@@ -1,0 +1,202 @@
+.features-container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+
+.features-header {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.features-title {
+  font-size: var(--text-page);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.features-subtitle {
+  font-size: var(--text-section);
+  color: var(--muted);
+  line-height: var(--line-body);
+}
+
+.features-quick-nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.quick-link {
+  background-color: var(--surface-soft);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+  text-decoration: none;
+  transition: all var(--duration-fast);
+}
+.quick-link:hover {
+  background-color: var(--ink);
+  color: var(--on-dark);
+}
+
+.feature-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  scroll-margin-top: calc(var(--nav-height) + 40px);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 2px solid var(--divider);
+  padding-bottom: var(--space-3);
+}
+
+.section-icon {
+  color: var(--focus);
+  width: 28px;
+  height: 28px;
+}
+
+.section-header h2 {
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.role-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.role-feature-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.role-name {
+  font-size: 1.125rem;
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  border-bottom: 1px solid var(--divider);
+  padding-bottom: var(--space-2);
+}
+
+.role-features-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.role-features-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  line-height: var(--line-body);
+}
+
+.item-icon {
+  color: var(--focus);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+
+/* Info Card */
+.info-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.info-lead {
+  font-size: var(--text-body);
+  font-weight: var(--weight-medium);
+  color: var(--ink);
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-5);
+}
+
+.info-item h4 {
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: var(--space-2);
+}
+
+.info-item p {
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: var(--line-body);
+}
+
+/* Security Card */
+.security-card {
+  background-color: #f7fafc;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.security-notice {
+  background-color: #fffaf0;
+  border: 1px solid #feebc8;
+  padding: var(--space-4);
+  border-radius: var(--radius-sm);
+  color: #795000;
+  font-size: var(--text-small);
+}
+
+.security-list {
+  padding-left: var(--space-5);
+  font-size: var(--text-small);
+  color: var(--ink-soft);
+  line-height: var(--line-body);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+@media (max-width: 860px) {
+  .role-cards-grid,
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}

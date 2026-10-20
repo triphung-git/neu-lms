@@ -1,0 +1,124 @@
+.login-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.login-header {
+  text-align: center;
+}
+
+.login-title {
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.login-subtitle {
+  font-size: var(--text-small);
+  color: var(--muted);
+  margin-top: var(--space-1);
+}
+
+.login-error-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background-color: #fdeeee;
+  border: 1px solid #f8c8c6;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3) var(--space-4);
+  color: var(--danger);
+  font-size: var(--text-small);
+  font-weight: var(--weight-medium);
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.password-field-wrapper {
+  position: relative;
+}
+
+.toggle-password-btn {
+  position: absolute;
+  right: var(--space-3);
+  top: 36px;
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 4px;
+}
+.toggle-password-btn:hover {
+  color: var(--ink);
+}
+
+.login-submit-btn {
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.demo-credentials-box {
+  background-color: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.demo-box-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.demo-quick-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.demo-btn-chip {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2) var(--space-3);
+  text-align: left;
+  font-size: var(--text-caption);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+.demo-btn-chip:hover {
+  border-color: var(--focus);
+  background-color: #f0f9ff;
+}
+
+.chip-locked {
+  border-style: dashed;
+}
+.chip-locked:hover {
+  border-color: var(--danger);
+  background-color: #fff5f5;
+}
+
+.login-extra-links {
+  text-align: center;
+  font-size: var(--text-small);
+  color: var(--muted);
+}
+
+.register-link {
+  color: var(--focus);
+  font-weight: var(--weight-semibold);
+  text-decoration: underline;
+}

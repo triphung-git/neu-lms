@@ -1,0 +1,135 @@
+.guide-container {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--space-7) var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+
+.guide-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.guide-title {
+  font-size: var(--text-page);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  letter-spacing: -0.02em;
+}
+
+.guide-subtitle {
+  font-size: var(--text-section);
+  color: var(--muted);
+}
+
+.guide-tabs-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.guide-steps-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.guide-step-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  box-shadow: var(--shadow-small);
+}
+
+.step-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: var(--ink);
+  color: var(--on-dark);
+  font-weight: var(--weight-bold);
+  font-size: var(--text-body);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  flex: 1;
+}
+
+.step-title {
+  font-size: var(--text-section);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+}
+
+.step-description {
+  font-size: var(--text-body);
+  color: var(--ink-soft);
+  line-height: var(--line-body);
+}
+
+.step-tip {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  color: var(--success);
+  font-size: var(--text-small);
+  margin-top: var(--space-1);
+}
+
+.tip-icon {
+  flex-shrink: 0;
+}
+
+.guide-support-box {
+  max-width: 800px;
+  margin: 0 auto;
+  width: 100%;
+  background-color: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  display: flex;
+  gap: var(--space-4);
+  align-items: center;
+}
+
+.support-icon {
+  color: var(--focus);
+  flex-shrink: 0;
+}
+
+.guide-support-box h4 {
+  font-size: var(--text-body);
+  font-weight: var(--weight-bold);
+  color: var(--ink);
+  margin-bottom: var(--space-1);
+}
+
+.guide-support-box p {
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: var(--line-body);
+}

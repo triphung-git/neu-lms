@@ -1,0 +1,102 @@
+.course-members-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.course-members-container {
+  padding: var(--space-8);
+}
+
+.header-actions {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+}
+
+.filter-search-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-4);
+  align-items: flex-end;
+}
+
+@media (max-width: 650px) {
+  .filter-search-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.members-table-container {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
+}
+
+.danger-text {
+  color: var(--danger, #dc2626);
+}
+
+.danger-text:hover {
+  background: #fee2e2;
+}
+
+.bulk-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.preview-action-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.preview-results-box {
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.preview-stat-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.preview-stat-pill.success { color: #16a34a; }
+.preview-stat-pill.danger { color: #dc2626; }
+.preview-stat-pill.info { color: #0284c7; }
+
+.preview-valid-list {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.preview-valid-list ul {
+  padding-left: var(--space-4);
+  margin: var(--space-1) 0 0 0;
+}
+
+.notice-box-warning {
+  display: flex;
+  gap: var(--space-3);
+  background: var(--warning-surface, #fffbeb);
+  border: 1px solid var(--warning-border, #fef08a);
+  color: var(--warning-ink, #854d0e);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+}

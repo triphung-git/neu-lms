@@ -1,0 +1,144 @@
+.teacher-submissions-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.teacher-subs-container {
+  padding: var(--space-8);
+}
+
+.five-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: var(--space-4);
+}
+
+.metric-box {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.metric-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.metric-icon.blue { background: #e0f2fe; color: #0284c7; }
+.metric-icon.gray { background: #f1f5f9; color: #64748b; }
+.metric-icon.green { background: #dcfce7; color: #16a34a; }
+.metric-icon.red { background: #fee2e2; color: #dc2626; }
+.metric-icon.purple { background: #f3e8ff; color: #7e22ce; }
+
+.metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.metric-val {
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.metric-lbl {
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.filter-search-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-4);
+  align-items: flex-end;
+}
+
+@media (max-width: 650px) {
+  .filter-search-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+.subs-table-wrapper {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
+}
+
+.email-subtext {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.withdrawn-chip {
+  padding: 1px 6px;
+  background: #f1f5f9;
+  color: #64748b;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.withdrawn-row {
+  opacity: 0.75;
+  background: #f8fafc;
+}
+
+.status-cell-wrap {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.late-warning-pill {
+  font-size: 11px;
+  color: #dc2626;
+  background: #fee2e2;
+  padding: 1px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.file-info-cell {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.file-info-cell .file-icon {
+  color: var(--accent);
+}
+
+.published-score-pill {
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.draft-score-pill {
+  font-size: var(--text-xs);
+  color: #d97706;
+  background: #fef3c7;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}

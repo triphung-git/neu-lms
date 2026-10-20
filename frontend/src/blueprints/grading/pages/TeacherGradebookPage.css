@@ -1,0 +1,161 @@
+.teacher-gradebook-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.teacher-gradebook-container {
+  padding: var(--space-8);
+}
+
+.gradebook-notice-box {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.gradebook-search-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  max-width: 480px;
+}
+
+.gradebook-matrix-card {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
+.matrix-scroll-wrapper {
+  overflow-x: auto;
+  position: relative;
+  max-width: 100%;
+}
+
+.gradebook-matrix-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+  text-align: left;
+}
+
+.gradebook-matrix-table th,
+.gradebook-matrix-table td {
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--border);
+  border-right: 1px solid var(--border-soft);
+  white-space: nowrap;
+}
+
+.gradebook-matrix-table thead th {
+  background: var(--surface-hover);
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* Sticky Student Column */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  background: var(--surface);
+  z-index: 2;
+  box-shadow: 2px 0 4px rgba(0, 0, 0, 0.05);
+  min-width: 180px;
+}
+
+.sticky-col.header-col {
+  background: var(--surface-hover);
+  z-index: 3;
+}
+
+.sub-header-col,
+.email-data-col {
+  min-width: 180px;
+}
+
+.ass-col-header {
+  min-width: 140px;
+  text-align: center;
+}
+
+.ass-header-title {
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.ass-header-pts {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: normal;
+}
+
+.matrix-cell {
+  text-align: center;
+}
+
+.cell-score-link {
+  text-decoration: none;
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  transition: all var(--duration-fast) ease;
+}
+
+.cell-score-link:hover {
+  background: var(--surface-hover);
+}
+
+.published-score-text {
+  font-size: var(--text-base);
+  color: #16a34a;
+  font-weight: 700;
+}
+
+.draft-score-tag {
+  font-size: var(--text-xs);
+  color: #d97706;
+  background: #fef3c7;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.cell-grade-action-btn {
+  display: inline-block;
+  padding: 3px 8px;
+  background: var(--accent);
+  color: #ffffff;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.cell-grade-action-btn:hover {
+  opacity: 0.9;
+}
+
+.withdrawn-row {
+  opacity: 0.7;
+  background: #f8fafc;
+}
+
+.withdrawn-tag {
+  display: inline-block;
+  margin-left: var(--space-2);
+  padding: 1px 4px;
+  background: #e2e8f0;
+  color: #475569;
+  border-radius: var(--radius-sm);
+  font-size: 10px;
+}

@@ -1,0 +1,98 @@
+.teacher-assignment-list-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.teacher-ass-container {
+  padding: var(--space-8);
+}
+
+.ass-tabs-bar {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 2px solid var(--border-soft);
+}
+
+.ass-tabs-bar .tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all var(--duration-fast) ease;
+}
+
+.ass-tabs-bar .tab-btn:hover {
+  color: var(--ink);
+}
+
+.ass-tabs-bar .tab-btn.active {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+}
+
+.count-chip {
+  font-size: var(--text-xs);
+  background: var(--surface-hover);
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+
+.ass-table-wrapper {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
+}
+
+.ass-title-link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.ass-title-link:hover {
+  color: var(--accent);
+}
+
+.ass-subtext {
+  font-size: var(--text-xs);
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.badge-allow-late {
+  font-size: var(--text-xs);
+  color: #0284c7;
+  background: #e0f2fe;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+}
+
+.pending-alert-text {
+  color: #dc2626;
+  font-size: var(--text-xs);
+}
+
+.ass-row-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.text-warning {
+  color: #d97706;
+}
+
+.text-warning:hover {
+  background: #fffbeb;
+}

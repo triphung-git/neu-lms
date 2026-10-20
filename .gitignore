@@ -1,0 +1,38 @@
+# Local dependencies and generated artifacts
+node_modules/
+dist/
+dist-ssr/
+coverage/
+test-results/
+playwright-report/
+*.tsbuildinfo
+*.log
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+
+# Internal agent inputs (must stay outside the public repository)
+AGENTS.md
+AGENTS.override.md
+.agents/
+.codex/
+agent-private/
+agent-docs/
+
+# Private credentials and local backups
+*.key
+*.pem
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.bak
+*.backup
+backups/
+*.sqlite
+*.sqlite3
+*.db
+.npmrc
+.envrc

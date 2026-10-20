@@ -1,0 +1,79 @@
+.teacher-materials-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.materials-list-container {
+  padding: var(--space-8);
+}
+
+.materials-filter-bar {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-5);
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: var(--space-4);
+  align-items: flex-end;
+}
+
+@media (max-width: 768px) {
+  .materials-filter-bar {
+    grid-template-columns: 1fr;
+  }
+}
+
+.materials-table-wrapper {
+  background: var(--surface-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  box-shadow: var(--shadow-xs);
+}
+
+.mat-title-link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.mat-title-link:hover {
+  color: var(--accent);
+}
+
+.file-badge {
+  font-size: var(--text-xs);
+  font-weight: 700;
+  background: var(--surface-hover);
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.vis-select-dropdown {
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--text-xs);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.modal-content-stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.alert-notice-box {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}

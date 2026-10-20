@@ -1,0 +1,119 @@
+.demo-bar {
+  background-color: #121820;
+  color: #e2e8f0;
+  font-size: var(--text-caption);
+  padding: 6px var(--space-4);
+  border-bottom: 1px solid #2d3748;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+}
+
+.demo-bar-inner {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.demo-bar-clock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.demo-clock-text strong {
+  color: var(--accent);
+}
+
+.demo-clock-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.demo-pill-btn {
+  background-color: #2d3748;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 1px 8px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+.demo-pill-btn:hover {
+  background-color: #4a5568;
+}
+
+.demo-bar-warning {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #795000;
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+}
+
+.demo-bar-right {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.demo-role-switcher {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.demo-role-label {
+  color: #a0aec0;
+  margin-right: 2px;
+}
+
+.demo-role-btn {
+  background-color: transparent;
+  color: #cbd5e0;
+  border: 1px solid #4a5568;
+  border-radius: var(--radius-pill);
+  padding: 2px 10px;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all var(--duration-fast);
+}
+
+.demo-role-btn:hover {
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.demo-role-btn.active {
+  background-color: var(--accent);
+  color: #000;
+  font-weight: var(--weight-bold);
+  border-color: var(--accent);
+}
+
+.demo-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background-color: #e53e3e;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 3px 8px;
+  font-size: 11px;
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+  transition: background-color var(--duration-fast);
+}
+.demo-reset-btn:hover {
+  background-color: #c53030;
+}
