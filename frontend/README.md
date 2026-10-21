@@ -1,5 +1,3 @@
-# Frontend NEU LMS
-React + TypeScript strict + Vite, React Router, CSS và dữ liệu demo. Một số nội dung hiện còn mang tên NPC.
 
 Chạy trong thư mục này:
 ```sh
@@ -10,7 +8,7 @@ npm test
 npm run lint
 npm run typecheck
 ```
-Xem [setup](../docs/development/SETUP.md) và [trạng thái](../docs/development/STATUS.md). npm run preview xem bản build cục bộ.
+Xem [setup](../../agent-private/docs/development/SETUP.md) và [trạng thái](../../agent-private/docs/development/STATUS.md). npm run preview xem bản build cục bộ.
 
 src/App.tsx khai báo route; src/app/providers quản lý state; src/blueprints chứa các trang; src/shared chứa UI và kiểu chung; src/infrastructure chứa mock/persistence; src/__tests__ chứa Vitest tests.
 
