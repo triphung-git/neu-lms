@@ -30,10 +30,18 @@ export const StudentLayout: React.FC = () => {
     (a) => studentCourseIds.includes(a.courseId) && !a.readByUserIds.includes(currentUser?.id || '')
   ).length;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/dang-nhap');
-  };
+  const handleLogout = async () => {
+  try {
+    await logout();
+    navigate('/dang-nhap', { replace: true });
+  } catch (error) {
+    window.alert(
+      error instanceof Error
+        ? error.message
+        : 'Đăng xuất thất bại. Vui lòng thử lại.'
+    );
+  }
+};
 
   const navLinks = [
     { to: '/sv', label: 'Việc cần làm', icon: <CheckSquare size={18} />, end: true },

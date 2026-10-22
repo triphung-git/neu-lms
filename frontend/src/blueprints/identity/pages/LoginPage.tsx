@@ -10,7 +10,6 @@ export const LoginPage: React.FC = () => {
   const { login } = useSession();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const returnTo = searchParams.get('returnTo');
   const errorParam = searchParams.get('error');
 
   const [email, setEmail] = useState('');
@@ -22,30 +21,40 @@ export const LoginPage: React.FC = () => {
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage('');
-    setIsLoading(true);
+  e.preventDefault();
 
-    const res = await login(email, password);
-    setIsLoading(false);
+  if (isLoading) return;
 
-    if (res.success) {
-      if (returnTo && returnTo.startsWith('/')) {
-        navigate(decodeURIComponent(returnTo));
-      } else {
-        const norm = email.trim().toLowerCase();
-        if (norm.includes('quan-tri') || norm.includes('admin')) {
-          navigate('/ad');
-        } else if (norm.includes('giang-vien') || norm.includes('teacher')) {
-          navigate('/gv');
-        } else {
-          navigate('/sv');
-        }
-      }
-    } else {
-      setErrorMessage(res.message || 'Đăng nhập không thành công.');
+  setErrorMessage('');
+  setIsLoading(true);
+
+  try {
+    const result = await login(email, password);
+
+    if (!result.success || !result.role) {
+      setErrorMessage(
+        result.message || 'Đăng nhập không thành công.'
+      );
+      return;
     }
-  };
+
+    const destination = {
+      admin: '/ad',
+      teacher: '/gv',
+      student: '/sv',
+    }[result.role];
+
+    navigate(destination, { replace: true });
+  } catch (error) {
+    setErrorMessage(
+      error instanceof Error
+        ? error.message
+        : 'Không kết nối được máy chủ.'
+    );
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const handleFillDemo = (demoEmail: string) => {
     setEmail(demoEmail);
@@ -109,6 +118,7 @@ export const LoginPage: React.FC = () => {
       </form>
 
       {/* Demo Credentials Box */}
+      {import.meta.env.VITE_DATA_MODE !== 'api' && (
       <div className="demo-credentials-box">
         <div className="demo-box-header">
           <Sparkles size={16} />
@@ -145,6 +155,7 @@ export const LoginPage: React.FC = () => {
           </button>
         </div>
       </div>
+      )}
 
       <div className="login-extra-links">
         <span>Chưa có tài khoản?</span>{' '}

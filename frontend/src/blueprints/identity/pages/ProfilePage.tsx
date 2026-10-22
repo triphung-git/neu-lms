@@ -7,6 +7,7 @@ import { Button } from '../../../shared/ui/Button';
 import { Badge } from '../../../shared/ui/Badge';
 import { User, KeyRound, ArrowLeft, ShieldCheck, Check } from 'lucide-react';
 import './ProfilePage.css';
+import { authApi } from '../../../infrastructure/api/authApi';
 
 export const ProfilePage: React.FC = () => {
   const { currentUser, role, setDemoPassword } = useSession();
@@ -24,30 +25,51 @@ export const ProfilePage: React.FC = () => {
     return '/sv';
   };
 
-  const handlePasswordChange = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!currentUser) return;
+  const handlePasswordChange = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (newPassword.length < 8) {
-      notifyError('Mật khẩu mới phải có ít nhất 8 ký tự.');
-      return;
+  if (!currentUser || isSubmitting) return;
+
+  if (newPassword.length < 8) {
+    notifyError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+    return;
+  }
+
+  if (newPassword !== confirmNewPassword) {
+    notifyError('Mật khẩu xác nhận không khớp.');
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  try {
+    if (import.meta.env.VITE_DATA_MODE === 'api') {
+      await authApi.changePassword(
+        currentPassword,
+        newPassword
+      );
+    } else {
+      setDemoPassword(
+        currentUser.emailNormalized,
+        newPassword
+      );
     }
 
-    if (newPassword !== confirmNewPassword) {
-      notifyError('Mật khẩu xác nhận không khớp.');
-      return;
-    }
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmNewPassword('');
 
-    setIsSubmitting(true);
-    setTimeout(() => {
-      setDemoPassword(currentUser.emailNormalized, newPassword);
-      setIsSubmitting(false);
-      setCurrentPassword('');
-      setNewPassword('');
-      setConfirmNewPassword('');
-      notifySuccess('Đổi mật khẩu thành công. Mật khẩu có hiệu lực trong phiên bộ nhớ hiện tại.');
-    }, 400);
-  };
+    notifySuccess('Đổi mật khẩu thành công.');
+  } catch (error) {
+    notifyError(
+      error instanceof Error
+        ? error.message
+        : 'Đổi mật khẩu thất bại.'
+    );
+  } finally {
+    setIsSubmitting(false);
+  }
+};
 
   if (!currentUser) return null;
 
@@ -111,7 +133,7 @@ export const ProfilePage: React.FC = () => {
         <section className="profile-card" aria-labelledby="password-change-title">
           <div className="profile-card-header">
             <KeyRound className="card-header-icon" />
-            <h2 id="password-change-title">Đổi mật khẩu phiên làm việc</h2>
+            <h2 id="password-change-title">Đổi mật khẩu</h2>
           </div>
 
           <form onSubmit={handlePasswordChange} className="profile-form">
@@ -145,8 +167,10 @@ export const ProfilePage: React.FC = () => {
             <div className="profile-password-notice">
               <ShieldCheck size={16} />
               <span>
-                Phiên bản minh họa: Mật khẩu mới được bảo lưu trong bộ nhớ phiên làm việc, không lưu trữ văn bản thuần vào bộ nhớ cục bộ.
-              </span>
+                {import.meta.env.VITE_DATA_MODE === 'api'
+                ? 'Mật khẩu được cập nhật trên máy chủ sau khi xác minh mật khẩu hiện tại.'
+                : 'Mật khẩu demo chỉ được giữ trong bộ nhớ phiên làm việc.'}
+                </span>
             </div>
 
             <Button
