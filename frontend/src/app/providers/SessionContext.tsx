@@ -1,14 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { User, UserRole } from '../../shared/kernel/types';
 import { storageManager, type StoredSession } from '../../infrastructure/persistence/storage';
+import { authApi, type ApiAccount } from '../../infrastructure/api/authApi';
+
+const USE_API = import.meta.env.VITE_DATA_MODE === 'api';
+
+function toFrontendUser(account: ApiAccount): User {
+  return {
+    id: String(account.id),
+    fullName: account.first_name || account.email,
+    emailNormalized: account.email,
+    role: account.role,
+    status: account.is_active ? 'active' : 'locked',
+    code: '',
+    createdAt: '',
+    lastLoginAt: '',
+  };
+}
 
 interface SessionContextType {
   currentUser: User | null;
   role: UserRole | null;
   isAuthenticated: boolean;
   isInitialized: boolean;
-  login: (email: string, password?: string) => Promise<{ success: boolean; message?: string }>;
-  logout: () => void;
+  login: (email: string, password?: string) => Promise<{success: boolean; message?: string; role?: UserRole;}>;
+
+logout: () => void | Promise<void>;
   switchRoleQuick: (role: UserRole) => void;
   updateUserStatus: (status: 'active' | 'locked') => void;
   setDemoPassword: (email: string, password: string) => void;
@@ -25,15 +42,49 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   currentUserRef.current = currentUser;
 
   const setDemoPassword = (email: string, password: string) => {
+    if (USE_API) {
+      throw new Error('Phải đổi mật khẩu thông qua API.');
+    }
     demoPasswordsRef.current.set(email.trim().toLowerCase(), password);
   };
 
   const logout = () => {
-    storageManager.clearSession();
-    setCurrentUser(null);
-  };
+  if (USE_API) {
+    return authApi.logout().then(() => {
+      storageManager.clearSession();
+      setCurrentUser(null);
+    });
+  }
+
+  storageManager.clearSession();
+  setCurrentUser(null);
+};
 
   useEffect(() => {
+    if (USE_API) {
+  let cancelled = false;
+
+  authApi.getCurrentUser()
+    .then((account) => {
+      if (!cancelled) {
+        setCurrentUser(toFrontendUser(account));
+      }
+    })
+    .catch(() => {
+      if (!cancelled) {
+        setCurrentUser(null);
+      }
+    })
+    .finally(() => {
+      if (!cancelled) {
+        setIsInitialized(true);
+      }
+    });
+
+  return () => {
+    cancelled = true;
+  };
+}
     // Check initial session
     const stored = storageManager.getSession();
     const db = storageManager.getDatabase();
@@ -74,7 +125,27 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     return unsubscribe;
   }, []);
 
-  const login = async (email: string, password?: string): Promise<{ success: boolean; message?: string }> => {
+  const login = async (email: string, password?: string): Promise<{success: boolean; message?: string; role?: UserRole;}> => {
+    if (USE_API) {
+  try {
+    const account = await authApi.login(email, password || '');
+
+    setCurrentUser(toFrontendUser(account));
+
+    return {
+      success: true,
+      role: account.role,
+    };
+  } catch (error) {
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : 'Không kết nối được máy chủ.',
+    };
+  }
+}
     const db = storageManager.getDatabase();
     const normalized = email.trim().toLowerCase();
     const user = db.users.find((u) => u.emailNormalized === normalized);
@@ -113,10 +184,14 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
     user.lastLoginAt = new Date().toISOString();
     storageManager.saveDatabase(db);
 
-    return { success: true };
+    return {
+  success: true,
+  role: user.role,
+   };
   };
 
   const switchRoleQuick = (role: UserRole) => {
+    if (USE_API) return;
     const db = storageManager.getDatabase();
     let target = db.users.find((u) => u.role === role && u.status === 'active');
     if (!target) {
@@ -133,6 +208,9 @@ export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const updateUserStatus = (status: 'active' | 'locked') => {
+    if (USE_API) {
+      throw new Error('Chức năng cập nhật trạng thái tài khoản chưa nối API.');
+    }
     if (currentUser) {
       const db = storageManager.getDatabase();
       const user = db.users.find((u) => u.id === currentUser.id);

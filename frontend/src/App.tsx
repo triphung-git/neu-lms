@@ -104,7 +104,19 @@ export const App: React.FC = () => {
                 {/* Authentication Shell Routes */}
                 <Route element={<AuthLayout />}>
                   <Route path="dang-nhap" element={<LoginPage />} />
-                  <Route path="dang-ky" element={<RegisterPage />} />
+                  <Route path="dang-ky" element={
+                    import.meta.env.VITE_DATA_MODE === 'api' ? (
+                    <div style={{ padding: 24 }}>
+                      <h1>Đăng ký tài khoản</h1>
+                      <p>
+                        Biểu mẫu đăng ký đang được kết nối với máy chủ.
+                        Hiện tại hãy sử dụng tài khoản đã tạo qua API.
+                        </p>
+                        <a href="/dang-nhap">Về trang đăng nhập</a>
+                        </div>
+                    ) : (
+                    <RegisterPage />
+                  )} />
                 </Route>
 
                 {/* Student Workspace (S01 - S08) */}
