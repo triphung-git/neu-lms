@@ -20,150 +20,107 @@
   margin-top: var(--space-1);
 }
 
-.register-stepper {
+.register-status-card {
+  background-color: #fefce8;
+  border: 1px solid #fef08a;
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-5);
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
   gap: var(--space-2);
-  margin-bottom: var(--space-2);
 }
 
-.step-dot {
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background-color: var(--surface-soft);
-  color: var(--muted);
-  border: 1px solid var(--border);
+.register-status-header {
   display: flex;
   align-items: center;
-  justify-content: center;
-  font-size: var(--text-caption);
+  gap: var(--space-2);
+}
+
+.register-status-icon {
+  color: #ca8a04;
+  flex-shrink: 0;
+}
+
+.register-status-title {
+  font-size: var(--text-base);
   font-weight: var(--weight-bold);
-}
-.step-dot.active {
-  background-color: var(--ink);
-  color: var(--on-dark);
-  border-color: var(--ink);
+  color: #854d0e;
+  margin: 0;
 }
 
-.step-line {
-  width: 48px;
-  height: 2px;
-  background-color: var(--border);
-}
-.step-line.active {
-  background-color: var(--ink);
-}
-
-.register-error-alert {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  background-color: #fdeeee;
-  border: 1px solid #f8c8c6;
-  border-radius: var(--radius-sm);
-  padding: var(--space-3) var(--space-4);
-  color: var(--danger);
+.register-status-body {
   font-size: var(--text-small);
+  color: #713f12;
+  line-height: var(--line-body);
+  margin: 0;
 }
 
-.register-success-alert {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  background-color: #eaf5eb;
-  border: 1px solid #c7e6c9;
-  border-radius: var(--radius-sm);
-  padding: var(--space-3) var(--space-4);
-  color: var(--success);
-  font-size: var(--text-small);
-  font-weight: var(--weight-semibold);
-}
-
-.register-form {
+.register-guidance-card {
+  background-color: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
 }
 
-.register-submit-btn {
-  width: 100%;
+.guidance-title {
+  font-size: var(--text-small);
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  margin: 0;
 }
 
-.sample-eligible-box {
-  background-color: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-3);
+.guidance-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
   display: flex;
+  flex-direction: column;
   gap: var(--space-3);
-  font-size: var(--text-caption);
+}
+
+.guidance-item {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  font-size: var(--text-small);
+  line-height: var(--line-body);
   color: var(--ink-soft);
 }
 
-.sample-text {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.sample-text code {
-  background-color: var(--surface);
-  border: 1px solid var(--border);
+.guidance-item code {
+  background-color: var(--surface-soft);
   padding: 1px 4px;
   border-radius: 4px;
-  width: fit-content;
-  color: var(--focus);
+  font-family: monospace;
 }
 
-.matched-info-card {
-  background-color: var(--surface-soft);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: var(--space-4);
+.guidance-icon {
+  color: var(--focus);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.register-actions {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
-  margin-bottom: var(--space-2);
-}
-
-.info-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: var(--text-small);
-}
-.row-label {
-  color: var(--muted);
-}
-.row-value {
-  color: var(--ink);
-}
-
-.role-tag {
-  background-color: var(--ink);
-  color: var(--on-dark);
-  padding: 2px 8px;
-  border-radius: var(--radius-pill);
-  font-size: 11px;
-  font-weight: var(--weight-bold);
-}
-
-.register-step2-actions {
-  display: flex;
-  justify-content: space-between;
   gap: var(--space-3);
-  margin-top: var(--space-2);
+}
+
+.register-cta-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  text-decoration: none;
 }
 
 .register-footer-link {
   text-align: center;
-  font-size: var(--text-small);
+  font-size: var(--text-caption);
   color: var(--muted);
-}
-
-.login-link {
-  color: var(--focus);
-  font-weight: var(--weight-semibold);
-  text-decoration: underline;
+  line-height: var(--line-body);
 }

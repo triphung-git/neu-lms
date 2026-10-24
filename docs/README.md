@@ -1,6 +1,8 @@
 # Tài liệu dự án
 
-Tài liệu kỹ thuật đặt tại [agent-private/docs](../../agent-private/docs/README.md).
-Báo cáo task và bàn giao nằm tại [agent-private/reviews](../../agent-private/reviews/README.md).
-
-Thư mục này chỉ giữ README chỉ dẫn. Các liên kết cần hai thư mục codebase và agent-private nằm cạnh nhau.
+- [Phạm vi sản phẩm](../../agent-private/docs/requirements/SCOPE.md)
+- [Kiến trúc](../../agent-private/docs/architecture/CURRENT.md)
+- [Setup và kiểm thử](../../agent-private/docs/development/SETUP.md)
+- [Trạng thái kỹ thuật](../../agent-private/docs/development/STATUS.md)
+- [API](../../agent-private/docs/api/README.md)
+- [Triển khai](../../agent-private/docs/deployment/README.md)

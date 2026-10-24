@@ -1,0 +1,13 @@
+import { apiClient } from './client';
+import type { components, paths } from './schema';
+
+export * from './client';
+export type { components, paths };
+
+export async function fetchHealthLive(): Promise<components['schemas']['LivenessResponse']> {
+  return apiClient.get('/api/v1/health/live');
+}
+
+export async function fetchHealthReady(): Promise<components['schemas']['ReadinessSuccessResponse']> {
+  return apiClient.get('/api/v1/health/ready');
+}

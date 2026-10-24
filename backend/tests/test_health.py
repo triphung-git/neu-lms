@@ -58,4 +58,45 @@ def test_new_api_views_deny_anonymous_by_default():
             return Response({"private": True})
 
     response = FutureBusinessView.as_view()(APIRequestFactory().get("/private"))
-    assert response.status_code == 403
+    # B01c registered UserSessionAuthentication:
+    # unauthenticated requests receive 401 authentication_required
+    assert response.status_code == 401
+    assert response.data["error"]["code"] == "authentication_required"
+
+
+def test_healthcheck_exempt_from_ssl_redirect(client):
+    """
+    Production enables SECURE_SSL_REDIRECT=True.
+    Health checks (liveness and readiness) called by container/load balancer probes
+    over plain HTTP must be exempt from redirect to avoid 301 unhealthy loops.
+    """
+    from django.test import override_settings
+
+    with override_settings(
+        SECURE_SSL_REDIRECT=True,
+        SECURE_REDIRECT_EXEMPT=[r"^api/v1/health/"],
+    ):
+        # Plain HTTP health requests return 200 directly without 301 redirect
+        live_resp = client.get("/api/v1/health/live")
+        assert live_resp.status_code == 200
+
+        # Normal business/schema endpoints are redirected to HTTPS (301)
+        schema_resp = client.get("/api/v1/schema")
+        assert schema_resp.status_code == 301
+        assert schema_resp.headers["Location"].startswith("https://")
+
+
+def test_trusted_proxy_ssl_header_handling(client):
+    """
+    When behind a trusted reverse proxy (ALB/Traefik/Cloudflare),
+    X-Forwarded-Proto: https is respected and requests are not redirected.
+    """
+    from django.test import override_settings
+
+    with override_settings(
+        SECURE_SSL_REDIRECT=True,
+        SECURE_REDIRECT_EXEMPT=[r"^api/v1/health/"],
+        SECURE_PROXY_SSL_HEADER=("HTTP_X_FORWARDED_PROTO", "https"),
+    ):
+        resp = client.get("/api/v1/schema", HTTP_X_FORWARDED_PROTO="https")
+        assert resp.status_code == 200

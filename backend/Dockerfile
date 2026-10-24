@@ -13,6 +13,8 @@ RUN groupadd --gid 10001 app && useradd --uid 10001 --gid app --no-create-home a
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=app:app config ./config
 COPY --chown=app:app health ./health
+COPY --chown=app:app identity ./identity
+COPY --chown=app:app platform_core ./platform_core
 COPY --chown=app:app manage.py ./
 USER app
 EXPOSE 8000

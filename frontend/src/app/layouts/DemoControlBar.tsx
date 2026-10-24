@@ -51,28 +51,36 @@ export const DemoControlBar: React.FC = () => {
         )}
 
         <div className="demo-bar-right">
-          <div className="demo-role-switcher">
-            <UserCheck size={14} aria-hidden="true" />
-            <span className="demo-role-label">Vai trò:</span>
-            <button
-              className={`demo-role-btn ${role === 'student' ? 'active' : ''}`}
-              onClick={() => switchRoleQuick('student')}
-            >
-              Sinh viên
-            </button>
-            <button
-              className={`demo-role-btn ${role === 'teacher' ? 'active' : ''}`}
-              onClick={() => switchRoleQuick('teacher')}
-            >
-              Giảng viên
-            </button>
-            <button
-              className={`demo-role-btn ${role === 'admin' ? 'active' : ''}`}
-              onClick={() => switchRoleQuick('admin')}
-            >
-              Quản trị
-            </button>
-          </div>
+          {currentUser && currentUser.roles && currentUser.roles.length > 1 && (
+            <div className="demo-role-switcher">
+              <UserCheck size={14} aria-hidden="true" />
+              <span className="demo-role-label">Chuyển vai trò:</span>
+              {currentUser.roles.includes('student') && (
+                <button
+                  className={`demo-role-btn ${role === 'student' ? 'active' : ''}`}
+                  onClick={() => switchRoleQuick('student')}
+                >
+                  Sinh viên
+                </button>
+              )}
+              {currentUser.roles.includes('teacher') && (
+                <button
+                  className={`demo-role-btn ${role === 'teacher' ? 'active' : ''}`}
+                  onClick={() => switchRoleQuick('teacher')}
+                >
+                  Giảng viên
+                </button>
+              )}
+              {currentUser.roles.includes('admin') && (
+                <button
+                  className={`demo-role-btn ${role === 'admin' ? 'active' : ''}`}
+                  onClick={() => switchRoleQuick('admin')}
+                >
+                  Quản trị
+                </button>
+              )}
+            </div>
+          )}
 
           <button
             className="demo-reset-btn"
