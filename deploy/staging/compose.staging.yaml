@@ -1,0 +1,93 @@
+# Staging deployment configuration for NEU LMS API.
+# Immutable container images, strictly separated environment secrets, controlled migrations.
+# DO NOT commit .env.staging with real credentials.
+name: neu-lms-staging
+
+services:
+  # 1. Controlled one-off migration job.
+  # Executes before web replicas start to guarantee database schema consistency
+  # and prevent multi-replica migration race conditions.
+  migrator:
+    image: ${API_IMAGE:?API_IMAGE must be specified as an immutable image digest, e.g. ghcr.io/neu-lms/api@sha256:<digest>}
+    restart: "no"
+    command: ["python", "manage.py", "migrate", "--noinput"]
+    env_file:
+      - path: .env.staging
+        required: false
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      PGSSLROOTCERT: /etc/ssl/certs/db-ca.crt
+      DJANGO_BEHIND_TRUSTED_PROXY: "true"
+    volumes:
+      - type: bind
+        source: ${PGSSLROOTCERT_FILE:?Provide the managed database CA bundle path}
+        target: /etc/ssl/certs/db-ca.crt
+        read_only: true
+        bind:
+          create_host_path: false
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal-vpc
+
+  # 2. Main API service (can be scaled horizontally).
+  api:
+    image: ${API_IMAGE:?API_IMAGE must be specified as an immutable image digest, e.g. ghcr.io/neu-lms/api@sha256:<digest>}
+    restart: unless-stopped
+    command:
+      [
+        "gunicorn",
+        "config.wsgi:application",
+        "--bind",
+        "0.0.0.0:8000",
+        "--workers",
+        "3",
+        "--access-logfile",
+        "-",
+        "--error-logfile",
+        "-"
+      ]
+    depends_on:
+      migrator:
+        condition: service_completed_successfully
+    env_file:
+      - path: .env.staging
+        required: false
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.production
+      PGSSLROOTCERT: /etc/ssl/certs/db-ca.crt
+      DJANGO_BEHIND_TRUSTED_PROXY: "true"
+    volumes:
+      - type: bind
+        source: ${PGSSLROOTCERT_FILE:?Provide the managed database CA bundle path}
+        target: /etc/ssl/certs/db-ca.crt
+        read_only: true
+        bind:
+          create_host_path: false
+    ports:
+      # Bound to loopback interface for local reverse proxy (e.g. Nginx/Caddy/Cloudflare Tunnel)
+      - "127.0.0.1:${API_PORT:-8000}:8000"
+    user: "10001:10001"
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal-vpc
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import json, urllib.request; req = urllib.request.Request('http://127.0.0.1:8000/api/v1/health/ready', headers={'Host': '127.0.0.1'}); resp = urllib.request.urlopen(req, timeout=5); assert resp.status == 200; data = json.loads(resp.read().decode()); assert data.get('status') == 'ok'"
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+# External managed services declaration:
+# PostgreSQL (managed cloud database with SSL verify-full) and Redis (managed cluster)
+# are connected via private internal network (internal-vpc). No public database ports are opened.
+# Local development mocks (S3Mock, Mailpit) are NOT used in staging.
+networks:
+  internal-vpc:
+    driver: bridge

@@ -12,7 +12,6 @@ from django.db import IntegrityError, transaction
 from django.middleware.csrf import get_token
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_protect
-
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -40,9 +39,11 @@ class AuthView(APIView):
 
     def get(self, request, operation):
         if operation == "csrf":
-            return Response({
-                "csrfToken": get_token(request),
-            })
+            return Response(
+                {
+                    "csrfToken": get_token(request),
+                }
+            )
 
         if operation == "me" and request.user.is_authenticated:
             return Response(UserSerializer(request.user).data)
@@ -53,23 +54,17 @@ class AuthView(APIView):
         )
 
     def post(self, request, operation):
-        email = str(
-            request.data.get("email", "")
-        ).strip().lower()
+        email = str(request.data.get("email", "")).strip().lower()
 
         password = request.data.get("password")
 
         if operation in ("login", "register"):
             if not isinstance(password, str):
-                raise ApiValidationError(
-                    "Vui lòng nhập mật khẩu."
-                )
+                raise ApiValidationError("Vui lòng nhập mật khẩu.")
 
         # Đăng nhập
         if operation == "login":
-            account = User.objects.filter(
-                email__iexact=email
-            ).first()
+            account = User.objects.filter(email__iexact=email).first()
 
             user = authenticate(
                 request,
@@ -79,40 +74,29 @@ class AuthView(APIView):
 
             if not user:
                 return Response(
-                    {
-                        "detail": (
-                            "Thông tin đăng nhập không hợp lệ "
-                            "hoặc tài khoản đã khóa."
-                        )
-                    },
+                    {"detail": ("Thông tin đăng nhập không hợp lệ hoặc tài khoản đã khóa.")},
                     status=400,
                 )
 
             login(request, user)
 
-            return Response(
-                UserSerializer(user).data
-            )
+            return Response(UserSerializer(user).data)
 
         # Đăng ký
         if operation == "register":
             try:
                 with transaction.atomic():
                     eligible = (
-                        EligibleEmail.objects
-                        .select_for_update()
+                        EligibleEmail.objects.select_for_update()
                         .filter(email__iexact=email)
                         .first()
                     )
 
-                    already_registered = User.objects.filter(
-                        email__iexact=email
-                    ).exists()
+                    already_registered = User.objects.filter(email__iexact=email).exists()
 
                     if not eligible or already_registered:
                         raise ApiValidationError(
-                            "Email không đủ điều kiện đăng ký "
-                            "hoặc đã được sử dụng."
+                            "Email không đủ điều kiện đăng ký hoặc đã được sử dụng."
                         )
 
                     user = User(
@@ -127,14 +111,10 @@ class AuthView(APIView):
                     user.save()
 
             except ValidationError as exc:
-                raise ApiValidationError(
-                    exc.messages
-                ) from exc
+                raise ApiValidationError(exc.messages) from exc
 
             except IntegrityError as exc:
-                raise ApiValidationError(
-                    "Email đã được sử dụng."
-                ) from exc
+                raise ApiValidationError("Email đã được sử dụng.") from exc
 
             return Response(
                 UserSerializer(user).data,
@@ -163,9 +143,7 @@ class AuthView(APIView):
                 or not isinstance(new_password, str)
                 or not request.user.check_password(old_password)
             ):
-                raise ApiValidationError(
-                    "Mật khẩu hiện tại không đúng."
-                )
+                raise ApiValidationError("Mật khẩu hiện tại không đúng.")
 
             try:
                 validate_password(
@@ -174,24 +152,18 @@ class AuthView(APIView):
                 )
 
             except ValidationError as exc:
-                raise ApiValidationError(
-                    exc.messages
-                ) from exc
+                raise ApiValidationError(exc.messages) from exc
 
             request.user.set_password(new_password)
 
-            request.user.save(
-                update_fields=["password"]
-            )
+            request.user.save(update_fields=["password"])
 
             update_session_auth_hash(
                 request,
                 request.user,
             )
 
-            return Response({
-                "detail": "Đã đổi mật khẩu."
-            })
+            return Response({"detail": "Đã đổi mật khẩu."})
 
         return Response(status=404)
 
@@ -236,9 +208,7 @@ class CourseViewSet(viewsets.ModelViewSet):
             return courses
 
         if user.role == "teacher":
-            return courses.filter(
-                teacher=user
-            )
+            return courses.filter(teacher=user)
 
         return courses.filter(
             memberships__student=user,
@@ -253,22 +223,16 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         if self.request.user.role != "teacher":
-            raise PermissionDenied(
-                "Chỉ giảng viên tạo môn học trong phiên bản này."
-            )
+            raise PermissionDenied("Chỉ giảng viên tạo môn học trong phiên bản này.")
 
-        serializer.save(
-            teacher=self.request.user
-        )
+        serializer.save(teacher=self.request.user)
 
     def perform_update(self, serializer):
         course = serializer.instance
         self.require_manager(course)
 
         if course.status != "open":
-            raise ApiValidationError(
-                "Môn học đã lưu trữ."
-            )
+            raise ApiValidationError("Môn học đã lưu trữ.")
 
         serializer.save()
 
@@ -281,9 +245,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         course.status = "archived"
         course.save(update_fields=["status"])
 
-        return Response(
-            self.get_serializer(course).data
-        )
+        return Response(self.get_serializer(course).data)
 
     @action(detail=True, methods=["get", "post"])
     def members(self, request, pk=None):
@@ -292,11 +254,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         self.require_manager(course)
 
         if request.method == "GET":
-            members = (
-                course.memberships
-                .select_related("student")
-                .order_by("id")
-            )
+            members = course.memberships.select_related("student").order_by("id")
 
             return Response(
                 MembershipSerializer(
@@ -306,13 +264,9 @@ class CourseViewSet(viewsets.ModelViewSet):
             )
 
         if course.status != "open":
-            raise ApiValidationError(
-                "Môn học đã lưu trữ."
-            )
+            raise ApiValidationError("Môn học đã lưu trữ.")
 
-        email = str(
-            request.data.get("email", "")
-        ).strip()
+        email = str(request.data.get("email", "")).strip()
 
         student = User.objects.filter(
             email__iexact=email,
@@ -321,9 +275,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         ).first()
 
         if not student:
-            raise ApiValidationError(
-                "Không tìm thấy tài khoản sinh viên đang hoạt động."
-            )
+            raise ApiValidationError("Không tìm thấy tài khoản sinh viên đang hoạt động.")
 
         member, created = Membership.objects.get_or_create(
             course=course,
@@ -331,9 +283,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         )
 
         if not created:
-            raise ApiValidationError(
-                "Sinh viên đã có trong danh sách môn học."
-            )
+            raise ApiValidationError("Sinh viên đã có trong danh sách môn học.")
 
         return Response(
             MembershipSerializer(member).data,

@@ -7,7 +7,6 @@ from .views import (
     EligibleEmailViewSet,
 )
 
-
 router = DefaultRouter(trailing_slash=False)
 
 router.register(

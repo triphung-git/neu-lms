@@ -10,6 +10,8 @@ playwright-report/
 .env
 .env.*
 !.env.example
+!**/.env*.example
+!deploy/staging/.env.staging.example
 .DS_Store
 Thumbs.db
 
@@ -35,6 +37,7 @@ backups/
 *.sqlite3
 *.db
 .npmrc
+!frontend/.npmrc
 .envrc
 
 # Python and backend build/test artifacts
@@ -47,3 +50,6 @@ __pycache__/
 htmlcov/
 *.egg-info/
 backend/.static/
+
+# Provider CA bundles belong outside source; test CA lives under backend/tests/fixtures.
+deploy/staging/certs/

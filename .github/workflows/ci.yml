@@ -35,18 +35,99 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - name: Install locked dependencies
         run: npm ci
+      - name: Check API client drift
+        run: npm run api:check
       - name: Lint
         run: npm run lint
       - name: Typecheck
         run: npm run typecheck
       - name: Test
-        run: npm test
+        run: npm test -- --run
       - name: Build
         run: npm run build
 
+  backend:
+    name: backend-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+        shell: bash
+    services:
+      postgres:
+        image: postgres:17-bookworm@sha256:3645570cccdfa447589da9f57dd740faa29b30938e861289a5574b6ca6b03826
+        env:
+          POSTGRES_DB: neu_lms_test
+          POSTGRES_USER: neu_lms
+          POSTGRES_PASSWORD: ci_test_postgres_password
+          POSTGRES_HOST_AUTH_METHOD: scram-sha-256
+        ports:
+          - 55432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7.4-bookworm@sha256:858f009f9709ce576febc734aa78b8f6d624b82571f9ddb6bda4377c833b3499
+        ports:
+          - 56379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      PYTHONUTF8: '1'
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      DJANGO_SECRET_KEY: ci-test-secret-key-not-for-production-min-50-chars-long-neu-lms
+      DJANGO_ALLOWED_HOSTS: localhost,127.0.0.1,testserver
+      PGDATABASE: neu_lms_test
+      PGUSER: neu_lms
+      PGPASSWORD: ci_test_postgres_password
+      PGHOST: 127.0.0.1
+      PGPORT: '55432'
+      PGSSLMODE: disable
+      REDIS_URL: redis://127.0.0.1:56379/0
+      ENVIRONMENT: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - name: Set up Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.13'
+      - name: Set up uv
+        uses: astral-sh/setup-uv@d4b2f3b6ecc6e67c4457f6d3e41ec42d3d0fcb86 # v5.4.2
+        with:
+          version: '0.12.10'
+          enable-cache: true
+          cache-dependency-glob: backend/uv.lock
+      - name: Install locked dependencies
+        run: uv sync --frozen
+      - name: Ruff lint check
+        run: uv run ruff check .
+      - name: Ruff format check
+        run: uv run ruff format --check .
+      - name: Django configuration check
+        run: uv run python manage.py check
+      - name: Check migrations drift
+        run: uv run python manage.py makemigrations --check --dry-run
+      - name: Run pytest test suite (PostgreSQL 17)
+        run: uv run pytest -q -p no:cacheprovider
+      - name: Validate OpenAPI schema and check drift
+        run: |
+          uv run python manage.py spectacular --file ../schema/openapi.json --validate --format openapi-json
+          git diff --exit-code ../schema/openapi.json
+      - name: Build runtime docker image
+        run: docker build --target runtime -t neu-lms-api:ci-test .
+
   ci-gate:
     name: ci-gate
-    needs: frontend
+    needs: [frontend, backend]
     if: ${{ always() }}
     runs-on: ubuntu-24.04
     timeout-minutes: 2
@@ -54,4 +135,5 @@ jobs:
       - name: Require all checks to succeed
         env:
           FRONTEND_RESULT: ${{ needs.frontend.result }}
-        run: test "$FRONTEND_RESULT" = success
+          BACKEND_RESULT: ${{ needs.backend.result }}
+        run: test "$FRONTEND_RESULT" = success && test "$BACKEND_RESULT" = success

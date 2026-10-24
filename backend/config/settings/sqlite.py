@@ -2,7 +2,6 @@
 
 import os
 
-
 local_defaults = {
     "DJANGO_SECRET_KEY": "local-only-do-not-deploy",
     "PGDATABASE": "unused",
@@ -16,7 +15,6 @@ for key, value in local_defaults.items():
 
 
 from .base import *  # noqa: E402,F403
-
 
 DEBUG = True
 
@@ -33,6 +31,4 @@ ALLOWED_HOSTS = [
     "testserver",
 ]
 
-EMAIL_BACKEND = (
-    "django.core.mail.backends.console.EmailBackend"
-)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"

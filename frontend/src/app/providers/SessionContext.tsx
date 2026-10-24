@@ -1,31 +1,28 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import type { User, UserRole } from '../../shared/kernel/types';
-import { storageManager, type StoredSession } from '../../infrastructure/persistence/storage';
-import { authApi, type ApiAccount } from '../../infrastructure/api/authApi';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import type { UserRole } from '../../shared/kernel/types';
+import {
+  authService,
+  mapSessionInfoToUser,
+  type AuthUser,
+  type AuthService,
+} from '../../api/authService';
+import { ApiError, getCsrfToken } from '../../api/client';
 
-const USE_API = import.meta.env.VITE_DATA_MODE === 'api';
+export type SessionStatus = 'initializing' | 'anonymous' | 'authenticated' | 'network-error';
 
-function toFrontendUser(account: ApiAccount): User {
-  return {
-    id: String(account.id),
-    fullName: account.first_name || account.email,
-    emailNormalized: account.email,
-    role: account.role,
-    status: account.is_active ? 'active' : 'locked',
-    code: '',
-    createdAt: '',
-    lastLoginAt: '',
-  };
-}
-
-interface SessionContextType {
-  currentUser: User | null;
+export interface SessionContextType {
+  currentUser: AuthUser | null;
   role: UserRole | null;
+  roles: UserRole[];
+  status: SessionStatus;
   isAuthenticated: boolean;
   isInitialized: boolean;
-  login: (email: string, password?: string) => Promise<{success: boolean; message?: string; role?: UserRole;}>;
-
-logout: () => void | Promise<void>;
+  login: (email: string, password?: string) => Promise<{ success: boolean; message?: string; role?: UserRole | null }>;
+  logout: () => Promise<void>;
+  logoutAll: () => Promise<void>;
+  switchRole: (role: UserRole) => boolean;
+  refreshSession: () => Promise<void>;
+  // Backward-compatible isolated demo stubs:
   switchRoleQuick: (role: UserRole) => void;
   updateUserStatus: (status: 'active' | 'locked') => void;
   setDemoPassword: (email: string, password: string) => void;
@@ -33,206 +30,178 @@ logout: () => void | Promise<void>;
 
 const SessionContext = createContext<SessionContextType | undefined>(undefined);
 
-export const SessionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const currentUserRef = React.useRef<User | null>(null);
-  const demoPasswordsRef = React.useRef<Map<string, string>>(new Map());
+export interface SessionProviderProps {
+  children: React.ReactNode;
+  service?: AuthService;
+}
 
-  currentUserRef.current = currentUser;
+export const SessionProvider: React.FC<SessionProviderProps> = ({ children, service = authService }) => {
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
+  const [roles, setRoles] = useState<UserRole[]>([]);
+  const [status, setStatus] = useState<SessionStatus>('initializing');
 
-  const setDemoPassword = (email: string, password: string) => {
-    if (USE_API) {
-      throw new Error('Phải đổi mật khẩu thông qua API.');
+  const refreshSession = useCallback(async () => {
+    try {
+      const info = await service.getMe();
+      setCurrentUser((prevUser) => {
+        const user = mapSessionInfoToUser(info, prevUser?.role);
+        setRole(user.role);
+        setRoles(user.roles);
+        return user;
+      });
+      setStatus('authenticated');
+    } catch (err: unknown) {
+      if (err instanceof ApiError && err.status === 401) {
+        // Explicit 401 (unauthenticated, account_inactive, session_revoked, session_expired)
+        setCurrentUser(null);
+        setRole(null);
+        setRoles([]);
+        setStatus('anonymous');
+      } else {
+        // Network failure, 5xx server disruption, or fetch TypeError
+        setStatus('network-error');
+      }
     }
-    demoPasswordsRef.current.set(email.trim().toLowerCase(), password);
-  };
-
-  const logout = () => {
-  if (USE_API) {
-    return authApi.logout().then(() => {
-      storageManager.clearSession();
-      setCurrentUser(null);
-    });
-  }
-
-  storageManager.clearSession();
-  setCurrentUser(null);
-};
+  }, [service]);
 
   useEffect(() => {
-    if (USE_API) {
-  let cancelled = false;
+    let isMounted = true;
 
-  authApi.getCurrentUser()
-    .then((account) => {
-      if (!cancelled) {
-        setCurrentUser(toFrontendUser(account));
-      }
-    })
-    .catch(() => {
-      if (!cancelled) {
-        setCurrentUser(null);
-      }
-    })
-    .finally(() => {
-      if (!cancelled) {
-        setIsInitialized(true);
-      }
-    });
-
-  return () => {
-    cancelled = true;
-  };
-}
-    // Check initial session
-    const stored = storageManager.getSession();
-    const db = storageManager.getDatabase();
-
-    if (stored) {
-      const user = db.users.find((u) => u.id === stored.userId);
-      if (user && user.status === 'active') {
+    const init = async () => {
+      try {
+        const info = await service.getMe();
+        if (!isMounted) return;
+        const user = mapSessionInfoToUser(info);
         setCurrentUser(user);
-      } else {
-        storageManager.clearSession();
-        setCurrentUser(null);
-      }
-    } else {
-      // Clean start: Guest stays unauthenticated guest per baseline
-      setCurrentUser(null);
-    }
-    setIsInitialized(true);
-
-    // Subscribe to DB updates
-    const unsubscribe = storageManager.subscribe((updatedDb) => {
-      const activeUser = currentUserRef.current;
-      if (activeUser) {
-        const fresh = updatedDb.users.find((u) => u.id === activeUser.id);
-        if (fresh) {
-          if (fresh.status === 'locked') {
-            logout();
-          } else if (
-            fresh.role !== activeUser.role ||
-            fresh.status !== activeUser.status ||
-            fresh.fullName !== activeUser.fullName
-          ) {
-            setCurrentUser(fresh);
-          }
+        setRole(user.role);
+        setRoles(user.roles);
+        setStatus('authenticated');
+      } catch (err: unknown) {
+        if (!isMounted) return;
+        if (err instanceof ApiError && err.status === 401) {
+          setCurrentUser(null);
+          setRole(null);
+          setRoles([]);
+          setStatus('anonymous');
+        } else {
+          // Network failure or backend temporarily unreachable
+          setStatus('network-error');
         }
       }
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const login = async (email: string, password?: string): Promise<{success: boolean; message?: string; role?: UserRole;}> => {
-    if (USE_API) {
-  try {
-    const account = await authApi.login(email, password || '');
-
-    setCurrentUser(toFrontendUser(account));
-
-    return {
-      success: true,
-      role: account.role,
     };
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : 'Không kết nối được máy chủ.',
+
+    init();
+
+    return () => {
+      isMounted = false;
     };
-  }
-}
-    const db = storageManager.getDatabase();
-    const normalized = email.trim().toLowerCase();
-    const user = db.users.find((u) => u.emailNormalized === normalized);
+  }, [service]);
 
-    if (!user) {
-      return { success: false, message: 'Email hoặc mật khẩu không chính xác.' };
+  const login = async (
+    email: string,
+    password?: string
+  ): Promise<{ success: boolean; message?: string; role?: UserRole | null }> => {
+    const trimmedEmail = email.trim().toLowerCase();
+    if (!trimmedEmail) {
+      return { success: false, message: 'Vui lòng nhập địa chỉ email.' };
     }
-
-    if (user.status === 'locked') {
-      return { success: false, message: 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.' };
-    }
-
-    // Verify password: check in-memory custom password or fallback to Demo@1234
-    const customPassword = demoPasswordsRef.current.get(normalized);
-    const expectedPassword = customPassword || 'Demo@1234';
-
-    if (password !== undefined) {
-      if (password !== expectedPassword) {
-        return { success: false, message: 'Email hoặc mật khẩu không chính xác.' };
-      }
-    } else {
-      // If password was omitted, require it unless explicit shortcut
+    if (!password) {
       return { success: false, message: 'Vui lòng nhập mật khẩu.' };
     }
 
-    const session: StoredSession = {
-      userId: user.id,
-      role: user.role,
-      fullName: user.fullName,
-      email: user.emailNormalized,
-    };
-    storageManager.saveSession(session);
-    setCurrentUser(user);
-
-    // Update lastLoginAt
-    user.lastLoginAt = new Date().toISOString();
-    storageManager.saveDatabase(db);
-
-    return {
-  success: true,
-  role: user.role,
-   };
-  };
-
-  const switchRoleQuick = (role: UserRole) => {
-    if (USE_API) return;
-    const db = storageManager.getDatabase();
-    let target = db.users.find((u) => u.role === role && u.status === 'active');
-    if (!target) {
-      target = db.users[0];
-    }
-    const session: StoredSession = {
-      userId: target.id,
-      role: target.role,
-      fullName: target.fullName,
-      email: target.emailNormalized,
-    };
-    storageManager.saveSession(session);
-    setCurrentUser(target);
-  };
-
-  const updateUserStatus = (status: 'active' | 'locked') => {
-    if (USE_API) {
-      throw new Error('Chức năng cập nhật trạng thái tài khoản chưa nối API.');
-    }
-    if (currentUser) {
-      const db = storageManager.getDatabase();
-      const user = db.users.find((u) => u.id === currentUser.id);
-      if (user) {
-        user.status = status;
-        storageManager.saveDatabase(db);
-        if (status === 'locked') {
-          logout();
+    try {
+      // Ensure CSRF token is present before login mutation
+      if (!getCsrfToken()) {
+        try {
+          await service.getCsrf();
+        } catch {
+          // Ignore CSRF fetch error if backend emits it directly
         }
       }
+
+      const info = await service.login({ email: trimmedEmail, password });
+      const user = mapSessionInfoToUser(info);
+      setCurrentUser(user);
+      setRole(user.role);
+      setRoles(user.roles);
+      setStatus('authenticated');
+
+      return { success: true, role: user.role };
+    } catch (err: unknown) {
+      if (err instanceof ApiError) {
+        return { success: false, message: err.message || 'Đăng nhập không thành công.' };
+      }
+      return {
+        success: false,
+        message: 'Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại mạng.',
+      };
     }
+  };
+
+  const logout = async (): Promise<void> => {
+    try {
+      await service.logout();
+    } catch {
+      // Regardless of server network status, locally transition to anonymous
+    } finally {
+      setCurrentUser(null);
+      setRole(null);
+      setRoles([]);
+      setStatus('anonymous');
+    }
+  };
+
+  const logoutAll = async (): Promise<void> => {
+    try {
+      await service.logoutAll();
+    } catch {
+      // Fallback local cleanup
+    } finally {
+      setCurrentUser(null);
+      setRole(null);
+      setRoles([]);
+      setStatus('anonymous');
+    }
+  };
+
+  const switchRole = (targetRole: UserRole): boolean => {
+    if (!currentUser || !currentUser.roles.includes(targetRole)) {
+      console.warn(`[SessionContext] Không thể chuyển sang vai trò ${targetRole}: vai trò chưa được cấp.`);
+      return false;
+    }
+    setRole(targetRole);
+    setCurrentUser((prev) => (prev ? { ...prev, role: targetRole } : null));
+    return true;
+  };
+
+  // Deprecated isolated demo stubs
+  const switchRoleQuick = (targetRole: UserRole) => {
+    switchRole(targetRole);
+  };
+
+  const updateUserStatus = (_newStatus: 'active' | 'locked') => {
+    // No-op in real server-authoritative authentication
+  };
+
+  const setDemoPassword = (_email: string, _pwd: string) => {
+    // No-op in real server-authoritative authentication
   };
 
   return (
     <SessionContext.Provider
       value={{
         currentUser,
-        role: currentUser?.role || null,
-        isAuthenticated: Boolean(currentUser),
-        isInitialized,
+        role,
+        roles,
+        status,
+        isAuthenticated: status === 'authenticated' && Boolean(currentUser),
+        isInitialized: status !== 'initializing',
         login,
         logout,
+        logoutAll,
+        switchRole,
+        refreshSession,
         switchRoleQuick,
         updateUserStatus,
         setDemoPassword,

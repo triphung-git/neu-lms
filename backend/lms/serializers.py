@@ -23,9 +23,7 @@ class EligibleEmailSerializer(serializers.ModelSerializer):
         email = value.strip().lower()
 
         if EligibleEmail.objects.filter(email__iexact=email).exists():
-            raise serializers.ValidationError(
-                "Email đã có trong danh sách."
-            )
+            raise serializers.ValidationError("Email đã có trong danh sách.")
 
         return email
 
@@ -49,9 +47,7 @@ class CourseSerializer(serializers.ModelSerializer):
             query = query.exclude(pk=self.instance.pk)
 
         if query.exists():
-            raise serializers.ValidationError(
-                "Mã môn học đã tồn tại."
-            )
+            raise serializers.ValidationError("Mã môn học đã tồn tại.")
 
         return code
 

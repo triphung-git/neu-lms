@@ -18,6 +18,12 @@
   align-items: start;
 }
 
+.profile-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
 .profile-card {
   background-color: var(--surface);
   border: 1px solid var(--border);
@@ -39,6 +45,10 @@
 
 .card-header-icon {
   color: var(--focus);
+}
+
+.danger-icon {
+  color: var(--danger);
 }
 
 .profile-card-header h2 {
@@ -81,10 +91,33 @@
   border-radius: 4px;
 }
 
+.session-card-description {
+  font-size: var(--text-small);
+  color: var(--muted);
+  line-height: var(--line-body);
+  margin: 0;
+}
+
+.logout-all-btn {
+  align-self: flex-start;
+}
+
 .profile-form {
   display: flex;
   flex-direction: column;
   gap: var(--space-3);
+}
+
+.profile-error-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: #fdeeee;
+  border: 1px solid #f8c8c6;
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+  color: var(--danger);
+  font-size: var(--text-small);
 }
 
 .profile-password-notice {

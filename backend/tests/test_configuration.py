@@ -1,8 +1,11 @@
 import os
 import subprocess
 import sys
+from pathlib import Path
 
 import pytest
+
+DEFAULT_CA_BUNDLE = str(Path(__file__).resolve().parent / "fixtures" / "test-ca.crt")
 
 
 def production_check(**overrides):
@@ -11,7 +14,7 @@ def production_check(**overrides):
         "DJANGO_SETTINGS_MODULE": "config.settings.production",
         "DJANGO_SECRET_KEY": "test-only-production-check-1234567890-abcdefghijk-ABCDEFGHIJK",
         "DJANGO_ALLOWED_HOSTS": "lms.example.test",
-        "PGSSLROOTCERT": "/test-only/provider-ca.pem",
+        "PGSSLROOTCERT": DEFAULT_CA_BUNDLE,
         **overrides,
     }
     return subprocess.run(
@@ -38,9 +41,18 @@ def test_production_deployment_checks_pass():
         ({"DJANGO_ALLOWED_HOSTS": ""}, "explicit DJANGO_ALLOWED_HOSTS"),
         ({"PGPASSWORD": ""}, "PGPASSWORD"),
         ({"PGSSLROOTCERT": ""}, "PGSSLROOTCERT"),
+        ({"PGSSLROOTCERT": "/non-existent/ca.crt"}, "Database CA root certificate not found"),
     ],
 )
 def test_production_rejects_incomplete_or_unsafe_configuration(overrides, expected):
     result = production_check(**overrides)
     assert result.returncode != 0
     assert expected in result.stderr
+
+
+def test_production_rejects_malformed_certificate(tmp_path):
+    cert = tmp_path / "invalid.crt"
+    cert.write_text("not a certificate")
+    result = production_check(PGSSLROOTCERT=str(cert))
+    assert result.returncode != 0
+    assert "unreadable or invalid" in result.stderr

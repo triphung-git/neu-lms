@@ -20,7 +20,7 @@ import { AdminLayout } from './app/layouts/AdminLayout';
 import { HomePage, FeaturesPage, GuidePage, NotFoundPage } from './blueprints/public';
 
 // Blueprints - Identity (P04, P05, C01)
-import { LoginPage, RegisterPage, ProfilePage } from './blueprints/identity';
+import { LoginPage, RegisterPage, ProfilePage, ForgotPasswordPage, ResetPasswordPage } from './blueprints/identity';
 
 // Blueprints - Dashboards (S01, T01, A01)
 import { StudentDashboardPage, TeacherDashboardPage, AdminDashboardPage } from './blueprints/dashboards';
@@ -104,19 +104,10 @@ export const App: React.FC = () => {
                 {/* Authentication Shell Routes */}
                 <Route element={<AuthLayout />}>
                   <Route path="dang-nhap" element={<LoginPage />} />
-                  <Route path="dang-ky" element={
-                    import.meta.env.VITE_DATA_MODE === 'api' ? (
-                    <div style={{ padding: 24 }}>
-                      <h1>Đăng ký tài khoản</h1>
-                      <p>
-                        Biểu mẫu đăng ký đang được kết nối với máy chủ.
-                        Hiện tại hãy sử dụng tài khoản đã tạo qua API.
-                        </p>
-                        <a href="/dang-nhap">Về trang đăng nhập</a>
-                        </div>
-                    ) : (
-                    <RegisterPage />
-                  )} />
+                  <Route path="dang-ky" element={<RegisterPage />} />
+                  <Route path="quen-mat-khau" element={<ForgotPasswordPage />} />
+                  <Route path="reset-password" element={<ResetPasswordPage />} />
+                  <Route path="dat-lai-mat-khau" element={<ResetPasswordPage />} />
                 </Route>
 
                 {/* Student Workspace (S01 - S08) */}
