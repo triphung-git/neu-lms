@@ -18,10 +18,18 @@ export const TeacherLayout: React.FC = () => {
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
-    navigate('/dang-nhap');
-  };
+  const handleLogout = async () => {
+  try {
+    await logout();
+    navigate('/dang-nhap', { replace: true });
+  } catch (error) {
+    window.alert(
+      error instanceof Error
+        ? error.message
+        : 'Đăng xuất thất bại. Vui lòng thử lại.'
+    );
+  }
+};
 
   const navLinks = [
     { to: '/gv', label: 'Tổng quan công việc', icon: <LayoutDashboard size={18} />, end: true },
