@@ -7,6 +7,7 @@ from platform_core.models import AuditEvent, OutboxEvent
 EVENTS = {
     "password.changed": set(),
     "password.reset": set(),
+    "account.password_reset_initiated": set(),
     "account.created": set(),
     "email.verified": set(),
     "role.requested": {"role"},

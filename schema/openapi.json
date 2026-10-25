@@ -6,6 +6,809 @@
         "description": "Hợp đồng API chuẩn của nền tảng NEU LMS"
     },
     "paths": {
+        "/api/v1/admin/accounts": {
+            "get": {
+                "operationId": "admin_accounts_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "email_verified",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Filter by email verified status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "is_active",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Filter by active status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Number of results per page"
+                    },
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by active role: student, teacher, admin"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by email or display name"
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAdminAccountListItemList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}": {
+            "get": {
+                "operationId": "admin_accounts_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/lock": {
+            "post": {
+                "operationId": "admin_accounts_lock_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountStateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/request-reset": {
+            "post": {
+                "operationId": "admin_accounts_request_reset_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "202": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminPasswordResetResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/roles": {
+            "post": {
+                "operationId": "admin_accounts_roles_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountRoleGrantRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountRoleGrantRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountRoleGrantRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountRoleGrantResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/roles/{grant_id}/revoke": {
+            "post": {
+                "operationId": "admin_accounts_roles_revoke_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "grant_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountRoleRevokeResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/state": {
+            "post": {
+                "operationId": "admin_accounts_state_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountStateUpdateRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountStateUpdateRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminAccountStateUpdateRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountStateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/accounts/{id}/unlock": {
+            "post": {
+                "operationId": "admin_accounts_unlock_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountStateResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/courses/{course_id}/transfer": {
+            "post": {
+                "operationId": "admin_courses_transfer_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/grants/{grant_id}/revoke": {
+            "post": {
+                "operationId": "admin_grants_revoke_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "grant_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AdminReauthRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminAccountRoleRevokeResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/role-requests": {
+            "get": {
+                "operationId": "admin_role_requests_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Number of results per page"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by user email or display name"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by status: pending, approved, rejected, cancelled, all"
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAdminTeacherRequestItemList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/role-requests/{id}/approve": {
+            "post": {
+                "operationId": "admin_role_requests_approve_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminTeacherApprovalResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/role-requests/{id}/reject": {
+            "post": {
+                "operationId": "admin_role_requests_reject_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminTeacherRejectResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/teacher-requests": {
+            "get": {
+                "operationId": "admin_teacher_requests_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Page number"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Number of results per page"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by user email or display name"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by status: pending, approved, rejected, cancelled, all"
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAdminTeacherRequestItemList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/teacher-requests/{id}/approve": {
+            "post": {
+                "operationId": "admin_teacher_requests_approve_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminTeacherApprovalResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/teacher-requests/{id}/reject": {
+            "post": {
+                "operationId": "admin_teacher_requests_reject_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminTeacherRejectResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/auth/csrf": {
             "get": {
                 "operationId": "auth_csrf_retrieve",
@@ -18,6 +821,35 @@
                 "responses": {
                     "204": {
                         "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/grants": {
+            "get": {
+                "operationId": "auth_grants_list",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RoleGrantItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -240,10 +1072,276 @@
                 }
             }
         },
+        "/api/v1/auth/register": {
+            "post": {
+                "operationId": "auth_register_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RegisterRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RegisterResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/resend-verification": {
+            "post": {
+                "operationId": "auth_resend_verification_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResendVerificationRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResendVerificationRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResendVerificationRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "202": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/role-requests": {
+            "get": {
+                "operationId": "auth_role_requests_list",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/RoleRequestItem"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "auth_role_requests_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateRoleRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateRoleRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateRoleRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleRequestItem"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/role-requests/{id}/cancel": {
+            "post": {
+                "operationId": "auth_role_requests_cancel_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/RoleRequestItem"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verification": {
+            "get": {
+                "operationId": "auth_verification_retrieve",
+                "tags": [
+                    "auth"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerificationStatusResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/auth/verify-email": {
+            "post": {
+                "operationId": "auth_verify_email_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/VerifyEmailRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/VerifyEmailResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses": {
             "get": {
                 "operationId": "courses_list",
                 "parameters": [
+                    {
+                        "in": "query",
+                        "name": "enrollment_open",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Filter enrollment availability"
+                    },
                     {
                         "name": "page",
                         "required": false,
@@ -261,6 +1359,30 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by course code, name, term or teacher"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by open or archived status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "term",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by academic term"
                     }
                 ],
                 "tags": [
@@ -330,9 +1452,746 @@
                 }
             }
         },
+        "/api/v1/courses/{course_id}/chapters": {
+            "get": {
+                "operationId": "courses_chapters_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Chapter"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_chapters_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Chapter"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}": {
+            "patch": {
+                "operationId": "courses_chapters_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Chapter"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_chapters_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons": {
+            "get": {
+                "operationId": "courses_chapters_lessons_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_chapters_lessons_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/{lesson_id}": {
+            "patch": {
+                "operationId": "courses_chapters_lessons_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_chapters_lessons_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/reorder": {
+            "post": {
+                "operationId": "courses_chapters_lessons_reorder_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/reorder": {
+            "post": {
+                "operationId": "courses_chapters_reorder_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Chapter"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}": {
             "get": {
                 "operationId": "courses_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "courses_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "courses_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/archive": {
+            "post": {
+                "operationId": "courses_archive_create",
                 "parameters": [
                     {
                         "in": "path",
@@ -431,6 +2290,469 @@
     },
     "components": {
         "schemas": {
+            "AdminAccountDetail": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "email_verified": {
+                        "type": "boolean"
+                    },
+                    "verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminAccountRoleItem"
+                        }
+                    },
+                    "role_requests": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminAccountRoleRequestItem"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "display_name",
+                    "email",
+                    "email_verified",
+                    "id",
+                    "is_active",
+                    "role_requests",
+                    "roles",
+                    "updated_at",
+                    "verified_at"
+                ]
+            },
+            "AdminAccountListItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "email_verified": {
+                        "type": "boolean"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "display_name",
+                    "email",
+                    "email_verified",
+                    "id",
+                    "is_active",
+                    "roles",
+                    "updated_at"
+                ]
+            },
+            "AdminAccountRoleGrantRequest": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/UserRoleEnum"
+                    },
+                    "current_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "maxLength": 1024
+                    }
+                },
+                "required": [
+                    "role"
+                ]
+            },
+            "AdminAccountRoleGrantResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "granted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "granted_at",
+                    "id",
+                    "role",
+                    "user_id"
+                ]
+            },
+            "AdminAccountRoleItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserRoleEnum"
+                    },
+                    "granted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "granted_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "grant_source": {
+                        "type": "string"
+                    },
+                    "revoked_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "revoke_reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "grant_source",
+                    "granted_at",
+                    "granted_by",
+                    "id",
+                    "revoked_at",
+                    "role"
+                ]
+            },
+            "AdminAccountRoleRequestItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/RoleRequestStatusEnum"
+                    },
+                    "requested_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reviewed_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "review_reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "id",
+                    "requested_at",
+                    "reviewed_at",
+                    "reviewed_by",
+                    "role",
+                    "status"
+                ]
+            },
+            "AdminAccountRoleRevokeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "revoked_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "revoked_at",
+                    "role"
+                ]
+            },
+            "AdminAccountStateResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "is_active": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "id",
+                    "is_active"
+                ]
+            },
+            "AdminAccountStateUpdateRequest": {
+                "type": "object",
+                "properties": {
+                    "is_active": {
+                        "type": "boolean"
+                    },
+                    "current_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "maxLength": 1024
+                    }
+                },
+                "required": [
+                    "is_active"
+                ]
+            },
+            "AdminPasswordResetResponse": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "message"
+                ]
+            },
+            "AdminReauthRequest": {
+                "type": "object",
+                "properties": {
+                    "current_password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "maxLength": 1024
+                    }
+                }
+            },
+            "AdminTeacherApprovalResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "granted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "granted_at",
+                    "id",
+                    "role",
+                    "status",
+                    "user_id"
+                ]
+            },
+            "AdminTeacherRejectResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "id",
+                    "reviewed_at",
+                    "status"
+                ]
+            },
+            "AdminTeacherRequestItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "user_email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "user_display_name": {
+                        "type": "string"
+                    },
+                    "role": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "requested_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "reviewed_by": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "review_reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "id",
+                    "requested_at",
+                    "reviewed_at",
+                    "reviewed_by",
+                    "role",
+                    "status",
+                    "user_display_name",
+                    "user_email",
+                    "user_id"
+                ]
+            },
+            "Chapter": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "position": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course",
+                    "created_at",
+                    "id",
+                    "position",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "ChapterRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
             "Course": {
                 "type": "object",
                 "properties": {
@@ -466,10 +2788,24 @@
                     "status": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/StatusEnum"
+                                "$ref": "#/components/schemas/CourseStatusEnum"
                             }
                         ],
                         "readOnly": true
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "active_member_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "default": 0
                     },
                     "created_at": {
                         "type": "string",
@@ -483,6 +2819,8 @@
                     }
                 },
                 "required": [
+                    "active_member_count",
+                    "archived_at",
                     "code",
                     "created_at",
                     "id",
@@ -514,12 +2852,46 @@
                     },
                     "description": {
                         "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
                     }
                 },
                 "required": [
                     "code",
                     "name",
                     "term"
+                ]
+            },
+            "CourseStatusEnum": {
+                "enum": [
+                    "open",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `open` - Đang mở\n* `archived` - Đã lưu trữ"
+            },
+            "CourseTransferRequest": {
+                "type": "object",
+                "properties": {
+                    "teacher_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "teacher_id"
+                ]
+            },
+            "CreateRoleRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    }
+                },
+                "required": [
+                    "role"
                 ]
             },
             "CredentialsRequest": {
@@ -600,12 +2972,176 @@
                     }
                 }
             },
+            "Lesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "chapter": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "chapter",
+                    "created_at",
+                    "id",
+                    "position",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "LessonRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
             "LivenessResponse": {
                 "type": "object",
                 "properties": {
                     "status": {
                         "type": "string",
                         "default": "ok"
+                    }
+                }
+            },
+            "PaginatedAdminAccountListItemList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminAccountListItem"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
+            "PaginatedAdminTeacherRequestItemList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AdminTeacherRequestItem"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
                     }
                 }
             },
@@ -682,6 +3218,55 @@
                     "new_password"
                 ]
             },
+            "PatchedChapterRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                }
+            },
+            "PatchedCourseRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "term": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PatchedLessonRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
             "ReadinessSuccessResponse": {
                 "type": "object",
                 "properties": {
@@ -716,6 +3301,102 @@
                 },
                 "required": [
                     "checks"
+                ]
+            },
+            "RegisterRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "maxLength": 254
+                    },
+                    "password": {
+                        "type": "string",
+                        "writeOnly": true,
+                        "minLength": 1,
+                        "maxLength": 1024
+                    },
+                    "display_name": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 150
+                    },
+                    "requested_role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    }
+                },
+                "required": [
+                    "email",
+                    "password",
+                    "requested_role"
+                ]
+            },
+            "RegisterResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "display_name": {
+                        "type": "string"
+                    },
+                    "requested_role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    },
+                    "email_verified": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "display_name",
+                    "email",
+                    "id",
+                    "requested_role"
+                ]
+            },
+            "ReorderRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "ids"
+                ]
+            },
+            "RequestableRoleEnum": {
+                "enum": [
+                    "student",
+                    "teacher"
+                ],
+                "type": "string",
+                "description": "* `student` - student\n* `teacher` - teacher"
+            },
+            "ResendVerificationRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1,
+                        "maxLength": 254
+                    }
+                },
+                "required": [
+                    "email"
                 ]
             },
             "ResetConfirmRequest": {
@@ -753,14 +3434,75 @@
                     "email"
                 ]
             },
-            "RolesEnum": {
+            "RoleGrantItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/UserRoleEnum"
+                    },
+                    "grant_source": {
+                        "type": "string"
+                    },
+                    "granted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "grant_source",
+                    "granted_at",
+                    "id",
+                    "role"
+                ]
+            },
+            "RoleRequestItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/RoleRequestStatusEnum"
+                    },
+                    "requested_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "review_reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "id",
+                    "requested_at",
+                    "reviewed_at",
+                    "role",
+                    "status"
+                ]
+            },
+            "RoleRequestStatusEnum": {
                 "enum": [
-                    "student",
-                    "teacher",
-                    "admin"
+                    "pending",
+                    "approved",
+                    "rejected",
+                    "cancelled"
                 ],
                 "type": "string",
-                "description": "* `student` - student\n* `teacher` - teacher\n* `admin` - admin"
+                "description": "* `pending` - pending\n* `approved` - approved\n* `rejected` - rejected\n* `cancelled` - cancelled"
             },
             "SessionInfo": {
                 "type": "object",
@@ -779,7 +3521,16 @@
                     "roles": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/RolesEnum"
+                            "$ref": "#/components/schemas/UserRoleEnum"
+                        }
+                    },
+                    "email_verified": {
+                        "type": "boolean"
+                    },
+                    "pending_roles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RequestableRoleEnum"
                         }
                     },
                     "idle_expires_at": {
@@ -795,18 +3546,79 @@
                     "absolute_expires_at",
                     "display_name",
                     "email",
+                    "email_verified",
                     "id",
                     "idle_expires_at",
+                    "pending_roles",
                     "roles"
                 ]
             },
-            "StatusEnum": {
+            "UserRoleEnum": {
                 "enum": [
-                    "open",
-                    "archived"
+                    "admin",
+                    "teacher",
+                    "student"
                 ],
                 "type": "string",
-                "description": "* `open` - Đang mở\n* `archived` - Đã lưu trữ"
+                "description": "* `admin` - admin\n* `teacher` - teacher\n* `student` - student"
+            },
+            "VerificationStatusResponse": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    },
+                    "verified_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "email",
+                    "verified",
+                    "verified_at"
+                ]
+            },
+            "VerifyEmailRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "VerifyEmailResponse": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "verified": {
+                        "type": "boolean"
+                    },
+                    "granted_roles": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UserRoleEnum"
+                        }
+                    }
+                },
+                "required": [
+                    "email",
+                    "granted_roles",
+                    "verified"
+                ]
             }
         },
         "securitySchemes": {

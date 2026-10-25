@@ -1,234 +1,238 @@
-import React, { useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { coursesService, type Chapter, type Course, type Lesson } from '../../../api/coursesService';
 import { useNotifications } from '../../../app/providers/NotificationContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { Modal } from '../../../shared/ui/Modal';
 import { Button } from '../../../shared/ui/Button';
 import { TextField, TextAreaField } from '../../../shared/ui/TextField';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { ErrorBanner } from '../../../shared/ui/ErrorBanner';
+import { LoadingSkeleton } from '../../../shared/ui/LoadingSkeleton';
 import {
-  Plus,
-  ArrowUp,
-  ArrowDown,
-  Edit2,
-  Trash2,
-  FileText,
   AlertTriangle,
-  BookOpen
+  ArrowDown,
+  ArrowUp,
+  BookOpen,
+  Edit2,
+  Plus,
+  Trash2,
 } from 'lucide-react';
 import './CourseStructurePage.css';
 
+type LessonsByChapter = Record<string, Lesson[]>;
+
 export const CourseStructurePage: React.FC = () => {
   const { monId } = useParams<{ monId: string }>();
-  const {
-    courses,
-    chapters,
-    lessons,
-    materials,
-    createChapter,
-    updateChapter,
-    deleteChapter,
-    createLesson,
-    updateLesson,
-    deleteLesson
-  } = useDatabase();
-  const { showNotification } = useNotifications();
   const navigate = useNavigate();
+  const { showNotification } = useNotifications();
+  const [course, setCourse] = useState<Course | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessonsByChapter, setLessonsByChapter] = useState<LessonsByChapter>({});
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const course = courses.find(c => c.id === monId);
-  const isArchived = course?.status === 'archived';
-
-  // Modal states
   const [showChapterModal, setShowChapterModal] = useState(false);
-  const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
+  const [editingChapter, setEditingChapter] = useState<Chapter | null>(null);
   const [chapterTitle, setChapterTitle] = useState('');
-
   const [showLessonModal, setShowLessonModal] = useState(false);
   const [targetChapterId, setTargetChapterId] = useState<string | null>(null);
-  const [editingLessonId, setEditingLessonId] = useState<string | null>(null);
+  const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [lessonTitle, setLessonTitle] = useState('');
-  const [lessonDesc, setLessonDesc] = useState('');
+  const [lessonDescription, setLessonDescription] = useState('');
 
-  if (!course) {
-    return (
-      <div className="course-structure-container">
-        <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại trên hệ thống."
-          action={<Button onClick={() => navigate('/gv/mon-hoc')}>Về danh sách môn học</Button>}
-        />
-      </div>
-    );
-  }
+  const loadStructure = useCallback(async (): Promise<boolean> => {
+    if (!monId) {
+      setError('Thiếu mã môn học.');
+      setIsLoading(false);
+      return false;
+    }
 
-  const courseChapters = chapters
-    .filter(ch => ch.courseId === monId)
-    .sort((a, b) => a.order - b.order);
+    setIsLoading(true);
+    setError(null);
+    try {
+      const [courseData, chapterData] = await Promise.all([
+        coursesService.get(monId),
+        coursesService.listChapters(monId),
+      ]);
+      const lessonEntries = await Promise.all(
+        chapterData.map(async (chapter) => [
+          chapter.id,
+          await coursesService.listLessons(monId, chapter.id),
+        ] as const),
+      );
+      setCourse(courseData);
+      setChapters(chapterData);
+      setLessonsByChapter(Object.fromEntries(lessonEntries));
+      return true;
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : 'Không thể tải cấu trúc môn học.');
+      return false;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [monId]);
 
-  // CHAPTER HANDLERS
+  useEffect(() => {
+    void loadStructure();
+  }, [loadStructure]);
+
+  const orderedChapters = useMemo(
+    () => [...chapters].sort((a, b) => a.position - b.position || a.id.localeCompare(b.id)),
+    [chapters],
+  );
+  const isArchived = course?.status === 'archived';
+
+  const runMutation = async (action: () => Promise<unknown>, successMessage: string) => {
+    setIsSaving(true);
+    try {
+      await action();
+      if (!(await loadStructure())) return false;
+      showNotification('success', successMessage);
+      return true;
+    } catch (cause) {
+      showNotification('error', cause instanceof Error ? cause.message : 'Không thể lưu thay đổi.');
+      return false;
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   const openAddChapter = () => {
-    setEditingChapterId(null);
+    setEditingChapter(null);
     setChapterTitle('');
     setShowChapterModal(true);
   };
 
-  const openEditChapter = (ch: typeof chapters[0]) => {
-    setEditingChapterId(ch.id);
-    setChapterTitle(ch.title);
+  const openEditChapter = (chapter: Chapter) => {
+    setEditingChapter(chapter);
+    setChapterTitle(chapter.title);
     setShowChapterModal(true);
   };
 
-  const handleSaveChapter = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = chapterTitle.trim();
-    if (!trimmed) {
-      showNotification('error', 'Vui lòng nhập tiêu đề chương.');
-      return;
-    }
+  const handleSaveChapter = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const title = chapterTitle.trim();
+    if (!title || !course) return;
 
-    if (editingChapterId) {
-      const res = updateChapter(editingChapterId, { title: trimmed });
-      if (res.ok) {
-        showNotification('success', 'Đã cập nhật tiêu đề chương.');
-        setShowChapterModal(false);
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi cập nhật chương');
-      }
-    } else {
-      const newOrder = courseChapters.length + 1;
-      const res = createChapter({
-        id: `chap-${Date.now()}`,
-        courseId: course.id,
-        title: trimmed,
-        order: newOrder
-      });
-      if (res.ok) {
-        showNotification('success', 'Đã thêm chương mới thành công.');
-        setShowChapterModal(false);
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi thêm chương');
-      }
-    }
+    const saved = editingChapter
+      ? await runMutation(
+          () => coursesService.updateChapter(course.id, editingChapter.id, { title }),
+          'Đã cập nhật chương.',
+        )
+      : await runMutation(
+          () => coursesService.createChapter(course.id, { title }),
+          'Đã thêm chương mới.',
+        );
+
+    if (saved) setShowChapterModal(false);
   };
 
-  const handleDeleteChapter = (chId: string) => {
-    const hasLessons = lessons.some(l => l.chapterId === chId);
-    if (hasLessons) {
-      showNotification('error', 'Không thể xóa chương đang chứa bài học. Vui lòng chuyển hoặc xóa các bài học trước.');
-      return;
-    }
-
-    if (window.confirm('Bạn có chắc chắn muốn xóa chương này?')) {
-      const res = deleteChapter(chId);
-      if (res.ok) {
-        showNotification('success', 'Đã xóa chương thành công.');
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi xóa chương');
-      }
-    }
+  const handleDeleteChapter = async (chapter: Chapter) => {
+    if (!course || !window.confirm('Bạn có chắc chắn muốn xóa chương này?')) return;
+    await runMutation(
+      () => coursesService.deleteChapter(course.id, chapter.id),
+      'Đã xóa chương.',
+    );
   };
 
-  const handleMoveChapter = (chIndex: number, direction: 'up' | 'down') => {
-    const targetIndex = direction === 'up' ? chIndex - 1 : chIndex + 1;
-    if (targetIndex < 0 || targetIndex >= courseChapters.length) return;
-
-    const currentCh = courseChapters[chIndex];
-    const targetCh = courseChapters[targetIndex];
-
-    updateChapter(currentCh.id, { order: targetCh.order });
-    updateChapter(targetCh.id, { order: currentCh.order });
-    showNotification('info', 'Đã thay đổi thứ tự chương.');
+  const moveChapter = async (index: number, direction: 'up' | 'down') => {
+    if (!course) return;
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= orderedChapters.length) return;
+    const next = [...orderedChapters];
+    [next[index], next[target]] = [next[target], next[index]];
+    await runMutation(
+      () => coursesService.reorderChapters(course.id, next.map((chapter) => chapter.id)),
+      'Đã thay đổi thứ tự chương.',
+    );
   };
 
-  // LESSON HANDLERS
   const openAddLesson = (chapterId: string) => {
     setTargetChapterId(chapterId);
-    setEditingLessonId(null);
+    setEditingLesson(null);
     setLessonTitle('');
-    setLessonDesc('');
+    setLessonDescription('');
     setShowLessonModal(true);
   };
 
-  const openEditLesson = (lesson: typeof lessons[0]) => {
-    setTargetChapterId(lesson.chapterId);
-    setEditingLessonId(lesson.id);
+  const openEditLesson = (lesson: Lesson) => {
+    setTargetChapterId(lesson.chapter);
+    setEditingLesson(lesson);
     setLessonTitle(lesson.title);
-    setLessonDesc(lesson.description);
+    setLessonDescription(lesson.description || '');
     setShowLessonModal(true);
   };
 
-  const handleSaveLesson = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedTitle = lessonTitle.trim();
-    if (!trimmedTitle) {
-      showNotification('error', 'Vui lòng nhập tiêu đề bài học.');
-      return;
-    }
-    if (!targetChapterId) return;
+  const handleSaveLesson = async (event: React.FormEvent) => {
+    event.preventDefault();
+    if (!course || !targetChapterId || !lessonTitle.trim()) return;
 
-    if (editingLessonId) {
-      const res = updateLesson(editingLessonId, {
-        title: trimmedTitle,
-        description: lessonDesc.trim()
-      });
-      if (res.ok) {
-        showNotification('success', 'Đã cập nhật thông tin bài học.');
-        setShowLessonModal(false);
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi cập nhật bài học');
-      }
-    } else {
-      const chLessons = lessons.filter(l => l.chapterId === targetChapterId);
-      const newOrder = chLessons.length + 1;
-      const res = createLesson({
-        id: `les-${Date.now()}`,
-        chapterId: targetChapterId,
-        title: trimmedTitle,
-        description: lessonDesc.trim(),
-        order: newOrder
-      });
-      if (res.ok) {
-        showNotification('success', 'Đã thêm bài học mới thành công.');
-        setShowLessonModal(false);
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi thêm bài học');
-      }
-    }
+    const content = { title: lessonTitle.trim(), description: lessonDescription.trim() };
+    const saved = editingLesson
+      ? await runMutation(
+          () =>
+            coursesService.updateLesson(
+              course.id,
+              targetChapterId,
+              editingLesson.id,
+              content,
+            ),
+          'Đã cập nhật bài học.',
+        )
+      : await runMutation(
+          () => coursesService.createLesson(course.id, targetChapterId, content),
+          'Đã thêm bài học mới.',
+        );
+
+    if (saved) setShowLessonModal(false);
   };
 
-  const handleDeleteLesson = (lessonId: string) => {
-    const hasMaterials = materials.some(m => m.lessonId === lessonId);
-    if (hasMaterials) {
-      showNotification('error', 'Không thể xóa bài học đang có học liệu. Vui lòng di chuyển hoặc xóa các học liệu trước.');
-      return;
-    }
-
-    if (window.confirm('Bạn có chắc chắn muốn xóa bài học này?')) {
-      const res = deleteLesson(lessonId);
-      if (res.ok) {
-        showNotification('success', 'Đã xóa bài học thành công.');
-      } else {
-        showNotification('error', res.error?.message || 'Lỗi xóa bài học');
-      }
-    }
+  const handleDeleteLesson = async (chapterId: string, lesson: Lesson) => {
+    if (!course || !window.confirm('Bạn có chắc chắn muốn xóa bài học này?')) return;
+    await runMutation(
+      () => coursesService.deleteLesson(course.id, chapterId, lesson.id),
+      'Đã xóa bài học.',
+    );
   };
 
-  const handleMoveLesson = (chapterId: string, lIndex: number, direction: 'up' | 'down') => {
-    const chLessons = lessons
-      .filter(l => l.chapterId === chapterId)
-      .sort((a, b) => a.order - b.order);
-
-    const targetIndex = direction === 'up' ? lIndex - 1 : lIndex + 1;
-    if (targetIndex < 0 || targetIndex >= chLessons.length) return;
-
-    const currentL = chLessons[lIndex];
-    const targetL = chLessons[targetIndex];
-
-    updateLesson(currentL.id, { order: targetL.order });
-    updateLesson(targetL.id, { order: currentL.order });
-    showNotification('info', 'Đã thay đổi thứ tự bài học.');
+  const moveLesson = async (
+    chapterId: string,
+    lessons: Lesson[],
+    index: number,
+    direction: 'up' | 'down',
+  ) => {
+    if (!course) return;
+    const target = direction === 'up' ? index - 1 : index + 1;
+    if (target < 0 || target >= lessons.length) return;
+    const next = [...lessons];
+    [next[index], next[target]] = [next[target], next[index]];
+    await runMutation(
+      () => coursesService.reorderLessons(course.id, chapterId, next.map((lesson) => lesson.id)),
+      'Đã thay đổi thứ tự bài học.',
+    );
   };
+
+  if (isLoading) return <LoadingSkeleton lines={6} />;
+  if (error) {
+    return (
+      <ErrorBanner
+        title="Không thể tải cấu trúc môn học"
+        message={error}
+        onRetry={() => void loadStructure()}
+      />
+    );
+  }
+  if (!course) {
+    return (
+      <EmptyState
+        title="Không tìm thấy môn học"
+        description="Môn học không tồn tại hoặc bạn không có quyền truy cập."
+        action={<Button onClick={() => navigate('/gv/mon-hoc')}>Về danh sách môn học</Button>}
+      />
+    );
+  }
 
   return (
     <div className="course-structure-page">
@@ -238,94 +242,92 @@ export const CourseStructurePage: React.FC = () => {
             items={[
               { label: 'Bàn làm việc', path: '/gv' },
               { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-              { label: 'Cấu trúc môn học' }
+              { label: 'Cấu trúc môn học' },
             ]}
           />
           <h1 className="page-main-heading">Cấu trúc môn học</h1>
           <p className="page-subtitle">
-            Thiết lập danh mục chương và bài học. Học liệu và bài giảng sẽ được gắn tương ứng theo từng bài học.
+            Thiết lập chương, bài học và thứ tự nội dung của học phần.
           </p>
         </div>
-
         {!isArchived && (
-          <Button type="button" variant="primary" onClick={openAddChapter}>
+          <Button type="button" variant="primary" onClick={openAddChapter} disabled={isSaving}>
             <Plus size={18} />
             <span>Thêm chương mới</span>
           </Button>
         )}
       </div>
 
+      {error && (
+        <ErrorBanner title="Không thể cập nhật cấu trúc" message={error} onRetry={() => void loadStructure()} />
+      )}
+
       {isArchived && (
         <div className="archived-warning-alert" role="alert">
           <AlertTriangle size={20} />
-          <span>
-            Môn học đã lưu trữ: Chế độ chỉ đọc. Không thể thêm, sửa, xóa hoặc thay đổi thứ tự bài học.
-          </span>
+          <span>Môn học đã lưu trữ: chế độ chỉ đọc, không thể thay đổi cấu trúc.</span>
         </div>
       )}
 
-      {courseChapters.length === 0 ? (
+      {orderedChapters.length === 0 ? (
         <EmptyState
           title="Chưa có chương học nào"
-          description="Khởi tạo chương học đầu tiên để bắt đầu xây dựng đề cương chi tiết cho môn học."
+          description="Thêm chương đầu tiên để bắt đầu xây dựng đề cương."
           action={!isArchived ? (
-            <Button variant="primary" onClick={openAddChapter}>
+            <Button variant="primary" onClick={openAddChapter} disabled={isSaving}>
               Thêm chương đầu tiên
             </Button>
           ) : undefined}
         />
       ) : (
         <div className="structure-tree-list">
-          {courseChapters.map((ch, chIdx) => {
-            const chLessons = lessons
-              .filter(l => l.chapterId === ch.id)
-              .sort((a, b) => a.order - b.order);
+          {orderedChapters.map((chapter, chapterIndex) => {
+            const lessons = [...(lessonsByChapter[chapter.id] || [])].sort(
+              (a, b) => a.position - b.position || a.id.localeCompare(b.id),
+            );
 
             return (
-              <section key={ch.id} className="chapter-card">
+              <section key={chapter.id} className="chapter-card">
                 <header className="chapter-card-header">
                   <div className="chapter-title-group">
-                    <span className="chapter-order-badge">Chương {chIdx + 1}</span>
-                    <h2 className="chapter-title-text">{ch.title}</h2>
+                    <span className="chapter-order-badge">Chương {chapterIndex + 1}</span>
+                    <h2 className="chapter-title-text">{chapter.title}</h2>
                   </div>
-
                   {!isArchived && (
                     <div className="chapter-actions-group">
                       <button
                         type="button"
                         className="icon-action-btn"
-                        onClick={() => handleMoveChapter(chIdx, 'up')}
-                        disabled={chIdx === 0}
+                        onClick={() => void moveChapter(chapterIndex, 'up')}
+                        disabled={chapterIndex === 0 || isSaving}
                         aria-label="Di chuyển chương lên trên"
-                        title="Di chuyển lên"
                       >
                         <ArrowUp size={16} />
                       </button>
                       <button
                         type="button"
                         className="icon-action-btn"
-                        onClick={() => handleMoveChapter(chIdx, 'down')}
-                        disabled={chIdx === courseChapters.length - 1}
+                        onClick={() => void moveChapter(chapterIndex, 'down')}
+                        disabled={chapterIndex === orderedChapters.length - 1 || isSaving}
                         aria-label="Di chuyển chương xuống dưới"
-                        title="Di chuyển xuống"
                       >
                         <ArrowDown size={16} />
                       </button>
                       <button
                         type="button"
                         className="icon-action-btn"
-                        onClick={() => openEditChapter(ch)}
+                        onClick={() => openEditChapter(chapter)}
+                        disabled={isSaving}
                         aria-label="Đổi tên chương"
-                        title="Sửa tên chương"
                       >
                         <Edit2 size={16} />
                       </button>
                       <button
                         type="button"
                         className="icon-action-btn danger"
-                        onClick={() => handleDeleteChapter(ch.id)}
+                        onClick={() => void handleDeleteChapter(chapter)}
+                        disabled={isSaving}
                         aria-label="Xóa chương"
-                        title="Xóa chương"
                       >
                         <Trash2 size={16} />
                       </button>
@@ -334,89 +336,74 @@ export const CourseStructurePage: React.FC = () => {
                 </header>
 
                 <div className="chapter-body">
-                  {chLessons.length === 0 ? (
+                  {lessons.length === 0 ? (
                     <p className="no-lessons-text">Chưa có bài học nào trong chương này.</p>
                   ) : (
                     <ul className="lessons-sublist">
-                      {chLessons.map((lesson, lIdx) => {
-                        const matCount = materials.filter(m => m.lessonId === lesson.id).length;
-                        return (
-                          <li key={lesson.id} className="lesson-row-item">
-                            <div className="lesson-left">
-                              <BookOpen size={18} className="lesson-icon" />
-                              <div className="lesson-info">
-                                <strong className="lesson-item-title">
-                                  Bài {lIdx + 1}: {lesson.title}
-                                </strong>
-                                {lesson.description && (
-                                  <p className="lesson-item-desc">{lesson.description}</p>
-                                )}
-                                <div className="lesson-badges-row">
-                                  <Link
-                                    to={`/gv/mon-hoc/${course.id}/hoc-lieu?bai=${lesson.id}`}
-                                    className="lesson-mat-link"
-                                  >
-                                    <FileText size={14} />
-                                    <span>{matCount} học liệu</span>
-                                  </Link>
-                                </div>
-                              </div>
+                      {lessons.map((lesson, lessonIndex) => (
+                        <li key={lesson.id} className="lesson-row-item">
+                          <div className="lesson-left">
+                            <BookOpen size={18} className="lesson-icon" />
+                            <div className="lesson-info">
+                              <strong className="lesson-item-title">
+                                Bài {lessonIndex + 1}: {lesson.title}
+                              </strong>
+                              {lesson.description && (
+                                <p className="lesson-item-desc">{lesson.description}</p>
+                              )}
                             </div>
-
-                            {!isArchived && (
-                              <div className="lesson-actions-group">
-                                <button
-                                  type="button"
-                                  className="icon-action-btn"
-                                  onClick={() => handleMoveLesson(ch.id, lIdx, 'up')}
-                                  disabled={lIdx === 0}
-                                  aria-label="Di chuyển bài lên"
-                                  title="Di chuyển lên"
-                                >
-                                  <ArrowUp size={15} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="icon-action-btn"
-                                  onClick={() => handleMoveLesson(ch.id, lIdx, 'down')}
-                                  disabled={lIdx === chLessons.length - 1}
-                                  aria-label="Di chuyển bài xuống"
-                                  title="Di chuyển xuống"
-                                >
-                                  <ArrowDown size={15} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="icon-action-btn"
-                                  onClick={() => openEditLesson(lesson)}
-                                  aria-label="Chỉnh sửa bài học"
-                                  title="Sửa bài học"
-                                >
-                                  <Edit2 size={15} />
-                                </button>
-                                <button
-                                  type="button"
-                                  className="icon-action-btn danger"
-                                  onClick={() => handleDeleteLesson(lesson.id)}
-                                  aria-label="Xóa bài học"
-                                  title="Xóa bài học"
-                                >
-                                  <Trash2 size={15} />
-                                </button>
-                              </div>
-                            )}
-                          </li>
-                        );
-                      })}
+                          </div>
+                          {!isArchived && (
+                            <div className="lesson-actions-group">
+                              <button
+                                type="button"
+                                className="icon-action-btn"
+                                onClick={() => void moveLesson(chapter.id, lessons, lessonIndex, 'up')}
+                                disabled={lessonIndex === 0 || isSaving}
+                                aria-label="Di chuyển bài lên trên"
+                              >
+                                <ArrowUp size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                className="icon-action-btn"
+                                onClick={() => void moveLesson(chapter.id, lessons, lessonIndex, 'down')}
+                                disabled={lessonIndex === lessons.length - 1 || isSaving}
+                                aria-label="Di chuyển bài xuống dưới"
+                              >
+                                <ArrowDown size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                className="icon-action-btn"
+                                onClick={() => openEditLesson(lesson)}
+                                disabled={isSaving}
+                                aria-label="Chỉnh sửa bài học"
+                              >
+                                <Edit2 size={15} />
+                              </button>
+                              <button
+                                type="button"
+                                className="icon-action-btn danger"
+                                onClick={() => void handleDeleteLesson(chapter.id, lesson)}
+                                disabled={isSaving}
+                                aria-label="Xóa bài học"
+                              >
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          )}
+                        </li>
+                      ))}
                     </ul>
                   )}
-
                   {!isArchived && (
                     <div className="add-lesson-row">
                       <Button
                         type="button"
                         variant="secondary"
-                        onClick={() => openAddLesson(ch.id)}
+                        onClick={() => openAddLesson(chapter.id)}
+                        disabled={isSaving}
                       >
                         <Plus size={16} />
                         <span>Thêm bài học vào chương này</span>
@@ -430,61 +417,69 @@ export const CourseStructurePage: React.FC = () => {
         </div>
       )}
 
-      {/* Chapter Modal */}
       {showChapterModal && (
         <Modal
-          title={editingChapterId ? 'Sửa tên chương' : 'Thêm chương mới'}
+          title={editingChapter ? 'Sửa tên chương' : 'Thêm chương mới'}
           isOpen={showChapterModal}
           onClose={() => setShowChapterModal(false)}
         >
-          <form onSubmit={handleSaveChapter} className="modal-form-body">
+          <form onSubmit={(event) => void handleSaveChapter(event)} className="modal-form-body">
             <TextField
               label="Tiêu đề chương"
               required
               value={chapterTitle}
-              onChange={e => setChapterTitle(e.target.value)}
-              placeholder="Ví dụ: Chương 1: Tổng quan về hệ thống"
+              onChange={(event) => setChapterTitle(event.target.value)}
+              placeholder="Ví dụ: Chương 1: Tổng quan"
             />
             <div className="modal-actions-bar">
-              <Button type="button" variant="secondary" onClick={() => setShowChapterModal(false)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowChapterModal(false)}
+                disabled={isSaving}
+              >
                 Hủy bỏ
               </Button>
-              <Button type="submit" variant="primary">
-                {editingChapterId ? 'Lưu thay đổi' : 'Thêm chương'}
+              <Button type="submit" variant="primary" isLoading={isSaving}>
+                {editingChapter ? 'Lưu thay đổi' : 'Thêm chương'}
               </Button>
             </div>
           </form>
         </Modal>
       )}
 
-      {/* Lesson Modal */}
       {showLessonModal && (
         <Modal
-          title={editingLessonId ? 'Sửa bài học' : 'Thêm bài học mới'}
+          title={editingLesson ? 'Sửa bài học' : 'Thêm bài học mới'}
           isOpen={showLessonModal}
           onClose={() => setShowLessonModal(false)}
         >
-          <form onSubmit={handleSaveLesson} className="modal-form-body">
+          <form onSubmit={(event) => void handleSaveLesson(event)} className="modal-form-body">
             <TextField
               label="Tiêu đề bài học"
               required
               value={lessonTitle}
-              onChange={e => setLessonTitle(e.target.value)}
+              onChange={(event) => setLessonTitle(event.target.value)}
               placeholder="Ví dụ: Bài 1: Khái niệm cơ bản"
             />
             <TextAreaField
               label="Mô tả bài học"
-              value={lessonDesc}
-              onChange={e => setLessonDesc(e.target.value)}
+              value={lessonDescription}
+              onChange={(event) => setLessonDescription(event.target.value)}
               placeholder="Tóm tắt nội dung chính hoặc yêu cầu chuẩn bị..."
               rows={3}
             />
             <div className="modal-actions-bar">
-              <Button type="button" variant="secondary" onClick={() => setShowLessonModal(false)}>
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShowLessonModal(false)}
+                disabled={isSaving}
+              >
                 Hủy bỏ
               </Button>
-              <Button type="submit" variant="primary">
-                {editingLessonId ? 'Lưu thay đổi' : 'Thêm bài học'}
+              <Button type="submit" variant="primary" isLoading={isSaving}>
+                {editingLesson ? 'Lưu thay đổi' : 'Thêm bài học'}
               </Button>
             </div>
           </form>

@@ -32,6 +32,8 @@ class Course(models.Model):
         choices=Status.choices,
         default=Status.OPEN,
     )
+    enrollment_open = models.BooleanField(default=False)
+    archived_at = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -43,6 +45,13 @@ class Course(models.Model):
             models.UniqueConstraint(
                 Lower("code"),
                 name="courses_code_case_insensitive_unique",
+            ),
+            models.CheckConstraint(
+                condition=(
+                    models.Q(status="open", archived_at__isnull=True)
+                    | models.Q(status="archived", archived_at__isnull=False)
+                ),
+                name="courses_archive_timestamp_consistent",
             ),
         ]
 
@@ -60,7 +69,7 @@ class Membership(models.Model):
 
     course = models.ForeignKey(
         Course,
-        on_delete=models.CASCADE,
+        on_delete=models.PROTECT,
         related_name="memberships",
     )
 
@@ -85,3 +94,46 @@ class Membership(models.Model):
                 name="courses_membership_unique",
             ),
         ]
+
+
+class Chapter(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    course = models.ForeignKey(
+        Course,
+        on_delete=models.PROTECT,
+        related_name="chapters",
+    )
+    title = models.CharField(max_length=200)
+    position = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["position", "id"]
+        indexes = [models.Index(fields=["course", "position"])]
+
+
+class Lesson(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False,
+    )
+    chapter = models.ForeignKey(
+        Chapter,
+        on_delete=models.PROTECT,
+        related_name="lessons",
+    )
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    position = models.PositiveIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["position", "id"]
+        indexes = [models.Index(fields=["chapter", "position"])]

@@ -108,6 +108,13 @@ class TestPasswordResetDeliveryAndRetries:
 
         delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
         assert delivery is not None
+        assert delivery.status == PasswordResetDelivery.Status.PENDING
+        assert delivery.attempts == 0
+        assert len(mail.outbox) == 0
+
+        # Deliver out-of-request
+        deliver_password_reset(delivery.id)
+        delivery.refresh_from_db()
         assert delivery.status == PasswordResetDelivery.Status.SENT
         assert delivery.attempts == 1
         assert delivery.sent_at is not None
@@ -137,15 +144,19 @@ class TestPasswordResetDeliveryAndRetries:
     @pytest.mark.django_db(transaction=True)
     def test_delivery_provider_error_and_retry(self, auth_user):
         mail.outbox.clear()
-        # Simulate SMTP network outage on initial dispatch
+        request_password_reset(email=auth_user.email)
+        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        assert delivery.status == PasswordResetDelivery.Status.PENDING
+        assert delivery.attempts == 0
+
+        # Simulate SMTP network outage on dispatch
         with patch(
             "identity.transport.send_mail",
             side_effect=smtplib.SMTPConnectError(421, b"Service unavailable"),
         ):
-            request_password_reset(email=auth_user.email)
+            deliver_password_reset(delivery.id)
 
-        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
-        assert delivery is not None
+        delivery.refresh_from_db()
         assert delivery.status == PasswordResetDelivery.Status.PENDING
         assert delivery.attempts == 1
         assert delivery.last_error_code == "smtp_connection_error"
@@ -164,14 +175,19 @@ class TestPasswordResetDeliveryAndRetries:
 
     @pytest.mark.django_db(transaction=True)
     def test_delivery_max_attempts_exhaustion(self, auth_user):
-        # Create delivery with attempts already at 2 (max_attempts = 3)
+        request_password_reset(email=auth_user.email)
+        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        assert delivery.status == PasswordResetDelivery.Status.PENDING
+        assert delivery.attempts == 0
+
+        # First failure
         with patch(
             "identity.transport.send_mail",
             side_effect=TimeoutError("Connection timed out"),
         ):
-            request_password_reset(email=auth_user.email)
+            deliver_password_reset(delivery.id)
 
-        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        delivery.refresh_from_db()
         assert delivery.status == PasswordResetDelivery.Status.PENDING
         assert delivery.attempts == 1
         assert delivery.last_error_code == "smtp_timeout"
@@ -205,9 +221,11 @@ class TestPasswordResetDeliveryAndRetries:
     def test_duplicate_dispatch_is_idempotent(self, auth_user):
         mail.outbox.clear()
         request_password_reset(email=auth_user.email)
+        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        deliver_password_reset(delivery.id)
         assert len(mail.outbox) == 1
 
-        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        delivery.refresh_from_db()
         assert delivery.status == PasswordResetDelivery.Status.SENT
 
         # Calling deliver_password_reset a second time on already sent delivery
@@ -218,13 +236,7 @@ class TestPasswordResetDeliveryAndRetries:
     @pytest.mark.django_db(transaction=True)
     def test_stale_token_after_auth_version_bump_fails_delivery(self, auth_user):
         mail.outbox.clear()
-        # Suppress send on creation so we can test delayed delivery
-        with patch(
-            "identity.transport.send_mail",
-            side_effect=smtplib.SMTPException("Initial temp failure"),
-        ):
-            request_password_reset(email=auth_user.email)
-
+        request_password_reset(email=auth_user.email)
         delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
         assert delivery.status == PasswordResetDelivery.Status.PENDING
 
@@ -247,6 +259,7 @@ class TestSecurityInvariantsNoTokenLeakage:
         request_password_reset(email=auth_user.email)
 
         delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        deliver_password_reset(delivery.id)
         token_record = delivery.token
 
         match = re.search(r"#token=([A-Fa-f0-9]+)", mail.outbox[0].body)
@@ -282,12 +295,14 @@ class TestSecurityInvariantsNoTokenLeakage:
 
     @pytest.mark.django_db(transaction=True)
     def test_no_token_or_email_in_logs_on_delivery_failure(self, auth_user, caplog):
+        request_password_reset(email=auth_user.email)
+        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
         with caplog.at_level(logging.ERROR):
             with patch(
                 "identity.transport.send_mail",
                 side_effect=smtplib.SMTPConnectError(554, b"Host connection failed"),
             ):
-                request_password_reset(email=auth_user.email)
+                deliver_password_reset(delivery.id)
 
         # Check log output: must not contain token, email, or password
         log_text = caplog.text
@@ -325,17 +340,22 @@ class TestMailpitRealSmtpIntegration:
         except Exception as exc:
             pytest.skip(f"Mailpit service not reachable: {exc}")
 
-        # 2. Dispatch reset using real SMTP backend pointing to Mailpit
+        # 2. Request reset (leaves delivery in PENDING without calling SMTP)
+        request_password_reset(email=auth_user.email)
+        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
+        assert delivery is not None
+        assert delivery.status == PasswordResetDelivery.Status.PENDING
+
+        # 3. Dispatch reset out-of-request using real SMTP backend pointing to Mailpit
         with override_settings(
             EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend",
             EMAIL_HOST="127.0.0.1",
             EMAIL_PORT=11025,
             EMAIL_TIMEOUT=5,
         ):
-            request_password_reset(email=auth_user.email)
+            deliver_password_reset(delivery.id)
 
-        delivery = PasswordResetDelivery.objects.filter(user=auth_user).first()
-        assert delivery is not None
+        delivery.refresh_from_db()
         assert delivery.status == PasswordResetDelivery.Status.SENT
 
         # 3. Query Mailpit REST API to verify received email

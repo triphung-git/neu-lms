@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
+
+from django.core.exceptions import ImproperlyConfigured
 
 from config.environment import csv_values, required
 
@@ -63,6 +66,11 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "SCHEMA_PATH_PREFIX_TRIM": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "RequestableRoleEnum": ["student", "teacher"],
+        "UserRoleEnum": ["student", "teacher", "admin"],
+        "RoleRequestStatusEnum": ["pending", "approved", "rejected", "cancelled"],
+    },
     "APPEND_COMPONENTS": {
         "securitySchemes": {
             "SessionCookieAuth": {
@@ -187,7 +195,24 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
-PUBLIC_APP_ORIGIN = os.environ.get("PUBLIC_APP_ORIGIN", "http://localhost:5173")
+
+
+def validate_origin(origin_str: str) -> str:
+    parsed = urlparse(origin_str)
+    if parsed.scheme not in ("http", "https"):
+        raise ImproperlyConfigured(
+            f"PUBLIC_APP_ORIGIN scheme must be http or https, got: '{parsed.scheme}'"
+        )
+    if not parsed.netloc:
+        raise ImproperlyConfigured(f"PUBLIC_APP_ORIGIN host is missing in: '{origin_str}'")
+    if parsed.path not in ("", "/") or parsed.params or parsed.query or parsed.fragment:
+        raise ImproperlyConfigured(
+            f"PUBLIC_APP_ORIGIN must not contain path, query, or fragment: '{origin_str}'"
+        )
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+PUBLIC_APP_ORIGIN = validate_origin(os.environ.get("PUBLIC_APP_ORIGIN", "http://localhost:5173"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@neu.edu.vn")
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "127.0.0.1")

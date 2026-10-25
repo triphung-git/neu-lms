@@ -1,4 +1,4 @@
-import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
@@ -10,7 +10,9 @@ const schemaPath = resolve(__dirname, '../../schema/openapi.json');
 const currentDtsPath = resolve(__dirname, '../src/api/schema.d.ts');
 const tempDtsPath = resolve(__dirname, '../src/api/.schema.d.ts.tmp');
 
+// The artifact must be JSON, matching the backend CI generation format.
 try {
+  JSON.parse(readFileSync(schemaPath, 'utf8'));
   const currentDts = readFileSync(currentDtsPath, 'utf8').replace(/\r\n/g, '\n');
 
   // Run the generator into the temp file to get exact byte-for-byte CLI output

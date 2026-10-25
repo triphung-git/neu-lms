@@ -16,7 +16,8 @@ export const PublicLayout: React.FC = () => {
   const getDashboardPath = () => {
     if (role === 'admin') return '/ad';
     if (role === 'teacher') return '/gv';
-    return '/sv';
+    if (role === 'student') return '/sv';
+    return '/ho-so';
   };
 
   if (isHomePage) {

@@ -110,7 +110,7 @@ def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Respons
                 ),
                 status=status.HTTP_409_CONFLICT,
             )
-        elif code in ("FORBIDDEN", "LAST_ACTIVE_ADMIN"):
+        elif code == "FORBIDDEN":
             return Response(
                 format_error_envelope(
                     code="permission_denied",
@@ -118,6 +118,17 @@ def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Respons
                     request_id=request_id,
                 ),
                 status=status.HTTP_403_FORBIDDEN,
+            )
+        elif code == "LAST_ACTIVE_ADMIN":
+            return Response(
+                format_error_envelope(
+                    code="last_active_admin",
+                    message=(
+                        "Không thể thu hồi hoặc khóa tài khoản quản trị viên hoạt động cuối cùng."
+                    ),
+                    request_id=request_id,
+                ),
+                status=status.HTTP_400_BAD_REQUEST,
             )
         elif code == "SESSION_EXPIRED":
             return Response(
@@ -147,10 +158,49 @@ def custom_exception_handler(exc: Exception, context: dict[str, Any]) -> Respons
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         else:
+            domain_messages = {
+                "EMAIL_ALREADY_REGISTERED": "Email này đã được đăng ký trong hệ thống.",
+                "INVALID_STUDENT_EMAIL_DOMAIN": (
+                    "Email sinh viên phải đúng định dạng số hiệu sinh viên NEU (@st.neu.edu.vn)."
+                ),
+                "ROLE_NOT_REQUESTABLE": (
+                    "Vai trò yêu cầu không hợp lệ. Chỉ chấp nhận sinh viên hoặc giảng viên."
+                ),
+                "ROLE_ALREADY_GRANTED": "Người dùng đã được cấp vai trò này.",
+                "ONE_PENDING_ROLE_REQUEST": (
+                    "Người dùng đã có một yêu cầu đang chờ xử lý cho vai trò này."
+                ),
+                "TOKEN_INVALID_OR_EXPIRED": "Mã xác thực không hợp lệ hoặc đã hết hạn.",
+                "EMAIL_NOT_VERIFIED": "Email chưa được xác thực.",
+                "EMAIL_MISMATCH": "Email xác thực không khớp với tài khoản.",
+                "CANNOT_CANCEL_REQUEST": "Không thể hủy yêu cầu vai trò này.",
+                "FORBIDDEN_REGISTRATION_FIELDS": (
+                    "Không được phép cung cấp trường đặc quyền khi đăng ký."
+                ),
+                "INVALID_DISPLAY_NAME": "Tên hiển thị không hợp lệ.",
+                "INVALID_ROLE_TRANSITION": (
+                    "Trạng thái yêu cầu vai trò không cho phép thao tác này."
+                ),
+                "STUDENT_EMAIL_REQUIRED": "Yêu cầu email sinh viên NEU hợp lệ.",
+                "REAUTH_REQUIRED": "Thao tác nhạy cảm yêu cầu xác thực lại mật khẩu hiện tại.",
+                "INVALID_CREDENTIALS": "Mật khẩu xác thực lại không chính xác.",
+                "ACCOUNT_NOT_FOUND": "Không tìm thấy tài khoản người dùng.",
+                "ROLE_GRANT_NOT_FOUND": "Không tìm thấy bản ghi cấp vai trò.",
+                "ROLE_POLICY_VIOLATION": (
+                    "Vai trò yêu cầu không thể cấp trực tiếp ngoài quy trình quy định."
+                ),
+                "TEACHER_APPROVAL_WORKFLOW_REQUIRED": (
+                    "Vai trò giảng viên phải thông qua quy trình xét duyệt yêu cầu giảng viên."
+                ),
+                "STUDENT_VERIFICATION_WORKFLOW_REQUIRED": (
+                    "Vai trò sinh viên phải thông qua quy trình xác thực email sinh viên NEU."
+                ),
+            }
+            msg = domain_messages.get(code, f"Thao tác không hợp lệ: {code}.")
             return Response(
                 format_error_envelope(
                     code=code.lower(),
-                    message=f"Thao tác không hợp lệ: {code}.",
+                    message=msg,
                     request_id=request_id,
                 ),
                 status=status.HTTP_400_BAD_REQUEST,

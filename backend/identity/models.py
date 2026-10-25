@@ -244,3 +244,60 @@ class PasswordResetDelivery(models.Model):
                 name="pwd_delivery_max_attempts_valid",
             ),
         ]
+
+
+class EmailVerificationToken(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=254)
+    digest = models.CharField(max_length=64, unique=True)
+    auth_version = models.PositiveIntegerField()
+    created_at = models.DateTimeField(default=timezone.now)
+    expires_at = models.DateTimeField()
+    used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["user", "expires_at"], name="email_verif_user_exp_idx"),
+        ]
+
+
+class EmailVerificationDelivery(models.Model):
+    class Status(models.TextChoices):
+        PENDING = "pending"
+        PROCESSING = "processing"
+        SENT = "sent"
+        FAILED = "failed"
+
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    token = models.OneToOneField(
+        EmailVerificationToken, on_delete=models.CASCADE, related_name="delivery"
+    )
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=254)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    attempts = models.PositiveIntegerField(default=0)
+    max_attempts = models.PositiveIntegerField(default=3)
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    last_error_code = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(default=timezone.now)
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["status", "created_at"], name="email_verif_status_idx"),
+        ]
+        constraints = [
+            models.CheckConstraint(
+                condition=Q(status__in=["pending", "processing", "sent", "failed"]),
+                name="email_verif_status_valid",
+            ),
+            models.CheckConstraint(
+                condition=Q(attempts__gte=0),
+                name="email_verif_attempts_valid",
+            ),
+            models.CheckConstraint(
+                condition=Q(max_attempts__gte=1),
+                name="email_verif_max_attempts_valid",
+            ),
+        ]

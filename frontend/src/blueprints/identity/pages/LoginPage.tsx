@@ -56,9 +56,12 @@ export const LoginPage: React.FC = () => {
         const safeTarget = getSafeReturnTo(returnTo);
         if (safeTarget) {
           navigate(safeTarget);
-        } else {
+        } else if (res.role) {
           // Strictly route to dashboard based on server-granted role, not client email heuristics
           navigate(getRoleDashboardPath(res.role));
+        } else {
+          // If account has no active role yet (e.g. pending teacher approval), go to profile status page
+          navigate('/ho-so');
         }
       } else {
         setErrorMessage(res.message || 'Đăng nhập không thành công.');

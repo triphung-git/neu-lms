@@ -139,30 +139,27 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children, serv
     }
   };
 
+  const clearSession = () => {
+    setCurrentUser(null);
+    setRole(null);
+    setRoles([]);
+    setStatus('anonymous');
+  };
+
   const logout = async (): Promise<void> => {
     try {
       await service.logout();
-    } catch {
-      // Regardless of server network status, locally transition to anonymous
-    } finally {
-      setCurrentUser(null);
-      setRole(null);
-      setRoles([]);
-      setStatus('anonymous');
+    } catch (err) {
+      // An expired/revoked current session is already signed out.
+      if (!(err instanceof ApiError && err.status === 401)) throw err;
     }
+    clearSession();
   };
 
   const logoutAll = async (): Promise<void> => {
-    try {
-      await service.logoutAll();
-    } catch {
-      // Fallback local cleanup
-    } finally {
-      setCurrentUser(null);
-      setRole(null);
-      setRoles([]);
-      setStatus('anonymous');
-    }
+    // Do not report global revocation when the server could not confirm it.
+    await service.logoutAll();
+    clearSession();
   };
 
   const switchRole = (targetRole: UserRole): boolean => {

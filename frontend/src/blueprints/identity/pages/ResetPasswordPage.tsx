@@ -50,8 +50,8 @@ export const ResetPasswordPage: React.FC = () => {
     setConfirmError('');
     setFormError('');
 
-    if (newPassword.length < 8) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 8 ký tự.');
+    if (newPassword.length < 12) {
+      setPasswordError('Mật khẩu mới phải có ít nhất 12 ký tự.');
       return;
     }
 
@@ -156,8 +156,8 @@ export const ResetPasswordPage: React.FC = () => {
                   if (passwordError) setPasswordError('');
                   if (formError) setFormError('');
                 }}
-                placeholder="Tối thiểu 8 ký tự"
-                helperText="Mật khẩu phải có độ dài tối thiểu 8 ký tự."
+                placeholder="Tối thiểu 12 ký tự"
+                helperText="Mật khẩu phải có độ dài tối thiểu 12 ký tự."
                 error={passwordError}
                 required
                 disabled={isSubmitting}

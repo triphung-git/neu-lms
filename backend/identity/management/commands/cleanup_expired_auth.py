@@ -12,6 +12,7 @@ class Command(BaseCommand):
             self.style.SUCCESS(
                 f"Successfully cleaned up auth data: "
                 f"{result['buckets_deleted']} rate-limit bucket(s) deleted, "
-                f"{result['tokens_deleted']} reset token(s) deleted."
+                f"{result['tokens_deleted']} reset token(s) deleted, "
+                f"{result.get('verification_tokens_deleted', 0)} verification token(s) deleted."
             )
         )

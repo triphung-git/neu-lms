@@ -36,7 +36,7 @@ export const AdminLayout: React.FC = () => {
   const navLinks = [
     { to: '/ad', label: 'Vận hành tổng quan', icon: <ShieldCheck size={18} />, end: true },
     { to: '/ad/tai-khoan', label: 'Tài khoản người dùng', icon: <Users size={18} /> },
-    { to: '/ad/email-hop-le', label: 'Email hợp lệ', icon: <MailCheck size={18} /> },
+    { to: '/ad/duyet-giang-vien', label: 'Duyệt giảng viên', icon: <MailCheck size={18} /> },
     { to: '/ad/mon-hoc', label: 'Danh mục môn học', icon: <BookMarked size={18} /> },
     { to: '/ad/nhat-ky', label: 'Nhật ký hoạt động', icon: <FileText size={18} /> },
     { to: '/ad/cau-hinh', label: 'Cấu hình hệ thống', icon: <Sliders size={18} /> },

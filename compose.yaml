@@ -76,6 +76,26 @@ services:
       retries: 6
       start_period: 10s
 
+  auth-dispatcher:
+    build:
+      context: ./backend
+      target: runtime
+    command: ["python", "manage.py", "dispatch_auth_emails", "--daemon", "--poll-interval", "2"]
+    env_file: .env
+    environment:
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      PGHOST: postgres
+      PGPORT: "5432"
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+
 volumes:
   postgres-data:
   redis-data:
