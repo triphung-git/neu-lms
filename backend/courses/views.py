@@ -1,6 +1,5 @@
 from django.db import IntegrityError, transaction
 from django.db.models import Q
-
 from rest_framework import mixins, viewsets
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
@@ -39,9 +38,7 @@ class CourseViewSet(
         if not user or not user.is_authenticated:
             return Course.objects.none()
 
-        queryset = Course.objects.select_related(
-            "teacher"
-        ).order_by("-created_at", "id")
+        queryset = Course.objects.select_related("teacher").order_by("-created_at", "id")
 
         # Admin được xem toàn bộ môn học.
         if has_role(user, Role.ADMIN):
@@ -68,9 +65,7 @@ class CourseViewSet(
         user = self.request.user
 
         if not has_role(user, Role.TEACHER):
-            raise PermissionDenied(
-                "Bạn cần vai trò giảng viên để tạo môn học."
-            )
+            raise PermissionDenied("Bạn cần vai trò giảng viên để tạo môn học.")
 
         try:
             with transaction.atomic():
@@ -79,10 +74,5 @@ class CourseViewSet(
         except IntegrityError as exc:
             # Xử lý trường hợp hai yêu cầu cùng tạo một mã môn.
             raise ValidationError(
-                {
-                    "code": [
-                        "Không thể tạo môn học với mã này. "
-                        "Hãy kiểm tra mã môn đã tồn tại."
-                    ]
-                }
+                {"code": ["Không thể tạo môn học với mã này. Hãy kiểm tra mã môn đã tồn tại."]}
             ) from exc

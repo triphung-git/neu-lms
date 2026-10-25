@@ -43,8 +43,6 @@ class CourseSerializer(serializers.ModelSerializer):
             queryset = queryset.exclude(pk=self.instance.pk)
 
         if queryset.exists():
-            raise serializers.ValidationError(
-                "Mã môn học đã tồn tại."
-            )
+            raise serializers.ValidationError("Mã môn học đã tồn tại.")
 
         return code
