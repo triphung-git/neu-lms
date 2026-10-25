@@ -1,10 +1,11 @@
-from django.urls import path
+from django.urls import include, path
 from drf_spectacular.views import SpectacularJSONAPIView
 
 from health.views import LivenessView, ReadinessView
 from identity import views as auth_views
 
 urlpatterns = [
+    path("api/v1/", include("courses.urls")),
     path("api/v1/auth/csrf", auth_views.CsrfView.as_view()),
     path("api/v1/auth/login", auth_views.LoginView.as_view()),
     path("api/v1/auth/me", auth_views.MeView.as_view()),
