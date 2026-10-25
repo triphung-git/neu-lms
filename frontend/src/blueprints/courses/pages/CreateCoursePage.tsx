@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
 import { useNotifications } from '../../../app/providers/NotificationContext';
+import { coursesService } from '../../../api/coursesService';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { TextField, TextAreaField } from '../../../shared/ui/TextField';
 import { Button } from '../../../shared/ui/Button';
@@ -11,8 +10,6 @@ import { Info } from 'lucide-react';
 import './CreateCoursePage.css';
 
 export const CreateCoursePage: React.FC = () => {
-  const { courses, createCourse } = useDatabase();
-  const { currentUser } = useSession();
   const { showNotification } = useNotifications();
   const navigate = useNavigate();
 
@@ -28,7 +25,7 @@ export const CreateCoursePage: React.FC = () => {
     setCode(val.toUpperCase().replace(/\s+/g, ''));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
 
@@ -49,40 +46,20 @@ export const CreateCoursePage: React.FC = () => {
       return;
     }
 
-    // Check duplicate code
-    const isDuplicate = courses.some(
-      c => c.code.toLowerCase() === trimmedCode.toLowerCase()
-    );
-    if (isDuplicate) {
-      setErrorMsg(`Mã môn học "${trimmedCode}" đã tồn tại trên hệ thống. Vui lòng chọn mã khác.`);
-      return;
-    }
-
-    if (!currentUser) {
-      setErrorMsg('Phiên đăng nhập không hợp lệ.');
-      return;
-    }
-
     setIsSubmitting(true);
-    const newCourseId = `course-${Date.now()}`;
-    const result = createCourse({
-      id: newCourseId,
-      code: trimmedCode,
-      name: trimmedName,
-      term: trimmedTerm,
-      description: description.trim(),
-      teacherId: currentUser.id,
-      teacherName: currentUser.fullName,
-      status: 'open'
-    });
-
-    setIsSubmitting(false);
-
-    if (result.ok) {
+    try {
+      const course = await coursesService.create({
+        code: trimmedCode,
+        name: trimmedName,
+        term: trimmedTerm,
+        description: description.trim(),
+      });
       showNotification('success', `Đã tạo môn học "${trimmedName}" thành công.`);
-      navigate(`/gv/mon-hoc/${newCourseId}`);
-    } else {
-      setErrorMsg(result.error?.message || 'Không thể tạo môn học.');
+      navigate(`/gv/mon-hoc/${course.id}`);
+    } catch (error) {
+      setErrorMsg(error instanceof Error ? error.message : 'Không thể tạo môn học.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

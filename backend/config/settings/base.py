@@ -24,6 +24,7 @@ INSTALLED_APPS = [
     "health",
     "identity",
     "platform_core",
+    "courses",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []

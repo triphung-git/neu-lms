@@ -428,6 +428,63 @@
                 }
             }
         },
+        "/api/v1/admin/courses/{course_id}/transfer": {
+            "post": {
+                "operationId": "admin_courses_transfer_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseTransferRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/admin/grants/{grant_id}/revoke": {
             "post": {
                 "operationId": "admin_grants_revoke_create",
@@ -1273,6 +1330,903 @@
                 }
             }
         },
+        "/api/v1/courses": {
+            "get": {
+                "operationId": "courses_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "enrollment_open",
+                        "schema": {
+                            "type": "boolean"
+                        },
+                        "description": "Filter enrollment availability"
+                    },
+                    {
+                        "name": "page",
+                        "required": false,
+                        "in": "query",
+                        "description": "A page number within the paginated result set.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "required": false,
+                        "in": "query",
+                        "description": "Number of results to return per page.",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Search by course code, name, term or teacher"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by open or archived status"
+                    },
+                    {
+                        "in": "query",
+                        "name": "term",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Filter by academic term"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCourseList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_create",
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters": {
+            "get": {
+                "operationId": "courses_chapters_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Chapter"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_chapters_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Chapter"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}": {
+            "patch": {
+                "operationId": "courses_chapters_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedChapterRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Chapter"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_chapters_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons": {
+            "get": {
+                "operationId": "courses_chapters_lessons_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_chapters_lessons_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/LessonRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/{lesson_id}": {
+            "patch": {
+                "operationId": "courses_chapters_lessons_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedLessonRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Lesson"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_chapters_lessons_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "lesson_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/reorder": {
+            "post": {
+                "operationId": "courses_chapters_lessons_reorder_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Lesson"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/chapters/reorder": {
+            "post": {
+                "operationId": "courses_chapters_reorder_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ReorderRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Chapter"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}": {
+            "get": {
+                "operationId": "courses_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "courses_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "courses_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{id}/archive": {
+            "post": {
+                "operationId": "courses_archive_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "A UUID string identifying this course.",
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/health/live": {
             "get": {
                 "operationId": "get_health_live",
@@ -1745,6 +2699,190 @@
                     "user_id"
                 ]
             },
+            "Chapter": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "position": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course",
+                    "created_at",
+                    "id",
+                    "position",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "ChapterRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "Course": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 40
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "term": {
+                        "type": "string",
+                        "maxLength": 80
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "teacher": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "teacher_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CourseStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    },
+                    "archived_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "active_member_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "default": 0
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "active_member_count",
+                    "archived_at",
+                    "code",
+                    "created_at",
+                    "id",
+                    "name",
+                    "status",
+                    "teacher",
+                    "teacher_name",
+                    "term",
+                    "updated_at"
+                ]
+            },
+            "CourseRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "term": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "code",
+                    "name",
+                    "term"
+                ]
+            },
+            "CourseStatusEnum": {
+                "enum": [
+                    "open",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `open` - Đang mở\n* `archived` - Đã lưu trữ"
+            },
+            "CourseTransferRequest": {
+                "type": "object",
+                "properties": {
+                    "teacher_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "teacher_id"
+                ]
+            },
             "CreateRoleRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -1833,6 +2971,66 @@
                         }
                     }
                 }
+            },
+            "Lesson": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "chapter": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "chapter",
+                    "created_at",
+                    "id",
+                    "position",
+                    "title",
+                    "updated_at"
+                ]
+            },
+            "LessonRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "title"
+                ]
             },
             "LivenessResponse": {
                 "type": "object",
@@ -1947,6 +3145,58 @@
                     }
                 }
             },
+            "PaginatedCourseList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Course"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
             "PasswordChangeRequest": {
                 "type": "object",
                 "properties": {
@@ -1967,6 +3217,55 @@
                     "current_password",
                     "new_password"
                 ]
+            },
+            "PatchedChapterRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    }
+                }
+            },
+            "PatchedCourseRequest": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 40
+                    },
+                    "name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "term": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "PatchedLessonRequest": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
             },
             "ReadinessSuccessResponse": {
                 "type": "object",
@@ -2061,6 +3360,21 @@
                     "email",
                     "id",
                     "requested_role"
+                ]
+            },
+            "ReorderRequest": {
+                "type": "object",
+                "properties": {
+                    "ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "ids"
                 ]
             },
             "RequestableRoleEnum": {

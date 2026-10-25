@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/courses/{course_id}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_courses_transfer_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/grants/{grant_id}/revoke": {
         parameters: {
             query?: never;
@@ -484,6 +500,150 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_list"];
+        put?: never;
+        post: operations["courses_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_chapters_list"];
+        put?: never;
+        post: operations["courses_chapters_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["courses_chapters_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_chapters_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_chapters_lessons_list"];
+        put?: never;
+        post: operations["courses_chapters_lessons_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["courses_chapters_lessons_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_chapters_lessons_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_chapters_lessons_reorder_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_chapters_reorder_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_retrieve"];
+        put: operations["courses_update"];
+        post?: never;
+        delete: operations["courses_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_archive_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/health/live": {
         parameters: {
             query?: never;
@@ -658,6 +818,59 @@ export interface components {
             /** @default  */
             review_reason: string;
         };
+        Chapter: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course: string;
+            title: string;
+            readonly position: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ChapterRequest: {
+            title: string;
+        };
+        Course: {
+            /** Format: uuid */
+            readonly id: string;
+            code: string;
+            name: string;
+            term: string;
+            description?: string;
+            /** Format: uuid */
+            readonly teacher: string;
+            readonly teacher_name: string;
+            readonly status: components["schemas"]["CourseStatusEnum"];
+            enrollment_open?: boolean;
+            /** Format: date-time */
+            readonly archived_at: string | null;
+            /** @default 0 */
+            readonly active_member_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        CourseRequest: {
+            code: string;
+            name: string;
+            term: string;
+            description?: string;
+            enrollment_open?: boolean;
+        };
+        /**
+         * @description * `open` - Đang mở
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        CourseStatusEnum: "open" | "archived";
+        CourseTransferRequest: {
+            /** Format: uuid */
+            teacher_id: string;
+        };
         CreateRoleRequestRequest: {
             role: components["schemas"]["RequestableRoleEnum"];
         };
@@ -694,6 +907,23 @@ export interface components {
                  */
                 correlation_id: string;
             };
+        };
+        Lesson: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly chapter: string;
+            title: string;
+            description?: string;
+            readonly position: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        LessonRequest: {
+            title: string;
+            description?: string;
         };
         LivenessResponse: {
             /** @default ok */
@@ -733,9 +963,40 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        PaginatedCourseList: {
+            items: components["schemas"]["Course"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
         PasswordChangeRequest: {
             current_password: string;
             new_password: string;
+        };
+        PatchedChapterRequest: {
+            title?: string;
+        };
+        PatchedCourseRequest: {
+            code?: string;
+            name?: string;
+            term?: string;
+            description?: string;
+            enrollment_open?: boolean;
+        };
+        PatchedLessonRequest: {
+            title?: string;
+            description?: string;
         };
         ReadinessSuccessResponse: {
             /** @default ok */
@@ -768,6 +1029,9 @@ export interface components {
             requested_role: components["schemas"]["RequestableRoleEnum"];
             /** @default false */
             email_verified: boolean;
+        };
+        ReorderRequest: {
+            ids: string[];
         };
         /**
          * @description * `student` - student
@@ -1061,6 +1325,33 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminAccountStateResponse"];
+                };
+            };
+        };
+    };
+    admin_courses_transfer_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseTransferRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseTransferRequest"];
+                "multipart/form-data": components["schemas"]["CourseTransferRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
                 };
             };
         };
@@ -1575,6 +1866,437 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["VerifyEmailResponse"];
+                };
+            };
+        };
+    };
+    courses_list: {
+        parameters: {
+            query?: {
+                /** @description Filter enrollment availability */
+                enrollment_open?: boolean;
+                /** @description A page number within the paginated result set. */
+                page?: number;
+                /** @description Number of results to return per page. */
+                page_size?: number;
+                /** @description Search by course code, name, term or teacher */
+                search?: string;
+                /** @description Filter by open or archived status */
+                status?: string;
+                /** @description Filter by academic term */
+                term?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseList"];
+                };
+            };
+        };
+    };
+    courses_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseRequest"];
+                "multipart/form-data": components["schemas"]["CourseRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_chapters_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"][];
+                };
+            };
+        };
+    };
+    courses_chapters_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChapterRequest"];
+                "multipart/form-data": components["schemas"]["ChapterRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+        };
+    };
+    courses_chapters_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_chapters_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChapterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedChapterRequest"];
+                "multipart/form-data": components["schemas"]["PatchedChapterRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"][];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LessonRequest"];
+                "multipart/form-data": components["schemas"]["LessonRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_chapters_lessons_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLessonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLessonRequest"];
+                "multipart/form-data": components["schemas"]["PatchedLessonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_reorder_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
+                "multipart/form-data": components["schemas"]["ReorderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"][];
+                };
+            };
+        };
+    };
+    courses_chapters_reorder_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
+                "multipart/form-data": components["schemas"]["ReorderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"][];
+                };
+            };
+        };
+    };
+    courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this course. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this course. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseRequest"];
+                "multipart/form-data": components["schemas"]["CourseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this course. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this course. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCourseRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCourseRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCourseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_archive_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description A UUID string identifying this course. */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
                 };
             };
         };
