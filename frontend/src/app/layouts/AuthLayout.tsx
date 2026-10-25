@@ -25,7 +25,7 @@ export const AuthLayout: React.FC = () => {
           <Outlet />
         </main>
         <footer className="auth-footer">
-          <p>Dữ liệu minh họa phiên bản 2.0</p>
+          <p>NEU LMS — Tài khoản học tập</p>
           <Link to="/" className="auth-back-link">
             ← Quay lại trang chủ
           </Link>

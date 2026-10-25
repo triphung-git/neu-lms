@@ -672,19 +672,25 @@ describe('B03.6 - Identity Pages, Open Redirect Defense & Session Invalidation',
   });
 
   // =========================================================================
-  // 6. RegisterPage Status Boundary
+  // 6. RegisterPage Form Rendering
   // =========================================================================
-  describe('RegisterPage Status Boundary', () => {
-    it('informs user that self-registration API is pending B04/B13 and prevents mock user creation', () => {
+  describe('RegisterPage Form Rendering', () => {
+    it('renders real registration form with student/teacher role choice, email and password inputs', () => {
       render(
         <MemoryRouter initialEntries={['/dang-ky']}>
           <RegisterPage />
         </MemoryRouter>
       );
 
-      expect(screen.getByText(/tính năng tự đăng ký trực tuyến đang phát triển/i)).toBeDefined();
-      expect(screen.getByText(/không cho phép tạo tài khoản thử nghiệm cục bộ/i)).toBeDefined();
-      expect(screen.getByRole('link', { name: /đã có tài khoản được cấp — đăng nhập ngay/i })).toBeDefined();
+      expect(screen.getByRole('heading', { level: 1, name: /đăng ký tài khoản/i })).toBeDefined();
+      expect(screen.getByRole('radio', { name: /sinh viên/i })).toBeDefined();
+      expect(screen.getByRole('radio', { name: /giảng viên/i })).toBeDefined();
+      expect(screen.getByLabelText(/họ và tên/i)).toBeDefined();
+      expect(screen.getByLabelText(/địa chỉ email/i)).toBeDefined();
+      expect(screen.getByLabelText(/^mật khẩu/i)).toBeDefined();
+      expect(screen.getByLabelText(/xác nhận mật khẩu/i)).toBeDefined();
+      expect(screen.getByRole('button', { name: /tạo tài khoản/i })).toBeDefined();
+      expect(screen.getByRole('link', { name: /đăng nhập ngay/i })).toBeDefined();
     });
   });
 });

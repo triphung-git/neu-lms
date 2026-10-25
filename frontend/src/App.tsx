@@ -20,7 +20,14 @@ import { AdminLayout } from './app/layouts/AdminLayout';
 import { HomePage, FeaturesPage, GuidePage, NotFoundPage } from './blueprints/public';
 
 // Blueprints - Identity (P04, P05, C01)
-import { LoginPage, RegisterPage, ProfilePage, ForgotPasswordPage, ResetPasswordPage } from './blueprints/identity';
+import {
+  LoginPage,
+  RegisterPage,
+  ProfilePage,
+  ForgotPasswordPage,
+  ResetPasswordPage,
+  VerifyEmailPage,
+} from './blueprints/identity';
 
 // Blueprints - Dashboards (S01, T01, A01)
 import { StudentDashboardPage, TeacherDashboardPage, AdminDashboardPage } from './blueprints/dashboards';
@@ -108,6 +115,8 @@ export const App: React.FC = () => {
                   <Route path="quen-mat-khau" element={<ForgotPasswordPage />} />
                   <Route path="reset-password" element={<ResetPasswordPage />} />
                   <Route path="dat-lai-mat-khau" element={<ResetPasswordPage />} />
+                  <Route path="verify-email" element={<VerifyEmailPage />} />
+                  <Route path="xac-minh-email" element={<VerifyEmailPage />} />
                 </Route>
 
                 {/* Student Workspace (S01 - S08) */}
@@ -171,6 +180,7 @@ export const App: React.FC = () => {
                 >
                   <Route index element={<AdminDashboardPage />} />
                   <Route path="email-hop-le" element={<AdminEligibleEmailsPage />} />
+                  <Route path="duyet-giang-vien" element={<AdminEligibleEmailsPage />} />
                   <Route path="tai-khoan" element={<AdminAccountsPage />} />
                   <Route path="tai-khoan/:taiKhoanId" element={<AdminAccountDetailPage />} />
                   <Route path="mon-hoc" element={<AdminCoursesPage />} />

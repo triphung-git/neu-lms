@@ -7,7 +7,7 @@ from django.core.exceptions import ImproperlyConfigured
 from config.environment import csv_values, required
 
 from .base import *  # noqa: F403
-from .base import DATABASES, SECRET_KEY
+from .base import DATABASES, SECRET_KEY, validate_origin
 
 if len(SECRET_KEY) < 50 or len(set(SECRET_KEY)) < 5 or SECRET_KEY.startswith("dev-"):
     raise ImproperlyConfigured("Production requires a strong, dedicated DJANGO_SECRET_KEY.")
@@ -52,3 +52,9 @@ CSRF_COOKIE_SECURE = True
 if os.environ.get("DJANGO_BEHIND_TRUSTED_PROXY", "false").lower() in ("true", "1", "yes"):
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     USE_X_FORWARDED_HOST = True
+
+PUBLIC_APP_ORIGIN = validate_origin(os.environ.get("PUBLIC_APP_ORIGIN", "https://lms.neu.edu.vn"))
+if not PUBLIC_APP_ORIGIN.startswith("https://"):
+    raise ImproperlyConfigured(
+        f"Production requires HTTPS for PUBLIC_APP_ORIGIN, got '{PUBLIC_APP_ORIGIN}'."
+    )

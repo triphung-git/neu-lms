@@ -42,6 +42,18 @@ def test_production_deployment_checks_pass():
         ({"PGPASSWORD": ""}, "PGPASSWORD"),
         ({"PGSSLROOTCERT": ""}, "PGSSLROOTCERT"),
         ({"PGSSLROOTCERT": "/non-existent/ca.crt"}, "Database CA root certificate not found"),
+        (
+            {"PUBLIC_APP_ORIGIN": "http://insecure.example.com"},
+            "Production requires HTTPS for PUBLIC_APP_ORIGIN",
+        ),
+        (
+            {"PUBLIC_APP_ORIGIN": "ftp://invalid-scheme.example.com"},
+            "PUBLIC_APP_ORIGIN scheme must be http or https",
+        ),
+        (
+            {"PUBLIC_APP_ORIGIN": "https://lms.example.test/some/path"},
+            "PUBLIC_APP_ORIGIN must not contain path",
+        ),
     ],
 )
 def test_production_rejects_incomplete_or_unsafe_configuration(overrides, expected):
