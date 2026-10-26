@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { coursesService, type Course } from '../../../api/coursesService';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
@@ -32,7 +32,10 @@ export const TeacherCoursesPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
+  const loadSequence = useRef(0);
+
   const loadCourses = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -41,6 +44,7 @@ export const TeacherCoursesPage: React.FC = () => {
         coursesService.list({ status: 'open', page: 1, page_size: 1 }),
         coursesService.list({ status: 'archived', page: 1, page_size: 1 }),
       ]);
+      if (sequence !== loadSequence.current) return;
       setCourses(result.items);
       setPageInfo({
         page: result.pagination.page,
@@ -52,14 +56,16 @@ export const TeacherCoursesPage: React.FC = () => {
         archived: archivedCount.pagination.total_items,
       });
     } catch (cause) {
+      if (sequence !== loadSequence.current) return;
       setError(cause instanceof Error ? cause.message : 'Không thể tải danh sách môn học.');
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [activeTab, page]);
 
   useEffect(() => {
     void loadCourses();
+    return () => { loadSequence.current += 1; };
   }, [loadCourses]);
 
   const chooseTab = (tab: CourseStatus) => {
@@ -119,7 +125,7 @@ export const TeacherCoursesPage: React.FC = () => {
 
       {isLoading ? (
         <LoadingSkeleton lines={5} />
-      ) : courses.length === 0 ? (
+      ) : error ? null : courses.length === 0 ? (
         activeTab === 'open' ? (
           <EmptyState
             title="Chưa có môn học nào đang mở"

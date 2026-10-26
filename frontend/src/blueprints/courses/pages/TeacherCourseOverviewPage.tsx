@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { coursesService, type Course } from '../../../api/coursesService';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
@@ -18,6 +18,8 @@ export const TeacherCourseOverviewPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadSequence = useRef(0);
+
   const loadCourse = useCallback(async () => {
     if (!monId) {
       setError('Thiếu mã môn học.');
@@ -25,6 +27,7 @@ export const TeacherCourseOverviewPage: React.FC = () => {
       return;
     }
 
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -35,18 +38,21 @@ export const TeacherCourseOverviewPage: React.FC = () => {
       const lessonLists = await Promise.all(
         chapterData.map((chapter) => coursesService.listLessons(monId, chapter.id)),
       );
+      if (sequence !== loadSequence.current) return;
       setCourse(courseData);
       setChapterCount(chapterData.length);
       setLessonCount(lessonLists.reduce((total, lessons) => total + lessons.length, 0));
     } catch (cause) {
+      if (sequence !== loadSequence.current) return;
       setError(cause instanceof Error ? cause.message : 'Không thể tải thông tin môn học.');
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [monId]);
 
   useEffect(() => {
     void loadCourse();
+    return () => { loadSequence.current += 1; };
   }, [loadCourse]);
 
   if (isLoading) return <LoadingSkeleton lines={6} />;

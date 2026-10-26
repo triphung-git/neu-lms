@@ -2185,7 +2185,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;
@@ -2207,7 +2206,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;
@@ -2235,7 +2233,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;
@@ -2256,7 +2253,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;
@@ -2284,7 +2280,6 @@ export interface operations {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;

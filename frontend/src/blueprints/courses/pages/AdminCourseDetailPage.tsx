@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { adminService, type AdminAccountListItem } from '../../../api/adminService';
 import {
@@ -37,6 +37,8 @@ export const AdminCourseDetailPage: React.FC = () => {
   const [selectedTeacherId, setSelectedTeacherId] = useState('');
   const activeTab = searchParams.get('tab') === 'cau-truc' ? 'cau-truc' : 'tong-quan';
 
+  const loadSequence = useRef(0);
+
   const loadData = useCallback(async () => {
     if (!monId) {
       setError('Thiếu mã môn học.');
@@ -44,6 +46,7 @@ export const AdminCourseDetailPage: React.FC = () => {
       return;
     }
 
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -61,6 +64,7 @@ export const AdminCourseDetailPage: React.FC = () => {
       const lessons = await Promise.all(
         chapterData.map((chapter) => coursesService.listLessons(monId, chapter.id)),
       );
+      if (sequence !== loadSequence.current) return;
       setCourse(courseData);
       setChapters(
         chapterData.map((chapter, index) => ({ ...chapter, lessons: lessons[index] })),
@@ -77,16 +81,19 @@ export const AdminCourseDetailPage: React.FC = () => {
         });
         teacherAccounts.push(...nextPage.items);
       }
+      if (sequence !== loadSequence.current) return;
       setTeachers(teacherAccounts);
     } catch (cause) {
+      if (sequence !== loadSequence.current) return;
       setError(cause instanceof Error ? cause.message : 'Không thể tải thông tin môn học.');
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [monId]);
 
   useEffect(() => {
     void loadData();
+    return () => { loadSequence.current += 1; };
   }, [loadData]);
 
   const handleTransfer = async (event: React.FormEvent) => {

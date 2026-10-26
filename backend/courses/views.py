@@ -37,6 +37,7 @@ def visible_course_queryset(user):
         active_member_count=Count(
             "memberships",
             filter=Q(memberships__status=Membership.Status.ACTIVE),
+            distinct=True,
         )
     )
 
@@ -97,6 +98,9 @@ class CourseViewSet(
 ):
     serializer_class = CourseSerializer
     permission_classes = [IsAuthenticated]
+    lookup_value_regex = (
+        "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}"
+    )
     http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     def get_queryset(self):
@@ -177,6 +181,7 @@ class CourseViewSet(
     def archive(self, request, pk=None):
         course = self.get_object()
         course = archive_course(request.user, course.id)
+        course = visible_course_queryset(request.user).get(pk=course.id)
         return Response(self.get_serializer(course).data)
 
 

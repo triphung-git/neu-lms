@@ -1,14 +1,17 @@
 import itertools
 import json
 import uuid
+from concurrent.futures import ThreadPoolExecutor
+from threading import Barrier
 
 import pytest
 from django.conf import settings
+from django.db import close_old_connections
 from django.test import Client
 from django.utils import timezone
 from rest_framework import status
 
-from courses.models import Chapter, Course, Membership
+from courses.models import Chapter, Course, Lesson, Membership
 from identity.models import Role, RoleGrant, RoleRequest
 from identity.services.accounts import confirm_email, create_account
 from identity.services.sessions import issue_session
@@ -307,3 +310,252 @@ class TestCourseApi:
         blocked = api_client(teacher).api_request("delete", f"/api/v1/courses/{course.id}")
         assert blocked.status_code == status.HTTP_400_BAD_REQUEST
         assert Course.objects.filter(pk=course.id).exists()
+
+
+@pytest.mark.django_db
+class TestCourseAcceptance:
+    def test_invalid_course_id_returns_404(self, make_user, api_client):
+        client = api_client(make_user(Role.TEACHER))
+        for suffix in ("", "/archive"):
+            response = client.api_request(
+                "get" if not suffix else "post", f"/api/v1/courses/not-a-uuid{suffix}"
+            )
+            assert response.status_code == 404
+
+    def test_multirole_owner_member_count_is_not_multiplied(self, make_user, api_client):
+        owner = make_user(Role.TEACHER)
+        student_request = RoleRequest.objects.create(
+            user=owner,
+            role=Role.STUDENT,
+            status="approved",
+            reviewed_by=owner,
+            reviewed_at=timezone.now(),
+            review_reason="course_test",
+        )
+        RoleGrant.objects.create(
+            user=owner,
+            role=Role.STUDENT,
+            grant_source="verified_student_email",
+            source_request=student_request,
+        )
+        course = create_course(owner)
+        for _ in range(3):
+            Membership.objects.create(course=course, student=make_user(Role.STUDENT))
+        client = api_client(owner)
+        assert client.get(f"/api/v1/courses/{course.id}").json()["active_member_count"] == 3
+        response = client.api_request("post", f"/api/v1/courses/{course.id}/archive")
+        assert response.status_code == 200
+        assert response.json()["active_member_count"] == 3
+
+    def test_foreign_owner_student_and_admin_cannot_edit_content(self, make_user, api_client):
+        course = create_course(make_user(Role.TEACHER))
+        chapter = Chapter.objects.create(course=course, title="Chapter", position=1)
+        lesson = Lesson.objects.create(chapter=chapter, title="Lesson", position=1)
+        base = f"/api/v1/courses/{course.id}"
+        for role in (Role.TEACHER, Role.STUDENT, Role.ADMIN):
+            user = make_user(role)
+            if role == Role.STUDENT:
+                Membership.objects.create(course=course, student=user)
+            client = api_client(user)
+            for method, url, body in [
+                ("patch", base, {"name": "Forbidden"}),
+                ("delete", base, None),
+                ("post", f"{base}/chapters", {"title": "Forbidden"}),
+                ("patch", f"{base}/chapters/{chapter.id}", {"title": "Forbidden"}),
+                ("delete", f"{base}/chapters/{chapter.id}", None),
+                ("post", f"{base}/chapters/reorder", {"ids": [str(chapter.id)]}),
+                ("post", f"{base}/chapters/{chapter.id}/lessons", {"title": "Forbidden"}),
+                (
+                    "patch",
+                    f"{base}/chapters/{chapter.id}/lessons/{lesson.id}",
+                    {"title": "Forbidden"},
+                ),
+                ("delete", f"{base}/chapters/{chapter.id}/lessons/{lesson.id}", None),
+                (
+                    "post",
+                    f"{base}/chapters/{chapter.id}/lessons/reorder",
+                    {"ids": [str(lesson.id)]},
+                ),
+            ]:
+                assert client.api_request(method, url, body).status_code in (403, 404)
+        course.refresh_from_db()
+        chapter.refresh_from_db()
+        lesson.refresh_from_db()
+        assert course.name != "Forbidden"
+        assert chapter.title == "Chapter" and lesson.title == "Lesson"
+
+    def test_course_mutations_require_csrf(self, make_user, api_client):
+        owner = make_user(Role.TEACHER)
+        course = create_course(owner)
+        client = api_client(owner)
+        for method, url in [
+            ("post", "/api/v1/courses"),
+            ("patch", f"/api/v1/courses/{course.id}"),
+            ("delete", f"/api/v1/courses/{course.id}"),
+            ("post", f"/api/v1/courses/{course.id}/archive"),
+            ("post", f"/api/v1/courses/{course.id}/chapters"),
+        ]:
+            response = getattr(client, method)(url, data="{}", content_type="application/json")
+            assert response.status_code == 403
+        course.refresh_from_db()
+        assert course.status == "open"
+
+    def test_reorder_rejects_missing_duplicate_and_foreign_ids_atomically(
+        self, make_user, api_client
+    ):
+        owner = make_user(Role.TEACHER)
+        course = create_course(owner)
+        client = api_client(owner)
+        chapters = [
+            Chapter.objects.create(course=course, title=f"Chapter {i}", position=i) for i in (1, 2)
+        ]
+        foreign = Chapter.objects.create(course=create_course(owner), title="Other", position=1)
+        lessons = [
+            Lesson.objects.create(chapter=chapters[0], title=f"Lesson {i}", position=i)
+            for i in (1, 2)
+        ]
+        for url, objects, foreign_id in [
+            (f"/api/v1/courses/{course.id}/chapters/reorder", chapters, foreign.id),
+            (
+                f"/api/v1/courses/{course.id}/chapters/{chapters[0].id}/lessons/reorder",
+                lessons,
+                uuid.uuid4(),
+            ),
+        ]:
+            for ids in (
+                [],
+                [objects[0].id],
+                [objects[0].id, objects[0].id],
+                [objects[0].id, foreign_id],
+            ):
+                response = client.api_request("post", url, {"ids": [str(item) for item in ids]})
+                assert response.status_code == 400
+                for obj in objects:
+                    obj.refresh_from_db()
+                assert [obj.position for obj in objects] == [1, 2]
+            response = client.api_request(
+                "post", url, {"ids": [str(obj.id) for obj in reversed(objects)]}
+            )
+            assert response.status_code == 200
+            assert [item["id"] for item in response.json()] == [
+                str(obj.id) for obj in reversed(objects)
+            ]
+
+    def test_transfer_revokes_previous_owner_and_archived_mutations_are_blocked(
+        self, make_user, api_client
+    ):
+        admin = make_user(Role.ADMIN)
+        old = make_user(Role.TEACHER)
+        new = make_user(Role.TEACHER)
+        course = create_course(old)
+        client = api_client(admin)
+        base = f"/api/v1/courses/{course.id}"
+        assert (
+            client.api_request(
+                "post", f"/api/v1/admin/courses/{course.id}/transfer", {"teacher_id": str(new.id)}
+            ).status_code
+            == 200
+        )
+        assert api_client(old).get(base).status_code == 404
+        new_client = api_client(new)
+        assert new_client.api_request("patch", base, {"name": "New owner"}).status_code == 200
+        assert client.api_request("post", f"{base}/archive").status_code == 200
+        assert (
+            client.api_request(
+                "post", f"/api/v1/admin/courses/{course.id}/transfer", {"teacher_id": str(old.id)}
+            ).status_code
+            == 400
+        )
+        for method in ("patch", "delete"):
+            assert (
+                new_client.api_request(
+                    method, base, {"enrollment_open": True} if method == "patch" else None
+                ).status_code
+                == 403
+            )
+        assert new_client.get(base).status_code == 200
+
+    def test_case_insensitive_unique_code_and_empty_course_deletion(self, make_user, api_client):
+        owner = make_user(Role.TEACHER)
+        course = create_course(owner, code="SAME")
+        client = api_client(owner)
+        response = client.api_request(
+            "post", "/api/v1/courses", {"code": " same ", "name": "Duplicate", "term": "HK1"}
+        )
+        assert response.status_code == 400
+        assert client.api_request("delete", f"/api/v1/courses/{course.id}").status_code == 204
+        assert not Course.objects.filter(pk=course.id).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+class TestCourseConcurrency:
+    def test_concurrent_reorders_leave_one_complete_order(self, make_user):
+        from courses.services import reorder_chapters
+
+        owner = make_user(Role.TEACHER)
+        course = create_course(owner)
+        chapters = [
+            Chapter.objects.create(course=course, title=f"C{i}", position=i) for i in (1, 2, 3)
+        ]
+        ids = [chapter.id for chapter in chapters]
+        orders = [ids[::-1], [ids[1], ids[2], ids[0]]]
+        barrier = Barrier(2)
+
+        def run(order):
+            close_old_connections()
+            try:
+                barrier.wait(timeout=10)
+                return [chapter.id for chapter in reorder_chapters(owner, course.id, order)]
+            finally:
+                close_old_connections()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(run, orders))
+        assert results == orders
+        final = list(
+            Chapter.objects.filter(course=course).order_by("position").values_list("id", flat=True)
+        )
+        assert final in orders
+        assert list(
+            Chapter.objects.filter(course=course)
+            .order_by("position")
+            .values_list("position", flat=True)
+        ) == [1, 2, 3]
+
+    def test_archive_and_reorder_serialize_without_partial_state(self, make_user):
+        from rest_framework.exceptions import PermissionDenied
+
+        from courses.services import archive_course, reorder_chapters
+
+        owner = make_user(Role.TEACHER)
+        course = create_course(owner, enrollment_open=True)
+        chapters = [
+            Chapter.objects.create(course=course, title=f"C{i}", position=i) for i in (1, 2)
+        ]
+        barrier = Barrier(2)
+
+        def run(action):
+            close_old_connections()
+            try:
+                barrier.wait(timeout=10)
+                if action == "archive":
+                    archive_course(owner, course.id)
+                    return "archived"
+                try:
+                    reorder_chapters(owner, course.id, [chapter.id for chapter in chapters[::-1]])
+                    return "reordered"
+                except PermissionDenied:
+                    return "blocked"
+            finally:
+                close_old_connections()
+
+        with ThreadPoolExecutor(max_workers=2) as pool:
+            results = list(pool.map(run, ["archive", "reorder"]))
+        assert results[0] == "archived" and results[1] in ("blocked", "reordered")
+        course.refresh_from_db()
+        assert course.status == "archived" and course.enrollment_open is False
+        assert list(
+            Chapter.objects.filter(course=course)
+            .order_by("position")
+            .values_list("position", flat=True)
+        ) == [1, 2]

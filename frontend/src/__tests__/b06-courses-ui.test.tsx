@@ -1,12 +1,13 @@
 import '@testing-library/jest-dom/vitest';
 import React from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { NotificationProvider } from '../app/providers/NotificationContext';
 import { AdminCoursesPage } from '../blueprints/courses/pages/AdminCoursesPage';
 import { CreateCoursePage } from '../blueprints/courses/pages/CreateCoursePage';
 import { CourseStructurePage } from '../blueprints/courses/pages/CourseStructurePage';
+import { CourseTeacherLayout } from '../app/layouts/CourseTeacherLayout';
 import { TeacherCoursesPage } from '../blueprints/courses/pages/TeacherCoursesPage';
 import { coursesService, type Chapter, type Course } from '../api/coursesService';
 
@@ -155,5 +156,53 @@ describe('B06 course management UI', () => {
         expect.objectContaining({ term: 'HK1-2026', page: 1, page_size: 20 }),
       ),
     );
+  });
+});
+
+
+describe('B06 acceptance regressions', () => {
+  it('keeps the latest admin filter results when an older request finishes later', async () => {
+    let resolveOld!: (value: typeof paginatedCourses) => void;
+    const oldResult = new Promise<typeof paginatedCourses>((resolve) => { resolveOld = resolve; });
+    vi.spyOn(coursesService, 'list').mockImplementation((params) =>
+      params?.search === 'new' ? Promise.resolve({ ...paginatedCourses, items: [{ ...sampleCourse, name: 'Newest result' }] }) : oldResult,
+    );
+    render(<MemoryRouter><AdminCoursesPage /></MemoryRouter>);
+    fireEvent.change(screen.getByRole('textbox', { name: 'Tìm kiếm' }), { target: { value: 'new' } });
+    expect(await screen.findByText('Newest result')).toBeInTheDocument();
+    await act(async () => { resolveOld(paginatedCourses); });
+    expect(screen.getByText('Newest result')).toBeInTheDocument();
+    expect(screen.queryByText(sampleCourse.name)).not.toBeInTheDocument();
+  });
+
+  it('does not present failed teacher fetches as an empty successful list', async () => {
+    vi.spyOn(coursesService, 'list').mockRejectedValue(new Error('Network unavailable'));
+    render(<MemoryRouter><TeacherCoursesPage /></MemoryRouter>);
+    expect(await screen.findByText('Network unavailable')).toBeInTheDocument();
+    expect(screen.queryByText('Chưa có môn học nào đang mở')).not.toBeInTheDocument();
+  });
+
+  it('refreshes the nested structure after archiving from the course header', async () => {
+    let current = sampleCourse;
+    vi.spyOn(coursesService, 'get').mockImplementation(async () => current);
+    vi.spyOn(coursesService, 'listChapters').mockResolvedValue([]);
+    vi.spyOn(coursesService, 'archive').mockImplementation(async () => {
+      current = { ...sampleCourse, status: 'archived', archived_at: '2026-10-26T00:00:00Z', updated_at: '2026-10-26T00:00:00Z' };
+      return current;
+    });
+    render(
+      <MemoryRouter initialEntries={[`/gv/mon-hoc/${sampleCourse.id}/cau-truc`]}>
+        <NotificationProvider><Routes>
+          <Route path="/gv/mon-hoc/:monId" element={<CourseTeacherLayout />}>
+            <Route path="cau-truc" element={<CourseStructurePage />} />
+          </Route>
+        </Routes></NotificationProvider>
+      </MemoryRouter>,
+    );
+    expect(await screen.findByRole('button', { name: 'Thêm chương mới' })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Lưu trữ môn' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Xác nhận Lưu trữ' }));
+    expect(await screen.findByText('Môn học đã lưu trữ: chế độ chỉ đọc, không thể thay đổi cấu trúc.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Thêm chương mới' })).not.toBeInTheDocument();
   });
 });
