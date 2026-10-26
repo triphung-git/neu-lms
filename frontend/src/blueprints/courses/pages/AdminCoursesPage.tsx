@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { coursesService, type Course } from '../../../api/coursesService';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
@@ -24,7 +24,10 @@ export const AdminCoursesPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const loadSequence = useRef(0);
+
   const loadCourses = useCallback(async () => {
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -35,18 +38,21 @@ export const AdminCoursesPage: React.FC = () => {
         page,
         page_size: 20,
       });
+      if (sequence !== loadSequence.current) return;
       setCourses(result.items);
       setTotalPages(result.pagination.total_pages);
       setTotalCourses(result.pagination.total_items);
     } catch (cause) {
+      if (sequence !== loadSequence.current) return;
       setError(cause instanceof Error ? cause.message : 'Không thể tải danh mục môn học.');
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [page, search, statusFilter, term]);
 
   useEffect(() => {
     void loadCourses();
+    return () => { loadSequence.current += 1; };
   }, [loadCourses]);
 
   const clearFilters = () => {
@@ -129,7 +135,7 @@ export const AdminCoursesPage: React.FC = () => {
 
       {isLoading ? (
         <LoadingSkeleton lines={6} />
-      ) : courses.length === 0 ? (
+      ) : error ? null : courses.length === 0 ? (
         <EmptyState
           title="Không tìm thấy môn học phù hợp"
           description="Không có môn học nào khớp với bộ lọc hiện tại."

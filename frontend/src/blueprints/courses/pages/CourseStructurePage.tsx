@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { coursesService, type Chapter, type Course, type Lesson } from '../../../api/coursesService';
 import { useNotifications } from '../../../app/providers/NotificationContext';
@@ -42,6 +42,8 @@ export const CourseStructurePage: React.FC = () => {
   const [lessonTitle, setLessonTitle] = useState('');
   const [lessonDescription, setLessonDescription] = useState('');
 
+  const loadSequence = useRef(0);
+
   const loadStructure = useCallback(async (): Promise<boolean> => {
     if (!monId) {
       setError('Thiếu mã môn học.');
@@ -49,6 +51,7 @@ export const CourseStructurePage: React.FC = () => {
       return false;
     }
 
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setError(null);
     try {
@@ -62,20 +65,23 @@ export const CourseStructurePage: React.FC = () => {
           await coursesService.listLessons(monId, chapter.id),
         ] as const),
       );
+      if (sequence !== loadSequence.current) return false;
       setCourse(courseData);
       setChapters(chapterData);
       setLessonsByChapter(Object.fromEntries(lessonEntries));
       return true;
     } catch (cause) {
+      if (sequence !== loadSequence.current) return false;
       setError(cause instanceof Error ? cause.message : 'Không thể tải cấu trúc môn học.');
       return false;
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [monId]);
 
   useEffect(() => {
     void loadStructure();
+    return () => { loadSequence.current += 1; };
   }, [loadStructure]);
 
   const orderedChapters = useMemo(

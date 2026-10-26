@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ApiError } from '../../api/client';
 import { coursesService, type Course } from '../../api/coursesService';
@@ -29,6 +29,8 @@ export const CourseTeacherLayout: React.FC = () => {
   const [courseTerm, setCourseTerm] = useState('');
   const [courseDescription, setCourseDescription] = useState('');
 
+  const loadSequence = useRef(0);
+
   const loadCourse = useCallback(async () => {
     if (!monId) {
       setLoadError('Thiếu mã môn học.');
@@ -36,12 +38,16 @@ export const CourseTeacherLayout: React.FC = () => {
       return;
     }
 
+    const sequence = ++loadSequence.current;
     setIsLoading(true);
     setLoadError(null);
     setIsNotFound(false);
     try {
-      setCourse(await coursesService.get(monId));
+      const result = await coursesService.get(monId);
+      if (sequence !== loadSequence.current) return;
+      setCourse(result);
     } catch (error) {
+      if (sequence !== loadSequence.current) return;
       setCourse(null);
       if (error instanceof ApiError && error.status === 404) {
         setIsNotFound(true);
@@ -49,12 +55,13 @@ export const CourseTeacherLayout: React.FC = () => {
         setLoadError(error instanceof Error ? error.message : 'Không thể tải thông tin môn học.');
       }
     } finally {
-      setIsLoading(false);
+      if (sequence === loadSequence.current) setIsLoading(false);
     }
   }, [monId]);
 
   useEffect(() => {
     void loadCourse();
+    return () => { loadSequence.current += 1; };
   }, [loadCourse]);
 
   const handleConfirmArchive = async () => {
@@ -231,7 +238,7 @@ export const CourseTeacherLayout: React.FC = () => {
             Môn học đã lưu trữ. Khu vực này chưa có chế độ xem lưu trữ khả dụng.
           </div>
         ) : (
-          <Outlet context={{ course, isArchived }} />
+          <Outlet key={`${course.id}:${course.updated_at}`} context={{ course, isArchived }} />
         )}
       </div>
 
