@@ -78,6 +78,11 @@ jobs:
           --health-interval 5s
           --health-timeout 5s
           --health-retries 5
+      mailpit:
+        image: axllent/mailpit:v1.27.8@sha256:6abc8e633df15eaf785cfcf38bae48e66f64beecdc03121e249d0f9ec15f0707
+        ports:
+          - 11025:1025
+          - 18025:8025
     env:
       PYTHONUTF8: '1'
       DJANGO_SETTINGS_MODULE: config.settings.local
