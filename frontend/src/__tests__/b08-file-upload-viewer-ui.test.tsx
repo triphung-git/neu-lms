@@ -627,10 +627,19 @@ describe('B08-06: UI Tích Hợp Upload, Quarantine Progress & Secure File Viewe
       const onSuccess = vi.fn();
       vi.spyOn(filesService, 'createUploadIntent').mockResolvedValue({ file_id: 'pending-id', file_name: 'pending.pdf', file_size: 10, storage_path: 'q/pending', status: 'quarantine_pending', expires_in_seconds: 900, expires_at: '2026-10-27T00:15:00Z' });
       vi.spyOn(filesService, 'commitUpload').mockResolvedValue({ file_id: 'pending-id', file_name: 'pending.pdf', file_size: 10, status: 'scanning', sha256_hash: 'a'.repeat(64) });
-      vi.spyOn(filesService, 'getFile').mockResolvedValue({ ...sampleCleanPdf, id: 'pending-id', status: 'scanning' });
+      const getFile = vi.spyOn(filesService, 'getFile').mockResolvedValue({ ...sampleCleanPdf, id: 'pending-id', status: 'scanning' });
+      const pendingFile = new File(['%PDF-test'], 'pending.pdf', { type: 'application/pdf' });
+      // This case tests polling, not native File/WebCrypto I/O, which fake timers cannot flush.
+      // Client hashing is optional: the server always computes the authoritative checksum.
+      Object.defineProperty(pendingFile, 'arrayBuffer', {
+        value: vi.fn().mockRejectedValue(new Error('Client hashing unavailable')),
+      });
       render(<SecureFileUploader courseId={sampleCourse.id} policy={samplePolicy} onUploadSuccess={onSuccess} />);
-      await act(async () => { fireEvent.drop(screen.getByTestId('file-dropzone'), { dataTransfer: { files: [new File(['%PDF-test'], 'pending.pdf', { type: 'application/pdf' })] } }); });
+      await act(async () => { fireEvent.drop(screen.getByTestId('file-dropzone'), { dataTransfer: { files: [pendingFile] } }); });
+      expect(filesService.commitUpload).toHaveBeenCalledWith(sampleCourse.id, 'pending-id', { client_checksum: '' });
+      expect(getFile).toHaveBeenCalledTimes(1);
       await act(async () => { await vi.advanceTimersByTimeAsync(35000); });
+      expect(getFile).toHaveBeenCalledTimes(20);
       expect(onSuccess).not.toHaveBeenCalled();
       expect(screen.getByText('Quét chưa hoàn tất. Kiểm tra lại trong kho tệp.')).toBeInTheDocument();
     } finally { vi.useRealTimers(); }
