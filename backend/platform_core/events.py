@@ -5,6 +5,16 @@ from platform_core.models import AuditEvent, OutboxEvent
 
 # No free-form request bodies, reasons, credentials or personally identifying fields.
 EVENTS = {
+    "files.policy_updated": {"course_id", "version"},
+    "files.publication_updated": {"course_id", "file_id", "is_published"},
+    "courses.enrollment_requested": {"course_id", "request_id", "student_id"},
+    "courses.enrollment_cancelled": {"course_id", "request_id", "student_id"},
+    "courses.enrollment_approved": {"course_id", "request_id", "membership_id", "student_id"},
+    "courses.enrollment_rejected": {"course_id", "request_id", "student_id"},
+    "courses.member_added": {"course_id", "membership_id", "student_id"},
+    "courses.member_withdrawn": {"course_id", "membership_id", "student_id"},
+    "courses.member_removed": {"course_id", "membership_id", "student_id"},
+    "courses.member_re_enrolled": {"course_id", "membership_id", "student_id"},
     "password.changed": set(),
     "password.reset": set(),
     "account.password_reset_initiated": set(),
@@ -18,6 +28,10 @@ EVENTS = {
     "session.revoked": set(),
     "session.all_revoked": set(),
     "admin.bootstrapped": set(),
+    "files.upload_intent_created": {"course_id", "file_id", "uploader_id"},
+    "files.upload_committed": {"course_id", "file_id", "uploader_id"},
+    "files.upload_aborted": {"course_id", "file_id"},
+    "files.virus_detected": {"course_id", "file_id", "threat_name"},
 }
 
 
@@ -31,15 +45,33 @@ def _metadata(action, metadata):
         raise DomainError("INVALID_EVENT_METADATA")
     if "active" in metadata and type(metadata["active"]) is not bool:
         raise DomainError("INVALID_EVENT_METADATA")
+    for key in {
+        "course_id",
+        "student_id",
+        "request_id",
+        "membership_id",
+        "file_id",
+        "uploader_id",
+    } & metadata.keys():
+        try:
+            uuid.UUID(str(metadata[key]))
+        except (ValueError, TypeError, AttributeError) as exc:
+            raise DomainError("INVALID_EVENT_METADATA") from exc
     return metadata.copy()
 
 
 def append_audit(*, action, resource_type, resource_id, actor=None, system_actor="", metadata=None):
-    if resource_type not in {"user", "role_request", "role_grant", "session"}:
+    if resource_type not in {"user", "role_request", "role_grant", "session", "course", "file"}:
         raise DomainError("INVALID_RESOURCE_TYPE")
     if (actor is None) == (not system_actor):
         raise DomainError("AUDIT_ACTOR_REQUIRED")
-    if system_actor and system_actor not in {"registration", "email_verifier", "bootstrap_command"}:
+    if system_actor and system_actor not in {
+        "registration",
+        "email_verifier",
+        "bootstrap_command",
+        "scan_worker",
+        "cleanup_worker",
+    }:
         raise DomainError("INVALID_SYSTEM_ACTOR")
     return AuditEvent.objects.create(
         actor=actor,

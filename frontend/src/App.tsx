@@ -56,6 +56,9 @@ import {
   TeacherMaterialDetailPage
 } from './blueprints/materials';
 
+// Blueprints - Files (B08)
+import { CourseFilePolicyPage } from './blueprints/files';
+
 // Blueprints - Assignments (S06, T10, T11)
 import {
   StudentAssignmentDetailPage,
@@ -162,6 +165,8 @@ export const App: React.FC = () => {
                     <Route path="cau-truc" element={<CourseStructurePage />} />
                     <Route path="thanh-vien" element={<CourseMembersPage />} />
                     <Route path="hoc-lieu" element={<TeacherMaterialListPage />} />
+                    <Route path="tep-tin" element={<CourseFilePolicyPage initialTab="files" />} />
+                    <Route path="chinh-sach-tep" element={<CourseFilePolicyPage initialTab="policy" />} />
                     <Route path="hoc-lieu/tai-len" element={<UploadMaterialPage />} />
                     <Route path="bai-tap" element={<TeacherAssignmentListPage />} />
                     <Route path="bai-tap/soan" element={<TeacherAssignmentEditPage />} />

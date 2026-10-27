@@ -559,3 +559,300 @@ class TestCourseConcurrency:
             .order_by("position")
             .values_list("position", flat=True)
         ) == [1, 2]
+
+
+@pytest.mark.django_db
+class TestCourseSummaryApi:
+    def test_anonymous_cannot_access_summary(self, api_client):
+        client = api_client(user=None)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_401_UNAUTHORIZED
+
+    def test_user_without_roles_cannot_access_summary(self, make_user, api_client):
+        user = make_user(role=None)
+        client = api_client(user)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_admin_only_cannot_access_summary(self, make_user, api_client):
+        admin = make_user(Role.ADMIN)
+        client = api_client(admin)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_teacher_summary_metrics_and_recent_courses(self, make_user, api_client):
+        teacher = make_user(Role.TEACHER)
+        student_a = make_user(Role.STUDENT)
+        student_b = make_user(Role.STUDENT)
+        student_c = make_user(Role.STUDENT)
+
+        # C1: open, enrollment_open=True, 2 chapters, 3 lessons
+        c1 = create_course(teacher, code="TC101", name="Môn 1", status="open", enrollment_open=True)
+        ch1 = Chapter.objects.create(course=c1, title="Chương 1", position=1)
+        ch2 = Chapter.objects.create(course=c1, title="Chương 2", position=2)
+        Lesson.objects.create(chapter=ch1, title="Bài 1.1", position=1)
+        Lesson.objects.create(chapter=ch1, title="Bài 1.2", position=2)
+        Lesson.objects.create(chapter=ch2, title="Bài 2.1", position=1)
+
+        # C2: open, enrollment_open=False, 1 chapter, 1 lesson
+        c2 = create_course(
+            teacher, code="TC102", name="Môn 2", status="open", enrollment_open=False
+        )
+        ch3 = Chapter.objects.create(course=c2, title="Chương 1", position=1)
+        Lesson.objects.create(chapter=ch3, title="Bài 1.1", position=1)
+
+        # C3: archived, 1 chapter, 0 lessons
+        c3 = create_course(
+            teacher,
+            code="TC103",
+            name="Môn 3",
+            status="archived",
+            archived_at=timezone.now(),
+            enrollment_open=False,
+        )
+        Chapter.objects.create(course=c3, title="Chương 1", position=1)
+
+        # Memberships:
+        # C1 has Student A (active), Student B (active), Student C (withdrawn)
+        Membership.objects.create(course=c1, student=student_a, status=Membership.Status.ACTIVE)
+        Membership.objects.create(course=c1, student=student_b, status=Membership.Status.ACTIVE)
+        Membership.objects.create(course=c1, student=student_c, status=Membership.Status.WITHDRAWN)
+        # C2 has Student A (active)
+        Membership.objects.create(course=c2, student=student_a, status=Membership.Status.ACTIVE)
+
+        client = api_client(teacher)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_200_OK
+        data = res.json()
+
+        assert data["role"] == "teacher"
+        assert data["total_courses"] == 3
+        assert data["open_courses"] == 2
+        assert data["archived_courses"] == 1
+        assert data["enrollment_open_courses"] == 1
+        assert data["total_chapters"] == 4
+        assert data["total_lessons"] == 4
+        # Student A is in C1 & C2, Student B in C1 => 3 active memberships, 2 distinct students
+        assert data["total_memberships"] == 3
+        assert data["distinct_students"] == 2
+
+        # Unavailable metrics represented as null, not fake zero
+        assert data["pending_submissions"] is None
+        assert data["upcoming_deadlines"] is None
+        assert data["problem_materials"] is None
+        assert data["pending_ai_drafts"] is None
+        assert set(data["unavailable_metrics"]) == {
+            "pending_submissions",
+            "upcoming_deadlines",
+            "problem_materials",
+            "pending_ai_drafts",
+        }
+
+        # Recent courses contains only open courses (c1, c2)
+        assert len(data["recent_courses"]) == 2
+        codes = [c["code"] for c in data["recent_courses"]]
+        assert "TC101" in codes and "TC102" in codes
+        c1_item = next(c for c in data["recent_courses"] if c["code"] == "TC101")
+        assert c1_item["active_member_count"] == 2
+        assert c1_item["chapter_count"] == 2
+        assert c1_item["lesson_count"] == 3
+
+    def test_teacher_summary_isolation_from_foreign_teacher(self, make_user, api_client):
+        t1 = make_user(Role.TEACHER)
+        t2 = make_user(Role.TEACHER)
+        s = make_user(Role.STUDENT)
+
+        c1 = create_course(t1, code="T1C1", name="T1 Course")
+        Membership.objects.create(course=c1, student=s, status=Membership.Status.ACTIVE)
+
+        c2 = create_course(t2, code="T2C1", name="T2 Course 1")
+        c3 = create_course(t2, code="T2C2", name="T2 Course 2")
+        Membership.objects.create(course=c2, student=s, status=Membership.Status.ACTIVE)
+        Membership.objects.create(course=c3, student=s, status=Membership.Status.ACTIVE)
+
+        client1 = api_client(t1)
+        res1 = client1.api_request("get", "/api/v1/courses/summary")
+        assert res1.status_code == status.HTTP_200_OK
+        data1 = res1.json()
+        assert data1["total_courses"] == 1
+        assert data1["total_memberships"] == 1
+        assert data1["distinct_students"] == 1
+
+    def test_student_summary_metrics_and_recent_courses(self, make_user, api_client):
+        teacher = make_user(Role.TEACHER)
+        student = make_user(Role.STUDENT)
+
+        c1 = create_course(teacher, code="SC101", name="Student Course 1", status="open")
+        ch1 = Chapter.objects.create(course=c1, title="Chương 1", position=1)
+        ch2 = Chapter.objects.create(course=c1, title="Chương 2", position=2)
+        Lesson.objects.create(chapter=ch1, title="Bài 1", position=1)
+        Lesson.objects.create(chapter=ch2, title="Bài 2", position=1)
+        Lesson.objects.create(chapter=ch2, title="Bài 3", position=2)
+
+        c2 = create_course(
+            teacher,
+            code="SC102",
+            name="Student Course 2",
+            status="archived",
+            archived_at=timezone.now(),
+        )
+        Chapter.objects.create(course=c2, title="Chương C2", position=1)
+
+        c3 = create_course(teacher, code="SC103", name="Student Course 3", status="open")
+
+        Membership.objects.create(course=c1, student=student, status=Membership.Status.ACTIVE)
+        Membership.objects.create(course=c2, student=student, status=Membership.Status.ACTIVE)
+        Membership.objects.create(course=c3, student=student, status=Membership.Status.WITHDRAWN)
+
+        client = api_client(student)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_200_OK
+        data = res.json()
+
+        assert data["role"] == "student"
+        assert data["total_enrolled_courses"] == 2
+        assert data["open_enrolled_courses"] == 1
+        assert data["archived_enrolled_courses"] == 1
+        assert data["withdrawn_courses"] == 1
+        assert data["total_chapters"] == 2
+        assert data["total_lessons"] == 3
+
+        # Unavailable metrics represented as null, not fake zero
+        assert data["upcoming_deadlines"] is None
+        assert data["recent_grades"] is None
+        assert data["recent_announcements"] is None
+        assert set(data["unavailable_metrics"]) == {
+            "upcoming_deadlines",
+            "recent_grades",
+            "recent_announcements",
+        }
+
+        assert len(data["recent_courses"]) == 1
+        assert data["recent_courses"][0]["code"] == "SC101"
+        assert data["recent_courses"][0]["teacher_name"] != ""
+
+    def test_student_summary_isolation_from_unenrolled_courses(self, make_user, api_client):
+        teacher = make_user(Role.TEACHER)
+        student = make_user(Role.STUDENT)
+
+        c1 = create_course(teacher, code="ENC1", name="Enrolled")
+        create_course(teacher, code="UNENC2", name="Not Enrolled")
+        Membership.objects.create(course=c1, student=student, status=Membership.Status.ACTIVE)
+
+        client = api_client(student)
+        res = client.api_request("get", "/api/v1/courses/summary")
+        assert res.status_code == status.HTTP_200_OK
+        data = res.json()
+        assert data["total_enrolled_courses"] == 1
+        assert len(data["recent_courses"]) == 1
+        assert data["recent_courses"][0]["code"] == "ENC1"
+
+    def test_multi_role_user_selection(self, make_user, api_client):
+        user = make_user(Role.TEACHER)
+        req = RoleRequest.objects.create(
+            user=user,
+            role=Role.STUDENT,
+            status=RoleRequest.Status.APPROVED,
+            reviewed_by=user,
+            reviewed_at=timezone.now(),
+            review_reason="course_test",
+        )
+        RoleGrant.objects.create(
+            user=user,
+            role=Role.STUDENT,
+            grant_source="verified_student_email",
+            source_request=req,
+            granted_by=None,
+        )
+
+        create_course(user, code="TAUGHT1", name="Course Taught")
+        other_teacher = make_user(Role.TEACHER)
+        c_enrolled = create_course(other_teacher, code="ENROLLED1", name="Course Enrolled")
+        Membership.objects.create(course=c_enrolled, student=user, status=Membership.Status.ACTIVE)
+
+        client = api_client(user)
+
+        # Without specifying role -> 400 Bad Request (ambiguous)
+        res_ambiguous = client.api_request("get", "/api/v1/courses/summary")
+        assert res_ambiguous.status_code == status.HTTP_400_BAD_REQUEST
+
+        # Specifying role=teacher -> teacher summary
+        res_teacher = client.api_request("get", "/api/v1/courses/summary?role=teacher")
+        assert res_teacher.status_code == status.HTTP_200_OK
+        data_t = res_teacher.json()
+        assert data_t["role"] == "teacher"
+        assert data_t["total_courses"] == 1
+        assert data_t["recent_courses"][0]["code"] == "TAUGHT1"
+
+        # Specifying workspace=student -> student summary
+        res_student = client.api_request("get", "/api/v1/courses/summary?workspace=student")
+        assert res_student.status_code == status.HTTP_200_OK
+        data_s = res_student.json()
+        assert data_s["role"] == "student"
+        assert data_s["total_enrolled_courses"] == 1
+        assert data_s["recent_courses"][0]["code"] == "ENROLLED1"
+
+    def test_role_validation_and_permission_checks(self, make_user, api_client):
+        teacher = make_user(Role.TEACHER)
+        student = make_user(Role.STUDENT)
+
+        client_t = api_client(teacher)
+        # Teacher requests role=student -> 403 Forbidden
+        res_t_as_s = client_t.api_request("get", "/api/v1/courses/summary?role=student")
+        assert res_t_as_s.status_code == status.HTTP_403_FORBIDDEN
+
+        # Invalid role parameter -> 400 Bad Request
+        res_invalid = client_t.api_request("get", "/api/v1/courses/summary?role=admin")
+        assert res_invalid.status_code == status.HTTP_400_BAD_REQUEST
+
+        client_s = api_client(student)
+        # Student requests role=teacher -> 403 Forbidden
+        res_s_as_t = client_s.api_request("get", "/api/v1/courses/summary?role=teacher")
+        assert res_s_as_t.status_code == status.HTTP_403_FORBIDDEN
+
+    def test_zero_data_handling(self, make_user, api_client):
+        teacher = make_user(Role.TEACHER)
+        student = make_user(Role.STUDENT)
+
+        client_t = api_client(teacher)
+        res_t = client_t.api_request("get", "/api/v1/courses/summary")
+        assert res_t.status_code == status.HTTP_200_OK
+        assert res_t.json()["total_courses"] == 0
+        assert res_t.json()["recent_courses"] == []
+
+        client_s = api_client(student)
+        res_s = client_s.api_request("get", "/api/v1/courses/summary")
+        assert res_s.status_code == status.HTTP_200_OK
+        assert res_s.json()["total_enrolled_courses"] == 0
+        assert res_s.json()["recent_courses"] == []
+
+    def test_query_count_is_constant(self, make_user, api_client):
+        from django.db import connection
+        from django.test.utils import CaptureQueriesContext
+
+        teacher = make_user(Role.TEACHER)
+        client = api_client(teacher)
+
+        # Baseline: 1 course
+        c1 = create_course(teacher, code="QC1", name="Query Count 1")
+        ch1 = Chapter.objects.create(course=c1, title="Ch1", position=1)
+        Lesson.objects.create(chapter=ch1, title="L1", position=1)
+
+        with CaptureQueriesContext(connection) as ctx1:
+            res1 = client.api_request("get", "/api/v1/courses/summary")
+            assert res1.status_code == status.HTTP_200_OK
+        count1 = len(ctx1.captured_queries)
+
+        # Add 5 more courses with chapters and lessons
+        for i in range(2, 7):
+            ci = create_course(teacher, code=f"QC{i}", name=f"Query Count {i}")
+            chi = Chapter.objects.create(course=ci, title=f"Ch{i}", position=1)
+            Lesson.objects.create(chapter=chi, title=f"L{i}", position=1)
+
+        with CaptureQueriesContext(connection) as ctx2:
+            res2 = client.api_request("get", "/api/v1/courses/summary")
+            assert res2.status_code == status.HTTP_200_OK
+        count2 = len(ctx2.captured_queries)
+
+        # Query count must remain constant O(1)
+        assert count1 == count2

@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     "identity",
     "platform_core",
     "courses",
+    "files",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []
@@ -70,6 +71,11 @@ SPECTACULAR_SETTINGS = {
         "RequestableRoleEnum": ["student", "teacher"],
         "UserRoleEnum": ["student", "teacher", "admin"],
         "RoleRequestStatusEnum": ["pending", "approved", "rejected", "cancelled"],
+        "EnrollmentRequestStatusEnum": "courses.models.EnrollmentRequest.Status",
+        "CourseStatusEnum": "courses.models.Course.Status",
+        "CourseMemberStatusEnum": "courses.models.Membership.Status",
+        "StoredFileStatusEnum": "files.models.StoredFile.Status",
+        "StoredFilePurposeEnum": "files.models.StoredFile.Purpose",
     },
     "APPEND_COMPONENTS": {
         "securitySchemes": {
@@ -222,3 +228,28 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "false").lower() in ("true", "1", "yes")
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() in ("true", "1", "yes")
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
+
+
+# Private file storage and asynchronous security scanning.
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", str(BASE_DIR / "var" / "media"))
+FILES_STORAGE_BACKEND = os.environ.get("FILES_STORAGE_BACKEND", "local")
+FILES_S3_BUCKET = os.environ.get("FILES_S3_BUCKET", "neu-lms-local")
+FILES_S3_ENDPOINT = os.environ.get("FILES_S3_ENDPOINT", "")
+FILES_S3_REGION = os.environ.get("FILES_S3_REGION", "ap-southeast-1")
+FILES_SYSTEM_MAX_SIZE = 52_428_800
+FILES_SCANNER_ENGINE = "clamav"
+FILES_ALLOW_TEST_SCANNERS = False
+CLAMAV_HOST = os.environ.get("CLAMAV_HOST", "127.0.0.1")
+CLAMAV_PORT = int(os.environ.get("CLAMAV_PORT", "3310"))
+CELERY_BROKER_URL = os.environ.get(
+    "CELERY_BROKER_URL", os.environ.get("REDIS_URL", "redis://localhost:56379/0")
+)
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULE = {
+    "quarantine-scan": {"task": "files.tasks.process_pending_files", "schedule": 5.0}
+}
+
+CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "files")

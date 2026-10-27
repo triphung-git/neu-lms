@@ -60,6 +60,13 @@ services:
       PGPORT: "5432"
       EMAIL_HOST: mailpit
       EMAIL_PORT: "1025"
+      FILES_STORAGE_BACKEND: s3
+      FILES_S3_ENDPOINT: http://s3:9090
+      FILES_S3_BUCKET: neu-lms-local
+      AWS_ACCESS_KEY_ID: local-emulator
+      AWS_SECRET_ACCESS_KEY: local-emulator
+      CLAMAV_HOST: clamav
+      CELERY_BROKER_URL: redis://redis:6379/1
     ports:
       - "127.0.0.1:${API_PORT:-8000}:8000"
     depends_on:
@@ -75,6 +82,52 @@ services:
       timeout: 6s
       retries: 6
       start_period: 10s
+
+  clamav:
+    profiles: [files]
+    image: clamav/clamav:1.5.4@sha256:bda39705e291105049c3936e2803ac90b955172af8030f94f05dce1252df6c6d
+    volumes:
+      - clamav-data:/var/lib/clamav
+
+  file-worker:
+    profiles: [files]
+    build:
+      context: ./backend
+      target: runtime
+    command: ["celery", "-A", "config", "worker", "--loglevel=INFO", "--concurrency=2"]
+    env_file: .env
+    environment: &file-environment
+      DJANGO_SETTINGS_MODULE: config.settings.local
+      PGHOST: postgres
+      PGPORT: "5432"
+      FILES_STORAGE_BACKEND: s3
+      FILES_S3_ENDPOINT: http://s3:9090
+      FILES_S3_BUCKET: neu-lms-local
+      AWS_ACCESS_KEY_ID: local-emulator
+      AWS_SECRET_ACCESS_KEY: local-emulator
+      CLAMAV_HOST: clamav
+      CELERY_BROKER_URL: redis://redis:6379/1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      s3:
+        condition: service_started
+      clamav:
+        condition: service_started
+
+  file-scheduler:
+    profiles: [files]
+    build:
+      context: ./backend
+      target: runtime
+    command: ["celery", "-A", "config", "beat", "--loglevel=INFO", "--schedule=/tmp/celerybeat-schedule", "--pidfile=/tmp/celerybeat.pid"]
+    env_file: .env
+    environment: *file-environment
+    depends_on:
+      redis:
+        condition: service_healthy
 
   auth-dispatcher:
     build:
@@ -97,6 +150,7 @@ services:
 
 
 volumes:
+  clamav-data:
   postgres-data:
   redis-data:
   s3-data:

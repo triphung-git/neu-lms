@@ -1362,6 +1362,18 @@
                     },
                     {
                         "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "student",
+                                "teacher"
+                            ]
+                        },
+                        "description": "Narrow to owned or enrolled courses"
+                    },
+                    {
+                        "in": "query",
                         "name": "search",
                         "schema": {
                             "type": "string"
@@ -2011,6 +2023,948 @@
                 }
             }
         },
+        "/api/v1/courses/{course_id}/enroll": {
+            "post": {
+                "operationId": "courses_enroll_create",
+                "description": "Sinh viên gửi yêu cầu ghi danh vào môn học đang mở nhận đăng ký.",
+                "summary": "Gửi yêu cầu ghi danh môn học",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentEnrollmentRequest"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/enrollment-requests": {
+            "get": {
+                "operationId": "courses_enrollment_requests_list",
+                "description": "Giảng viên phụ trách xem hàng đợi yêu cầu ghi danh của môn học.",
+                "summary": "Danh sách yêu cầu ghi danh của môn học (Giảng viên)",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số lượng mỗi trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "approved",
+                                "cancelled",
+                                "pending",
+                                "rejected"
+                            ]
+                        },
+                        "description": "Lọc theo trạng thái yêu cầu"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedTeacherEnrollmentRequestList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/file-policy": {
+            "get": {
+                "operationId": "courses_file_policy_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseFilePolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "courses_file_policy_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseFilePolicyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseFilePolicyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseFilePolicyRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseFilePolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "courses_file_policy_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseFilePolicyRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseFilePolicyRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedCourseFilePolicyRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseFilePolicy"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files": {
+            "get": {
+                "operationId": "courses_files_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "purpose",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedStoredFileList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/{file_id}": {
+            "get": {
+                "operationId": "courses_files_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoredFile"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "courses_files_partial_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUpdateFilePublishRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUpdateFilePublishRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedUpdateFilePublishRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StoredFile"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_files_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/{file_id}/commit": {
+            "post": {
+                "operationId": "courses_files_commit_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommitUploadRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommitUploadRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CommitUploadRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CommitUploadResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/{file_id}/content": {
+            "put": {
+                "operationId": "courses_files_content_update",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/octet-stream": {
+                            "schema": {
+                                "type": "string",
+                                "format": "binary"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/{file_id}/download": {
+            "get": {
+                "operationId": "courses_files_download_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/{file_id}/preview": {
+            "get": {
+                "operationId": "courses_files_preview_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/files/upload-intent": {
+            "post": {
+                "operationId": "courses_files_upload_intent_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadIntentRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadIntentRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UploadIntentRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UploadIntentResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/members": {
+            "get": {
+                "operationId": "courses_members_list",
+                "description": "Giảng viên phụ trách xem danh sách thành viên của môn học.",
+                "summary": "Danh sách thành viên môn học",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số lượng mỗi trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "active",
+                                "withdrawn"
+                            ]
+                        },
+                        "description": "Lọc theo trạng thái thành viên ('active' hoặc 'withdrawn')"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCourseMemberList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_members_create",
+                "description": "Giảng viên phụ trách thêm sinh viên vào môn học bằng email.",
+                "summary": "Thêm thành viên vào môn học",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddMemberRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddMemberRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AddMemberRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseMember"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/members/{student_id}/re-enroll": {
+            "post": {
+                "operationId": "courses_members_re_enroll_create",
+                "description": "Giảng viên phụ trách khôi phục thành viên đã rút lui.",
+                "summary": "Khôi phục thành viên môn học",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseMember"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/members/{student_id}/withdraw": {
+            "post": {
+                "operationId": "courses_members_withdraw_create",
+                "description": "Sinh viên tự rút lui hoặc giảng viên phụ trách gỡ thành viên khỏi môn học.",
+                "summary": "Rút thành viên khỏi môn học",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseMember"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}": {
             "get": {
                 "operationId": "courses_retrieve",
@@ -2222,6 +3176,318 @@
                 }
             }
         },
+        "/api/v1/courses/catalog": {
+            "get": {
+                "operationId": "courses_catalog_list",
+                "description": "Tra cứu danh mục môn học đang mở nhận ghi danh kèm trạng thái đăng ký của sinh viên.",
+                "summary": "Danh mục môn học đang mở nhận ghi danh",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang (bắt đầu từ 1)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số lượng mỗi trang (tối đa 100)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tìm kiếm theo mã, tên môn, học kỳ, giảng viên"
+                    },
+                    {
+                        "in": "query",
+                        "name": "term",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo học kỳ"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedCourseCatalogItemList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/enrollment-requests/{request_id}/approve": {
+            "post": {
+                "operationId": "courses_enrollment_requests_approve_create",
+                "description": "Giảng viên phụ trách duyệt yêu cầu ghi danh vào môn học.",
+                "summary": "Duyệt yêu cầu ghi danh",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "request_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TeacherEnrollmentRequest"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/enrollment-requests/{request_id}/cancel": {
+            "post": {
+                "operationId": "courses_enrollment_requests_cancel_create",
+                "description": "Sinh viên hủy yêu cầu ghi danh đang ở trạng thái pending của chính mình.",
+                "summary": "Hủy yêu cầu ghi danh",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "request_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentEnrollmentRequest"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/enrollment-requests/{request_id}/reject": {
+            "post": {
+                "operationId": "courses_enrollment_requests_reject_create",
+                "description": "Giảng viên phụ trách từ chối yêu cầu ghi danh vào môn học kèm lý do.",
+                "summary": "Từ chối yêu cầu ghi danh",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "request_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectEnrollmentRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectEnrollmentRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RejectEnrollmentRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TeacherEnrollmentRequest"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/enrollment-requests/my": {
+            "get": {
+                "operationId": "courses_enrollment_requests_my_list",
+                "description": "Lấy danh sách các yêu cầu ghi danh của chính sinh viên đang đăng nhập.",
+                "summary": "Danh sách yêu cầu ghi danh của sinh viên",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số lượng mỗi trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "approved",
+                                "cancelled",
+                                "pending",
+                                "rejected"
+                            ]
+                        },
+                        "description": "Lọc theo trạng thái yêu cầu"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedStudentEnrollmentRequestList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/summary": {
+            "get": {
+                "operationId": "courses_summary_retrieve",
+                "description": "Trả về các chỉ số thống kê môn học thực tế cho giảng viên phụ trách hoặc sinh viên đang tham gia.",
+                "summary": "Lấy tổng quan môn học theo vai trò cá nhân",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "role",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "student",
+                                "teacher"
+                            ]
+                        },
+                        "description": "Vai trò workspace cần lấy summary ('teacher' hoặc 'student')."
+                    },
+                    {
+                        "in": "query",
+                        "name": "workspace",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "student",
+                                "teacher"
+                            ]
+                        },
+                        "description": "Alias cho tham số role."
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseSummaryResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/health/live": {
             "get": {
                 "operationId": "get_health_live",
@@ -2285,6 +3551,19 @@
     },
     "components": {
         "schemas": {
+            "AddMemberRequest": {
+                "type": "object",
+                "properties": {
+                    "student_email": {
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 1
+                    }
+                },
+                "required": [
+                    "student_email"
+                ]
+            },
             "AdminAccountDetail": {
                 "type": "object",
                 "properties": {
@@ -2748,6 +4027,44 @@
                     "title"
                 ]
             },
+            "CommitUploadRequest": {
+                "type": "object",
+                "properties": {
+                    "client_checksum": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 64
+                    }
+                }
+            },
+            "CommitUploadResponse": {
+                "type": "object",
+                "properties": {
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "type": "integer"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "sha256_hash": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "file_id",
+                    "file_name",
+                    "file_size",
+                    "sha256_hash",
+                    "status"
+                ]
+            },
             "Course": {
                 "type": "object",
                 "properties": {
@@ -2827,6 +4144,219 @@
                     "updated_at"
                 ]
             },
+            "CourseCatalogItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "term": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "teacher_name": {
+                        "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    },
+                    "active_member_count": {
+                        "type": "integer"
+                    },
+                    "my_enrollment_status": {
+                        "type": "string"
+                    },
+                    "pending_request_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "active_member_count",
+                    "code",
+                    "created_at",
+                    "description",
+                    "enrollment_open",
+                    "id",
+                    "my_enrollment_status",
+                    "name",
+                    "pending_request_id",
+                    "teacher_name",
+                    "term"
+                ]
+            },
+            "CourseFilePolicy": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "allowed_extensions": {},
+                    "max_file_size_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "max_files_per_assignment": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "course_quota_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "used_quota_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "reserved_quota_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "preview_allowed": {
+                        "type": "boolean"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course_id",
+                    "created_at",
+                    "id",
+                    "reserved_quota_bytes",
+                    "updated_at",
+                    "used_quota_bytes",
+                    "version"
+                ]
+            },
+            "CourseFilePolicyRequest": {
+                "type": "object",
+                "properties": {
+                    "allowed_extensions": {},
+                    "max_file_size_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "max_files_per_assignment": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "course_quota_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "preview_allowed": {
+                        "type": "boolean"
+                    }
+                }
+            },
+            "CourseMember": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "student_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CourseMemberStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "added_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "added_at",
+                    "course_id",
+                    "id",
+                    "status",
+                    "student_email",
+                    "student_id",
+                    "student_name",
+                    "updated_at"
+                ]
+            },
+            "CourseMemberStatusEnum": {
+                "enum": [
+                    "active",
+                    "withdrawn"
+                ],
+                "type": "string",
+                "description": "* `active` - Đang tham gia\n* `withdrawn` - Đã rút"
+            },
             "CourseRequest": {
                 "type": "object",
                 "properties": {
@@ -2865,6 +4395,160 @@
                 ],
                 "type": "string",
                 "description": "* `open` - Đang mở\n* `archived` - Đã lưu trữ"
+            },
+            "CourseSummaryItem": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "term": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "enrollment_open": {
+                        "type": "boolean"
+                    },
+                    "active_member_count": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "teacher_name": {
+                        "type": "string"
+                    },
+                    "chapter_count": {
+                        "type": "integer"
+                    },
+                    "lesson_count": {
+                        "type": "integer"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "chapter_count",
+                    "code",
+                    "created_at",
+                    "enrollment_open",
+                    "id",
+                    "lesson_count",
+                    "name",
+                    "status",
+                    "term",
+                    "updated_at"
+                ]
+            },
+            "CourseSummaryResponse": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/RequestableRoleEnum"
+                    },
+                    "total_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "open_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "archived_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "enrollment_open_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "total_memberships": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "distinct_students": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "pending_submissions": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "problem_materials": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "pending_ai_drafts": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "total_enrolled_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "open_enrolled_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "archived_enrolled_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "withdrawn_courses": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "recent_grades": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "recent_announcements": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "total_chapters": {
+                        "type": "integer"
+                    },
+                    "total_lessons": {
+                        "type": "integer"
+                    },
+                    "upcoming_deadlines": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "recent_courses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseSummaryItem"
+                        }
+                    },
+                    "unavailable_metrics": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "recent_courses",
+                    "role",
+                    "total_chapters",
+                    "total_lessons",
+                    "unavailable_metrics"
+                ]
             },
             "CourseTransferRequest": {
                 "type": "object",
@@ -2909,6 +4593,16 @@
                     "email",
                     "password"
                 ]
+            },
+            "EnrollmentRequestStatusEnum": {
+                "enum": [
+                    "pending",
+                    "approved",
+                    "rejected",
+                    "cancelled"
+                ],
+                "type": "string",
+                "description": "* `pending` - Đang chờ duyệt\n* `approved` - Đã duyệt\n* `rejected` - Đã từ chối\n* `cancelled` - Đã hủy"
             },
             "ErrorEnvelope": {
                 "type": "object",
@@ -3140,6 +4834,58 @@
                     }
                 }
             },
+            "PaginatedCourseCatalogItemList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseCatalogItem"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
             "PaginatedCourseList": {
                 "type": "object",
                 "required": [
@@ -3151,6 +4897,181 @@
                         "type": "array",
                         "items": {
                             "$ref": "#/components/schemas/Course"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
+            "PaginatedCourseMemberList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseMember"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
+            "PaginatedStoredFileList": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StoredFile"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "PaginatedStudentEnrollmentRequestList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentEnrollmentRequest"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "required": [
+                            "page",
+                            "page_size",
+                            "total_items",
+                            "total_pages",
+                            "has_next",
+                            "has_previous"
+                        ],
+                        "properties": {
+                            "page": {
+                                "type": "integer",
+                                "example": 1
+                            },
+                            "page_size": {
+                                "type": "integer",
+                                "example": 20
+                            },
+                            "total_items": {
+                                "type": "integer",
+                                "example": 100
+                            },
+                            "total_pages": {
+                                "type": "integer",
+                                "example": 5
+                            },
+                            "has_next": {
+                                "type": "boolean",
+                                "example": true
+                            },
+                            "has_previous": {
+                                "type": "boolean",
+                                "example": false
+                            }
+                        }
+                    }
+                }
+            },
+            "PaginatedTeacherEnrollmentRequestList": {
+                "type": "object",
+                "required": [
+                    "items",
+                    "pagination"
+                ],
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TeacherEnrollmentRequest"
                         }
                     },
                     "pagination": {
@@ -3223,6 +5144,32 @@
                     }
                 }
             },
+            "PatchedCourseFilePolicyRequest": {
+                "type": "object",
+                "properties": {
+                    "allowed_extensions": {},
+                    "max_file_size_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "max_files_per_assignment": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
+                    },
+                    "course_quota_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "preview_allowed": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedCourseRequest": {
                 "type": "object",
                 "properties": {
@@ -3259,6 +5206,14 @@
                     },
                     "description": {
                         "type": "string"
+                    }
+                }
+            },
+            "PatchedUpdateFilePublishRequest": {
+                "type": "object",
+                "properties": {
+                    "is_published": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -3356,6 +5311,15 @@
                     "id",
                     "requested_role"
                 ]
+            },
+            "RejectEnrollmentRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                }
             },
             "ReorderRequest": {
                 "type": "object",
@@ -3546,6 +5510,333 @@
                     "idle_expires_at",
                     "pending_roles",
                     "roles"
+                ]
+            },
+            "StoredFile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "uploader_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "uploader_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "file_size": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StoredFileStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "purpose": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StoredFilePurposeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Chỉ hiển thị cho sinh viên khi tệp clean và đã công bố"
+                    },
+                    "sha256_hash": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course_id",
+                    "created_at",
+                    "file_name",
+                    "file_size",
+                    "id",
+                    "is_published",
+                    "purpose",
+                    "sha256_hash",
+                    "status",
+                    "updated_at",
+                    "uploader_id",
+                    "uploader_name"
+                ]
+            },
+            "StoredFilePurposeEnum": {
+                "enum": [
+                    "course_material",
+                    "assignment_attachment",
+                    "assignment_submission",
+                    "general"
+                ],
+                "type": "string",
+                "description": "* `course_material` - Học liệu môn học\n* `assignment_attachment` - Đính kèm bài tập\n* `assignment_submission` - Bài nộp sinh viên\n* `general` - Tệp chung"
+            },
+            "StoredFileStatusEnum": {
+                "enum": [
+                    "quarantine_pending",
+                    "scanning",
+                    "clean",
+                    "infected",
+                    "deleted"
+                ],
+                "type": "string",
+                "description": "* `quarantine_pending` - Chờ cách ly\n* `scanning` - Đang quét\n* `clean` - An toàn\n* `infected` - Nhiễm mã độc\n* `deleted` - Đã xóa"
+            },
+            "StudentEnrollmentRequest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "course_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "course_term": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "teacher_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnrollmentRequestStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "requested_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "rejection_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course_code",
+                    "course_id",
+                    "course_name",
+                    "course_term",
+                    "created_at",
+                    "id",
+                    "rejection_reason",
+                    "requested_at",
+                    "reviewed_at",
+                    "status",
+                    "teacher_name",
+                    "updated_at"
+                ]
+            },
+            "TeacherEnrollmentRequest": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "student_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "student_email": {
+                        "type": "string",
+                        "format": "email",
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/EnrollmentRequestStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "requested_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "reviewed_by_name": {
+                        "type": "string",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "rejection_reason": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "course_id",
+                    "created_at",
+                    "id",
+                    "rejection_reason",
+                    "requested_at",
+                    "reviewed_at",
+                    "reviewed_by_name",
+                    "status",
+                    "student_email",
+                    "student_id",
+                    "student_name",
+                    "updated_at"
+                ]
+            },
+            "UploadIntentRequest": {
+                "type": "object",
+                "properties": {
+                    "file_name": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "file_size": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "purpose": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StoredFilePurposeEnum"
+                            }
+                        ],
+                        "default": "course_material"
+                    }
+                },
+                "required": [
+                    "file_name",
+                    "file_size"
+                ]
+            },
+            "UploadIntentResponse": {
+                "type": "object",
+                "properties": {
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "type": "integer"
+                    },
+                    "storage_path": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    },
+                    "purpose": {
+                        "type": "string"
+                    },
+                    "expires_in_seconds": {
+                        "type": "integer",
+                        "default": 900
+                    },
+                    "expires_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "expires_at",
+                    "file_id",
+                    "file_name",
+                    "file_size",
+                    "status",
+                    "storage_path"
                 ]
             },
             "UserRoleEnum": {

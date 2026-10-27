@@ -152,12 +152,22 @@ export const CourseTeacherLayout: React.FC = () => {
     { to: `/gv/mon-hoc/${course.id}/diem`, label: 'Bảng điểm' },
   ].filter((item) => {
     if (!isArchived) return true;
-    return item.to === `/gv/mon-hoc/${course.id}` || item.to.endsWith('/cau-truc');
+    return (
+      item.to === `/gv/mon-hoc/${course.id}` ||
+      item.to.endsWith('/cau-truc') ||
+      item.to.endsWith('/thanh-vien') ||
+      item.to.endsWith('/hoc-lieu')
+    );
   });
   const coursePath = `/gv/mon-hoc/${course.id}`;
-  const archivedSubroute = isArchived
-    && location.pathname !== coursePath
-    && location.pathname !== `${coursePath}/cau-truc`;
+  const archivedSubroute =
+    isArchived &&
+    location.pathname !== coursePath &&
+    location.pathname !== `${coursePath}/cau-truc` &&
+    location.pathname !== `${coursePath}/thanh-vien` &&
+    location.pathname !== `${coursePath}/hoc-lieu` &&
+    location.pathname !== `${coursePath}/tep-tin` &&
+    location.pathname !== `${coursePath}/chinh-sach-tep`;
 
   return (
     <div className="course-layout-shell">
