@@ -1,65 +1,69 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
 import { useSession } from '../../../app/providers/SessionContext';
-import { useClock } from '../../../app/providers/ClockContext';
+import { coursesService, type CourseSummaryResponse } from '../../../api/coursesService';
 import { Button } from '../../../shared/ui/Button';
 import { Badge } from '../../../shared/ui/Badge';
+import { ErrorBanner } from '../../../shared/ui/ErrorBanner';
+import { LoadingSkeleton } from '../../../shared/ui/LoadingSkeleton';
 import {
   BookOpen,
   PlusCircle,
-  FileCheck,
+  Users,
+  FileText,
   Clock,
-  AlertTriangle,
+  Sparkles,
   ArrowRight,
-  Sparkles
+  ShieldCheck,
 } from 'lucide-react';
 import './DashboardPages.css';
 
 export const TeacherDashboardPage: React.FC = () => {
-  const { db } = useDatabase();
   const { currentUser } = useSession();
-  const { currentTimeIso } = useClock();
   const navigate = useNavigate();
 
-  // Courses taught by this teacher
-  const myCourses = db.courses.filter((c) => c.teacherId === currentUser?.id);
-  const openCourses = myCourses.filter((c) => c.status === 'open');
-  const openCourseIds = openCourses.map((c) => c.id);
+  const [summary, setSummary] = useState<CourseSummaryResponse | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [retryCount, setRetryCount] = useState<number>(0);
 
-  // Assignments in open courses
-  const myAssignments = db.assignments.filter((a) => openCourseIds.includes(a.courseId));
-  const myAssignmentIds = myAssignments.map((a) => a.id);
+  const handleRetry = useCallback(() => {
+    setRetryCount((prev) => prev + 1);
+  }, []);
 
-  // Submissions for my assignments
-  const pendingSubmissions = db.submissions.filter(
-    (s) => myAssignmentIds.includes(s.assignmentId) && s.gradingStatus !== 'graded'
-  );
+  useEffect(() => {
+    let isCurrent = true;
+    setLoading(true);
+    setError(null);
 
-  // Assignments due in next 7 days
-  const nowMs = new Date(currentTimeIso).getTime();
-  const sevenDaysMs = nowMs + 7 * 24 * 60 * 60 * 1000;
-  const upcomingAssignments = myAssignments.filter((a) => {
-    const dueMs = new Date(a.dueAt).getTime();
-    return dueMs >= nowMs && dueMs <= sevenDaysMs && a.status === 'published';
-  });
+    coursesService
+      .getSummary('teacher')
+      .then((data) => {
+        if (isCurrent) {
+          setSummary(data);
+          setLoading(false);
+        }
+      })
+      .catch((err: unknown) => {
+        if (isCurrent) {
+          const message =
+            err instanceof Error
+              ? err.message
+              : 'Không thể tải dữ liệu tổng quan giảng viên từ máy chủ.';
+          setError(message);
+          setLoading(false);
+        }
+      });
 
-  // Materials with extraction errors or no text
-  const problemMaterials = db.materials.filter((m) => {
-    if (!openCourseIds.includes(m.courseId)) return false;
-    const version = db.materialVersions.find((v) => v.id === m.currentVersionId);
-    return (
-      version?.scanStatus === 'infected' ||
-      version?.scanStatus === 'error' ||
-      version?.extractionStatus === 'error' ||
-      version?.extractionStatus === 'no_text'
-    );
-  });
+    return () => {
+      isCurrent = false;
+    };
+  }, [retryCount, currentUser?.id]);
 
-  // Recent AI drafts for this teacher
-  const myAIDrafts = db.aiDrafts.filter(
-    (d) => openCourseIds.includes(d.courseId) && d.status === 'pending'
-  );
+  if (error) return <ErrorBanner title="Không thể tải dữ liệu tổng quan" message={error} onRetry={handleRetry} />;
+
+  const openCoursesCount = summary?.open_courses ?? 0;
+  const recentCourses = summary?.recent_courses ?? [];
 
   return (
     <div className="dash-page-container">
@@ -67,7 +71,7 @@ export const TeacherDashboardPage: React.FC = () => {
         <div>
           <h1 className="dash-page-title">Bàn làm việc Giảng viên</h1>
           <p className="dash-page-subtitle">
-            Tổng quan công việc chấm bài, theo dõi hạn nộp và rà soát trạng thái học liệu số.
+            Xin chào {currentUser?.fullName || 'Thầy/Cô'}, theo dõi tổng quan các môn học và hoạt động giảng dạy.
           </p>
         </div>
         <Button
@@ -79,42 +83,76 @@ export const TeacherDashboardPage: React.FC = () => {
         </Button>
       </div>
 
+      {/* Error state */}
+      {error && (
+        <ErrorBanner
+          title="Không thể tải dữ liệu tổng quan"
+          message={error}
+          onRetry={handleRetry}
+        />
+      )}
+
       {/* 4 Stat Metric Cards */}
       <div className="stat-cards-row">
-        <div className="stat-metric-card" onClick={() => navigate(openCourses[0] ? `/gv/mon-hoc/${openCourses[0].id}/bai-tap` : '/gv/mon-hoc')}>
+        <div
+          className="stat-metric-card"
+          onClick={() => navigate('/gv/mon-hoc')}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') navigate('/gv/mon-hoc');
+          }}
+        >
           <div className="metric-header">
-            <span className="metric-title">Bài chờ chấm</span>
-            <FileCheck size={20} className="text-warning" />
+            <span className="metric-title">Môn đang phụ trách</span>
+            <BookOpen size={20} className="text-accent" />
           </div>
-          <span className="metric-number">{pendingSubmissions.length}</span>
-          <span className="metric-sub">Cần rà soát và cho điểm</span>
+          <span className="metric-number">
+            {loading ? '...' : openCoursesCount}
+          </span>
+          <span className="metric-sub">
+            {summary?.archived_courses
+              ? `${summary.archived_courses} môn đã lưu trữ`
+              : 'Môn học đang mở'}
+          </span>
         </div>
 
         <div className="stat-metric-card">
           <div className="metric-header">
-            <span className="metric-title">Hạn nộp 7 ngày tới</span>
-            <Clock size={20} className="text-accent" />
+            <span className="metric-title">Sinh viên tham gia</span>
+            <Users size={20} className="text-accent" />
           </div>
-          <span className="metric-number">{upcomingAssignments.length}</span>
-          <span className="metric-sub">Bài tập sắp đến hạn</span>
+          <span className="metric-number">
+            {loading ? '...' : (summary?.distinct_students ?? 0)}
+          </span>
+          <span className="metric-sub">
+            {summary?.total_memberships ?? 0} lượt ghi danh hoạt động
+          </span>
         </div>
 
         <div className="stat-metric-card">
           <div className="metric-header">
-            <span className="metric-title">Học liệu cần chú ý</span>
-            <AlertTriangle size={20} className="text-danger" />
+            <span className="metric-title">Chương & Bài học</span>
+            <FileText size={20} className="text-accent" />
           </div>
-          <span className="metric-number">{problemMaterials.length}</span>
-          <span className="metric-sub">Nhiễm mã độc / lỗi text</span>
+          <span className="metric-number">
+            {loading ? '...' : (summary?.total_lessons ?? 0)}
+          </span>
+          <span className="metric-sub">
+            Thuộc {summary?.total_chapters ?? 0} chương bài giảng
+          </span>
         </div>
 
-        <div className="stat-metric-card" onClick={() => navigate('/gv/ban-nhap-ai')}>
+        <div className="stat-metric-card stat-metric-unavailable">
           <div className="metric-header">
-            <span className="metric-title">Bản nháp AI chờ duyệt</span>
-            <Sparkles size={20} className="text-accent" />
+            <span className="metric-title">Bài chờ chấm & Hạn nộp</span>
+            <Clock size={20} className="text-muted" />
           </div>
-          <span className="metric-number">{myAIDrafts.length}</span>
-          <span className="metric-sub">Tóm tắt & Đề xuất bài tập</span>
+          <div className="metric-unavailable-row">
+            <span className="metric-number text-muted">—</span>
+            <Badge variant="draft" label="Chưa khả dụng" />
+          </div>
+          <span className="metric-sub">Phân hệ bài tập & chấm điểm đang hoàn thiện</span>
         </div>
       </div>
 
@@ -124,13 +162,21 @@ export const TeacherDashboardPage: React.FC = () => {
           <section className="dash-card" aria-labelledby="teaching-courses-heading">
             <div className="dash-card-header">
               <BookOpen className="card-title-icon" />
-              <h2 id="teaching-courses-heading">Môn học đang phụ trách ({openCourses.length})</h2>
+              <h2 id="teaching-courses-heading">
+                Môn học đang phụ trách ({loading ? '...' : recentCourses.length})
+              </h2>
               <Link to="/gv/mon-hoc" className="card-view-all">
                 Tất cả môn →
               </Link>
             </div>
 
-            {openCourses.length === 0 ? (
+            {loading ? (
+              <LoadingSkeleton lines={4} height="56px" />
+            ) : error ? (
+              <p className="side-empty-text text-danger">
+                Không thể tải danh sách môn học. Vui lòng bấm &ldquo;Thử lại&rdquo; ở phía trên.
+              </p>
+            ) : recentCourses.length === 0 ? (
               <div className="dash-card-empty">
                 <p>Bạn chưa phụ trách môn học nào trong học kỳ này.</p>
                 <Button
@@ -144,80 +190,67 @@ export const TeacherDashboardPage: React.FC = () => {
               </div>
             ) : (
               <div className="teacher-courses-list">
-                {openCourses.map((crs) => {
-                  const studentCount = db.memberships.filter(
-                    (m) => m.courseId === crs.id && m.status === 'active'
-                  ).length;
-                  const asgCount = db.assignments.filter((a) => a.courseId === crs.id).length;
-
-                  return (
-                    <div
-                      key={crs.id}
-                      className="teacher-course-row"
-                      onClick={() => navigate(`/gv/mon-hoc/${crs.id}`)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') navigate(`/gv/mon-hoc/${crs.id}`);
-                      }}
-                    >
-                      <div className="teacher-course-info">
-                        <div className="course-code-tag">{crs.code}</div>
-                        <h3 className="teacher-course-name">{crs.name}</h3>
-                        <span className="teacher-course-sub">{crs.term}</span>
-                      </div>
-                      <div className="teacher-course-stats">
-                        <span className="stat-pill">{studentCount} sinh viên</span>
-                        <span className="stat-pill">{asgCount} bài tập</span>
-                        <ArrowRight size={16} className="arrow-icon" />
-                      </div>
+                {recentCourses.map((crs) => (
+                  <div
+                    key={crs.id}
+                    className="teacher-course-row"
+                    onClick={() => navigate(`/gv/mon-hoc/${crs.id}`)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') navigate(`/gv/mon-hoc/${crs.id}`);
+                    }}
+                  >
+                    <div className="teacher-course-info">
+                      <div className="course-code-tag">{crs.code}</div>
+                      <h3 className="teacher-course-name">{crs.name}</h3>
+                      <span className="teacher-course-sub">{crs.term}</span>
                     </div>
-                  );
-                })}
+                    <div className="teacher-course-stats">
+                      <span className="stat-pill">
+                        {crs.active_member_count ?? 0} sinh viên
+                      </span>
+                      <span className="stat-pill">{crs.lesson_count} bài học</span>
+                      <span className="stat-pill">{crs.chapter_count} chương</span>
+                      <ArrowRight size={16} className="arrow-icon" />
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </section>
         </div>
 
-        {/* Side Column: Attention items */}
+        {/* Side Column: Additional modules status */}
         <div className="dash-col-side">
-          <section className="dash-card" aria-labelledby="problem-materials-heading">
+          <section className="dash-card" aria-labelledby="materials-status-heading">
             <div className="dash-card-header">
-              <AlertTriangle className="card-title-icon text-danger" />
-              <h2 id="problem-materials-heading">Học liệu cần kiểm tra</h2>
+              <ShieldCheck className="card-title-icon text-accent" />
+              <h2 id="materials-status-heading">Học liệu & An toàn</h2>
             </div>
-
-            {problemMaterials.length === 0 ? (
-              <p className="side-empty-text">Toàn bộ học liệu đều ở trạng thái xử lý an toàn.</p>
-            ) : (
-              <div className="problem-materials-list">
-                {problemMaterials.map((mat) => {
-                  const ver = db.materialVersions.find((v) => v.id === mat.currentVersionId);
-                  return (
-                    <div
-                      key={mat.id}
-                      className="problem-material-item"
-                      onClick={() => navigate(`/gv/hoc-lieu/${mat.id}`)}
-                      role="button"
-                      tabIndex={0}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') navigate(`/gv/hoc-lieu/${mat.id}`);
-                      }}
-                    >
-                      <div className="mat-problem-info">
-                        <h4>{mat.title}</h4>
-                        <span className="mat-problem-status">
-                          {ver?.scanStatus === 'infected' && 'Nhiễm mã độc'}
-                          {ver?.extractionStatus === 'no_text' && 'Ảnh scan / Không có text'}
-                          {ver?.extractionStatus === 'error' && 'Lỗi trích xuất'}
-                        </span>
-                      </div>
-                      <Badge variant={ver?.scanStatus === 'infected' ? 'error' : 'no-text'} />
-                    </div>
-                  );
-                })}
+            <div className="dash-notice-box">
+              <div className="dash-notice-header">
+                <Badge variant="draft" label="Chưa khả dụng" />
               </div>
-            )}
+              <p className="side-empty-text">
+                Phân hệ học liệu số, quét an toàn mã độc và trích xuất nội dung văn bản sẽ được tích hợp trong giai đoạn B09.
+              </p>
+            </div>
+          </section>
+
+          <section className="dash-card" aria-labelledby="ai-assistant-heading">
+            <div className="dash-card-header">
+              <Sparkles className="card-title-icon text-accent" />
+              <h2 id="ai-assistant-heading">Trợ lý AI & Bản nháp</h2>
+            </div>
+            <div className="dash-notice-box">
+              <div className="dash-notice-header">
+                <Badge variant="draft" label="Chưa khả dụng" />
+              </div>
+              <p className="side-empty-text">
+                Phân hệ tự động tóm tắt bài giảng và gợi ý bài tập bằng mô hình AI đang được chuẩn bị hạ tầng.
+              </p>
+            </div>
           </section>
         </div>
       </div>

@@ -64,7 +64,7 @@ describe('B06 course management UI', () => {
 
     expect(await screen.findByText('Lập trình Web')).toBeInTheDocument();
     expect(screen.getByText('5 sinh viên')).toBeInTheDocument();
-    expect(listSpy).toHaveBeenCalledWith({ status: 'open', page: 1, page_size: 20 });
+    expect(listSpy).toHaveBeenCalledWith({ role: 'teacher', status: 'open', page: 1, page_size: 20 });
   });
 
   it('creates courses through the API and navigates to the returned course id', async () => {

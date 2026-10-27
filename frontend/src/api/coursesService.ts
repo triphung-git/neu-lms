@@ -8,8 +8,24 @@ export type ChapterRequest = components['schemas']['ChapterRequest'];
 export type Lesson = components['schemas']['Lesson'];
 export type LessonRequest = components['schemas']['LessonRequest'];
 export type PaginatedCourseList = components['schemas']['PaginatedCourseList'];
+export type CourseSummaryResponse = components['schemas']['CourseSummaryResponse'];
+export type CourseSummaryItem = components['schemas']['CourseSummaryItem'];
+export type CourseCatalogItem = components['schemas']['CourseCatalogItem'];
+export type PaginatedCourseCatalogItemList = components['schemas']['PaginatedCourseCatalogItemList'];
+export type StudentEnrollmentRequest = components['schemas']['StudentEnrollmentRequest'];
+export type PaginatedStudentEnrollmentRequestList =
+  components['schemas']['PaginatedStudentEnrollmentRequestList'];
+export type TeacherEnrollmentRequest = components['schemas']['TeacherEnrollmentRequest'];
+export type PaginatedTeacherEnrollmentRequestList =
+  components['schemas']['PaginatedTeacherEnrollmentRequestList'];
+export type CourseMember = components['schemas']['CourseMember'];
+export type PaginatedCourseMemberList = components['schemas']['PaginatedCourseMemberList'];
+export type AddMemberRequest = components['schemas']['AddMemberRequest'];
+export type RejectEnrollmentRequestRequest =
+  components['schemas']['RejectEnrollmentRequestRequest'];
 
 export interface ListCoursesParams {
+  role?: 'teacher' | 'student';
   search?: string;
   term?: string;
   status?: 'open' | 'archived';
@@ -23,6 +39,12 @@ export class CoursesService {
 
   list(params?: ListCoursesParams): Promise<PaginatedCourseList> {
     return this.client.get('/api/v1/courses', { params });
+  }
+
+  getSummary(role?: 'teacher' | 'student'): Promise<CourseSummaryResponse> {
+    return this.client.get('/api/v1/courses/summary', {
+      params: role ? { role } : undefined,
+    });
   }
 
   get(id: string): Promise<Course> {
@@ -136,6 +158,106 @@ export class CoursesService {
     return this.client.untypedRequest<Lesson[]>(
       `/api/v1/courses/${encodeURIComponent(courseId)}/chapters/${encodeURIComponent(chapterId)}/lessons/reorder`,
       { method: 'POST', body: { ids } },
+    );
+  }
+
+  // Catalog
+  getCatalog(params?: {
+    search?: string;
+    term?: string;
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedCourseCatalogItemList> {
+    return this.client.get('/api/v1/courses/catalog', { params });
+  }
+
+  // Student Enrollment Requests
+  getMyEnrollmentRequests(params?: {
+    status?: 'pending' | 'approved' | 'rejected' | 'cancelled';
+    page?: number;
+    page_size?: number;
+  }): Promise<PaginatedStudentEnrollmentRequestList> {
+    return this.client.get('/api/v1/courses/enrollment-requests/my', { params });
+  }
+
+  enroll(courseId: string): Promise<StudentEnrollmentRequest> {
+    return this.client.untypedRequest<StudentEnrollmentRequest>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/enroll`,
+      { method: 'POST' },
+    );
+  }
+
+  cancelEnrollmentRequest(requestId: string): Promise<StudentEnrollmentRequest> {
+    return this.client.untypedRequest<StudentEnrollmentRequest>(
+      `/api/v1/courses/enrollment-requests/${encodeURIComponent(requestId)}/cancel`,
+      { method: 'POST' },
+    );
+  }
+
+  // Teacher Enrollment Requests
+  getCourseEnrollmentRequests(
+    courseId: string,
+    params?: {
+      search?: string;
+      status?: 'pending' | 'approved' | 'rejected' | 'cancelled';
+      page?: number;
+      page_size?: number;
+    },
+  ): Promise<PaginatedTeacherEnrollmentRequestList> {
+    return this.client.untypedRequest<PaginatedTeacherEnrollmentRequestList>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/enrollment-requests`,
+      { method: 'GET', params },
+    );
+  }
+
+  approveEnrollmentRequest(requestId: string): Promise<TeacherEnrollmentRequest> {
+    return this.client.untypedRequest<TeacherEnrollmentRequest>(
+      `/api/v1/courses/enrollment-requests/${encodeURIComponent(requestId)}/approve`,
+      { method: 'POST' },
+    );
+  }
+
+  rejectEnrollmentRequest(requestId: string, reason?: string): Promise<TeacherEnrollmentRequest> {
+    return this.client.untypedRequest<TeacherEnrollmentRequest>(
+      `/api/v1/courses/enrollment-requests/${encodeURIComponent(requestId)}/reject`,
+      { method: 'POST', body: { reason: reason ?? '' } },
+    );
+  }
+
+  // Members
+  getCourseMembers(
+    courseId: string,
+    params?: {
+      search?: string;
+      status?: 'active' | 'withdrawn';
+      page?: number;
+      page_size?: number;
+    },
+  ): Promise<PaginatedCourseMemberList> {
+    return this.client.untypedRequest<PaginatedCourseMemberList>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/members`,
+      { method: 'GET', params },
+    );
+  }
+
+  addCourseMember(courseId: string, studentEmail: string): Promise<CourseMember> {
+    return this.client.untypedRequest<CourseMember>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/members`,
+      { method: 'POST', body: { student_email: studentEmail } },
+    );
+  }
+
+  withdrawMember(courseId: string, studentId: string): Promise<CourseMember> {
+    return this.client.untypedRequest<CourseMember>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/members/${encodeURIComponent(studentId)}/withdraw`,
+      { method: 'POST' },
+    );
+  }
+
+  reEnrollMember(courseId: string, studentId: string): Promise<CourseMember> {
+    return this.client.untypedRequest<CourseMember>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/members/${encodeURIComponent(studentId)}/re-enroll`,
+      { method: 'POST' },
     );
   }
 }

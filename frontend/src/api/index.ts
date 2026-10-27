@@ -14,3 +14,5 @@ export async function fetchHealthReady(): Promise<components['schemas']['Readine
 
 export * from './adminService';
 export * from './authService';
+export * from './coursesService';
+export * from './filesService';

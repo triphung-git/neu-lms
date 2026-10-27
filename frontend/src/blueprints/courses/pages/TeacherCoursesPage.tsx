@@ -40,9 +40,9 @@ export const TeacherCoursesPage: React.FC = () => {
     setError(null);
     try {
       const [result, openCount, archivedCount] = await Promise.all([
-        coursesService.list({ status: activeTab, page, page_size: 20 }),
-        coursesService.list({ status: 'open', page: 1, page_size: 1 }),
-        coursesService.list({ status: 'archived', page: 1, page_size: 1 }),
+        coursesService.list({ role: 'teacher', status: activeTab, page, page_size: 20 }),
+        coursesService.list({ role: 'teacher', status: 'open', page: 1, page_size: 1 }),
+        coursesService.list({ role: 'teacher', status: 'archived', page: 1, page_size: 1 }),
       ]);
       if (sequence !== loadSequence.current) return;
       setCourses(result.items);

@@ -1,7 +1,9 @@
 import json
 import logging
+import os
 import re
 import smtplib
+import urllib.error
 import urllib.request
 from unittest.mock import patch
 
@@ -336,9 +338,12 @@ class TestMailpitRealSmtpIntegration:
         req = urllib.request.Request(mailpit_api, method="DELETE")
         try:
             with urllib.request.urlopen(req, timeout=3) as resp:
-                assert resp.status == 200
-        except Exception as exc:
+                response_status = resp.status
+        except (urllib.error.URLError, TimeoutError) as exc:
+            if os.environ.get("GITHUB_ACTIONS") == "true":
+                pytest.fail("Mailpit service is required on GitHub Actions", pytrace=False)
             pytest.skip(f"Mailpit service not reachable: {exc}")
+        assert response_status == 200
 
         # 2. Request reset (leaves delivery in PENDING without calling SMTP)
         request_password_reset(email=auth_user.email)

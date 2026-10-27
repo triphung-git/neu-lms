@@ -612,6 +612,238 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_id}/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Gửi yêu cầu ghi danh môn học
+         * @description Sinh viên gửi yêu cầu ghi danh vào môn học đang mở nhận đăng ký.
+         */
+        post: operations["courses_enroll_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/enrollment-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách yêu cầu ghi danh của môn học (Giảng viên)
+         * @description Giảng viên phụ trách xem hàng đợi yêu cầu ghi danh của môn học.
+         */
+        get: operations["courses_enrollment_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/file-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_file_policy_retrieve"];
+        put: operations["courses_file_policy_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["courses_file_policy_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_retrieve"];
+        put?: never;
+        post?: never;
+        delete: operations["courses_files_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_files_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_files_commit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["courses_files_content_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_preview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/upload-intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_files_upload_intent_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách thành viên môn học
+         * @description Giảng viên phụ trách xem danh sách thành viên của môn học.
+         */
+        get: operations["courses_members_list"];
+        put?: never;
+        /**
+         * Thêm thành viên vào môn học
+         * @description Giảng viên phụ trách thêm sinh viên vào môn học bằng email.
+         */
+        post: operations["courses_members_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members/{student_id}/re-enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Khôi phục thành viên môn học
+         * @description Giảng viên phụ trách khôi phục thành viên đã rút lui.
+         */
+        post: operations["courses_members_re_enroll_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members/{student_id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rút thành viên khỏi môn học
+         * @description Sinh viên tự rút lui hoặc giảng viên phụ trách gỡ thành viên khỏi môn học.
+         */
+        post: operations["courses_members_withdraw_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/{id}": {
         parameters: {
             query?: never;
@@ -638,6 +870,126 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["courses_archive_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh mục môn học đang mở nhận ghi danh
+         * @description Tra cứu danh mục môn học đang mở nhận ghi danh kèm trạng thái đăng ký của sinh viên.
+         */
+        get: operations["courses_catalog_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Duyệt yêu cầu ghi danh
+         * @description Giảng viên phụ trách duyệt yêu cầu ghi danh vào môn học.
+         */
+        post: operations["courses_enrollment_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hủy yêu cầu ghi danh
+         * @description Sinh viên hủy yêu cầu ghi danh đang ở trạng thái pending của chính mình.
+         */
+        post: operations["courses_enrollment_requests_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Từ chối yêu cầu ghi danh
+         * @description Giảng viên phụ trách từ chối yêu cầu ghi danh vào môn học kèm lý do.
+         */
+        post: operations["courses_enrollment_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách yêu cầu ghi danh của sinh viên
+         * @description Lấy danh sách các yêu cầu ghi danh của chính sinh viên đang đăng nhập.
+         */
+        get: operations["courses_enrollment_requests_my_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lấy tổng quan môn học theo vai trò cá nhân
+         * @description Trả về các chỉ số thống kê môn học thực tế cho giảng viên phụ trách hoặc sinh viên đang tham gia.
+         */
+        get: operations["courses_summary_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -688,6 +1040,10 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddMemberRequest: {
+            /** Format: email */
+            student_email: string;
+        };
         AdminAccountDetail: {
             /** Format: uuid */
             id: string;
@@ -833,6 +1189,18 @@ export interface components {
         ChapterRequest: {
             title: string;
         };
+        CommitUploadRequest: {
+            /** @default  */
+            client_checksum: string;
+        };
+        CommitUploadResponse: {
+            /** Format: uuid */
+            file_id: string;
+            file_name: string;
+            file_size: number;
+            status: string;
+            sha256_hash: string;
+        };
         Course: {
             /** Format: uuid */
             readonly id: string;
@@ -854,6 +1222,73 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        CourseCatalogItem: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            term: string;
+            description: string;
+            teacher_name: string;
+            enrollment_open: boolean;
+            active_member_count: number;
+            my_enrollment_status: string;
+            /** Format: uuid */
+            pending_request_id: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CourseFilePolicy: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            readonly used_quota_bytes: number;
+            readonly reserved_quota_bytes: number;
+            readonly version: number;
+            preview_allowed?: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        CourseFilePolicyRequest: {
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            preview_allowed?: boolean;
+        };
+        CourseMember: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly student_id: string;
+            readonly student_name: string;
+            /** Format: email */
+            readonly student_email: string;
+            readonly status: components["schemas"]["CourseMemberStatusEnum"];
+            /** Format: date-time */
+            readonly added_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `active` - Đang tham gia
+         *     * `withdrawn` - Đã rút
+         * @enum {string}
+         */
+        CourseMemberStatusEnum: "active" | "withdrawn";
         CourseRequest: {
             code: string;
             name: string;
@@ -867,6 +1302,46 @@ export interface components {
          * @enum {string}
          */
         CourseStatusEnum: "open" | "archived";
+        CourseSummaryItem: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            term: string;
+            status: string;
+            enrollment_open: boolean;
+            active_member_count?: number | null;
+            teacher_name?: string;
+            chapter_count: number;
+            lesson_count: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CourseSummaryResponse: {
+            role: components["schemas"]["RequestableRoleEnum"];
+            total_courses?: number | null;
+            open_courses?: number | null;
+            archived_courses?: number | null;
+            enrollment_open_courses?: number | null;
+            total_memberships?: number | null;
+            distinct_students?: number | null;
+            pending_submissions?: number | null;
+            problem_materials?: number | null;
+            pending_ai_drafts?: number | null;
+            total_enrolled_courses?: number | null;
+            open_enrolled_courses?: number | null;
+            archived_enrolled_courses?: number | null;
+            withdrawn_courses?: number | null;
+            recent_grades?: number | null;
+            recent_announcements?: number | null;
+            total_chapters: number;
+            total_lessons: number;
+            upcoming_deadlines?: number | null;
+            recent_courses: components["schemas"]["CourseSummaryItem"][];
+            unavailable_metrics: string[];
+        };
         CourseTransferRequest: {
             /** Format: uuid */
             teacher_id: string;
@@ -879,6 +1354,14 @@ export interface components {
             email: string;
             password: string;
         };
+        /**
+         * @description * `pending` - Đang chờ duyệt
+         *     * `approved` - Đã duyệt
+         *     * `rejected` - Đã từ chối
+         *     * `cancelled` - Đã hủy
+         * @enum {string}
+         */
+        EnrollmentRequestStatusEnum: "pending" | "approved" | "rejected" | "cancelled";
         ErrorEnvelope: {
             error: {
                 /**
@@ -963,8 +1446,82 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        PaginatedCourseCatalogItemList: {
+            items: components["schemas"]["CourseCatalogItem"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
         PaginatedCourseList: {
             items: components["schemas"]["Course"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        PaginatedCourseMemberList: {
+            items: components["schemas"]["CourseMember"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        PaginatedStoredFileList: {
+            items: components["schemas"]["StoredFile"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        PaginatedStudentEnrollmentRequestList: {
+            items: components["schemas"]["StudentEnrollmentRequest"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        PaginatedTeacherEnrollmentRequestList: {
+            items: components["schemas"]["TeacherEnrollmentRequest"][];
             pagination: {
                 /** @example 1 */
                 page: number;
@@ -987,6 +1544,15 @@ export interface components {
         PatchedChapterRequest: {
             title?: string;
         };
+        PatchedCourseFilePolicyRequest: {
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            preview_allowed?: boolean;
+        };
         PatchedCourseRequest: {
             code?: string;
             name?: string;
@@ -997,6 +1563,9 @@ export interface components {
         PatchedLessonRequest: {
             title?: string;
             description?: string;
+        };
+        PatchedUpdateFilePublishRequest: {
+            is_published?: boolean;
         };
         ReadinessSuccessResponse: {
             /** @default ok */
@@ -1029,6 +1598,10 @@ export interface components {
             requested_role: components["schemas"]["RequestableRoleEnum"];
             /** @default false */
             email_verified: boolean;
+        };
+        RejectEnrollmentRequestRequest: {
+            /** @default  */
+            reason: string;
         };
         ReorderRequest: {
             ids: string[];
@@ -1092,6 +1665,104 @@ export interface components {
             idle_expires_at: string;
             /** Format: date-time */
             absolute_expires_at: string;
+        };
+        StoredFile: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly uploader_id: string;
+            readonly uploader_name: string;
+            readonly file_name: string;
+            readonly file_size: number;
+            readonly status: components["schemas"]["StoredFileStatusEnum"];
+            readonly purpose: components["schemas"]["StoredFilePurposeEnum"];
+            /** @description Chỉ hiển thị cho sinh viên khi tệp clean và đã công bố */
+            readonly is_published: boolean;
+            readonly sha256_hash: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `course_material` - Học liệu môn học
+         *     * `assignment_attachment` - Đính kèm bài tập
+         *     * `assignment_submission` - Bài nộp sinh viên
+         *     * `general` - Tệp chung
+         * @enum {string}
+         */
+        StoredFilePurposeEnum: "course_material" | "assignment_attachment" | "assignment_submission" | "general";
+        /**
+         * @description * `quarantine_pending` - Chờ cách ly
+         *     * `scanning` - Đang quét
+         *     * `clean` - An toàn
+         *     * `infected` - Nhiễm mã độc
+         *     * `deleted` - Đã xóa
+         * @enum {string}
+         */
+        StoredFileStatusEnum: "quarantine_pending" | "scanning" | "clean" | "infected" | "deleted";
+        StudentEnrollmentRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            readonly course_name: string;
+            readonly course_term: string;
+            readonly teacher_name: string;
+            readonly status: components["schemas"]["EnrollmentRequestStatusEnum"];
+            /** Format: date-time */
+            readonly requested_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            readonly rejection_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        TeacherEnrollmentRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly student_id: string;
+            readonly student_name: string;
+            /** Format: email */
+            readonly student_email: string;
+            readonly status: components["schemas"]["EnrollmentRequestStatusEnum"];
+            /** Format: date-time */
+            readonly requested_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            readonly reviewed_by_name: string | null;
+            readonly rejection_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        UploadIntentRequest: {
+            file_name: string;
+            file_size: number;
+            /** @default course_material */
+            purpose: components["schemas"]["StoredFilePurposeEnum"];
+        };
+        UploadIntentResponse: {
+            /** Format: uuid */
+            file_id: string;
+            file_name: string;
+            file_size: number;
+            storage_path: string;
+            status: string;
+            purpose?: string;
+            /** @default 900 */
+            expires_in_seconds: number;
+            /** Format: date-time */
+            expires_at: string;
         };
         /**
          * @description * `admin` - admin
@@ -1879,6 +2550,8 @@ export interface operations {
                 page?: number;
                 /** @description Number of results to return per page. */
                 page_size?: number;
+                /** @description Narrow to owned or enrolled courses */
+                role?: "student" | "teacher";
                 /** @description Search by course code, name, term or teacher */
                 search?: string;
                 /** @description Filter by open or archived status */
@@ -2180,6 +2853,449 @@ export interface operations {
             };
         };
     };
+    courses_enroll_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái yêu cầu */
+                status?: "approved" | "cancelled" | "pending" | "rejected";
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedTeacherEnrollmentRequestList"];
+                };
+            };
+        };
+    };
+    courses_file_policy_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_file_policy_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CourseFilePolicyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseFilePolicyRequest"];
+                "multipart/form-data": components["schemas"]["CourseFilePolicyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_file_policy_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCourseFilePolicyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCourseFilePolicyRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCourseFilePolicyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_files_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                purpose?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStoredFileList"];
+                };
+            };
+        };
+    };
+    courses_files_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFile"];
+                };
+            };
+        };
+    };
+    courses_files_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_files_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUpdateFilePublishRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedUpdateFilePublishRequest"];
+                "multipart/form-data": components["schemas"]["PatchedUpdateFilePublishRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFile"];
+                };
+            };
+        };
+    };
+    courses_files_commit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CommitUploadRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CommitUploadRequest"];
+                "multipart/form-data": components["schemas"]["CommitUploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitUploadResponse"];
+                };
+            };
+        };
+    };
+    courses_files_content_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_files_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_files_preview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_files_upload_intent_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadIntentRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["UploadIntentRequest"];
+                "multipart/form-data": components["schemas"]["UploadIntentRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadIntentResponse"];
+                };
+            };
+        };
+    };
+    courses_members_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái thành viên ('active' hoặc 'withdrawn') */
+                status?: "active" | "withdrawn";
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseMemberList"];
+                };
+            };
+        };
+    };
+    courses_members_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMemberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AddMemberRequest"];
+                "multipart/form-data": components["schemas"]["AddMemberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_members_re_enroll_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                student_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_members_withdraw_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                student_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
     courses_retrieve: {
         parameters: {
             query?: never;
@@ -2292,6 +3408,153 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_catalog_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang (bắt đầu từ 1) */
+                page?: number;
+                /** @description Số lượng mỗi trang (tối đa 100) */
+                page_size?: number;
+                /** @description Tìm kiếm theo mã, tên môn, học kỳ, giảng viên */
+                search?: string;
+                /** @description Lọc theo học kỳ */
+                term?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseCatalogItemList"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RejectEnrollmentRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RejectEnrollmentRequestRequest"];
+                "multipart/form-data": components["schemas"]["RejectEnrollmentRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_my_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái yêu cầu */
+                status?: "approved" | "cancelled" | "pending" | "rejected";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStudentEnrollmentRequestList"];
+                };
+            };
+        };
+    };
+    courses_summary_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Vai trò workspace cần lấy summary ('teacher' hoặc 'student'). */
+                role?: "student" | "teacher";
+                /** @description Alias cho tham số role. */
+                workspace?: "student" | "teacher";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSummaryResponse"];
                 };
             };
         };

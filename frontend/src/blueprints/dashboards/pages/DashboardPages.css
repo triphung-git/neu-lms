@@ -504,3 +504,36 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Unavailable metrics and status helpers */
+.stat-metric-unavailable {
+  cursor: default;
+  opacity: 0.9;
+}
+.stat-metric-unavailable:hover {
+  transform: none;
+  border-color: var(--border);
+  box-shadow: var(--shadow-small);
+}
+
+.metric-unavailable-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.dash-notice-box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background-color: var(--surface-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.dash-notice-header {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
