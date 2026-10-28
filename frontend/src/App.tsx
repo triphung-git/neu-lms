@@ -138,6 +138,7 @@ export const App: React.FC = () => {
                   <Route path="hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
                   <Route path="tim-kiem" element={<StudentMaterialSearchPage />} />
                   <Route path="bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
+                  <Route path="mon-hoc/:monId/bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
                   <Route path="diem" element={<StudentGradesPage />} />
                   <Route path="thong-bao" element={<StudentAnnouncementsPage />} />
                 </Route>

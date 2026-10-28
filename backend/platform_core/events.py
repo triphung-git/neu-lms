@@ -41,6 +41,15 @@ EVENTS = {
     "materials.hidden": {"course_id", "material_id"},
     "materials.unhidden": {"course_id", "material_id"},
     "materials.file_delivered": {"course_id", "material_id", "file_id"},
+    "assignments.created": {"course_id", "assignment_id"},
+    "assignments.updated": {"course_id", "assignment_id", "version"},
+    "assignments.published": {"course_id", "assignment_id", "version"},
+    "assignments.closed": {"course_id", "assignment_id"},
+    "assignments.reopened": {"course_id", "assignment_id"},
+    "assignments.archived": {"course_id", "assignment_id"},
+    "assignments.attachment_delivered": {"course_id", "assignment_id", "file_id"},
+    "assignments.reopen_window_created": {"course_id", "assignment_id", "window_id", "target_type"},
+    "assignments.reopen_window_revoked": {"course_id", "assignment_id", "window_id"},
 }
 
 
@@ -63,6 +72,7 @@ def _metadata(action, metadata):
         "uploader_id",
         "material_id",
         "version_id",
+        "assignment_id",
     } & metadata.keys():
         try:
             uuid.UUID(str(metadata[key]))
@@ -82,6 +92,7 @@ def append_audit(*, action, resource_type, resource_id, actor=None, system_actor
         "material",
         "material_version",
         "material_file",
+        "assignment",
     }:
         raise DomainError("INVALID_RESOURCE_TYPE")
     if (actor is None) == (not system_actor):

@@ -809,6 +809,178 @@
                 }
             }
         },
+        "/api/v1/assignments/{id}": {
+            "get": {
+                "operationId": "assignments_direct_retrieve",
+                "description": "Xem chi tiết bài tập trực tiếp qua assignment ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignments"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/assignments/{id}/attachments/{file_id}/download": {
+            "get": {
+                "operationId": "assignments_direct_attachment_download",
+                "description": "Tải xuống tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignments"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/assignments/{id}/attachments/{file_id}/preview": {
+            "get": {
+                "operationId": "assignments_direct_attachment_preview",
+                "description": "Xem trước trực tuyến tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignments"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/assignments/{id}/eligibility": {
+            "get": {
+                "operationId": "assignments_direct_eligibility_check",
+                "description": "Thẩm định tính hợp lệ nộp bài trực tiếp qua assignment ID.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "assignments"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentAssignmentEligibility"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/auth/csrf": {
             "get": {
                 "operationId": "auth_csrf_retrieve",
@@ -1456,6 +1628,940 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/Course"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments": {
+            "get": {
+                "operationId": "teacher_assignments_list",
+                "description": "Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Lọc theo chương học"
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang hiển thị"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Kích thước mỗi trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tìm kiếm theo tiêu đề bài tập"
+                    },
+                    {
+                        "in": "query",
+                        "name": "status",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo trạng thái bài tập hoặc 'all'"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAssignmentSummaryList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "teacher_assignments_create",
+                "description": "Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCreateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCreateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCreateRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}": {
+            "get": {
+                "operationId": "teacher_assignments_retrieve",
+                "description": "Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "put": {
+                "operationId": "teacher_assignments_update",
+                "description": "Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentUpdateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentUpdateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentUpdateRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "teacher_assignments_partial_update",
+                "description": "Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentUpdateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentUpdateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAssignmentUpdateRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/archive": {
+            "post": {
+                "operationId": "teacher_assignments_archive",
+                "description": "Lưu trữ bài tập.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/download": {
+            "get": {
+                "operationId": "assignments_attachment_download",
+                "description": "Tải xuống tệp đính kèm tài liệu đề bài của bài tập.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/preview": {
+            "get": {
+                "operationId": "assignments_attachment_preview",
+                "description": "Xem trước trực tuyến tệp đính kèm tài liệu đề bài của bài tập.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/close": {
+            "post": {
+                "operationId": "teacher_assignments_close",
+                "description": "Đóng nhận bài sớm thủ công hoặc mở lại bài tập kèm gia hạn thời hạn nộp bài.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/eligibility": {
+            "get": {
+                "operationId": "assignments_eligibility_check",
+                "description": "Thẩm định tính hợp lệ nộp bài của sinh viên theo Thẩm quyền Máy chủ.\n\nKhông dùng ClockContext hay client timestamp làm authority.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentAssignmentEligibility"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/preview": {
+            "get": {
+                "operationId": "teacher_assignments_preview",
+                "description": "Xem trước bài tập dưới góc nhìn sinh viên.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentPreview"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/publish": {
+            "post": {
+                "operationId": "teacher_assignments_publish",
+                "description": "Công bố bài tập cho sinh viên và đóng băng đề bài cùng rubric.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentPublishRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentPublishRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentPublishRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/reopen": {
+            "post": {
+                "operationId": "teacher_assignments_reopen",
+                "description": "Endpoint mở lại bài tập đã đóng nhận bài.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/AssignmentCloseRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows": {
+            "get": {
+                "operationId": "teacher_assignments_reopen_windows_list",
+                "description": "Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AssignmentReopenWindow"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "teacher_assignments_reopen_windows_create",
+                "description": "Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAssignmentReopenWindowRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAssignmentReopenWindowRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CreateAssignmentReopenWindowRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentReopenWindow"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows/{window_id}": {
+            "delete": {
+                "operationId": "teacher_assignments_reopen_windows_revoke",
+                "description": "Thu hồi / hủy hiệu lực một cửa sổ mở lại.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "window_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AssignmentReopenWindow"
                                 }
                             }
                         },
@@ -4001,6 +5107,77 @@
                 }
             }
         },
+        "/api/v1/courses/{course_id}/published-assignments": {
+            "get": {
+                "operationId": "courses_published_assignments_list",
+                "description": "Danh sách bài tập đã công bố của môn học dành cho sinh viên và giảng viên.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "description": "Lọc theo chương học"
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Số trang hiển thị"
+                    },
+                    {
+                        "in": "query",
+                        "name": "page_size",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "description": "Kích thước mỗi trang"
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tìm kiếm theo tiêu đề bài tập"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedAssignmentSummaryList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{id}": {
             "get": {
                 "operationId": "courses_retrieve",
@@ -5124,6 +6301,717 @@
                     "user_id"
                 ]
             },
+            "ApplicableFilePolicy": {
+                "type": "object",
+                "description": "Serializer cho chính sách tệp áp dụng cho lần nộp tiếp theo.",
+                "properties": {
+                    "version": {
+                        "type": "integer"
+                    },
+                    "max_files": {
+                        "type": "integer"
+                    },
+                    "max_file_size_bytes": {
+                        "type": "integer"
+                    },
+                    "allowed_extensions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "allowed_extensions",
+                    "max_file_size_bytes",
+                    "max_files",
+                    "version"
+                ]
+            },
+            "AssignmentAttachment": {
+                "type": "object",
+                "description": "Serializer cho tệp đính kèm tài liệu đề bài của giảng viên.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "name": {
+                        "type": "string",
+                        "maxLength": 255
+                    },
+                    "size_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64"
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "sha256_hash": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "download_url": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "download_url",
+                    "file_id",
+                    "id",
+                    "mime_type",
+                    "name",
+                    "preview_url",
+                    "sha256_hash",
+                    "size_bytes"
+                ]
+            },
+            "AssignmentCloseRequestRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu yêu cầu đóng hoặc mở lại cửa sổ nhận bài.",
+                "properties": {
+                    "close_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CloseTypeEnum"
+                            }
+                        ],
+                        "default": "manual_close"
+                    },
+                    "reopen_until": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "target_type": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "all"
+                    },
+                    "reopen_student_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "scope": {
+                        "type": "string",
+                        "minLength": 1,
+                        "default": "all_actions"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                }
+            },
+            "AssignmentCreateRequestRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu yêu cầu tạo bài tập mới từ giảng viên.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "allow_late": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "ai_grading_opt_in": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "rubric_criteria": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RubricCriterionInputRequest"
+                        }
+                    },
+                    "file_policy": {
+                        "$ref": "#/components/schemas/FilePolicyInputRequest"
+                    },
+                    "attachment_file_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "publish_immediately": {
+                        "type": "boolean",
+                        "default": false
+                    }
+                },
+                "required": [
+                    "due_at",
+                    "title"
+                ]
+            },
+            "AssignmentDetail": {
+                "type": "object",
+                "description": "Serializer đầy đủ thông tin bài tập phục vụ xem chi tiết và biên soạn.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)",
+                        "readOnly": true
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Chương học chứa bài tập (xóa chương sẽ gán NULL)",
+                        "readOnly": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Bài học gắn với bài tập (xóa bài học sẽ gán NULL)",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Tiêu đề bài tập"
+                    },
+                    "instructions": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Nội dung yêu cầu, chỉ dẫn làm bài"
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AssignmentStatusEnum"
+                            }
+                        ],
+                        "readOnly": true,
+                        "description": "Trạng thái vòng đời: draft -> published -> closed/archived\n\n* `draft` - Bản nháp\n* `published` - Đã công bố\n* `closed` - Đã đóng nhận bài\n* `archived` - Đã lưu trữ"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "description": "Hạn chót nộp bài"
+                    },
+                    "allow_late": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ)"
+                    },
+                    "manually_closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "Thời điểm giảng viên chủ động đóng thu nhận bài sớm"
+                    },
+                    "rubric_criteria": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssignmentRubricCriterion"
+                        },
+                        "readOnly": true
+                    },
+                    "total_score": {
+                        "type": "number",
+                        "format": "double",
+                        "readOnly": true
+                    },
+                    "file_policy": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AssignmentFilePolicy"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "attachments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssignmentAttachment"
+                        },
+                        "readOnly": true
+                    },
+                    "ai_grading_opt_in": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt)"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Phiên bản tương tranh lạc quan (OCC)"
+                    },
+                    "is_submission_window_open": {
+                        "type": "boolean",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "ai_grading_opt_in",
+                    "allow_late",
+                    "attachments",
+                    "chapter_id",
+                    "course_id",
+                    "created_at",
+                    "due_at",
+                    "file_policy",
+                    "id",
+                    "instructions",
+                    "is_submission_window_open",
+                    "lesson_id",
+                    "manually_closed_at",
+                    "published_at",
+                    "rubric_criteria",
+                    "status",
+                    "title",
+                    "total_score",
+                    "updated_at",
+                    "version"
+                ]
+            },
+            "AssignmentFilePolicy": {
+                "type": "object",
+                "description": "Serializer cho chính sách tệp đính kèm khi nộp bài.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "max_files_per_submission": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "description": "Số lượng tệp tối đa trong một lần nộp (1 đến 10)"
+                    },
+                    "max_file_size_bytes": {
+                        "type": "integer",
+                        "maximum": 9223372036854775807,
+                        "minimum": -9223372036854775808,
+                        "format": "int64",
+                        "description": "Dung lượng tối đa mỗi tệp (bytes)"
+                    },
+                    "allowed_extensions": {
+                        "description": "Danh sách phần mở rộng hợp lệ (chữ thường, không chứa dấu chấm)"
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Phiên bản chính sách tệp cho lần nộp tương lai"
+                    }
+                },
+                "required": [
+                    "id",
+                    "version"
+                ]
+            },
+            "AssignmentPreview": {
+                "type": "object",
+                "description": "Schema phản hồi cho chức năng xem trước bài tập dưới góc nhìn sinh viên.",
+                "properties": {
+                    "assignment": {
+                        "$ref": "#/components/schemas/AssignmentDetail"
+                    },
+                    "preview_mode": {
+                        "type": "boolean",
+                        "default": true
+                    }
+                },
+                "required": [
+                    "assignment"
+                ]
+            },
+            "AssignmentPublishRequestRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu yêu cầu công bố bài tập.",
+                "properties": {
+                    "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
+            },
+            "AssignmentReopenWindow": {
+                "type": "object",
+                "description": "Serializer cho chi tiết cửa sổ mở lại do giảng viên chủ động cấp.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Bài tập được áp dụng cửa sổ mở lại",
+                        "readOnly": true
+                    },
+                    "target_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TargetTypeEnum"
+                            }
+                        ],
+                        "description": "Đối tượng áp dụng: all (toàn bộ lớp) hoặc student (sinh viên cụ thể)\n\n* `all` - Toàn bộ lớp\n* `student` - Sinh viên cụ thể"
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Sinh viên cụ thể nếu target_type='student'",
+                        "readOnly": true
+                    },
+                    "student_display_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "student_email": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "start_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Thời điểm bắt đầu hiệu lực của cửa sổ"
+                    },
+                    "end_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Thời điểm kết thúc của cửa sổ mở lại"
+                    },
+                    "scope": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ScopeEnum"
+                            }
+                        ],
+                        "description": "Phạm vi: all_actions (nộp mới và thay thế) hoặc first_only (chỉ lần đầu)\n\n* `all_actions` - Cho phép nộp mới và nộp lại\n* `first_only` - Chỉ cho phép nộp lần đầu"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "description": "Lý do giảng viên cấp cửa sổ mở lại / ngoại lệ"
+                    },
+                    "is_active": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Cờ kích hoạt của cửa sổ mở lại"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "assignment_id",
+                    "created_at",
+                    "end_at",
+                    "id",
+                    "is_active",
+                    "student_display_name",
+                    "student_email",
+                    "student_id"
+                ]
+            },
+            "AssignmentRubricCriterion": {
+                "type": "object",
+                "description": "Serializer cho tiêu chí đánh giá rubric của bài tập.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "Tên tiêu chí đánh giá",
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Mô tả mức độ đạt và hướng dẫn chấm"
+                    },
+                    "max_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "description": "Điểm tối đa của tiêu chí (phải > 0)"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0,
+                        "description": "Thứ tự hiển thị tiêu chí"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title"
+                ]
+            },
+            "AssignmentStatusEnum": {
+                "enum": [
+                    "draft",
+                    "published",
+                    "closed",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `draft` - Bản nháp\n* `published` - Đã công bố\n* `closed` - Đã đóng nhận bài\n* `archived` - Đã lưu trữ"
+            },
+            "AssignmentSummaryItem": {
+                "type": "object",
+                "description": "Serializer tóm tắt bài tập hiển thị trong danh sách môn học của giảng viên.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "description": "Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)",
+                        "readOnly": true
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Chương học chứa bài tập (xóa chương sẽ gán NULL)",
+                        "readOnly": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true,
+                        "description": "Bài học gắn với bài tập (xóa bài học sẽ gán NULL)",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Tiêu đề bài tập"
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/AssignmentStatusEnum"
+                            }
+                        ],
+                        "readOnly": true,
+                        "description": "Trạng thái vòng đời: draft -> published -> closed/archived\n\n* `draft` - Bản nháp\n* `published` - Đã công bố\n* `closed` - Đã đóng nhận bài\n* `archived` - Đã lưu trữ"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "description": "Hạn chót nộp bài"
+                    },
+                    "allow_late": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ)"
+                    },
+                    "manually_closed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true,
+                        "description": "Thời điểm giảng viên chủ động đóng thu nhận bài sớm"
+                    },
+                    "total_score": {
+                        "type": "number",
+                        "format": "double",
+                        "readOnly": true
+                    },
+                    "rubric_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "attachment_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "submission_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "default": 0
+                    },
+                    "graded_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "default": 0
+                    },
+                    "ai_grading_opt_in": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt)"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "version": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Phiên bản tương tranh lạc quan (OCC)"
+                    }
+                },
+                "required": [
+                    "ai_grading_opt_in",
+                    "allow_late",
+                    "attachment_count",
+                    "chapter_id",
+                    "course_id",
+                    "created_at",
+                    "due_at",
+                    "graded_count",
+                    "id",
+                    "lesson_id",
+                    "manually_closed_at",
+                    "published_at",
+                    "rubric_count",
+                    "status",
+                    "submission_count",
+                    "title",
+                    "total_score",
+                    "updated_at",
+                    "version"
+                ]
+            },
+            "AssignmentUpdateRequestRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "instructions": {
+                        "type": "string"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "allow_late": {
+                        "type": "boolean"
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "ai_grading_opt_in": {
+                        "type": "boolean"
+                    },
+                    "rubric_criteria": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RubricCriterionInputRequest"
+                        }
+                    },
+                    "file_policy": {
+                        "$ref": "#/components/schemas/FilePolicyInputRequest"
+                    },
+                    "attachment_file_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
+            },
             "Chapter": {
                 "type": "object",
                 "properties": {
@@ -5177,6 +7065,14 @@
                 "required": [
                     "title"
                 ]
+            },
+            "CloseTypeEnum": {
+                "enum": [
+                    "manual_close",
+                    "reopen"
+                ],
+                "type": "string",
+                "description": "* `manual_close` - manual_close\n* `reopen` - reopen"
             },
             "CommitUploadRequest": {
                 "type": "object",
@@ -5713,6 +7609,49 @@
                     "teacher_id"
                 ]
             },
+            "CreateAssignmentReopenWindowRequest": {
+                "type": "object",
+                "description": "Serializer cho yêu cầu tạo cửa sổ mở lại nộp bài.",
+                "properties": {
+                    "target_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TargetTypeEnum"
+                            }
+                        ],
+                        "default": "all"
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "start_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "end_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "scope": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ScopeEnum"
+                            }
+                        ],
+                        "default": "all_actions"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "default": ""
+                    }
+                },
+                "required": [
+                    "end_at"
+                ]
+            },
             "CreateRoleRequestRequest": {
                 "type": "object",
                 "properties": {
@@ -5808,6 +7747,29 @@
                                 "format": "uuid",
                                 "description": "Correlation / Request UUID"
                             }
+                        }
+                    }
+                }
+            },
+            "FilePolicyInputRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu đầu vào cho chính sách tệp nộp bài.",
+                "properties": {
+                    "max_files_per_submission": {
+                        "type": "integer",
+                        "maximum": 10,
+                        "minimum": 1
+                    },
+                    "max_file_size_bytes": {
+                        "type": "integer",
+                        "maximum": 52428800,
+                        "minimum": 1
+                    },
+                    "allowed_extensions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1
                         }
                     }
                 }
@@ -6793,6 +8755,25 @@
                     }
                 }
             },
+            "PaginatedAssignmentSummaryList": {
+                "type": "object",
+                "description": "Serializer phân trang cho danh sách bài tập của môn học.",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AssignmentSummaryItem"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
             "PaginatedCourseCatalogItemList": {
                 "type": "object",
                 "required": [
@@ -7142,6 +9123,37 @@
                     "total_pages"
                 ]
             },
+            "PaginationMeta": {
+                "type": "object",
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total_items": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    },
+                    "has_next": {
+                        "type": "boolean"
+                    },
+                    "has_previous": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "has_next",
+                    "has_previous",
+                    "page",
+                    "page_size",
+                    "total_items",
+                    "total_pages"
+                ]
+            },
             "PasswordChangeRequest": {
                 "type": "object",
                 "properties": {
@@ -7162,6 +9174,60 @@
                     "current_password",
                     "new_password"
                 ]
+            },
+            "PatchedAssignmentUpdateRequestRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "instructions": {
+                        "type": "string"
+                    },
+                    "due_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "allow_late": {
+                        "type": "boolean"
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "ai_grading_opt_in": {
+                        "type": "boolean"
+                    },
+                    "rubric_criteria": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RubricCriterionInputRequest"
+                        }
+                    },
+                    "file_policy": {
+                        "$ref": "#/components/schemas/FilePolicyInputRequest"
+                    },
+                    "attachment_file_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    "expected_version": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                }
             },
             "PatchedChapterRequest": {
                 "type": "object",
@@ -7542,6 +9608,47 @@
                 "type": "string",
                 "description": "* `pending` - pending\n* `approved` - approved\n* `rejected` - rejected\n* `cancelled` - cancelled"
             },
+            "RubricCriterionInputRequest": {
+                "type": "object",
+                "description": "Schema dữ liệu đầu vào cho một tiêu chí rubric.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 255
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "max_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$",
+                        "default": "10.00"
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "ScopeEnum": {
+                "enum": [
+                    "all_actions",
+                    "first_only"
+                ],
+                "type": "string",
+                "description": "* `all_actions` - Cho phép nộp mới và nộp lại\n* `first_only` - Chỉ cho phép nộp lần đầu"
+            },
             "SessionInfo": {
                 "type": "object",
                 "properties": {
@@ -7693,6 +9800,86 @@
                 "type": "string",
                 "description": "* `quarantine_pending` - Chờ cách ly\n* `scanning` - Đang quét\n* `clean` - An toàn\n* `infected` - Nhiễm mã độc\n* `deleted` - Đã xóa"
             },
+            "StudentAssignmentEligibility": {
+                "type": "object",
+                "description": "Serializer cho kết quả thẩm định hợp lệ nộp bài theo Thẩm quyền Máy chủ.",
+                "properties": {
+                    "can_submit": {
+                        "type": "boolean"
+                    },
+                    "can_replace": {
+                        "type": "boolean"
+                    },
+                    "is_late": {
+                        "type": "boolean"
+                    },
+                    "reason": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "server_time": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "deadline": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "effective_deadline": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "allow_late": {
+                        "type": "boolean"
+                    },
+                    "manually_closed": {
+                        "type": "boolean"
+                    },
+                    "in_reopen_window": {
+                        "type": "boolean"
+                    },
+                    "reopen_window_id": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "reopen_window_scope": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "reopen_window_end": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "has_existing_submission": {
+                        "type": "boolean"
+                    },
+                    "applicable_file_policy": {
+                        "$ref": "#/components/schemas/ApplicableFilePolicy"
+                    },
+                    "contract_version": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "allow_late",
+                    "applicable_file_policy",
+                    "can_replace",
+                    "can_submit",
+                    "contract_version",
+                    "deadline",
+                    "effective_deadline",
+                    "has_existing_submission",
+                    "in_reopen_window",
+                    "is_late",
+                    "manually_closed",
+                    "reason",
+                    "reopen_window_end",
+                    "reopen_window_id",
+                    "reopen_window_scope",
+                    "server_time"
+                ]
+            },
             "StudentEnrollmentRequest": {
                 "type": "object",
                 "properties": {
@@ -7770,6 +9957,14 @@
                     "teacher_name",
                     "updated_at"
                 ]
+            },
+            "TargetTypeEnum": {
+                "enum": [
+                    "all",
+                    "student"
+                ],
+                "type": "string",
+                "description": "* `all` - Toàn bộ lớp\n* `student` - Sinh viên cụ thể"
             },
             "TeacherEnrollmentRequest": {
                 "type": "object",
@@ -7871,6 +10066,11 @@
                             }
                         ],
                         "default": "course_material"
+                    },
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
                     }
                 },
                 "required": [

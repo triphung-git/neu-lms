@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     "courses",
     "files",
     "materials",
+    "assignments",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []
@@ -78,6 +79,7 @@ SPECTACULAR_SETTINGS = {
         "CourseMemberStatusEnum": "courses.models.Membership.Status",
         "StoredFileStatusEnum": "files.models.StoredFile.Status",
         "StoredFilePurposeEnum": "files.models.StoredFile.Purpose",
+        "AssignmentStatusEnum": "assignments.models.AssignmentStatus",
     },
     "APPEND_COMPONENTS": {
         "securitySchemes": {

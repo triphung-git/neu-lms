@@ -91,6 +91,7 @@ class UploadIntentSerializer(serializers.Serializer):
         default=FilePurpose.COURSE_MATERIAL,
         required=False,
     )
+    assignment_id = serializers.UUIDField(required=False, allow_null=True, default=None)
 
 
 class UploadIntentResponseSerializer(serializers.Serializer):

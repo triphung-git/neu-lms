@@ -9,6 +9,9 @@ import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Modal } from '../../../shared/ui/Modal';
 import { coursesService, type Course, type Chapter, type Lesson } from '../../../api/coursesService';
 import { materialsService, type MaterialListItem } from '../../../api/materialsService';
+import { getAssignmentService } from '../../../app/composition/assignmentWiring';
+import type { AssignmentSummaryItem } from '../../assignments/contracts/assignmentsDto';
+import { formatDateVN } from '../../../shared/kernel/formatting';
 import {
   BookOpen,
   FileText,
@@ -21,6 +24,8 @@ import {
   RefreshCw,
   Search,
   Info,
+  Calendar,
+  Clock,
 } from 'lucide-react';
 import './StudentCourseDetailPage.css';
 
@@ -42,6 +47,8 @@ export const StudentCourseDetailPage: React.FC = () => {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [materials, setMaterials] = useState<MaterialListItem[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentSummaryItem[]>([]);
+  const [assignmentsError, setAssignmentsError] = useState(false);
 
   const [materialsTotal, setMaterialsTotal] = useState(0);
   const [materialsError, setMaterialsError] = useState(false);
@@ -96,6 +103,25 @@ export const StudentCourseDetailPage: React.FC = () => {
         }
       } catch {
         if (currentSeq === loadSequence.current) { setMaterials([]); setMaterialsError(true); }
+      }
+
+      // Load published assignments for this course (B10-06)
+      try {
+        const assRes = await getAssignmentService().listStudentAssignments(monId);
+        if (currentSeq === loadSequence.current) {
+          if (assRes.ok) {
+            setAssignments(assRes.data.items || []);
+            setAssignmentsError(false);
+          } else {
+            setAssignments([]);
+            setAssignmentsError(true);
+          }
+        }
+      } catch {
+        if (currentSeq === loadSequence.current) {
+          setAssignments([]);
+          setAssignmentsError(true);
+        }
       }
     } catch (err: unknown) {
       if (currentSeq !== loadSequence.current) return;
@@ -543,23 +569,89 @@ export const StudentCourseDetailPage: React.FC = () => {
 
       {/* Tab: BÀI TẬP */}
       {activeTab === 'bai-tap' && (
-        <section className="course-tab-panel">
+        <section className="course-tab-panel" data-testid="student-assignments-tab">
           <div className="panel-header-row">
             <div>
               <h2 className="panel-title">Danh sách bài tập môn học</h2>
               <p className="panel-subtitle">Theo dõi các bài tập và hạn nộp được giao.</p>
             </div>
           </div>
-          <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
-            <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-            <div>
-              <strong>Phân hệ Bài tập & Đánh giá (B10-B12)</strong>
-              <span>
-                Phân hệ Bài tập đang được phát triển theo lộ trình B10-B12. Dữ liệu bài tập và nộp bài
-                sẽ được kết nối trực tiếp với máy chủ tại các mốc tiếp theo.
-              </span>
+
+          {assignmentsError ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title="Không thể tải danh sách bài tập"
+                description="Đã xảy ra lỗi khi tải dữ liệu bài tập từ máy chủ."
+                action={
+                  <Button variant="secondary" onClick={fetchCourseData} icon={<RefreshCw size={16} />}>
+                    Thử lại
+                  </Button>
+                }
+              />
             </div>
-          </div>
+          ) : assignments.length === 0 ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title="Chưa có bài tập nào"
+                description="Giảng viên chưa công bố bài tập nào cho môn học này."
+              />
+            </div>
+          ) : (
+            <div className="mat-hub-list" style={{ marginTop: 'var(--space-6)' }}>
+              {assignments.map((ass) => (
+                <article key={ass.id} className="mat-hub-card" data-testid={`assignment-item-${ass.id}`}>
+                  <div className="mat-hub-card-body">
+                    <div className="mat-hub-top-row">
+                      <Badge
+                        variant={
+                          ass.status === 'archived'
+                            ? 'archived'
+                            : ass.status === 'closed'
+                            ? 'archived'
+                            : 'published'
+                        }
+                        label={
+                          ass.status === 'archived'
+                            ? 'Lưu trữ'
+                            : ass.status === 'closed'
+                            ? 'Đã đóng nộp'
+                            : 'Đang mở'
+                        }
+                      />
+                      <span className="mat-hub-format" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Award size={14} />
+                        {ass.totalScore} điểm
+                      </span>
+                    </div>
+                    <h3 className="mat-hub-title">{ass.title}</h3>
+                    <div className="mat-hub-meta" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={14} />
+                        Hạn nộp: {formatDateVN(ass.dueAt)}
+                      </span>
+                      {ass.allowLate && (
+                        <span style={{ color: '#d97706', fontSize: 'var(--text-xs)' }}>
+                          (Cho phép nộp muộn)
+                        </span>
+                      )}
+                      {ass.rubricCount > 0 && (
+                        <span>{ass.rubricCount} tiêu chí rubric</span>
+                      )}
+                      {ass.attachmentCount > 0 && (
+                        <span>{ass.attachmentCount} tệp đính kèm</span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/sv/mon-hoc/${monId}/bai-tap/${ass.id}`)}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </article>
+              ))}
+            </div>
+          )}
         </section>
       )}
 
