@@ -8,6 +8,7 @@ import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { Modal } from '../../../shared/ui/Modal';
 import { coursesService, type Course, type Chapter, type Lesson } from '../../../api/coursesService';
+import { materialsService, type MaterialListItem } from '../../../api/materialsService';
 import {
   BookOpen,
   FileText,
@@ -18,6 +19,7 @@ import {
   Award,
   LogOut,
   RefreshCw,
+  Search,
   Info,
 } from 'lucide-react';
 import './StudentCourseDetailPage.css';
@@ -39,6 +41,10 @@ export const StudentCourseDetailPage: React.FC = () => {
   const [course, setCourse] = useState<Course | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [materials, setMaterials] = useState<MaterialListItem[]>([]);
+
+  const [materialsTotal, setMaterialsTotal] = useState(0);
+  const [materialsError, setMaterialsError] = useState(false);
 
   // Withdraw state
   const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
@@ -79,6 +85,18 @@ export const StudentCourseDetailPage: React.FC = () => {
         new Map(lessonResults.flatMap(items => [...items].sort((a, b) => a.position - b.position)).map((l) => [l.id, l])).values()
       );
       setLessons(allLessons);
+
+      // Load published materials for this course
+      try {
+        const matRes = await materialsService.listMaterials(monId);
+        if (currentSeq === loadSequence.current) {
+          setMaterials(matRes.items || []);
+          setMaterialsTotal(matRes.pagination?.total_items ?? matRes.items.length);
+          setMaterialsError(false);
+        }
+      } catch {
+        if (currentSeq === loadSequence.current) { setMaterials([]); setMaterialsError(true); }
+      }
     } catch (err: unknown) {
       if (currentSeq !== loadSequence.current) return;
       const apiErr = err as { status?: number; message?: string };
@@ -114,6 +132,16 @@ export const StudentCourseDetailPage: React.FC = () => {
     }
     return sortedLessons.length > 0 ? sortedLessons[0] : null;
   }, [sortedLessons, selectedLessonId]);
+
+  // Materials for current lesson
+  const lessonMaterials = useMemo(() => {
+    if (!currentLesson) return [];
+    return materials.filter(
+      (m) =>
+        m.lesson === currentLesson.id ||
+        (m.chapter === currentLesson.chapter && !m.lesson)
+    );
+  }, [materials, currentLesson]);
 
   // Current lesson index for prev/next
   const currentLessonIndex = currentLesson
@@ -268,6 +296,14 @@ export const StudentCourseDetailPage: React.FC = () => {
           <span>Nội dung bài học</span>
         </button>
         <button
+          className={`course-tab-btn ${activeTab === 'hoc-lieu' ? 'active' : ''}`}
+          onClick={() => handleSelectTab('hoc-lieu')}
+          aria-selected={activeTab === 'hoc-lieu'}
+        >
+          <FileText size={18} />
+          <span>Học liệu ({materialsTotal})</span>
+        </button>
+        <button
           className={`course-tab-btn ${activeTab === 'bai-tap' ? 'active' : ''}`}
           onClick={() => handleSelectTab('bai-tap')}
           aria-selected={activeTab === 'bai-tap'}
@@ -358,18 +394,39 @@ export const StudentCourseDetailPage: React.FC = () => {
                 <section className="lesson-materials-section">
                   <h3 className="materials-heading">
                     <FileText size={18} />
-                    <span>Học liệu bài học</span>
+                    <span>Học liệu bài học ({lessonMaterials.length})</span>
                   </h3>
-                  <div className="feature-notice-box" role="status">
-                    <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-                    <div>
-                      <strong>Phân hệ Quản lý Học liệu & Tập tin (B08)</strong>
-                      <span>
-                        Tính năng lưu trữ và xem trước học liệu trực tuyến đang được hoàn thiện tại phân hệ B08.
-                        Học liệu đính kèm bài học sẽ khả dụng sau khi hoàn tất tích hợp tập tin an toàn.
-                      </span>
+                  {lessonMaterials.length === 0 ? (
+                    <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 'var(--space-2) 0' }}>
+                      Chưa có học liệu nào được đính kèm cho bài học này.
+                    </p>
+                  ) : (
+                    <div className="lesson-materials-grid">
+                      {lessonMaterials.map((mat) => (
+                        <div key={mat.id} className="lesson-material-card">
+                          <div className="mat-card-icon">
+                            <FileText size={20} />
+                          </div>
+                          <div className="mat-card-body">
+                            <h4 className="mat-card-title">{mat.title}</h4>
+                            <div className="mat-card-meta">
+                              <span className="mat-type">{mat.material_type.toUpperCase()}</span>
+                              <span className="mat-version">
+                                v{mat.published_version_number || 1}
+                              </span>
+                              <span className="mat-files">{mat.file_count || 1} tệp</span>
+                            </div>
+                          </div>
+                          <Button
+                            variant="secondary"
+                            onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
+                          >
+                            Xem học liệu
+                          </Button>
+                        </div>
+                      ))}
                     </div>
-                  </div>
+                  )}
                 </section>
 
                 <footer className="lesson-pagination-nav">
@@ -414,6 +471,74 @@ export const StudentCourseDetailPage: React.FC = () => {
             )}
           </main>
         </div>
+      )}
+
+      {/* Tab: HỌC LIỆU MÔN HỌC */}
+      {activeTab === 'hoc-lieu' && (
+        <section className="course-tab-panel">
+          <div className="panel-header-row">
+            <div>
+              <h2 className="panel-title">Tài liệu học tập môn học</h2>
+              <p className="panel-subtitle">
+                Toàn bộ tài liệu bài giảng, giáo trình và tài liệu tham khảo chính thức của môn {course.code}.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/sv/tim-kiem?mon=${course.id}`)}
+              icon={<Search size={16} />}
+            >
+              Tìm kiếm toàn văn môn này
+            </Button>
+          </div>
+
+          {materialsError && <p role="alert">Không thể tải học liệu. <Button onClick={() => void fetchCourseData()}>Thử lại</Button></p>}
+          {materialsTotal > materials.length && <p>Hiển thị {materials.length}/{materialsTotal} học liệu mới nhất. Dùng Tìm kiếm để xem đầy đủ.</p>}
+          {!materialsError && materials.length === 0 ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title="Chưa có học liệu"
+                description="Giảng viên chưa công bố học liệu nào cho môn học này."
+              />
+            </div>
+          ) : (
+            <div className="course-materials-hub-grid" style={{ marginTop: 'var(--space-6)' }}>
+              {materials.map((mat) => (
+                <article key={mat.id} className="course-material-hub-card">
+                  <div className="mat-hub-icon">
+                    <FileText size={24} />
+                  </div>
+                  <div className="mat-hub-info">
+                    <div className="mat-hub-top">
+                      <span className="mat-type-pill">{mat.material_type.toUpperCase()}</span>
+                      <span className="mat-version-pill">
+                        v{mat.published_version_number || 1}
+                      </span>
+                      {mat.chapter_title && (
+                        <span className="mat-chapter-pill">{mat.chapter_title}</span>
+                      )}
+                    </div>
+                    <h3 className="mat-hub-title">{mat.title}</h3>
+                    <div className="mat-hub-meta">
+                      <span>{mat.file_count || 1} tệp đính kèm</span>
+                      {Array.isArray(mat.tags) && mat.tags.length > 0 && (
+                        <span className="mat-hub-tags">
+                          {(mat.tags as string[]).map((t: string) => `#${t}`).join(' ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
+                  >
+                    Xem chi tiết
+                  </Button>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
       )}
 
       {/* Tab: BÀI TẬP */}

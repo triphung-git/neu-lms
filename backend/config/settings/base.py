@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
+    "django.contrib.postgres",
     "rest_framework",
     "drf_spectacular",
     "health",
@@ -26,6 +27,7 @@ INSTALLED_APPS = [
     "platform_core",
     "courses",
     "files",
+    "materials",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []
@@ -249,7 +251,11 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_IGNORE_RESULT = True
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_BEAT_SCHEDULE = {
-    "quarantine-scan": {"task": "files.tasks.process_pending_files", "schedule": 5.0}
+    "quarantine-scan": {"task": "files.tasks.process_pending_files", "schedule": 5.0},
+    "material-extraction": {
+        "task": "materials.tasks.process_pending_material_extractions",
+        "schedule": 5.0,
+    },
 }
 
 CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "files")

@@ -333,7 +333,8 @@ class TestMailpitRealSmtpIntegration:
     @pytest.mark.django_db(transaction=True)
     def test_real_mailpit_smtp_and_rest_api_verification(self, auth_user):
         """End-to-end integration test with real Mailpit container on 11025/18025."""
-        mailpit_api = "http://127.0.0.1:18025/api/v1/messages"
+        mailpit_origin = os.environ.get("MAILPIT_HTTP_ORIGIN", "http://127.0.0.1:18025")
+        mailpit_api = mailpit_origin + "/api/v1/messages"
         # 1. Clear messages in Mailpit
         req = urllib.request.Request(mailpit_api, method="DELETE")
         try:
@@ -355,7 +356,7 @@ class TestMailpitRealSmtpIntegration:
         with override_settings(
             EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend",
             EMAIL_HOST="127.0.0.1",
-            EMAIL_PORT=11025,
+            EMAIL_PORT=int(os.environ.get("MAILPIT_SMTP_PORT", "11025")),
             EMAIL_TIMEOUT=5,
         ):
             deliver_password_reset(delivery.id)
@@ -375,7 +376,7 @@ class TestMailpitRealSmtpIntegration:
 
         # 4. Fetch full message body from Mailpit
         msg_id = msg["ID"]
-        msg_detail_url = f"http://127.0.0.1:18025/api/v1/message/{msg_id}"
+        msg_detail_url = f"{mailpit_origin}/api/v1/message/{msg_id}"
         with urllib.request.urlopen(msg_detail_url, timeout=3) as resp:
             msg_detail = json.loads(resp.read().decode("utf-8"))
 

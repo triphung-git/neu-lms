@@ -69,14 +69,32 @@ def readable_file(user, course_id, file_id):
     course = get_object_or_404(Course, pk=course_id)
     item = get_object_or_404(StoredFile, pk=file_id, course=course)
     is_manager, is_member = _check_course_access(user, course)
-    student_read = (
+
+    if item.material_links.exists():
+        from materials.models import Material
+
+        material_published = Material.objects.filter(
+            course=course,
+            is_hidden=False,
+            published_version__material_files__file=item,
+        ).exists()
+        student_material_read = is_member and item.status == FileStatus.CLEAN and material_published
+    else:
+        student_material_read = (
+            is_member
+            and item.status == FileStatus.CLEAN
+            and item.purpose == FilePurpose.COURSE_MATERIAL
+            and item.is_published
+        )
+
+    student_submission_read = (
         is_member
         and item.status == FileStatus.CLEAN
-        and (
-            (item.purpose == FilePurpose.COURSE_MATERIAL and item.is_published)
-            or (item.purpose == FilePurpose.ASSIGNMENT_SUBMISSION and item.uploader_id == user.id)
-        )
+        and item.purpose == FilePurpose.ASSIGNMENT_SUBMISSION
+        and item.uploader_id == user.id
     )
+
+    student_read = student_material_read or student_submission_read
     if not (is_manager or student_read) or item.status == FileStatus.DELETED:
         raise exceptions.PermissionDenied("Không có quyền truy cập tệp.")
     return item
@@ -146,7 +164,15 @@ class CourseFileListView(FilesBaseView):
         )
         if not owner:
             qs = qs.filter(status=FileStatus.CLEAN).filter(
-                Q(purpose=FilePurpose.COURSE_MATERIAL, is_published=True)
+                Q(
+                    purpose=FilePurpose.COURSE_MATERIAL,
+                    is_published=True,
+                    material_links__isnull=True,
+                )
+                | Q(
+                    material_links__material_version__published_for_materials__course=course,
+                    material_links__material_version__published_for_materials__is_hidden=False,
+                )
                 | Q(purpose=FilePurpose.ASSIGNMENT_SUBMISSION, uploader=request.user)
             )
         purpose = request.query_params.get("purpose")
@@ -155,7 +181,7 @@ class CourseFileListView(FilesBaseView):
                 raise exceptions.ValidationError({"purpose": ["Mục đích không hợp lệ."]})
             qs = qs.filter(purpose=purpose)
         paginator = StandardPageNumberPagination()
-        page = paginator.paginate_queryset(qs.order_by("-created_at", "id"), request)
+        page = paginator.paginate_queryset(qs.distinct().order_by("-created_at", "id"), request)
         return paginator.get_paginated_response(StoredFileSerializer(page, many=True).data)
 
 
@@ -211,6 +237,10 @@ class CourseFileDetailView(FilesBaseView):
             raise exceptions.PermissionDenied()
         serializer = UpdateFilePublishSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        if item.material_links.exists():
+            raise exceptions.ValidationError(
+                "Tệp đã gắn vào học liệu. Trạng thái công bố phải quản lý qua học liệu."
+            )
         publish = serializer.validated_data["is_published"]
         if publish and (
             item.status != FileStatus.CLEAN or item.purpose != FilePurpose.COURSE_MATERIAL
@@ -233,7 +263,11 @@ class CourseFileDetailView(FilesBaseView):
 
     @extend_schema(responses={204: None})
     def delete(self, request, course_id, file_id):
-        get_object_or_404(StoredFile, pk=file_id, course_id=course_id)
+        item = get_object_or_404(StoredFile, pk=file_id, course_id=course_id)
+        if item.material_links.exists():
+            raise exceptions.ValidationError(
+                "Tệp tin đã được gắn vào học liệu, không thể xóa trực tiếp."
+            )
         abort_upload_intent(file_id=file_id, actor=request.user)
         return Response(status=204)
 

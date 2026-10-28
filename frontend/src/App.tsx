@@ -134,6 +134,7 @@ export const App: React.FC = () => {
                   <Route index element={<StudentDashboardPage />} />
                   <Route path="mon-hoc" element={<StudentCoursesPage />} />
                   <Route path="mon-hoc/:monId" element={<StudentCourseDetailPage />} />
+                  <Route path="mon-hoc/:monId/hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
                   <Route path="hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
                   <Route path="tim-kiem" element={<StudentMaterialSearchPage />} />
                   <Route path="bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
@@ -168,6 +169,7 @@ export const App: React.FC = () => {
                     <Route path="tep-tin" element={<CourseFilePolicyPage initialTab="files" />} />
                     <Route path="chinh-sach-tep" element={<CourseFilePolicyPage initialTab="policy" />} />
                     <Route path="hoc-lieu/tai-len" element={<UploadMaterialPage />} />
+                    <Route path="hoc-lieu/:hocLieuId" element={<TeacherMaterialDetailPage />} />
                     <Route path="bai-tap" element={<TeacherAssignmentListPage />} />
                     <Route path="bai-tap/soan" element={<TeacherAssignmentEditPage />} />
                     <Route path="diem" element={<TeacherGradebookPage />} />

@@ -2745,6 +2745,1042 @@
                 }
             }
         },
+        "/api/v1/courses/{course_id}/materials": {
+            "get": {
+                "operationId": "courses_materials_list",
+                "description": "Quản lý danh sách và tạo học liệu mới cho môn học.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo chương"
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Tìm kiếm theo tiêu đề/tag"
+                    },
+                    {
+                        "in": "query",
+                        "name": "visibility",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo visibility (chỉ GV)"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMaterialList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_materials_create",
+                "description": "Quản lý danh sách và tạo học liệu mới cho môn học.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialCreateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialCreateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialCreateRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}": {
+            "get": {
+                "operationId": "courses_materials_retrieve",
+                "description": "Xem chi tiết, cập nhật metadata và xóa học liệu.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "courses_materials_partial_update",
+                "description": "Xem chi tiết, cập nhật metadata và xóa học liệu.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMaterialUpdateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMaterialUpdateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedMaterialUpdateRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "courses_materials_destroy",
+                "description": "Xem chi tiết, cập nhật metadata và xóa học liệu.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/download": {
+            "get": {
+                "operationId": "courses_materials_files_download_retrieve",
+                "description": "Tải xuống tệp tin học liệu có kiểm tra quyền và tính toàn vẹn.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/preview": {
+            "get": {
+                "operationId": "courses_materials_files_preview_retrieve",
+                "description": "Xem trước tệp tin học liệu trong sandbox an toàn.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/hide": {
+            "post": {
+                "operationId": "courses_materials_hide_create",
+                "description": "Ẩn học liệu khỏi sinh viên.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/publish": {
+            "post": {
+                "operationId": "courses_materials_publish_create",
+                "description": "Công bố một phiên bản đã đóng băng làm con trỏ công bố chính thức.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialPublishRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialPublishRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialPublishRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/unhide": {
+            "post": {
+                "operationId": "courses_materials_unhide_create",
+                "description": "Mở lại học liệu đã ẩn nếu đã có phiên bản công bố.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions": {
+            "get": {
+                "operationId": "courses_materials_versions_list",
+                "description": "Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MaterialVersionSummary"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "courses_materials_versions_create",
+                "description": "Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialVersionCreateRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialVersionCreateRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialVersionCreateRequestRequest"
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialVersionDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}": {
+            "get": {
+                "operationId": "courses_materials_versions_retrieve",
+                "description": "Chi tiết một phiên bản học liệu kèm danh sách tệp manifest.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "version_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialVersionDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files": {
+            "post": {
+                "operationId": "courses_materials_versions_files_create",
+                "description": "Thêm tệp tin vào manifest của phiên bản nháp.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "version_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialFileAddRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialFileAddRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialFileAddRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialFileManifestItem"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files/{file_id}": {
+            "delete": {
+                "operationId": "courses_materials_versions_files_destroy",
+                "description": "Xóa tệp tin khỏi manifest của phiên bản nháp.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "file_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "version_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/finalize": {
+            "post": {
+                "operationId": "courses_materials_versions_finalize_create",
+                "description": "Đóng băng manifest của phiên bản nháp, tính toán sha256 và snapshot policy.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "version_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialVersionDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/retry": {
+            "post": {
+                "operationId": "courses_materials_versions_retry_create",
+                "description": "Base API View cho phân hệ Học liệu: chuẩn hóa mã lỗi và bảo vệ security headers.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "version_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialVersionDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/materials/search": {
+            "get": {
+                "operationId": "courses_materials_search",
+                "description": "Tìm kiếm học liệu trong phạm vi một môn học với phân rã provenance và phân quyền.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo mã chương"
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Từ khóa tìm kiếm (tối đa 200 ký tự)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort_by",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sắp xếp: relevance, newest, title_asc, title_desc"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo thẻ"
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo loại tệp (all, pdf, docx, txt)"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMaterialSearchResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{course_id}/members": {
             "get": {
                 "operationId": "courses_members_list",
@@ -3544,6 +4580,121 @@
                             }
                         },
                         "description": "Cơ sở dữ liệu không khả dụng."
+                    }
+                }
+            }
+        },
+        "/api/v1/materials/{id}": {
+            "get": {
+                "operationId": "materials_retrieve_global",
+                "description": "Xem chi tiết học liệu tra cứu trực tiếp theo ID (hỗ trợ deep link sinh viên/giảng viên).",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "materials"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/materials/search": {
+            "get": {
+                "operationId": "materials_search_global",
+                "description": "Tìm kiếm học liệu trên tất cả các môn học người dùng có quyền tham gia/giảng dạy.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo mã chương"
+                    },
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo môn học cụ thể"
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Từ khóa tìm kiếm (tối đa 200 ký tự)"
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort_by",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Sắp xếp: relevance, newest, title_asc, title_desc"
+                    },
+                    {
+                        "in": "query",
+                        "name": "tag",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo thẻ"
+                    },
+                    {
+                        "in": "query",
+                        "name": "type",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Lọc theo loại tệp (all, pdf, docx, txt)"
+                    }
+                ],
+                "tags": [
+                    "materials"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PaginatedMaterialSearchResult"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -4721,6 +5872,15 @@
                     "title"
                 ]
             },
+            "LifecycleStatusEnum": {
+                "enum": [
+                    "draft",
+                    "finalized",
+                    "archived"
+                ],
+                "type": "string",
+                "description": "* `draft` - Đang soạn thảo\n* `finalized` - Đã đóng băng\n* `archived` - Đã lưu trữ"
+            },
             "LivenessResponse": {
                 "type": "object",
                 "properties": {
@@ -4729,6 +5889,805 @@
                         "default": "ok"
                     }
                 }
+            },
+            "MaterialCreateRequestRequest": {
+                "type": "object",
+                "description": "Payload tạo học liệu mới.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "material_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MaterialTypeEnum"
+                            }
+                        ],
+                        "default": "document"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                        }
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "initial_file_ids": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                },
+                "required": [
+                    "title"
+                ]
+            },
+            "MaterialDetail": {
+                "type": "object",
+                "description": "Chi tiết học liệu kèm thông tin phiên bản công bố và danh sách các phiên bản.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "chapter": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chapter_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tags": {
+                        "readOnly": true
+                    },
+                    "material_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MaterialTypeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_hidden": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên"
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "published_version": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MaterialVersionDetail"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "latest_version": {
+                        "type": "object",
+                        "additionalProperties": {},
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "total_versions": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "chapter",
+                    "chapter_title",
+                    "course_code",
+                    "course_id",
+                    "created_at",
+                    "description",
+                    "id",
+                    "is_hidden",
+                    "latest_version",
+                    "lesson",
+                    "lesson_title",
+                    "material_type",
+                    "published_version",
+                    "tags",
+                    "title",
+                    "total_versions",
+                    "updated_at",
+                    "visibility"
+                ]
+            },
+            "MaterialFileAddRequestRequest": {
+                "type": "object",
+                "description": "Payload thêm tệp vào manifest của phiên bản nháp.",
+                "properties": {
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "label": {
+                        "type": "string",
+                        "default": "",
+                        "maxLength": 255
+                    },
+                    "position": {
+                        "type": "integer",
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "file_id"
+                ]
+            },
+            "MaterialFileManifestItem": {
+                "type": "object",
+                "description": "Chi tiết một tệp tin trong manifest của phiên bản học liệu.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "position": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Thứ tự hiển thị tệp trong manifest của phiên bản (1, 2, ...)"
+                    },
+                    "label": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Nhãn hoặc tiêu đề tùy chọn cho tệp trong manifest"
+                    },
+                    "file_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "file_size": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "mime_type": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "sha256_hash": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "download_url": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "preview_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "extraction_status": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "extraction_error": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "extraction_page_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "download_url",
+                    "extraction_error",
+                    "extraction_page_count",
+                    "extraction_status",
+                    "file_id",
+                    "file_name",
+                    "file_size",
+                    "id",
+                    "label",
+                    "mime_type",
+                    "position",
+                    "preview_url",
+                    "sha256_hash"
+                ]
+            },
+            "MaterialListItem": {
+                "type": "object",
+                "description": "Mục học liệu hiển thị trong danh sách phân trang.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "chapter": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "chapter_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "lesson": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "tags": {
+                        "readOnly": true
+                    },
+                    "material_type": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MaterialTypeEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_hidden": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên"
+                    },
+                    "visibility": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "published_version_number": {
+                        "type": "integer",
+                        "nullable": true,
+                        "readOnly": true
+                    },
+                    "latest_version_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "file_count": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "total_size_bytes": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "chapter",
+                    "chapter_title",
+                    "course_code",
+                    "course_id",
+                    "created_at",
+                    "file_count",
+                    "id",
+                    "is_hidden",
+                    "latest_version_number",
+                    "lesson",
+                    "lesson_title",
+                    "material_type",
+                    "published_version_number",
+                    "tags",
+                    "title",
+                    "total_size_bytes",
+                    "updated_at",
+                    "visibility"
+                ]
+            },
+            "MaterialPublishRequestRequest": {
+                "type": "object",
+                "description": "Payload công bố phiên bản học liệu.",
+                "properties": {
+                    "version_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "version_id"
+                ]
+            },
+            "MaterialSearchMatch": {
+                "type": "object",
+                "description": "Chi tiết điểm khớp tìm kiếm trong tệp hoặc metadata.",
+                "properties": {
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "mime_type": {
+                        "type": "string"
+                    },
+                    "page_number": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "snippet": {
+                        "type": "string"
+                    },
+                    "match_type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "file_id",
+                    "file_name",
+                    "match_type",
+                    "mime_type",
+                    "page_number",
+                    "snippet"
+                ]
+            },
+            "MaterialSearchResult": {
+                "type": "object",
+                "description": "Kết quả tìm kiếm học liệu với provenance và điểm xếp hạng.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "course_code": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "material_type": {
+                        "type": "string"
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "chapter_title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_title": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "version_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "version_number": {
+                        "type": "integer"
+                    },
+                    "is_hidden": {
+                        "type": "boolean"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "rank": {
+                        "type": "number",
+                        "format": "double"
+                    },
+                    "matches": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MaterialSearchMatch"
+                        }
+                    }
+                },
+                "required": [
+                    "chapter_id",
+                    "chapter_title",
+                    "course_code",
+                    "course_id",
+                    "course_name",
+                    "created_at",
+                    "description",
+                    "id",
+                    "is_hidden",
+                    "lesson_id",
+                    "lesson_title",
+                    "matches",
+                    "material_type",
+                    "published_at",
+                    "rank",
+                    "tags",
+                    "title",
+                    "updated_at",
+                    "version_id",
+                    "version_number"
+                ]
+            },
+            "MaterialTypeEnum": {
+                "enum": [
+                    "document",
+                    "slide",
+                    "syllabus",
+                    "reference",
+                    "exercise",
+                    "other"
+                ],
+                "type": "string",
+                "description": "* `document` - Tài liệu\n* `slide` - Bài giảng/Slide\n* `syllabus` - Đề cương\n* `reference` - Tài liệu tham khảo\n* `exercise` - Bài tập rèn luyện\n* `other` - Khác"
+            },
+            "MaterialVersionCreateRequestRequest": {
+                "type": "object",
+                "description": "Payload tạo revision (phiên bản nháp mới).",
+                "properties": {
+                    "changelog": {
+                        "type": "string",
+                        "default": ""
+                    },
+                    "clone_from_version_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    }
+                }
+            },
+            "MaterialVersionDetail": {
+                "type": "object",
+                "description": "Chi tiết phiên bản học liệu kèm danh sách tệp tin đóng băng trong manifest.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "material_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "material_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "version_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "description": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "changelog": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Ghi chú thay đổi nội dung ở phiên bản này"
+                    },
+                    "lifecycle_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LifecycleStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "processing_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProcessingStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Đánh dấu phiên bản này đã từng hoặc đang được công bố"
+                    },
+                    "finalized_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "manifest_hash": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "SHA-256 hash của manifest đóng băng"
+                    },
+                    "total_size_bytes": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Tổng kích thước bytes của tất cả tệp trong manifest"
+                    },
+                    "file_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Số lượng tệp trong manifest"
+                    },
+                    "policy_snapshot": {
+                        "readOnly": true,
+                        "description": "Snapshot của CourseFilePolicy áp dụng tại thời điểm đóng băng"
+                    },
+                    "summary": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Tóm tắt nội dung đã được xác nhận của phiên bản học liệu"
+                    },
+                    "summary_confirmed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_by_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "files": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MaterialFileManifestItem"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "changelog",
+                    "created_at",
+                    "created_by_name",
+                    "description",
+                    "file_count",
+                    "files",
+                    "finalized_at",
+                    "id",
+                    "is_published",
+                    "lifecycle_status",
+                    "manifest_hash",
+                    "material_id",
+                    "material_title",
+                    "policy_snapshot",
+                    "processing_status",
+                    "published_at",
+                    "summary",
+                    "summary_confirmed_at",
+                    "title",
+                    "total_size_bytes",
+                    "updated_at",
+                    "version_number"
+                ]
+            },
+            "MaterialVersionSummary": {
+                "type": "object",
+                "description": "Tóm tắt ngắn gọn phiên bản học liệu dùng trong danh sách.",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "version_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "changelog": {
+                        "type": "string",
+                        "readOnly": true,
+                        "description": "Ghi chú thay đổi nội dung ở phiên bản này"
+                    },
+                    "lifecycle_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LifecycleStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "processing_status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/ProcessingStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "is_published": {
+                        "type": "boolean",
+                        "readOnly": true,
+                        "description": "Đánh dấu phiên bản này đã từng hoặc đang được công bố"
+                    },
+                    "file_count": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Số lượng tệp trong manifest"
+                    },
+                    "total_size_bytes": {
+                        "type": "integer",
+                        "readOnly": true,
+                        "description": "Tổng kích thước bytes của tất cả tệp trong manifest"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "finalized_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "changelog",
+                    "created_at",
+                    "file_count",
+                    "finalized_at",
+                    "id",
+                    "is_published",
+                    "lifecycle_status",
+                    "processing_status",
+                    "published_at",
+                    "title",
+                    "total_size_bytes",
+                    "version_number"
+                ]
             },
             "PaginatedAdminAccountListItemList": {
                 "type": "object",
@@ -4990,6 +6949,44 @@
                     }
                 }
             },
+            "PaginatedMaterialList": {
+                "type": "object",
+                "description": "Dữ liệu phân trang danh sách học liệu chuẩn StandardPageNumberPagination.",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MaterialListItem"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationInfo"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "PaginatedMaterialSearchResult": {
+                "type": "object",
+                "description": "Dữ liệu phân trang kết quả tìm kiếm học liệu chuẩn StandardPageNumberPagination.",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/MaterialSearchResult"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationInfo"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
             "PaginatedStoredFileList": {
                 "type": "object",
                 "properties": {
@@ -5113,6 +7110,38 @@
                     }
                 }
             },
+            "PaginationInfo": {
+                "type": "object",
+                "description": "Metadata phân trang chuẩn toàn hệ thống.",
+                "properties": {
+                    "page": {
+                        "type": "integer"
+                    },
+                    "page_size": {
+                        "type": "integer"
+                    },
+                    "total_items": {
+                        "type": "integer"
+                    },
+                    "total_pages": {
+                        "type": "integer"
+                    },
+                    "has_next": {
+                        "type": "boolean"
+                    },
+                    "has_previous": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "has_next",
+                    "has_previous",
+                    "page",
+                    "page_size",
+                    "total_items",
+                    "total_pages"
+                ]
+            },
             "PasswordChangeRequest": {
                 "type": "object",
                 "properties": {
@@ -5209,6 +7238,44 @@
                     }
                 }
             },
+            "PatchedMaterialUpdateRequestRequest": {
+                "type": "object",
+                "description": "Payload cập nhật metadata học liệu.",
+                "properties": {
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "description": {
+                        "type": "string"
+                    },
+                    "material_type": {
+                        "$ref": "#/components/schemas/MaterialTypeEnum"
+                    },
+                    "tags": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "minLength": 1,
+                            "maxLength": 50
+                        }
+                    },
+                    "chapter_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "lesson_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "is_hidden": {
+                        "type": "boolean"
+                    }
+                }
+            },
             "PatchedUpdateFilePublishRequest": {
                 "type": "object",
                 "properties": {
@@ -5216,6 +7283,18 @@
                         "type": "boolean"
                     }
                 }
+            },
+            "ProcessingStatusEnum": {
+                "enum": [
+                    "pending",
+                    "processing",
+                    "ready",
+                    "failed",
+                    "no_text",
+                    "unsupported"
+                ],
+                "type": "string",
+                "description": "* `pending` - Chờ xử lý\n* `processing` - Đang xử lý\n* `ready` - Sẵn sàng\n* `failed` - Thất bại\n* `no_text` - Không có văn bản\n* `unsupported` - Không hỗ trợ"
             },
             "ReadinessSuccessResponse": {
                 "type": "object",

@@ -1,210 +1,282 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../../app/providers/NotificationContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { Badge } from '../../../shared/ui/Badge';
 import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { Modal } from '../../../shared/ui/Modal';
 import { formatDateVN, formatFileSize } from '../../../shared/kernel/formatting';
+import {
+  materialsService,
+  type MaterialDetail,
+  type MaterialFileManifestItem,
+} from '../../../api/materialsService';
+import { coursesService, type Course } from '../../../api/coursesService';
 import {
   FileText,
   Download,
+  Eye,
+  Lock,
   Bot,
-  Send,
-  Sparkles,
   AlertTriangle,
-  Clock,
-  ExternalLink,
-  Layers
+  RefreshCw,
+  BookOpen,
+  ArrowRight,
+  ShieldCheck,
+  Hash,
 } from 'lucide-react';
 import './StudentMaterialDetailPage.css';
+import { PdfPreview } from '../../files/components/PdfPreview';
 
-interface ChatMessage {
-  id: string;
-  sender: 'user' | 'ai';
-  text: string;
-  citation?: string;
-  time: string;
+interface LoadError {
+  title: string;
+  message: string;
+  statusCode?: number;
 }
 
+const isFilePreviewAllowed = (f: MaterialFileManifestItem): boolean => {
+  if ('file_policy' in f && (f as any).file_policy) {
+    return Boolean((f as any).file_policy.preview_allowed);
+  }
+  return f.preview_url !== null;
+};
+
 export const StudentMaterialDetailPage: React.FC = () => {
-  const { hocLieuId } = useParams<{ hocLieuId: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { materials, materialVersions, courses, lessons, chapters, memberships, systemSettings } = useDatabase();
-  const { currentUser } = useSession();
-  const { showNotification } = useNotifications();
+  const { monId, hocLieuId } = useParams<{ monId?: string; hocLieuId: string }>();
   const navigate = useNavigate();
+  const { showNotification } = useNotifications();
 
-  const selectedVersionParam = searchParams.get('phienBan');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<LoadError | null>(null);
+  const [material, setMaterial] = useState<MaterialDetail | null>(null);
+  const [course, setCourse] = useState<Course | null>(null);
 
-  const material = materials.find(m => m.id === hocLieuId);
-  const course = material ? courses.find(c => c.id === material.courseId) : null;
-  const lesson = material ? lessons.find(l => l.id === material.lessonId) : null;
+  // File Download & Preview states
+  const [downloadingFileId, setDownloadingFileId] = useState<string | null>(null);
+  const [previewFile, setPreviewFile] = useState<MaterialFileManifestItem | null>(null);
+  const [previewBlobUrl, setPreviewBlobUrl] = useState<string | null>(null);
+  const [isPreviewLoading, setIsPreviewLoading] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
 
-  // Check enrollment
-  const isEnrolled = memberships.some(
-    m => m.courseId === material?.courseId && m.userId === currentUser?.id && m.status === 'active'
-  );
+  // Stale request guard
+  const reqSeq = useRef(0);
+  const previewSeq = useRef(0);
 
-  // Versions for this material
-  const versions = useMemo(() => {
-    return materialVersions
-      .filter(v => v.materialId === hocLieuId)
-      .sort((a, b) => b.versionNumber - a.versionNumber);
-  }, [materialVersions, hocLieuId]);
+  const fetchMaterialAndCourse = useCallback(async () => {
+    if (!hocLieuId) return;
+    const currentSeq = ++reqSeq.current;
+    setLoading(true);
+    setError(null);
 
-  // Current selected version
-  const currentVersion = useMemo(() => {
-    if (selectedVersionParam) {
-      const vNum = parseInt(selectedVersionParam, 10);
-      const found = versions.find(v => v.versionNumber === vNum);
-      if (found) return found;
-    }
-    return versions.length > 0 ? versions[0] : null;
-  }, [versions, selectedVersionParam]);
-
-  const fileType = currentVersion?.filename.split('.').pop()?.toUpperCase() || 'PDF';
-  const scanStatus = currentVersion?.scanStatus || 'clean';
-  const indexStatus = currentVersion?.indexStatus || 'pending';
-  const fileSize = currentVersion?.sizeBytes || 1024000;
-  const sampleContent = currentVersion?.contentExcerpt || currentVersion?.summary || '';
-  const updatedAt = currentVersion?.uploadedAt || '';
-
-  // AI Chat state
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    {
-      id: 'm1',
-      sender: 'ai',
-      text: `Xin chào! Tôi là trợ lý học tập AI của tài liệu "${material?.title || 'học liệu'}". Bạn có thể đặt câu hỏi về nội dung tài liệu hoặc chọn các câu hỏi gợi ý bên dưới.`,
-      time: '10:00'
-    }
-  ]);
-  const [inputText, setInputText] = useState('');
-  const [isAiTyping, setIsAiTyping] = useState(false);
-
-  if (!material || !course) {
-    return (
-      <div className="material-detail-container">
-        <EmptyState
-          title="Không tìm thấy học liệu"
-          description="Tài liệu không tồn tại hoặc đã bị gỡ khỏi khóa học."
-          action={
-            <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về môn học của tôi
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  if (!isEnrolled) {
-    return (
-      <div className="material-detail-container">
-        <EmptyState
-          title="Không có quyền truy cập"
-          description="Bạn chưa được ghi danh vào môn học này để xem học liệu."
-          action={
-            <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  // Student can only view 'class' visibility materials
-  if (material.visibility !== 'class') {
-    return (
-      <div className="material-detail-container">
-        <EmptyState
-          title="Học liệu chưa được công bố"
-          description="Tài liệu này đang ở chế độ riêng tư hoặc bản nháp của giảng viên."
-          action={
-            <Button variant="primary" onClick={() => navigate(`/sv/mon-hoc/${course.id}`)}>
-              Về môn học
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  const handleDownloadSample = () => {
-    if (scanStatus === 'infected') {
-      showNotification('error', 'Tệp bị khóa do phát hiện mã độc.');
-      return;
-    }
-    // Simulate safe clean download
-    showNotification('success', `Đang tải xuống tệp: ${material.title}.${fileType.toLowerCase()} (${formatFileSize(fileSize)})`);
-  };
-
-  const handleAskSuggested = (question: string) => {
-    handleSendMessage(question);
-  };
-
-  const handleSendMessage = (textToSend?: string) => {
-    const q = (textToSend || inputText).trim();
-    if (!q) return;
-
-    if (!systemSettings.aiEnabled) {
-      showNotification('error', 'Tính năng trợ lý AI hiện đang tạm tắt theo cấu hình hệ thống.');
-      return;
-    }
-
-    if (indexStatus !== 'success') {
-      showNotification('info', 'Tài liệu chưa được lập chỉ mục AI hoặc chỉ mục đang được xử lý.');
-      return;
-    }
-
-    const userMsg: ChatMessage = {
-      id: `u-${Date.now()}`,
-      sender: 'user',
-      text: q,
-      time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-    };
-
-    setMessages(prev => [...prev, userMsg]);
-    setInputText('');
-    setIsAiTyping(true);
-
-    setTimeout(() => {
-      let reply = '';
-      let citation = '';
-
-      if (q.toLowerCase().includes('tóm tắt') || q.toLowerCase().includes('nội dung')) {
-        reply = `Tài liệu "${material.title}" tập trung vào các nguyên lý cốt lõi, kiến trúc hệ thống và các tiêu chuẩn kiểm thử tự động. Người học cần nắm vững quy trình xử lý dữ liệu và các ràng buộc bảo mật.`;
-        citation = `Nguồn: Trang 3, Mục 1.2 "Mục tiêu bài học" (Phiên bản v${currentVersion?.versionNumber})`;
-      } else if (q.toLowerCase().includes('khái niệm') || q.toLowerCase().includes('định nghĩa')) {
-        reply = `Khái niệm được định nghĩa rõ: Hệ thống là tập hợp các thành phần tương tác theo hợp đồng dữ liệu chuẩn, đảm bảo tính toàn vẹn và khả năng mở rộng.`;
-        citation = `Nguồn: Trang 7, Mục 2.1 "Định nghĩa thuật ngữ"`;
+    try {
+      let matData: MaterialDetail;
+      if (monId) {
+        matData = await materialsService.getMaterial(monId, hocLieuId);
       } else {
-        reply = `Theo nội dung phiên bản ${currentVersion?.versionNumber}, vấn đề bạn hỏi liên quan trực tiếp đến cơ chế kiểm soát trạng thái và quy trình xác thực dữ liệu đầu vào.`;
-        citation = `Nguồn: Trang 12, Phần "Ràng buộc dữ liệu"`;
+        matData = await materialsService.getMaterialById(hocLieuId);
       }
 
-      setMessages(prev => [
-        ...prev,
-        {
-          id: `ai-${Date.now()}`,
-          sender: 'ai',
-          text: reply,
-          citation,
-          time: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })
-        }
-      ]);
-      setIsAiTyping(false);
-    }, 600);
+      if (currentSeq !== reqSeq.current) return;
+      setMaterial(matData);
+
+      // Verify student visibility
+      if (matData.is_hidden || !matData.published_version) {
+        setError({
+          title: 'Học liệu chưa công bố',
+          message: 'Tài liệu này hiện chưa được công bố hoặc đang ở chế độ ẩn của giảng viên.',
+          statusCode: 403,
+        });
+        setLoading(false);
+        return;
+      }
+
+      // Fetch course information
+      const targetCourseId = monId || matData.course_id;
+      if (targetCourseId) {
+        const courseData = await coursesService.get(targetCourseId);
+        if (currentSeq !== reqSeq.current) return;
+        setCourse(courseData);
+      }
+    } catch (err: unknown) {
+      if (currentSeq !== reqSeq.current) return;
+      const apiErr = err as { status?: number; message?: string };
+      const statusCode = apiErr.status;
+
+      if (statusCode === 403) {
+        setError({
+          title: 'Không có quyền truy cập',
+          message:
+            'Bạn chưa được ghi danh vào môn học này, đã rút khỏi môn học hoặc tài liệu đã bị ẩn.',
+          statusCode: 403,
+        });
+      } else if (statusCode === 404) {
+        setError({
+          title: 'Không tìm thấy học liệu',
+          message: 'Học liệu không tồn tại trên hệ thống hoặc đã bị gỡ bỏ.',
+          statusCode: 404,
+        });
+      } else {
+        setError({
+          title: 'Lỗi tải dữ liệu',
+          message: apiErr.message || 'Không thể tải thông tin học liệu từ máy chủ. Vui lòng thử lại.',
+          statusCode,
+        });
+      }
+    } finally {
+      if (currentSeq === reqSeq.current) {
+        setLoading(false);
+      }
+    }
+  }, [monId, hocLieuId]);
+
+  useEffect(() => {
+    void fetchMaterialAndCourse();
+    return () => {
+      reqSeq.current += 1;
+      previewSeq.current += 1;
+    };
+  }, [fetchMaterialAndCourse]);
+
+  useEffect(() => () => { if (previewBlobUrl) URL.revokeObjectURL(previewBlobUrl); }, [previewBlobUrl]);
+
+  // Clean up blob URL on unmount or preview close
+  const handleClosePreview = () => {
+    previewSeq.current++;
+    if (previewBlobUrl) {
+      URL.revokeObjectURL(previewBlobUrl);
+      setPreviewBlobUrl(null);
+    }
+    setPreviewFile(null);
+    setPreviewError(null);
+    setIsPreviewLoading(false);
   };
 
-  const handleSwitchVersion = (vNum: number) => {
-    const next = new URLSearchParams(searchParams);
-    next.set('phienBan', vNum.toString());
-    setSearchParams(next);
+  const handleOpenPreview = async (file: MaterialFileManifestItem) => {
+    if (!material) return;
+    const targetCourseId = monId || material.course_id;
+    if (!targetCourseId) return;
+
+    // Policy check: preview_allowed
+    const isAllowed = isFilePreviewAllowed(file);
+    if (!isAllowed) {
+      showNotification('error', 'Xem trước tệp tin này đã bị khóa theo chính sách của giảng viên.');
+      return;
+    }
+
+    const previewRequest = ++previewSeq.current;
+    setPreviewFile(file);
+    setIsPreviewLoading(true);
+    setPreviewError(null);
+
+    try {
+      const blob = await materialsService.previewMaterialFile(targetCourseId, material.id, file.file_id);
+      if (previewRequest !== previewSeq.current) return;
+      const url = URL.createObjectURL(blob);
+      setPreviewBlobUrl(url);
+    } catch (err: unknown) {
+      if (previewRequest !== previewSeq.current) return;
+      const apiErr = err as { message?: string };
+      setPreviewError(
+        apiErr.message || 'Không thể xem trước tệp: máy chủ từ chối quyền hoặc định dạng không hỗ trợ.'
+      );
+    } finally {
+      if (previewRequest === previewSeq.current) setIsPreviewLoading(false);
+    }
   };
+
+  const handleDownloadFile = async (file: MaterialFileManifestItem) => {
+    if (!material) return;
+    const targetCourseId = monId || material.course_id;
+    if (!targetCourseId) return;
+
+    setDownloadingFileId(file.file_id);
+    try {
+      const blob = await materialsService.downloadMaterialFile(targetCourseId, material.id, file.file_id);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = file.file_name || file.label || 'tai-lieu';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showNotification('success', `Đã tải xuống: ${file.file_name || file.label}`);
+    } catch (err: unknown) {
+      const apiErr = err as { message?: string };
+      showNotification(
+        'error',
+        apiErr.message || 'Không thể tải xuống tệp: quyền truy cập bị từ chối hoặc tài liệu đã bị ẩn.'
+      );
+    } finally {
+      setDownloadingFileId(null);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="student-material-detail-page">
+        <div className="page-header">
+          <Breadcrumb
+            items={[
+              { label: 'Trang chủ', path: '/sv' },
+              { label: 'Môn học', path: '/sv/mon-hoc' },
+              { label: 'Đang tải học liệu...' },
+            ]}
+          />
+        </div>
+        <div style={{ padding: 'var(--space-12)', textAlign: 'center', color: 'var(--muted)' }}>
+          <p>Đang tải thông tin học liệu từ máy chủ...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !material) {
+    return (
+      <div className="student-material-detail-page">
+        <div className="page-header">
+          <Breadcrumb
+            items={[
+              { label: 'Trang chủ', path: '/sv' },
+              { label: 'Môn học', path: '/sv/mon-hoc' },
+              { label: error?.title || 'Thông báo' },
+            ]}
+          />
+        </div>
+        <div className="material-detail-container">
+          <EmptyState
+            title={error?.title || 'Không tìm thấy học liệu'}
+            description={
+              error?.message ||
+              'Tài liệu không tồn tại hoặc bạn chưa được cấp quyền truy cập.'
+            }
+            action={
+              <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+                {error?.statusCode !== 403 && (
+                  <Button
+                    variant="secondary"
+                    onClick={fetchMaterialAndCourse}
+                    icon={<RefreshCw size={16} />}
+                  >
+                    Thử lại
+                  </Button>
+                )}
+                <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
+                  Về danh sách môn học
+                </Button>
+              </div>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const courseId = monId || material.course_id;
+  const publishedVer = material.published_version;
+  const files = publishedVer?.files || [];
+  const tags = Array.isArray(material.tags) ? (material.tags as string[]) : [];
 
   return (
     <div className="student-material-detail-page">
@@ -212,235 +284,277 @@ export const StudentMaterialDetailPage: React.FC = () => {
         <Breadcrumb
           items={[
             { label: 'Trang chủ', path: '/sv' },
-            { label: `${course.code} — ${course.name}`, path: `/sv/mon-hoc/${course.id}` },
-            { label: lesson ? lesson.title : 'Bài học', path: `/sv/mon-hoc/${course.id}?bai=${lesson?.id}` },
-            { label: material.title }
+            {
+              label: course ? `${course.code} — ${course.name}` : material.course_code || 'Môn học',
+              path: courseId ? `/sv/mon-hoc/${courseId}` : '/sv/mon-hoc',
+            },
+            ...(material.lesson_title && courseId
+              ? [
+                  {
+                    label: material.lesson_title,
+                    path: `/sv/mon-hoc/${courseId}?bai=${material.lesson}`,
+                  },
+                ]
+              : []),
+            { label: material.title },
           ]}
         />
       </div>
 
-      {/* Infected Alert Guard */}
-      {scanStatus === 'infected' && (
-        <div className="infected-danger-banner" role="alert">
-          <AlertTriangle size={24} />
-          <div>
-            <strong>Tệp tin này bị chặn do cảnh báo an toàn mã độc</strong>
-            <p>
-              Hệ thống phát hiện tệp tài liệu có nguy cơ bảo mật. Giảng viên đã được thông báo để tải lên phiên bản thay thế. Tệp không thể tải xuống hoặc xem trực tuyến.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {/* Main 2-column layout (Desktop 2-col / Mobile stacked) */}
       <div className="material-detail-layout">
-        {/* Left Column: Material Info & Document Viewer (60%) */}
+        {/* Left Column: Material Info & Files Manifest */}
         <section className="material-content-panel">
           <header className="material-header-block">
             <div className="material-badge-row">
-              <span className="filetype-badge">{fileType}</span>
-              <span className="version-pill">Phiên bản {currentVersion?.versionNumber}</span>
-              <Badge
-                variant={scanStatus === 'clean' ? 'ready' : scanStatus === 'infected' ? 'error' : 'processing'}
-                label={scanStatus === 'clean' ? 'Đã quét an toàn' : scanStatus === 'infected' ? 'Phát hiện mã độc' : 'Đang quét an ninh'}
-              />
+              <span className="filetype-badge">{material.material_type.toUpperCase()}</span>
+              {publishedVer && (
+                <span className="version-pill">Phiên bản v{publishedVer.version_number}</span>
+              )}
+              <Badge variant="published" label="Đã công bố" />
+              {publishedVer?.processing_status === 'ready' && (
+                <Badge variant="ready" label="Đã lập chỉ mục" />
+              )}
             </div>
 
             <h1 className="material-title">{material.title}</h1>
 
             <div className="material-meta-details">
-              <span>Môn học: <strong>{course.name}</strong></span>
+              <span>
+                Môn học: <strong>{course?.name || material.course_code}</strong>
+              </span>
               <span className="dot">•</span>
-              <span>Cập nhật: <strong>{formatDateVN(updatedAt)}</strong></span>
+              <span>
+                Công bố:{' '}
+                <strong>
+                  {formatDateVN(publishedVer?.published_at || publishedVer?.created_at || material.created_at)}
+                </strong>
+              </span>
               <span className="dot">•</span>
-              <span>Dung lượng: <strong>{formatFileSize(fileSize)}</strong></span>
+              <span>
+                Dung lượng: <strong>{formatFileSize(publishedVer?.total_size_bytes || 0)}</strong>
+              </span>
+              <span className="dot">•</span>
+              <span>
+                Tệp đính kèm: <strong>{publishedVer?.file_count || files.length} tệp</strong>
+              </span>
             </div>
 
-            {material.tags && material.tags.length > 0 && (
+            {tags.length > 0 && (
               <div className="material-tags-stack">
-                {material.tags.map(t => (
-                  <span key={t} className="tag-pill">#{t}</span>
+                {tags.map((t: string) => (
+                  <span key={t} className="tag-pill">
+                    #{t}
+                  </span>
                 ))}
               </div>
             )}
           </header>
 
-          {/* Version Switcher */}
-          {versions.length > 1 && (
-            <div className="version-selector-card">
-              <div className="version-sel-title">
-                <Layers size={16} />
-                <span>Các phiên bản tài liệu:</span>
-              </div>
-              <div className="version-buttons-row">
-                {versions.map(v => (
-                  <button
-                    key={v.id}
-                    type="button"
-                    className={`ver-btn ${currentVersion?.versionNumber === v.versionNumber ? 'active' : ''}`}
-                    onClick={() => handleSwitchVersion(v.versionNumber)}
-                  >
-                    <span>v{v.versionNumber}</span>
-                    <small>({formatDateVN(v.uploadedAt)})</small>
-                  </button>
-                ))}
-              </div>
+          {/* Description */}
+          {material.description && (
+            <div className="material-description-box">
+              <h2 className="section-subheading">Mô tả học liệu</h2>
+              <p className="material-desc-content">{material.description}</p>
             </div>
           )}
 
-          {/* Document Content Preview Block */}
-          <div className="document-preview-box">
-            <div className="preview-top-toolbar">
-              <span className="preview-doc-label">Bản xem trước trực tuyến</span>
-              <Button
-                type="button"
-                variant="secondary"
-                onClick={handleDownloadSample}
-                disabled={scanStatus === 'infected'}
-              >
-                <Download size={16} />
-                <span>Tải tệp mẫu</span>
-              </Button>
-            </div>
-
-            <div className="preview-text-canvas">
-              {sampleContent ? (
-                <div className="sample-text-body">
-                  <p className="sample-watermark">[NPC LMS — BẢN XEM TRƯỚC HỌC LIỆU CHÍNH THỨC]</p>
-                  <h3>{material.title}</h3>
-                  <p className="sample-lead">
-                    Học liệu thuộc học phần <strong>{course.name}</strong> ({course.code}), bài học <strong>{lesson?.title}</strong>.
-                  </p>
-                  <hr className="sample-divider" />
-                  <div className="sample-content-formatted">
-                    {sampleContent.split('\n').map((par: string, pIdx: number) => (
-                      <p key={pIdx}>{par}</p>
-                    ))}
-                  </div>
-                </div>
-              ) : (
-                <div className="preview-placeholder-body">
-                  <FileText size={48} className="placeholder-icon" />
-                  <h3>Xem tài liệu trực tuyến</h3>
-                  <p>Học liệu định dạng {fileType} đã sẵn sàng để nghiên cứu.</p>
-                </div>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Right Column: AI Interactive Study Assistant (40%) */}
-        <aside className="ai-chat-panel" aria-label="Trợ lý học tập AI">
-          <div className="ai-chat-header">
-            <div className="ai-brand">
-              <Bot size={22} className="ai-bot-icon" />
-              <div>
-                <h2 className="ai-title">Hỏi đáp AI theo ngữ cảnh</h2>
-                <span className="ai-scope-subtitle">Được trích dẫn từ tài liệu v{currentVersion?.versionNumber}</span>
+          {/* Confirmed Summary (if available from worker extraction) */}
+          {publishedVer?.summary && (
+            <div className="material-summary-card">
+              <div className="summary-header">
+                <ShieldCheck size={18} style={{ color: 'var(--accent)' }} />
+                <strong>Tóm tắt nội dung chính đã xác nhận:</strong>
               </div>
+              <p className="summary-body">{publishedVer.summary}</p>
             </div>
-            <span className="ai-status-indicator online" title="Hệ thống AI hoạt động"></span>
-          </div>
+          )}
 
-          {/* AI Disabled or Not Indexed Warning */}
-          {!systemSettings.aiEnabled ? (
-            <div className="ai-disabled-card">
-              <AlertTriangle size={18} />
-              <span>Trợ lý AI đang tạm ngưng phục vụ theo lịch bảo trì hệ thống.</span>
+          {/* Changelog */}
+          {publishedVer?.changelog && (
+            <div className="version-changelog-card">
+              <span className="changelog-label">Ghi chú phiên bản v{publishedVer.version_number}:</span>
+              <p className="changelog-text">{publishedVer.changelog}</p>
             </div>
-          ) : indexStatus !== 'success' ? (
-            <div className="ai-disabled-card">
-              <Clock size={18} />
-              <span>Chưa có chỉ mục nội dung cho phiên bản này. Trợ lý AI đang cập nhật.</span>
-            </div>
-          ) : null}
+          )}
 
-          {/* Suggested Questions */}
-          <div className="ai-suggested-section">
-            <span className="suggested-heading">
-              <Sparkles size={14} />
-              <span>Gợi ý câu hỏi nhanh:</span>
-            </span>
-            <div className="suggested-chips-list">
-              <button
-                type="button"
-                className="chip-btn"
-                onClick={() => handleAskSuggested('Tóm tắt 3 luận điểm chính của bài học này?')}
-              >
-                Tóm tắt 3 luận điểm chính?
-              </button>
-              <button
-                type="button"
-                className="chip-btn"
-                onClick={() => handleAskSuggested('Các định nghĩa và thuật ngữ cốt lõi là gì?')}
-              >
-                Thuật ngữ cốt lõi là gì?
-              </button>
-              <button
-                type="button"
-                className="chip-btn"
-                onClick={() => handleAskSuggested('Những lưu ý quan trọng khi làm bài tập thực hành?')}
-              >
-                Lưu ý quan trọng khi làm bài?
-              </button>
-            </div>
-          </div>
+          {/* Files Manifest Section */}
+          <div className="files-manifest-section">
+            <h2 className="section-subheading">
+              Danh sách tệp tài liệu ({files.length})
+            </h2>
 
-          {/* Chat Messages Log */}
-          <div className="chat-messages-scroll" role="log" aria-live="polite">
-            {messages.map(m => (
-              <div key={m.id} className={`chat-bubble-wrap ${m.sender}`}>
-                <div className="chat-bubble">
-                  <p className="bubble-text">{m.text}</p>
-                  {m.citation && (
-                    <div className="citation-badge">
-                      <ExternalLink size={12} />
-                      <span>{m.citation}</span>
-                    </div>
-                  )}
-                  <span className="bubble-time">{m.time}</span>
-                </div>
-              </div>
-            ))}
+            {files.length === 0 ? (
+              <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
+                Phiên bản này hiện không có tệp đính kèm nào.
+              </p>
+            ) : (
+              <div className="manifest-files-list">
+                {files.map((file) => {
+                  const isPreviewAllowed = isFilePreviewAllowed(file);
+                  const isDownloading = downloadingFileId === file.file_id;
 
-            {isAiTyping && (
-              <div className="chat-bubble-wrap ai">
-                <div className="chat-bubble typing">
-                  <div className="typing-dots">
-                    <span></span><span></span><span></span>
-                  </div>
-                </div>
+                  return (
+                    <article key={file.id} className="manifest-file-card">
+                      <div className="file-card-icon">
+                        <FileText size={28} />
+                      </div>
+
+                      <div className="file-card-info">
+                        <h3 className="file-card-title">
+                          {file.label || file.file_name}
+                        </h3>
+                        <div className="file-card-meta">
+                          <span className="file-mime">{file.mime_type}</span>
+                          <span className="file-size">{formatFileSize(file.file_size)}</span>
+                          <span className="file-hash" title={`SHA-256: ${file.sha256_hash}`}>
+                            <Hash size={12} />
+                            {file.sha256_hash.slice(0, 10)}...
+                          </span>
+                        </div>
+
+                        {!isPreviewAllowed && (
+                          <div className="preview-blocked-chip" role="status">
+                            <Lock size={12} />
+                            <span>Xem trước trực tuyến bị khóa bởi chính sách môn học</span>
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="file-card-actions">
+                        {isPreviewAllowed ? (
+                          <Button
+                            variant="secondary"
+                            onClick={() => handleOpenPreview(file)}
+                            icon={<Eye size={15} />}
+                          >
+                            Xem trực tuyến
+                          </Button>
+                        ) : (
+                          <span className="preview-disabled-tag">Không cho xem trước</span>
+                        )}
+
+                        <Button
+                          variant="primary"
+                          onClick={() => handleDownloadFile(file)}
+                          disabled={isDownloading}
+                          icon={<Download size={15} />}
+                        >
+                          {isDownloading ? 'Đang tải...' : 'Tải xuống'}
+                        </Button>
+                      </div>
+                    </article>
+                  );
+                })}
               </div>
             )}
           </div>
+        </section>
 
-          {/* Chat Input Box */}
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              handleSendMessage();
-            }}
-            className="chat-input-bar"
-          >
-            <input
-              type="text"
-              className="chat-text-input"
-              value={inputText}
-              onChange={e => setInputText(e.target.value)}
-              placeholder="Hỏi về nội dung tài liệu này..."
-              disabled={!systemSettings.aiEnabled || indexStatus !== 'success'}
-            />
-            <button
-              type="submit"
-              className="chat-send-btn"
-              disabled={!inputText.trim() || !systemSettings.aiEnabled || indexStatus !== 'success'}
-              aria-label="Gửi câu hỏi"
-            >
-              <Send size={16} />
-            </button>
-          </form>
+        {/* Right Column: Context Navigation & B14 AI Status Notice */}
+        <aside className="ai-chat-panel" aria-label="Thông tin bài học và trợ lý AI">
+          {/* Lesson Link Card */}
+          {course && (
+            <div className="course-context-card">
+              <div className="context-card-header">
+                <BookOpen size={18} style={{ color: 'var(--accent)' }} />
+                <h3>Thông tin môn học</h3>
+              </div>
+              <p className="context-course-title">
+                <strong>{course.code}</strong> — {course.name}
+              </p>
+              {material.chapter_title && (
+                <p className="context-detail-line">
+                  <span>Chương:</span> <strong>{material.chapter_title}</strong>
+                </p>
+              )}
+              {material.lesson_title && (
+                <p className="context-detail-line">
+                  <span>Bài học:</span> <strong>{material.lesson_title}</strong>
+                </p>
+              )}
+
+              {material.lesson && (
+                <Button
+                  variant="secondary"
+                  className="go-to-lesson-btn"
+                  onClick={() => navigate(`/sv/mon-hoc/${course.id}?bai=${material.lesson}`)}
+                  icon={<ArrowRight size={15} />}
+                >
+                  Đến bài học trong môn
+                </Button>
+              )}
+            </div>
+          )}
+
+          {/* Honest AI Notice for B14 */}
+          <div className="ai-b14-status-card">
+            <div className="ai-brand-row">
+              <Bot size={22} className="ai-bot-icon" />
+              <div>
+                <h3 className="ai-b14-title">Trợ lý học tập AI</h3>
+                <span className="ai-b14-subtitle">Phân hệ B14 đang phát triển</span>
+              </div>
+            </div>
+
+            <div className="ai-b14-description">
+              <p>
+                Hệ thống chỉ mục kiến thức toàn văn (B09) đã sẵn sàng. Trợ lý AI hỏi đáp ngữ cảnh thông
+                minh và gợi ý câu hỏi theo tài liệu sẽ khả dụng khi hoàn tất phân hệ <strong>B14</strong>.
+              </p>
+            </div>
+
+            <div className="ai-disabled-card">
+              <AlertTriangle size={16} />
+              <span>Giao diện hỏi đáp AI đang ở chế độ chờ kết nối mô hình B14 thực tế.</span>
+            </div>
+          </div>
         </aside>
       </div>
+
+      {/* Sandboxed File Preview Modal */}
+      {previewFile && (
+        <Modal
+          isOpen={Boolean(previewFile)}
+          onClose={handleClosePreview}
+          title={`Xem trước: ${previewFile.file_name || previewFile.label}`}
+        >
+          <div className="sandboxed-preview-modal-body">
+            {isPreviewLoading && (
+              <div className="preview-loading-box">
+                <p>Đang tải bản xem trước an toàn từ máy chủ...</p>
+              </div>
+            )}
+
+            {previewError && (
+              <div className="preview-error-box" role="alert">
+                <AlertTriangle size={24} />
+                <p>{previewError}</p>
+                <div style={{ marginTop: 'var(--space-3)' }}>
+                  <Button variant="secondary" onClick={() => handleDownloadFile(previewFile)}>
+                    Tải tệp về máy
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {previewBlobUrl && !isPreviewLoading && !previewError && (
+              <div className="preview-canvas-container">
+                {previewFile.mime_type.includes('pdf') || previewFile.file_name.toLowerCase().endsWith('.pdf') ? (
+                  <div title="Bản xem trước PDF"><PdfPreview url={previewBlobUrl} /></div>
+                ) : ['image/png', 'image/jpeg', 'image/gif', 'image/webp'].includes(previewFile.mime_type) || /\.(png|jpe?g|gif|webp)$/i.test(previewFile.file_name) ? (
+                  <img
+                    src={previewBlobUrl}
+                    alt={previewFile.file_name}
+                    className="preview-image"
+                  />
+                ) : (
+                  <p role="status">Định dạng này chưa hỗ trợ xem trực tuyến. Vui lòng tải tệp để xem.</p>
+                )}
+              </div>
+            )}
+          </div>
+        </Modal>
+      )}
     </div>
   );
 };

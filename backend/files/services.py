@@ -199,6 +199,8 @@ def abort_upload_intent(*, file_id, actor=None, system_actor=""):
         require_file_upload_permission(actor, item.course, item.purpose)
     if item.status == FileStatus.DELETED:
         return item
+    if item.material_links.exists():
+        raise DomainError("INVALID_FILE_STATE")
     get_storage().delete(item.storage_path)
     if item.status == FileStatus.QUARANTINE_PENDING:
         policy.reserved_quota_bytes -= item.file_size

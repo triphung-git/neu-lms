@@ -1,81 +1,379 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useNotifications } from '../../../app/providers/NotificationContext';
+import React, { useState, useEffect, useRef } from 'react';
+import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
+import { materialsService, type MaterialListItem } from '../../../api/materialsService';
+import { filesService, type CourseFilePolicy } from '../../../api/filesService';
+import { coursesService, type Chapter, type Course, type Lesson } from '../../../api/coursesService';
+import { useNotification } from '../../../app/providers/NotificationContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
-import { TextField, SelectField } from '../../../shared/ui/TextField';
+import { TextField } from '../../../shared/ui/TextField';
 import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { Badge } from '../../../shared/ui/Badge';
+import { formatFileSize } from '../../../shared/kernel/formatting';
 import {
-  Upload,
+  UploadCloud,
   FileText,
   CheckCircle2,
   Trash2,
   Layers,
-  ShieldCheck
+  Loader2,
+  Plus,
 } from 'lucide-react';
 import './UploadMaterialPage.css';
 
-interface FileUploadItem {
-  id: string;
+interface QueueItem {
+  id: string; // StoredFile id if already created, or temp client id
+  file?: File;
   name: string;
   size: number;
-  type: string;
-  title: string;
-  lessonId: string;
-  tags: string;
   progress: number;
-  status: 'idle' | 'uploading' | 'scanning' | 'success' | 'error';
-  errorMsg?: string;
+  status: 'pending' | 'uploading' | 'committing' | 'scanning' | 'clean' | 'error';
+  storedFileId?: string;
+  error?: string;
 }
 
 export const UploadMaterialPage: React.FC = () => {
   const { monId } = useParams<{ monId: string }>();
-  const { courses, lessons, materials, materialVersions, createMaterial, addMaterialVersion } = useDatabase();
-  const { showNotification } = useNotifications();
+  const outletContext = useOutletContext<{ course?: Course; isArchived?: boolean } | null>();
+  const { notifySuccess, notifyError } = useNotification();
   const navigate = useNavigate();
 
-  const course = courses.find((c) => c.id === monId || c.code.toLowerCase() === monId?.toLowerCase());
-  const isArchived = course?.status === 'archived';
+  const [course, setCourse] = useState<Course | null>(outletContext?.course || null);
+  const [courseLoading, setCourseLoading] = useState(!outletContext?.course);
+  const isArchived = Boolean(outletContext?.isArchived || course?.status === 'archived');
 
-  // Mode: new material vs new version for existing material
+  const [policy, setPolicy] = useState<CourseFilePolicy | null>(null);
+
+  // Upload Mode: New Material vs New Version for Existing Material
   const [uploadMode, setUploadMode] = useState<'new_material' | 'new_version'>('new_material');
-  const [targetMaterialId, setTargetMaterialId] = useState('');
+  const [existingMaterials, setExistingMaterials] = useState<MaterialListItem[]>([]);
+  const [targetMaterialId, setTargetMaterialId] = useState<string>('');
 
-  // Course lessons
-  const courseLessons = useMemo(() => {
-    if (!course) return [];
-    return lessons.filter((l) => l.courseId === course.id);
-  }, [lessons, course]);
+  // Course structure: chapters & lessons
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [selectedChapterId, setSelectedChapterId] = useState<string>('');
+  const [selectedLessonId, setSelectedLessonId] = useState<string>('');
 
-  // Existing materials in this course
-  const existingMaterials = useMemo(() => {
-    return materials.filter((m) => m.courseId === course?.id);
-  }, [materials, course]);
+  // Form Fields (Mode 1: New Material)
+  const [title, setTitle] = useState('');
+  const [description, setDescription] = useState('');
+  const createCommandKey = useRef<string | null>(null);
+  const [materialType, setMaterialType] = useState<string>('document');
+  const [tags, setTags] = useState('');
+  const [changelog, setChangelog] = useState('Khởi tạo tài liệu v1');
 
-  // Selected existing material
-  const selectedExistingMaterial = useMemo(() => {
-    return existingMaterials.find((m) => m.id === targetMaterialId) || null;
-  }, [existingMaterials, targetMaterialId]);
+  // Options
+  const [autoFinalize, setAutoFinalize] = useState(true);
+  const [autoPublish, setAutoPublish] = useState(false);
 
-  // Queue of files to upload
-  const [fileQueue, setFileQueue] = useState<FileUploadItem[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
+  // Upload Queue
+  const [queue, setQueue] = useState<QueueItem[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  if (!course) {
-    return (
-      <div className="upload-page-container">
-        <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại trên hệ thống."
-          action={
-            <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
+  const mounted = useRef(true);
+  useEffect(() => { mounted.current = true; return () => { mounted.current = false; }; }, []);
+  const requireMounted = () => { if (!mounted.current) throw new Error('Upload cancelled after navigation'); };
+  const revisionId = useRef<string | null>(null);
+  const revisionFiles = useRef(new Set<string>());
+  useEffect(() => {
+    revisionId.current = null;
+    revisionFiles.current.clear();
+    createCommandKey.current = null;
+  }, [targetMaterialId, uploadMode]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 1. Load course info if not in outlet
+  useEffect(() => {
+    if (outletContext?.course) {
+      setCourse(outletContext.course);
+      setCourseLoading(false);
+      return;
+    }
+    if (!monId) return;
+
+    coursesService
+      .get(monId)
+      .then((c) => {
+        setCourse(c);
+        setCourseLoading(false);
+      })
+      .catch(() => setCourseLoading(false));
+  }, [monId, outletContext]);
+
+  // 2. Load policy, chapters, and existing materials
+  useEffect(() => {
+    if (!monId) return;
+
+    filesService
+      .getFilePolicy(monId)
+      .then(setPolicy)
+      .catch(() => setPolicy(null));
+
+    coursesService
+      .listChapters(monId)
+      .then(setChapters)
+      .catch(() => setChapters([]));
+
+    materialsService
+      .listMaterials(monId, { page_size: 100 })
+      .then((res) => setExistingMaterials(res.items || []))
+      .catch(() => setExistingMaterials([]));
+  }, [monId]);
+
+  // 3. Load lessons when selected chapter changes
+  useEffect(() => {
+    if (!monId || !selectedChapterId) {
+      setLessons([]);
+      setSelectedLessonId('');
+      return;
+    }
+
+    coursesService
+      .listLessons(monId, selectedChapterId)
+      .then((les) => {
+        setLessons(les);
+        setSelectedLessonId('');
+      })
+      .catch(() => setLessons([]));
+  }, [monId, selectedChapterId]);
+
+  // Handle local files selected
+  const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selected = e.target.files;
+    if (!selected || selected.length === 0) return;
+
+    const newItems: QueueItem[] = Array.from(selected).map((f) => ({
+      id: `client-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      file: f,
+      name: f.name,
+      size: f.size,
+      progress: 0,
+      status: 'pending',
+    }));
+
+    setQueue((prev) => [...prev, ...newItems]);
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleRemoveQueueItem = (id: string) => {
+    setQueue((prev) => prev.filter((item) => item.id !== id));
+  };
+
+  // Submit Handler: Real bytes upload + Material Creation
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!monId) return;
+
+    if (uploadMode === 'new_material' && !title.trim()) {
+      notifyError('Vui lòng nhập tên học liệu.');
+      return;
+    }
+
+    if (uploadMode === 'new_version' && !targetMaterialId) {
+      notifyError('Vui lòng chọn học liệu cần thêm phiên bản mới.');
+      return;
+    }
+
+    if (queue.length === 0) {
+      notifyError('Vui lòng chọn ít nhất một tệp tin tài liệu.');
+      return;
+    }
+
+    if (isSubmitting) return;
+    if (policy && (queue.length > (policy.max_files_per_assignment ?? 1) || queue.some(item =>
+      item.size > (policy.max_file_size_bytes ?? 26214400) || item.size <= 0 ||
+      !(Array.isArray(policy.allowed_extensions) ? policy.allowed_extensions : ['pdf', 'docx']).includes(item.name.split('.').pop()?.toLowerCase() || '')))) {
+      notifyError('Các tệp vượt giới hạn số lượng, loại hoặc dung lượng theo chính sách.');
+      return;
+    }
+    if (!createCommandKey.current) createCommandKey.current = crypto.randomUUID();
+    setIsSubmitting(true);
+
+    try {
+      // Step 1: Upload all pending files in the queue
+      const cleanStoredFileIds: string[] = [];
+
+      for (let i = 0; i < queue.length; i++) {
+        requireMounted();
+        const item = queue[i];
+        if (item.storedFileId && item.status === 'clean') {
+          cleanStoredFileIds.push(item.storedFileId);
+          continue;
+        }
+
+        if (!item.file) continue;
+
+        // 1a. Create upload intent
+        setQueue((prev) =>
+          prev.map((q, idx) => (idx === i ? { ...q, status: 'uploading', progress: 10 } : q)),
+        );
+
+        const intent = item.storedFileId ? { file_id: item.storedFileId } : await filesService.createUploadIntent(monId, {
+          file_name: item.name,
+          file_size: item.size,
+          purpose: 'course_material',
+        });
+        setQueue(prev => prev.map((q, idx) => idx === i ? { ...q, storedFileId: intent.file_id } : q));
+        const existing = item.storedFileId ? await filesService.getFile(monId, intent.file_id) : null;
+        if (!existing || existing.status === 'quarantine_pending') {
+
+          // 1b. Upload content
+          setQueue((prev) =>
+            prev.map((q, idx) => (idx === i ? { ...q, progress: 40 } : q)),
+          );
+
+          await filesService.uploadContent(monId, intent.file_id, item.file);
+
+          // 1c. Commit upload
+          setQueue((prev) =>
+            prev.map((q, idx) =>
+              idx === i ? { ...q, status: 'committing', progress: 80 } : q,
+            ),
+          );
+
+          await filesService.commitUpload(monId, intent.file_id, {
+            client_checksum: '',
+          });
+
+        }
+        // 1d. Check clean status
+        requireMounted();
+        let fileRecord = await filesService.getFile(monId, intent.file_id);
+        for (let attempt = 0; fileRecord.status === 'scanning' || fileRecord.status === 'quarantine_pending'; attempt++) {
+          setQueue(prev => prev.map((q, idx) => idx === i ? { ...q, storedFileId: intent.file_id, status: 'scanning' } : q));
+          if (attempt >= 60) throw new Error('Quét chưa hoàn tất. Kiểm tra lại trong kho tệp.');
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          requireMounted();
+          fileRecord = await filesService.getFile(monId, intent.file_id);
+        }
+        if (fileRecord.status !== 'clean' && fileRecord.status !== 'infected') {
+          throw new Error('Tệp chưa ở trạng thái sạch; không thể tạo manifest.');
+        }
+        if (fileRecord.status === 'infected') {
+          setQueue((prev) =>
+            prev.map((q, idx) =>
+              idx === i
+                ? { ...q, status: 'error', error: 'Tệp tin bị nhiễm mã độc, hệ thống đã loại bỏ.' }
+                : q,
+            ),
+          );
+          throw new Error(`Tệp tin "${item.name}" không an toàn và đã bị loại bỏ.`);
+        }
+
+        setQueue((prev) =>
+          prev.map((q, idx) =>
+            idx === i
+              ? { ...q, status: 'clean', progress: 100, storedFileId: fileRecord.id }
+              : q,
+          ),
+        );
+
+        cleanStoredFileIds.push(fileRecord.id);
+      }
+
+      requireMounted();
+      // Step 2: Create Material or Revision
+      const parsedTags = tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t.length > 0);
+
+      if (uploadMode === 'new_material') {
+        // Mode 1: Create new material with clean files
+        const newMat = await materialsService.createMaterial(monId, {
+          title: title.trim(),
+          description: description.trim(),
+          material_type: materialType as any,
+          chapter_id: selectedChapterId || undefined,
+          lesson_id: selectedLessonId || undefined,
+          tags: parsedTags,
+          initial_file_ids: cleanStoredFileIds,
+        }, createCommandKey.current);
+
+        notifySuccess(`Đã tạo học liệu "${newMat.title}" thành công.`);
+
+        // Finalize if requested
+        if (autoFinalize) {
+          requireMounted();
+          let targetVerId = (newMat.latest_version as any)?.id;
+          if (!targetVerId) {
+            const versions = await materialsService.listVersions(monId, newMat.id);
+            targetVerId = versions[0]?.id;
           }
-        />
-      </div>
-    );
+
+          if (targetVerId) {
+            const finVer = await materialsService.finalizeVersion(
+              monId,
+              newMat.id,
+              targetVerId,
+            );
+            notifySuccess(`Đã đóng băng manifest phiên bản v${finVer.version_number}.`);
+
+            // Publish if requested
+            if (autoPublish) {
+              requireMounted();
+              await materialsService.publishMaterial(monId, newMat.id, {
+                version_id: finVer.id,
+              });
+              notifySuccess(`Đã công bố học liệu v${finVer.version_number} cho sinh viên.`);
+            }
+          }
+        }
+
+        navigate(`/gv/mon-hoc/${monId}/hoc-lieu/${newMat.id}`);
+      } else {
+        // Mode 2: Create revision for existing material
+        const newVer = revisionId.current ? { id: revisionId.current, version_number: '?' } : await materialsService.createRevision(monId, targetMaterialId, {
+          changelog: changelog.trim() || 'Cập nhật phiên bản mới',
+        }, createCommandKey.current || undefined);
+
+        revisionId.current = newVer.id;
+        requireMounted();
+        // Add files to this new version
+        for (let idx = 0; idx < cleanStoredFileIds.length; idx++) {
+          requireMounted();
+          if (revisionFiles.current.has(cleanStoredFileIds[idx])) continue;
+          await materialsService.addFileToVersion(monId, targetMaterialId, newVer.id, {
+            file_id: cleanStoredFileIds[idx],
+            label: '',
+            position: idx + 1,
+          });
+          revisionFiles.current.add(cleanStoredFileIds[idx]);
+        }
+
+        notifySuccess(`Đã tạo phiên bản v${newVer.version_number} thành công.`);
+
+        // Finalize if requested
+        if (autoFinalize) {
+          requireMounted();
+          await materialsService.finalizeVersion(monId, targetMaterialId, newVer.id);
+          notifySuccess(`Đã đóng băng manifest v${newVer.version_number}.`);
+
+          if (autoPublish) {
+              requireMounted();
+            await materialsService.publishMaterial(monId, targetMaterialId, {
+              version_id: newVer.id,
+            });
+            notifySuccess(`Đã công bố phiên bản v${newVer.version_number} cho sinh viên.`);
+          }
+        }
+
+        navigate(`/gv/mon-hoc/${monId}/hoc-lieu/${targetMaterialId}`);
+      }
+    } catch (err) {
+      if (!mounted.current) return;
+      const message = err instanceof Error ? err.message : 'Tải lên học liệu thất bại.';
+      setQueue(prev => prev.map(q => ['uploading', 'committing', 'scanning'].includes(q.status) ? { ...q, status: 'error', error: message } : q));
+      notifyError(message);
+    } finally {
+      if (mounted.current) setIsSubmitting(false);
+    }
+  };
+
+  if (courseLoading) {
+    return <div className="upload-page-container">Đang tải thông tin môn học...</div>;
   }
 
   if (isArchived) {
@@ -85,7 +383,7 @@ export const UploadMaterialPage: React.FC = () => {
           title="Môn học đã lưu trữ"
           description="Không thể tải thêm tài liệu vào môn học đã kết thúc và lưu trữ."
           action={
-            <Button variant="secondary" onClick={() => navigate(`/gv/mon-hoc/${course.id}/hoc-lieu`)}>
+            <Button variant="secondary" onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu`)}>
               Quay lại danh sách học liệu
             </Button>
           }
@@ -94,315 +392,300 @@ export const UploadMaterialPage: React.FC = () => {
     );
   }
 
-  // Handle mock file selection
-  const handleSimulateAddFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (!files || files.length === 0) return;
-
-    const newItems: FileUploadItem[] = Array.from(files).map((f, idx) => {
-      const ext = f.name.split('.').pop()?.toLowerCase() || 'pdf';
-      const cleanTitle = f.name.replace(/\.[^/.]+$/, '');
-      return {
-        id: `f-${Date.now()}-${idx}`,
-        name: f.name,
-        size: f.size || 2500000,
-        type: ext,
-        title: cleanTitle,
-        lessonId: courseLessons.length > 0 ? courseLessons[0].id : '',
-        tags: 'bai-giang, tham-khao',
-        progress: 0,
-        status: 'idle'
-      };
-    });
-
-    setFileQueue(prev => [...prev, ...newItems]);
-  };
-
-  const handleAddDemoFile = () => {
-    const demoId = Date.now();
-    const newItem: FileUploadItem = {
-      id: `demo-${demoId}`,
-      name: `Giao_trinh_Hoc_phan_Phan_${fileQueue.length + 1}.pdf`,
-      size: 3400000,
-      type: 'pdf',
-      title: `Giáo trình Học phần - Phần ${fileQueue.length + 1}`,
-      lessonId: courseLessons.length > 0 ? courseLessons[0].id : '',
-      tags: 'giao-trinh, ly-thuyet',
-      progress: 0,
-      status: 'idle'
-    };
-    setFileQueue(prev => [...prev, newItem]);
-  };
-
-  const handleRemoveItem = (id: string) => {
-    setFileQueue(prev => prev.filter(item => item.id !== id));
-  };
-
-  const handleUpdateItem = (id: string, updates: Partial<FileUploadItem>) => {
-    setFileQueue(prev => prev.map(item => item.id === id ? { ...item, ...updates } : item));
-  };
-
-  // Upload and scan simulator
-  const handleStartUpload = () => {
-    if (fileQueue.length === 0) {
-      showNotification('error', 'Vui lòng chọn ít nhất một tệp để tải lên.');
-      return;
-    }
-
-    if (uploadMode === 'new_version' && !targetMaterialId) {
-      showNotification('error', 'Vui lòng chọn học liệu cần cập nhật phiên bản mới.');
-      return;
-    }
-
-    setIsProcessing(true);
-
-    // Update statuses to uploading
-    setFileQueue(prev => prev.map(item => ({ ...item, status: 'uploading', progress: 40 })));
-
-    setTimeout(() => {
-      // Step: Scanning
-      setFileQueue(prev => prev.map(item => ({ ...item, status: 'scanning', progress: 85 })));
-
-      setTimeout(() => {
-        // Step: Done & Commit
-        fileQueue.forEach((item, idx) => {
-          if (uploadMode === 'new_version' && selectedExistingMaterial) {
-            // New version
-            const existingVers = materialVersions?.filter((v) => v.materialId === selectedExistingMaterial.id) || [];
-            const newVerNumber = existingVers.length + 1;
-            addMaterialVersion({
-              id: `mv-${Date.now()}-${idx}`,
-              materialId: selectedExistingMaterial.id,
-              versionNumber: newVerNumber,
-              fileUrl: `/uploads/${item.name}`,
-              fileSize: item.size,
-              uploadedAt: new Date().toISOString(),
-              sampleContent: `Nội dung cập nhật của phiên bản mới v${newVerNumber}.\nTài liệu bao gồm các sửa đổi chi tiết theo phản hồi thực tế của sinh viên và đề cương mới nhất.`
-            });
-          } else {
-            // New material
-            const newMatId = `mat-${Date.now()}-${idx}`;
-            createMaterial({
-              id: newMatId,
-              courseId: course.id,
-              lessonId: item.lessonId || (courseLessons.length > 0 ? courseLessons[0].id : 'les-1'),
-              title: item.title.trim() || item.name,
-              fileType: item.type,
-              currentVersion: 1,
-              scanStatus: 'clean',
-              aiIndexStatus: 'indexed',
-              visibility: 'draft', // Default is draft
-              tags: item.tags.split(',').map(t => t.trim()).filter(Boolean),
-              updatedAt: new Date().toISOString()
-            });
-
-            addMaterialVersion({
-              id: `mv-${Date.now()}-${idx}`,
-              materialId: newMatId,
-              versionNumber: 1,
-              fileUrl: `/uploads/${item.name}`,
-              fileSize: item.size,
-              uploadedAt: new Date().toISOString(),
-              sampleContent: `Nội dung trích đoạn của tài liệu ${item.title}.\nGiảng viên có thể kiểm tra trực tiếp bản xem trước và yêu cầu trợ lý AI tóm tắt.`
-            });
-          }
-        });
-
-        setIsProcessing(false);
-        showNotification('success', `Đã tải lên và quét an ninh thành công ${fileQueue.length} tệp tài liệu.`);
-        navigate(`/gv/mon-hoc/${course.id}/hoc-lieu`);
-      }, 700);
-    }, 600);
-  };
-
   return (
     <div className="upload-material-page">
-      <div className="page-header">
-        <Breadcrumb
-          items={[
-            { label: 'Bàn làm việc', path: '/gv' },
-            { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-            { label: 'Học liệu', path: `/gv/mon-hoc/${course.id}/hoc-lieu` },
-            { label: 'Tải lên học liệu' }
-          ]}
-        />
-        <h1 className="page-heading">Tải lên học liệu giảng dạy</h1>
-        <p className="page-subheading">
-          Hệ thống tự động thực hiện quét mã độc an ninh và lập chỉ mục nội dung cho trợ lý học tập AI.
-        </p>
+      <Breadcrumb
+        items={[
+          { label: 'Môn học', path: '/gv/mon-hoc' },
+          { label: course?.name || 'Chi tiết môn', path: `/gv/mon-hoc/${monId}` },
+          { label: 'Học liệu', path: `/gv/mon-hoc/${monId}/hoc-lieu` },
+          { label: 'Tải lên học liệu' },
+        ]}
+      />
+
+      <div className="upload-header">
+        <h2>Tải lên học liệu mới</h2>
+        <p>Tải lên tài liệu giảng dạy, quản lý manifest phiên bản và kích hoạt trích xuất văn bản.</p>
       </div>
 
-      {/* Mode Switcher */}
-      <div className="upload-mode-card">
-        <div className="mode-toggle-group">
-          <button
-            type="button"
-            className={`mode-btn ${uploadMode === 'new_material' ? 'active' : ''}`}
-            onClick={() => setUploadMode('new_material')}
-          >
-            <FileText size={18} />
-            <span>Tạo học liệu mới</span>
-          </button>
-          <button
-            type="button"
-            className={`mode-btn ${uploadMode === 'new_version' ? 'active' : ''}`}
-            onClick={() => setUploadMode('new_version')}
-          >
-            <Layers size={18} />
-            <span>Tải phiên bản mới cho học liệu có sẵn</span>
-          </button>
+      <form onSubmit={(e) => void handleSubmit(e)} className="upload-form-stack">
+        {/* Mode Selector */}
+        <div className="upload-mode-card">
+          <label style={{ fontWeight: 600 }}>Chế độ tải lên:</label>
+          <div className="mode-toggle-group">
+            <button
+              type="button"
+              className={`mode-btn ${uploadMode === 'new_material' ? 'active' : ''}`}
+              onClick={() => setUploadMode('new_material')}
+            >
+              <Plus size={16} /> Tạo học liệu mới
+            </button>
+            <button
+              type="button"
+              className={`mode-btn ${uploadMode === 'new_version' ? 'active' : ''}`}
+              onClick={() => setUploadMode('new_version')}
+            >
+              <Layers size={16} /> Cập nhật phiên bản mới cho học liệu có sẵn
+            </button>
+          </div>
+
+          {uploadMode === 'new_version' && (
+            <div className="existing-material-picker">
+              <label htmlFor="target-mat">Chọn học liệu đích:</label>
+              <select
+                id="target-mat"
+                value={targetMaterialId}
+                onChange={(e) => setTargetMaterialId(e.target.value)}
+                required
+              >
+                <option value="">-- Chọn học liệu --</option>
+                {existingMaterials.map((m) => (
+                  <option key={m.id} value={m.id}>
+                    {m.title} (v{m.latest_version_number || 1})
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
         </div>
 
-        {uploadMode === 'new_version' && (
-          <div className="existing-material-picker">
-            <SelectField
-              label="Chọn học liệu cần nâng cấp phiên bản"
+        {/* Metadata Fields (for new material) */}
+        {uploadMode === 'new_material' && (
+          <div className="upload-section-card">
+            <h3>Thông tin học liệu</h3>
+            <TextField
+              label="Tên học liệu *"
+              placeholder="VD: Giáo trình Chương 1 - Nhập môn Kiến trúc phần mềm"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
               required
-              value={targetMaterialId}
-              onChange={e => setTargetMaterialId(e.target.value)}
-              options={[
-                { value: '', label: '-- Chọn học liệu trong danh sách --' },
-                ...existingMaterials.map((m) => {
-                  const ver = materialVersions?.find((v) => v.id === m.currentVersionId);
-                  return {
-                    value: m.id,
-                    label: `${m.title} (Hiện tại: v${ver?.versionNumber || 1})`
-                  };
-                })
-              ]}
-              helperText="Bài học và môn học sẽ tự động khóa theo học liệu gốc đã chọn."
+            />
+
+            <div style={{ marginTop: '1rem' }}>
+              <label htmlFor="mat-desc" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                Mô tả học liệu
+              </label>
+              <textarea
+                id="mat-desc"
+                rows={3}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
+                placeholder="Tóm tắt nội dung học liệu..."
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+              <div>
+                <label htmlFor="mat-type" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  Loại học liệu
+                </label>
+                <select
+                  id="mat-type"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
+                  value={materialType}
+                  onChange={(e) => setMaterialType(e.target.value)}
+                >
+                  <option value="document">Bài giảng</option>
+                  <option value="slide">Slide trình chiếu</option>
+                  <option value="reference">Tài liệu tham khảo</option>
+                  <option value="syllabus">Đề cương / Ôn tập</option>
+                  <option value="other">Khác</option>
+                </select>
+              </div>
+
+              <div>
+                <label htmlFor="mat-chapter" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                  Chương học (Tùy chọn)
+                </label>
+                <select
+                  id="mat-chapter"
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
+                  value={selectedChapterId}
+                  onChange={(e) => setSelectedChapterId(e.target.value)}
+                >
+                  <option value="">-- Không gắn chương --</option>
+                  {chapters.map((ch) => (
+                    <option key={ch.id} value={ch.id}>
+                      {ch.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {lessons.length > 0 && (
+                <div>
+                  <label htmlFor="mat-lesson" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
+                    Bài học cụ thể
+                  </label>
+                  <select
+                    id="mat-lesson"
+                    style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
+                    value={selectedLessonId}
+                    onChange={(e) => setSelectedLessonId(e.target.value)}
+                  >
+                    <option value="">-- Không gắn bài học --</option>
+                    {lessons.map((les) => (
+                      <option key={les.id} value={les.id}>
+                        {les.title}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginTop: '1rem' }}>
+              <TextField
+                label="Thẻ phân loại (Tags)"
+                placeholder="VD: kien-truc, chuong-1, microservices (phân cách bằng dấu phẩy)"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+              />
+            </div>
+          </div>
+        )}
+
+        {uploadMode === 'new_version' && (
+          <div className="upload-section-card">
+            <h3>Ghi chú phiên bản (Changelog)</h3>
+            <TextField
+              label="Mô tả cập nhật của phiên bản mới *"
+              placeholder="VD: Cập nhật sơ đồ hệ thống và bổ sung bài tập mẫu"
+              value={changelog}
+              onChange={(e) => setChangelog(e.target.value)}
+              required
             />
           </div>
         )}
-      </div>
 
-      {/* Drop Zone Box */}
-      <div className="dropzone-card">
-        <Upload size={36} className="dropzone-icon" />
-        <h2 className="dropzone-title">Kéo thả tệp vào đây hoặc chọn từ máy tính</h2>
-        <p className="dropzone-hint">
-          Hỗ trợ các định dạng PDF, DOCX, PPTX, MP4. Quyền hiển thị mặc định là <strong>Bản nháp</strong> (an toàn cho giảng viên).
-        </p>
+        {/* File Dropzone & Queue */}
+        <div className="upload-section-card">
+          <h3>Tệp tin tài liệu</h3>
+          <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0.25rem 0 1rem' }}>
+            Hỗ trợ PDF, DOCX, TXT (tự động trích xuất nội dung văn bản) và các định dạng tệp tin cho
+            phép theo chính sách môn học (tối đa {policy?.max_file_size_bytes ? formatFileSize(policy.max_file_size_bytes) : '50MB'}/tệp).
+          </p>
 
-        <div className="dropzone-actions">
-          <label className="npc-btn npc-btn-secondary">
-            <span>Chọn tệp tin...</span>
+          <div
+            className="dropzone-card"
+            onClick={() => fileInputRef.current?.click()}
+            style={{ cursor: 'pointer', textAlign: 'center', padding: '2rem', border: '2px dashed #cbd5e1', borderRadius: '0.5rem' }}
+          >
+            <UploadCloud size={40} style={{ color: '#0284c7', margin: '0 auto' }} />
+            <p style={{ fontWeight: 600, marginTop: '0.5rem' }}>
+              Nhấn để chọn tệp tin từ máy tính hoặc kéo thả vào đây
+            </p>
+            <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
+              Mọi tệp tin đều được quét mã độc an toàn và tính hash SHA-256 bất biến.
+            </p>
             <input
               type="file"
+              ref={fileInputRef}
               multiple
-              className="sr-only"
-              onChange={handleSimulateAddFiles}
+              style={{ display: 'none' }}
+              onChange={handleSelectFiles}
             />
-          </label>
-          <Button type="button" variant="ghost" onClick={handleAddDemoFile}>
-            + Thêm tệp mẫu minh họa
-          </Button>
-        </div>
-      </div>
-
-      {/* File Queue List */}
-      {fileQueue.length > 0 && (
-        <div className="file-queue-section">
-          <div className="queue-header">
-            <h3 className="queue-title">Danh sách tệp chờ tải lên ({fileQueue.length})</h3>
-            <span className="queue-badge">Tất cả tệp sẽ được quét an ninh</span>
           </div>
 
-          <div className="queue-items-stack">
-            {fileQueue.map(item => (
-              <div key={item.id} className="queue-item-card">
-                <div className="queue-item-top">
-                  <div className="queue-item-fileinfo">
-                    <FileText size={20} className="file-icon" />
+          {/* Queue List */}
+          {queue.length > 0 && (
+            <div className="files-queue-list" style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {queue.map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0.75rem 1rem',
+                    background: '#f8fafc',
+                    borderRadius: '0.375rem',
+                    border: '1px solid #e2e8f0',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                    <FileText size={20} style={{ color: '#0284c7' }} />
                     <div>
-                      <strong className="queue-file-name">{item.name}</strong>
-                      <span className="queue-file-size">{(item.size / 1024 / 1024).toFixed(2)} MB</span>
+                      <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.name}</div>
+                      <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+                        {formatFileSize(item.size)}
+                        {item.status === 'uploading' && ` · Đang tải lên ${item.progress}%...`}
+                        {item.status === 'committing' && ' · Đang xác thực hash SHA-256...'}
+                        {item.status === 'scanning' && ' · Đang quét an toàn...'}
+                        {item.status === 'clean' && ' · Đã quét sạch an toàn'}
+                        {item.status === 'error' && ` · Lỗi: ${item.error}`}
+                      </div>
                     </div>
                   </div>
 
-                  <div className="queue-item-status">
-                    {item.status === 'idle' && (
-                      <span className="status-idle">Chờ tải lên</span>
-                    )}
-                    {item.status === 'uploading' && (
-                      <span className="status-loading">Đang tải lên... {item.progress}%</span>
-                    )}
-                    {item.status === 'scanning' && (
-                      <span className="status-scanning">
-                        <ShieldCheck size={16} /> Đang quét an ninh...
-                      </span>
-                    )}
-                    {item.status === 'success' && (
-                      <span className="status-success">
-                        <CheckCircle2 size={16} /> Sạch & Hoàn tất
-                      </span>
-                    )}
-
-                    <button
-                      type="button"
-                      className="icon-remove-btn"
-                      onClick={() => handleRemoveItem(item.id)}
-                      disabled={isProcessing}
-                      title="Xóa tệp khỏi danh sách"
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    {item.status === 'clean' && <Badge variant="success">Sạch</Badge>}
+                    {item.status === 'error' && <Badge variant="danger">Lỗi</Badge>}
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<Trash2 size={14} />}
+                      onClick={() => handleRemoveQueueItem(item.id)}
+                      disabled={isSubmitting}
                     >
-                      <Trash2 size={16} />
-                    </button>
+                      Bỏ
+                    </Button>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
 
-                {/* Metadata Fields for New Material */}
-                {uploadMode === 'new_material' && (
-                  <div className="queue-item-metadata-row">
-                    <div className="meta-field">
-                      <TextField
-                        label="Tiêu đề hiển thị"
-                        value={item.title}
-                        onChange={e => handleUpdateItem(item.id, { title: e.target.value })}
-                      />
-                    </div>
-                    <div className="meta-field">
-                      <SelectField
-                        label="Gắn vào bài học"
-                        value={item.lessonId}
-                        onChange={e => handleUpdateItem(item.id, { lessonId: e.target.value })}
-                        options={courseLessons.map(l => ({ value: l.id, label: l.title }))}
-                      />
-                    </div>
-                    <div className="meta-field">
-                      <TextField
-                        label="Thẻ phân loại (phân tách bởi dấu phẩy)"
-                        value={item.tags}
-                        onChange={e => handleUpdateItem(item.id, { tags: e.target.value })}
-                        placeholder="giao-trinh, bai-tap..."
-                      />
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+        {/* Workflow & Options Card */}
+        <div className="upload-section-card" style={{ background: '#f8fafc' }}>
+          <h3>Tùy chọn quy trình xuất bản</h3>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={autoFinalize}
+                onChange={(e) => setAutoFinalize(e.target.checked)}
+              />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>
+                Đóng băng manifest ngay sau khi tải lên (Kích hoạt trích xuất văn bản)
+              </span>
+            </label>
 
-          <div className="queue-submit-bar">
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => navigate(`/gv/mon-hoc/${course.id}/hoc-lieu`)}
-              disabled={isProcessing}
-            >
-              Hủy bỏ
-            </Button>
-            <Button
-              type="button"
-              variant="primary"
-              isLoading={isProcessing}
-              onClick={handleStartUpload}
-            >
-              <Upload size={18} />
-              <span>Tiến hành tải lên và Quét an ninh</span>
-            </Button>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={autoPublish}
+                disabled={!autoFinalize}
+                onChange={(e) => setAutoPublish(e.target.checked)}
+              />
+              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: autoFinalize ? '#0f172a' : '#94a3b8' }}>
+                Công bố ngay cho sinh viên sau khi đóng băng
+              </span>
+            </label>
           </div>
         </div>
-      )}
+
+        {/* Form Actions */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '1rem', marginTop: '1.5rem' }}>
+          <Button
+            variant="secondary"
+            onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu`)}
+            disabled={isSubmitting}
+          >
+            Hủy
+          </Button>
+          <Button
+            variant="primary"
+            type="submit"
+            icon={isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Đang tải lên & xử lý...' : uploadMode === 'new_material' ? 'Tạo học liệu' : 'Lưu phiên bản mới'}
+          </Button>
+        </div>
+      </form>
     </div>
   );
 };
