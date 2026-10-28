@@ -82,6 +82,7 @@ def execute_once(*, scope, operation, key, payload, mutation):
             "session",
             "material",
             "material_version",
+            "assignment",
         }:
             raise DomainError("INVALID_IDEMPOTENCY_RESULT")
         record.result_type = result.resource_type

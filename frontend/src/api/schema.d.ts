@@ -260,6 +260,74 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/assignments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết bài tập trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/attachments/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_attachment_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/attachments/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước trực tuyến tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_attachment_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Thẩm định tính hợp lệ nộp bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_eligibility_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/csrf": {
         parameters: {
             query?: never;
@@ -511,6 +579,218 @@ export interface paths {
         put?: never;
         post: operations["courses_create"];
         delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học. */
+        get: operations["teacher_assignments_list"];
+        put?: never;
+        /** @description Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học. */
+        post: operations["teacher_assignments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        get: operations["teacher_assignments_retrieve"];
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        put: operations["teacher_assignments_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        patch: operations["teacher_assignments_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Lưu trữ bài tập. */
+        post: operations["teacher_assignments_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp đính kèm tài liệu đề bài của bài tập. */
+        get: operations["assignments_attachment_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước trực tuyến tệp đính kèm tài liệu đề bài của bài tập. */
+        get: operations["assignments_attachment_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Đóng nhận bài sớm thủ công hoặc mở lại bài tập kèm gia hạn thời hạn nộp bài. */
+        post: operations["teacher_assignments_close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Thẩm định tính hợp lệ nộp bài của sinh viên theo Thẩm quyền Máy chủ.
+         *
+         *     Không dùng ClockContext hay client timestamp làm authority.
+         */
+        get: operations["assignments_eligibility_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước bài tập dưới góc nhìn sinh viên. */
+        get: operations["teacher_assignments_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Công bố bài tập cho sinh viên và đóng băng đề bài cùng rubric. */
+        post: operations["teacher_assignments_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Endpoint mở lại bài tập đã đóng nhận bài. */
+        post: operations["teacher_assignments_reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp. */
+        get: operations["teacher_assignments_reopen_windows_list"];
+        put?: never;
+        /** @description Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp. */
+        post: operations["teacher_assignments_reopen_windows_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows/{window_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Thu hồi / hủy hiệu lực một cửa sổ mở lại. */
+        delete: operations["teacher_assignments_reopen_windows_revoke"];
         options?: never;
         head?: never;
         patch?: never;
@@ -1086,6 +1366,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_id}/published-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách bài tập đã công bố của môn học dành cho sinh viên và giảng viên. */
+        get: operations["courses_published_assignments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/{id}": {
         parameters: {
             query?: never;
@@ -1450,6 +1747,300 @@ export interface components {
             /** @default  */
             review_reason: string;
         };
+        /** @description Serializer cho chính sách tệp áp dụng cho lần nộp tiếp theo. */
+        ApplicableFilePolicy: {
+            version: number;
+            max_files: number;
+            max_file_size_bytes: number;
+            allowed_extensions: string[];
+        };
+        /** @description Serializer cho tệp đính kèm tài liệu đề bài của giảng viên. */
+        AssignmentAttachment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly file_id: string;
+            name: string;
+            /** Format: int64 */
+            size_bytes: number;
+            readonly mime_type: string;
+            readonly sha256_hash: string;
+            readonly download_url: string;
+            readonly preview_url: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Schema dữ liệu yêu cầu đóng hoặc mở lại cửa sổ nhận bài. */
+        AssignmentCloseRequestRequest: {
+            /** @default manual_close */
+            close_type: components["schemas"]["CloseTypeEnum"];
+            /** Format: date-time */
+            reopen_until?: string | null;
+            /** @default all */
+            target_type: string;
+            reopen_student_ids?: string[];
+            /** @default all_actions */
+            scope: string;
+            /** @default  */
+            reason: string;
+        };
+        /** @description Schema dữ liệu yêu cầu tạo bài tập mới từ giảng viên. */
+        AssignmentCreateRequestRequest: {
+            title: string;
+            /** @default  */
+            instructions: string;
+            /** Format: date-time */
+            due_at: string;
+            /** @default false */
+            allow_late: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            /** @default false */
+            ai_grading_opt_in: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            /** @default false */
+            publish_immediately: boolean;
+        };
+        /** @description Serializer đầy đủ thông tin bài tập phục vụ xem chi tiết và biên soạn. */
+        AssignmentDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)
+             */
+            readonly course_id: string;
+            /**
+             * Format: uuid
+             * @description Chương học chứa bài tập (xóa chương sẽ gán NULL)
+             */
+            readonly chapter_id: string | null;
+            /**
+             * Format: uuid
+             * @description Bài học gắn với bài tập (xóa bài học sẽ gán NULL)
+             */
+            readonly lesson_id: string | null;
+            /** @description Tiêu đề bài tập */
+            readonly title: string;
+            /** @description Nội dung yêu cầu, chỉ dẫn làm bài */
+            readonly instructions: string;
+            /**
+             * @description Trạng thái vòng đời: draft -> published -> closed/archived
+             *
+             *     * `draft` - Bản nháp
+             *     * `published` - Đã công bố
+             *     * `closed` - Đã đóng nhận bài
+             *     * `archived` - Đã lưu trữ
+             */
+            readonly status: components["schemas"]["AssignmentStatusEnum"];
+            /**
+             * Format: date-time
+             * @description Hạn chót nộp bài
+             */
+            readonly due_at: string;
+            /** @description Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ) */
+            readonly allow_late: boolean;
+            /**
+             * Format: date-time
+             * @description Thời điểm giảng viên chủ động đóng thu nhận bài sớm
+             */
+            readonly manually_closed_at: string | null;
+            readonly rubric_criteria: components["schemas"]["AssignmentRubricCriterion"][];
+            /** Format: double */
+            readonly total_score: number;
+            readonly file_policy: components["schemas"]["AssignmentFilePolicy"];
+            readonly attachments: components["schemas"]["AssignmentAttachment"][];
+            /** @description Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt) */
+            readonly ai_grading_opt_in: boolean;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** @description Phiên bản tương tranh lạc quan (OCC) */
+            readonly version: number;
+            readonly is_submission_window_open: boolean;
+        };
+        /** @description Serializer cho chính sách tệp đính kèm khi nộp bài. */
+        AssignmentFilePolicy: {
+            /** Format: uuid */
+            readonly id: string;
+            /** @description Số lượng tệp tối đa trong một lần nộp (1 đến 10) */
+            max_files_per_submission?: number;
+            /**
+             * Format: int64
+             * @description Dung lượng tối đa mỗi tệp (bytes)
+             */
+            max_file_size_bytes?: number;
+            /** @description Danh sách phần mở rộng hợp lệ (chữ thường, không chứa dấu chấm) */
+            allowed_extensions?: unknown;
+            /** @description Phiên bản chính sách tệp cho lần nộp tương lai */
+            readonly version: number;
+        };
+        /** @description Schema phản hồi cho chức năng xem trước bài tập dưới góc nhìn sinh viên. */
+        AssignmentPreview: {
+            assignment: components["schemas"]["AssignmentDetail"];
+            /** @default true */
+            preview_mode: boolean;
+        };
+        /** @description Schema dữ liệu yêu cầu công bố bài tập. */
+        AssignmentPublishRequestRequest: {
+            expected_version?: number;
+        };
+        /** @description Serializer cho chi tiết cửa sổ mở lại do giảng viên chủ động cấp. */
+        AssignmentReopenWindow: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Bài tập được áp dụng cửa sổ mở lại
+             */
+            readonly assignment_id: string;
+            /**
+             * @description Đối tượng áp dụng: all (toàn bộ lớp) hoặc student (sinh viên cụ thể)
+             *
+             *     * `all` - Toàn bộ lớp
+             *     * `student` - Sinh viên cụ thể
+             */
+            target_type?: components["schemas"]["TargetTypeEnum"];
+            /**
+             * Format: uuid
+             * @description Sinh viên cụ thể nếu target_type='student'
+             */
+            readonly student_id: string | null;
+            readonly student_display_name: string;
+            readonly student_email: string;
+            /**
+             * Format: date-time
+             * @description Thời điểm bắt đầu hiệu lực của cửa sổ
+             */
+            start_at?: string;
+            /**
+             * Format: date-time
+             * @description Thời điểm kết thúc của cửa sổ mở lại
+             */
+            end_at: string;
+            /**
+             * @description Phạm vi: all_actions (nộp mới và thay thế) hoặc first_only (chỉ lần đầu)
+             *
+             *     * `all_actions` - Cho phép nộp mới và nộp lại
+             *     * `first_only` - Chỉ cho phép nộp lần đầu
+             */
+            scope?: components["schemas"]["ScopeEnum"];
+            /** @description Lý do giảng viên cấp cửa sổ mở lại / ngoại lệ */
+            reason?: string;
+            /** @description Cờ kích hoạt của cửa sổ mở lại */
+            readonly is_active: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Serializer cho tiêu chí đánh giá rubric của bài tập. */
+        AssignmentRubricCriterion: {
+            /** Format: uuid */
+            readonly id: string;
+            /** @description Tên tiêu chí đánh giá */
+            title: string;
+            /** @description Mô tả mức độ đạt và hướng dẫn chấm */
+            description?: string;
+            /**
+             * Format: decimal
+             * @description Điểm tối đa của tiêu chí (phải > 0)
+             */
+            max_score?: string;
+            /** @description Thứ tự hiển thị tiêu chí */
+            position?: number;
+        };
+        /**
+         * @description * `draft` - Bản nháp
+         *     * `published` - Đã công bố
+         *     * `closed` - Đã đóng nhận bài
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        AssignmentStatusEnum: "draft" | "published" | "closed" | "archived";
+        /** @description Serializer tóm tắt bài tập hiển thị trong danh sách môn học của giảng viên. */
+        AssignmentSummaryItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)
+             */
+            readonly course_id: string;
+            /**
+             * Format: uuid
+             * @description Chương học chứa bài tập (xóa chương sẽ gán NULL)
+             */
+            readonly chapter_id: string | null;
+            /**
+             * Format: uuid
+             * @description Bài học gắn với bài tập (xóa bài học sẽ gán NULL)
+             */
+            readonly lesson_id: string | null;
+            /** @description Tiêu đề bài tập */
+            readonly title: string;
+            /**
+             * @description Trạng thái vòng đời: draft -> published -> closed/archived
+             *
+             *     * `draft` - Bản nháp
+             *     * `published` - Đã công bố
+             *     * `closed` - Đã đóng nhận bài
+             *     * `archived` - Đã lưu trữ
+             */
+            readonly status: components["schemas"]["AssignmentStatusEnum"];
+            /**
+             * Format: date-time
+             * @description Hạn chót nộp bài
+             */
+            readonly due_at: string;
+            /** @description Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ) */
+            readonly allow_late: boolean;
+            /**
+             * Format: date-time
+             * @description Thời điểm giảng viên chủ động đóng thu nhận bài sớm
+             */
+            readonly manually_closed_at: string | null;
+            /** Format: double */
+            readonly total_score: number;
+            readonly rubric_count: number;
+            readonly attachment_count: number;
+            /** @default 0 */
+            readonly submission_count: number;
+            /** @default 0 */
+            readonly graded_count: number;
+            /** @description Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt) */
+            readonly ai_grading_opt_in: boolean;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** @description Phiên bản tương tranh lạc quan (OCC) */
+            readonly version: number;
+        };
+        /** @description Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan. */
+        AssignmentUpdateRequestRequest: {
+            title?: string;
+            instructions?: string;
+            /** Format: date-time */
+            due_at?: string;
+            allow_late?: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            ai_grading_opt_in?: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            expected_version?: number;
+        };
         Chapter: {
             /** Format: uuid */
             readonly id: string;
@@ -1465,6 +2056,12 @@ export interface components {
         ChapterRequest: {
             title: string;
         };
+        /**
+         * @description * `manual_close` - manual_close
+         *     * `reopen` - reopen
+         * @enum {string}
+         */
+        CloseTypeEnum: "manual_close" | "reopen";
         CommitUploadRequest: {
             /** @default  */
             client_checksum: string;
@@ -1622,6 +2219,21 @@ export interface components {
             /** Format: uuid */
             teacher_id: string;
         };
+        /** @description Serializer cho yêu cầu tạo cửa sổ mở lại nộp bài. */
+        CreateAssignmentReopenWindowRequest: {
+            /** @default all */
+            target_type: components["schemas"]["TargetTypeEnum"];
+            /** Format: uuid */
+            student_id?: string | null;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at: string;
+            /** @default all_actions */
+            scope: components["schemas"]["ScopeEnum"];
+            /** @default  */
+            reason: string;
+        };
         CreateRoleRequestRequest: {
             role: components["schemas"]["RequestableRoleEnum"];
         };
@@ -1666,6 +2278,12 @@ export interface components {
                  */
                 correlation_id: string;
             };
+        };
+        /** @description Schema dữ liệu đầu vào cho chính sách tệp nộp bài. */
+        FilePolicyInputRequest: {
+            max_files_per_submission?: number;
+            max_file_size_bytes?: number;
+            allowed_extensions?: string[];
         };
         Lesson: {
             /** Format: uuid */
@@ -1957,6 +2575,11 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        /** @description Serializer phân trang cho danh sách bài tập của môn học. */
+        PaginatedAssignmentSummaryList: {
+            items: components["schemas"]["AssignmentSummaryItem"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
         PaginatedCourseCatalogItemList: {
             items: components["schemas"]["CourseCatalogItem"][];
             pagination: {
@@ -2067,9 +2690,34 @@ export interface components {
             has_next: boolean;
             has_previous: boolean;
         };
+        PaginationMeta: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
         PasswordChangeRequest: {
             current_password: string;
             new_password: string;
+        };
+        /** @description Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan. */
+        PatchedAssignmentUpdateRequestRequest: {
+            title?: string;
+            instructions?: string;
+            /** Format: date-time */
+            due_at?: string;
+            allow_late?: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            ai_grading_opt_in?: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            expected_version?: number;
         };
         PatchedChapterRequest: {
             title?: string;
@@ -2204,6 +2852,26 @@ export interface components {
          * @enum {string}
          */
         RoleRequestStatusEnum: "pending" | "approved" | "rejected" | "cancelled";
+        /** @description Schema dữ liệu đầu vào cho một tiêu chí rubric. */
+        RubricCriterionInputRequest: {
+            /** Format: uuid */
+            id?: string | null;
+            title: string;
+            /** @default  */
+            description: string;
+            /**
+             * Format: decimal
+             * @default 10.00
+             */
+            max_score: string;
+            position?: number;
+        };
+        /**
+         * @description * `all_actions` - Cho phép nộp mới và nộp lại
+         *     * `first_only` - Chỉ cho phép nộp lần đầu
+         * @enum {string}
+         */
+        ScopeEnum: "all_actions" | "first_only";
         SessionInfo: {
             /** Format: uuid */
             id: string;
@@ -2255,6 +2923,29 @@ export interface components {
          * @enum {string}
          */
         StoredFileStatusEnum: "quarantine_pending" | "scanning" | "clean" | "infected" | "deleted";
+        /** @description Serializer cho kết quả thẩm định hợp lệ nộp bài theo Thẩm quyền Máy chủ. */
+        StudentAssignmentEligibility: {
+            can_submit: boolean;
+            can_replace: boolean;
+            is_late: boolean;
+            reason: string | null;
+            /** Format: date-time */
+            server_time: string;
+            /** Format: date-time */
+            deadline: string;
+            /** Format: date-time */
+            effective_deadline: string;
+            allow_late: boolean;
+            manually_closed: boolean;
+            in_reopen_window: boolean;
+            reopen_window_id: string | null;
+            reopen_window_scope: string | null;
+            /** Format: date-time */
+            reopen_window_end: string | null;
+            has_existing_submission: boolean;
+            applicable_file_policy: components["schemas"]["ApplicableFilePolicy"];
+            contract_version: string;
+        };
         StudentEnrollmentRequest: {
             /** Format: uuid */
             readonly id: string;
@@ -2275,6 +2966,12 @@ export interface components {
             /** Format: date-time */
             readonly updated_at: string;
         };
+        /**
+         * @description * `all` - Toàn bộ lớp
+         *     * `student` - Sinh viên cụ thể
+         * @enum {string}
+         */
+        TargetTypeEnum: "all" | "student";
         TeacherEnrollmentRequest: {
             /** Format: uuid */
             readonly id: string;
@@ -2302,6 +2999,8 @@ export interface components {
             file_size: number;
             /** @default course_material */
             purpose: components["schemas"]["StoredFilePurposeEnum"];
+            /** Format: uuid */
+            assignment_id?: string | null;
         };
         UploadIntentResponse: {
             /** Format: uuid */
@@ -2746,6 +3445,92 @@ export interface operations {
             };
         };
     };
+    assignments_direct_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_direct_attachment_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_direct_attachment_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_direct_eligibility_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignmentEligibility"];
+                };
+            };
+        };
+    };
     auth_csrf_retrieve: {
         parameters: {
             query?: never;
@@ -3148,6 +3933,412 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    teacher_assignments_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương học */
+                chapter_id?: string;
+                /** @description Số trang hiển thị */
+                page?: number;
+                /** @description Kích thước mỗi trang */
+                page_size?: number;
+                /** @description Tìm kiếm theo tiêu đề bài tập */
+                search?: string;
+                /** @description Lọc theo trạng thái bài tập hoặc 'all' */
+                status?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAssignmentSummaryList"];
+                };
+            };
+        };
+    };
+    teacher_assignments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_attachment_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_attachment_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    teacher_assignments_close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCloseRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCloseRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCloseRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_eligibility_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignmentEligibility"];
+                };
+            };
+        };
+    };
+    teacher_assignments_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentPreview"];
+                };
+            };
+        };
+    };
+    teacher_assignments_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentPublishRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentPublishRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentPublishRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCloseRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCloseRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCloseRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"][];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+                "multipart/form-data": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                window_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"];
                 };
             };
         };
@@ -4291,6 +5482,36 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_published_assignments_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương học */
+                chapter_id?: string;
+                /** @description Số trang hiển thị */
+                page?: number;
+                /** @description Kích thước mỗi trang */
+                page_size?: number;
+                /** @description Tìm kiếm theo tiêu đề bài tập */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAssignmentSummaryList"];
                 };
             };
         };

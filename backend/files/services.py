@@ -50,8 +50,12 @@ def require_file_upload_permission(actor, course, purpose):
         raise DomainError("COURSE_ARCHIVED")
     if not manager(actor, course):
         raise DomainError("FORBIDDEN")
-    if purpose not in (FilePurpose.COURSE_MATERIAL, FilePurpose.GENERAL):
-        # Assignment/submission resources and their eligibility checks arrive with B10/B11.
+    if purpose not in (
+        FilePurpose.COURSE_MATERIAL,
+        FilePurpose.GENERAL,
+        FilePurpose.ASSIGNMENT_ATTACHMENT,
+    ):
+        # Assignment submissions arrive with B11.
         raise DomainError("INVALID_FILE_PURPOSE")
 
 
@@ -87,6 +91,8 @@ def create_upload_intent(
     file_size,
     mime_type="application/octet-stream",
     purpose=FilePurpose.COURSE_MATERIAL,
+    assignment_id=None,
+    require_assignment_scope=False,
 ):
     actor = current_actor(actor)
     try:
@@ -106,6 +112,32 @@ def create_upload_intent(
         > policy.course_quota_bytes
     ):
         raise DomainError("QUOTA_EXCEEDED")
+
+    if assignment_id is not None and purpose != FilePurpose.ASSIGNMENT_ATTACHMENT:
+        raise DomainError("INVALID_FILE_PURPOSE")
+    if (
+        require_assignment_scope
+        and purpose == FilePurpose.ASSIGNMENT_ATTACHMENT
+        and assignment_id is None
+    ):
+        raise DomainError("ASSIGNMENT_REQUIRED")
+    target_assignment = None
+    if assignment_id is not None:
+        from assignments.models import Assignment, AssignmentStatus
+
+        try:
+            target_assignment = Assignment.objects.select_for_update().get(
+                pk=assignment_id, course=course
+            )
+        except Assignment.DoesNotExist as err:
+            raise DomainError("ASSIGNMENT_NOT_FOUND") from err
+
+        if target_assignment.status != AssignmentStatus.DRAFT:
+            raise DomainError("ASSIGNMENT_IMMUTABLE")
+
+        if target_assignment.attachments.count() >= policy.max_files_per_assignment:
+            raise DomainError("FILE_COUNT_EXCEEDED")
+
     policy.reserved_quota_bytes += file_size
     policy.save(update_fields=["reserved_quota_bytes", "updated_at"])
     file_id = uuid.uuid4()
@@ -116,6 +148,9 @@ def create_upload_intent(
         "max_file_size_bytes": policy.max_file_size_bytes,
         "max_files_per_assignment": policy.max_files_per_assignment,
     }
+    if target_assignment:
+        snapshot["assignment_id"] = str(target_assignment.id)
+
     item = StoredFile.objects.create(
         id=file_id,
         course=course,
@@ -200,6 +235,18 @@ def abort_upload_intent(*, file_id, actor=None, system_actor=""):
     if item.status == FileStatus.DELETED:
         return item
     if item.material_links.exists():
+        raise DomainError("INVALID_FILE_STATE")
+    if item.assignment_attachments.exists():
+        from assignments.models import AssignmentStatus
+
+        if item.assignment_attachments.filter(
+            assignment__status__in=[
+                AssignmentStatus.PUBLISHED,
+                AssignmentStatus.CLOSED,
+                AssignmentStatus.ARCHIVED,
+            ]
+        ).exists():
+            raise DomainError("ASSIGNMENT_IMMUTABLE")
         raise DomainError("INVALID_FILE_STATE")
     get_storage().delete(item.storage_path)
     if item.status == FileStatus.QUARANTINE_PENDING:

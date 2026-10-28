@@ -94,7 +94,26 @@ def readable_file(user, course_id, file_id):
         and item.uploader_id == user.id
     )
 
-    student_read = student_material_read or student_submission_read
+    if item.assignment_attachments.exists():
+        from assignments.models import Assignment, AssignmentStatus
+
+        assignment_published = Assignment.objects.filter(
+            course=course,
+            published_at__isnull=False,
+            status__in=[
+                AssignmentStatus.PUBLISHED,
+                AssignmentStatus.CLOSED,
+                AssignmentStatus.ARCHIVED,
+            ],
+            attachments__file=item,
+        ).exists()
+        student_assignment_read = (
+            is_member and item.status == FileStatus.CLEAN and assignment_published
+        )
+    else:
+        student_assignment_read = False
+
+    student_read = student_material_read or student_submission_read or student_assignment_read
     if not (is_manager or student_read) or item.status == FileStatus.DELETED:
         raise exceptions.PermissionDenied("Không có quyền truy cập tệp.")
     return item
@@ -163,6 +182,8 @@ class CourseFileListView(FilesBaseView):
             .select_related("uploader")
         )
         if not owner:
+            from assignments.models import AssignmentStatus
+
             qs = qs.filter(status=FileStatus.CLEAN).filter(
                 Q(
                     purpose=FilePurpose.COURSE_MATERIAL,
@@ -174,6 +195,16 @@ class CourseFileListView(FilesBaseView):
                     material_links__material_version__published_for_materials__is_hidden=False,
                 )
                 | Q(purpose=FilePurpose.ASSIGNMENT_SUBMISSION, uploader=request.user)
+                | Q(
+                    purpose=FilePurpose.ASSIGNMENT_ATTACHMENT,
+                    assignment_attachments__assignment__course=course,
+                    assignment_attachments__assignment__published_at__isnull=False,
+                    assignment_attachments__assignment__status__in=[
+                        AssignmentStatus.PUBLISHED,
+                        AssignmentStatus.CLOSED,
+                        AssignmentStatus.ARCHIVED,
+                    ],
+                )
             )
         purpose = request.query_params.get("purpose")
         if purpose:
@@ -191,7 +222,10 @@ class CourseFileUploadIntentView(FilesBaseView):
         serializer = UploadIntentSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         result = create_upload_intent(
-            actor=request.user, course_id=course_id, **serializer.validated_data
+            actor=request.user,
+            course_id=course_id,
+            require_assignment_scope=True,
+            **serializer.validated_data,
         )
         return Response(UploadIntentResponseSerializer(result).data, status=status.HTTP_201_CREATED)
 
@@ -241,6 +275,13 @@ class CourseFileDetailView(FilesBaseView):
             raise exceptions.ValidationError(
                 "Tệp đã gắn vào học liệu. Trạng thái công bố phải quản lý qua học liệu."
             )
+        if (
+            item.assignment_attachments.exists()
+            or item.purpose == FilePurpose.ASSIGNMENT_ATTACHMENT
+        ):
+            raise exceptions.ValidationError(
+                "Trạng thái công bố của tệp đính kèm bài tập phải quản lý qua bài tập."
+            )
         publish = serializer.validated_data["is_published"]
         if publish and (
             item.status != FileStatus.CLEAN or item.purpose != FilePurpose.COURSE_MATERIAL
@@ -267,6 +308,22 @@ class CourseFileDetailView(FilesBaseView):
         if item.material_links.exists():
             raise exceptions.ValidationError(
                 "Tệp tin đã được gắn vào học liệu, không thể xóa trực tiếp."
+            )
+        if item.assignment_attachments.exists():
+            from assignments.models import AssignmentStatus
+
+            if item.assignment_attachments.filter(
+                assignment__status__in=[
+                    AssignmentStatus.PUBLISHED,
+                    AssignmentStatus.CLOSED,
+                    AssignmentStatus.ARCHIVED,
+                ]
+            ).exists():
+                raise exceptions.ValidationError(
+                    "Tệp tin đã gắn vào bài tập đã công bố, không thể xóa."
+                )
+            raise exceptions.ValidationError(
+                "Tệp tin đã được gắn vào bài tập, không thể xóa trực tiếp."
             )
         abort_upload_intent(file_id=file_id, actor=request.user)
         return Response(status=204)

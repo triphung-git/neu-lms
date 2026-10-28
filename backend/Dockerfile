@@ -19,6 +19,7 @@ COPY --chown=app:app platform_core ./platform_core
 COPY --chown=app:app courses ./courses
 COPY --chown=app:app files ./files
 COPY --chown=app:app materials ./materials
+COPY --chown=app:app assignments ./assignments
 COPY --chown=app:app manage.py ./
 USER app
 EXPOSE 8000

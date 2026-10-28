@@ -6,6 +6,7 @@ from identity import admin_views
 from identity import views as auth_views
 
 urlpatterns = [
+    path("api/v1/", include("assignments.urls")),
     path("api/v1/", include("courses.urls")),
     path("api/v1/", include("files.urls")),
     path("api/v1/", include("materials.urls")),

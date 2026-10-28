@@ -156,7 +156,8 @@ export const CourseTeacherLayout: React.FC = () => {
       item.to === `/gv/mon-hoc/${course.id}` ||
       item.to.endsWith('/cau-truc') ||
       item.to.endsWith('/thanh-vien') ||
-      item.to.endsWith('/hoc-lieu')
+      item.to.endsWith('/hoc-lieu') ||
+      item.to.endsWith('/bai-tap')
     );
   });
   const coursePath = `/gv/mon-hoc/${course.id}`;
@@ -167,7 +168,9 @@ export const CourseTeacherLayout: React.FC = () => {
     location.pathname !== `${coursePath}/thanh-vien` &&
     location.pathname !== `${coursePath}/hoc-lieu` &&
     location.pathname !== `${coursePath}/tep-tin` &&
-    location.pathname !== `${coursePath}/chinh-sach-tep`;
+    location.pathname !== `${coursePath}/chinh-sach-tep` &&
+    location.pathname !== `${coursePath}/bai-tap` &&
+    location.pathname !== `${coursePath}/bai-tap/soan`;
 
   return (
     <div className="course-layout-shell">

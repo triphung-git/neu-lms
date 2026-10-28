@@ -515,7 +515,7 @@ describe('B07-05: Student Courses & Enrollment Requests UI', () => {
       const assignmentsTabBtn = screen.getByRole('button', { name: 'Bài tập' });
       fireEvent.click(assignmentsTabBtn);
 
-      expect(await screen.findByText(/Phân hệ Bài tập & Đánh giá \(B10-B12\)/)).toBeInTheDocument();
+      expect(await screen.findByText('Danh sách bài tập môn học')).toBeInTheDocument();
 
       // Click tab "Bảng điểm"
       const gradesTabBtn = screen.getByRole('button', { name: 'Bảng điểm' });
