@@ -32,6 +32,15 @@ EVENTS = {
     "files.upload_committed": {"course_id", "file_id", "uploader_id"},
     "files.upload_aborted": {"course_id", "file_id"},
     "files.virus_detected": {"course_id", "file_id", "threat_name"},
+    "materials.created": {"course_id", "material_id"},
+    "materials.updated": {"course_id", "material_id"},
+    "materials.deleted": {"course_id", "material_id"},
+    "materials.version_created": {"course_id", "material_id", "version_id"},
+    "materials.version_finalized": {"course_id", "material_id", "version_id"},
+    "materials.published": {"course_id", "material_id", "version_id"},
+    "materials.hidden": {"course_id", "material_id"},
+    "materials.unhidden": {"course_id", "material_id"},
+    "materials.file_delivered": {"course_id", "material_id", "file_id"},
 }
 
 
@@ -52,6 +61,8 @@ def _metadata(action, metadata):
         "membership_id",
         "file_id",
         "uploader_id",
+        "material_id",
+        "version_id",
     } & metadata.keys():
         try:
             uuid.UUID(str(metadata[key]))
@@ -61,7 +72,17 @@ def _metadata(action, metadata):
 
 
 def append_audit(*, action, resource_type, resource_id, actor=None, system_actor="", metadata=None):
-    if resource_type not in {"user", "role_request", "role_grant", "session", "course", "file"}:
+    if resource_type not in {
+        "user",
+        "role_request",
+        "role_grant",
+        "session",
+        "course",
+        "file",
+        "material",
+        "material_version",
+        "material_file",
+    }:
         raise DomainError("INVALID_RESOURCE_TYPE")
     if (actor is None) == (not system_actor):
         raise DomainError("AUDIT_ACTOR_REQUIRED")

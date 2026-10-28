@@ -1,168 +1,208 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { SelectField } from '../../../shared/ui/TextField';
 import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
 import { formatDateVN } from '../../../shared/kernel/formatting';
-import { removeVietnameseAccents } from '../../../shared/lib/search';
-import type { Material, MaterialVersion, Course, Lesson, Membership } from '../../../shared/kernel/types';
+import { coursesService, type Course } from '../../../api/coursesService';
+import {
+  materialsService,
+  type MaterialSearchResult,
+  type PaginatedMaterialSearchResult,
+} from '../../../api/materialsService';
 import {
   Search,
   FileText,
   Tag,
-  ArrowRight
+  ArrowRight,
+  BookOpen,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
+  RefreshCw,
 } from 'lucide-react';
 import './StudentMaterialSearchPage.css';
 
 export const StudentMaterialSearchPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const { materials, materialVersions, courses, lessons, memberships } = useDatabase();
-  const { currentUser } = useSession();
 
   const queryQ = searchParams.get('q') || '';
   const filterCourse = searchParams.get('mon') || 'all';
   const filterType = searchParams.get('loai') || 'all';
-  const sortBy = searchParams.get('sap-xep') || 'moi-nhat';
-  const selectedTagsParam = searchParams.getAll('the');
+  const sortBy = searchParams.get('sap-xep') || 'relevance';
+  const selectedTag = searchParams.get('the') || '';
+  const pageParam = parseInt(searchParams.get('trang') || '1', 10);
+  const currentPage = isNaN(pageParam) || pageParam < 1 ? 1 : pageParam;
 
-  // Input state for search box
+  // Form input state
   const [searchInput, setSearchInput] = useState(queryQ);
 
-  // Student's active courses
-  const myCourseIds = useMemo(() => {
-    return new Set(
-      memberships
-        .filter((m: Membership) => (m.userId === currentUser?.id || m.emailNormalized === currentUser?.emailNormalized) && m.status === 'active')
-        .map((m: Membership) => m.courseId)
-    );
-  }, [memberships, currentUser]);
+  // Student Courses
+  const [studentCourses, setStudentCourses] = useState<Course[]>([]);
+  const [isCoursesLoading, setIsCoursesLoading] = useState(false);
 
-  const studentCourses = useMemo(() => {
-    return courses.filter((c: Course) => myCourseIds.has(c.id));
-  }, [courses, myCourseIds]);
+  // Search Results
+  const [results, setResults] = useState<MaterialSearchResult[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [searchError, setSearchError] = useState<string | null>(null);
 
-  // Materials student has access to
-  const availableMaterials = useMemo(() => {
-    return materials.filter(
-      (m: Material) => myCourseIds.has(m.courseId) && m.visibility === 'class'
-    );
-  }, [materials, myCourseIds]);
+  // Stale request guard
+  const reqSeq = useRef(0);
 
-  const enrichedMaterials = useMemo(() => {
-    return availableMaterials.map((m: Material) => {
-      const ver = materialVersions.find((v: MaterialVersion) => v.id === m.currentVersionId);
-      const fileType = ver?.filename ? ver.filename.split('.').pop()?.toUpperCase() || 'PDF' : 'PDF';
-      const versionNumber = ver?.versionNumber || 1;
-      const updatedAt = ver?.uploadedAt || new Date().toISOString();
-      return {
-        material: m,
-        fileType,
-        versionNumber,
-        updatedAt,
-      };
-    });
-  }, [availableMaterials, materialVersions]);
+  // 1. Fetch Student Courses for dropdown filter
+  useEffect(() => {
+    let isMounted = true;
+    const fetchCourses = async () => {
+      setIsCoursesLoading(true);
+      try {
+        const res = await coursesService.list();
+        if (isMounted) {
+          setStudentCourses(res.items || []);
+        }
+      } catch {
+        // Fallback silently if courses fail to list
+      } finally {
+        if (isMounted) {
+          setIsCoursesLoading(false);
+        }
+      }
+    };
+    void fetchCourses();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
-  // All distinct tags
-  const allTags = useMemo(() => {
-    const set = new Set<string>();
-    availableMaterials.forEach((m: Material) => m.tags.forEach((t) => set.add(t)));
-    return Array.from(set);
-  }, [availableMaterials]);
+  // Sync search input with URL params
+  useEffect(() => {
+    setSearchInput(queryQ);
+  }, [queryQ]);
 
-  // All distinct file types
-  const fileTypes = useMemo(() => {
-    const set = new Set<string>();
-    enrichedMaterials.forEach((item) => set.add(item.fileType));
-    return Array.from(set);
-  }, [enrichedMaterials]);
+  // 2. Execute Server-Side Search
+  const executeSearch = useCallback(async () => {
+    const currentSeq = ++reqSeq.current;
+    const hasSearchCriteria =
+      Boolean(queryQ.trim()) ||
+      filterCourse !== 'all' ||
+      filterType !== 'all' ||
+      Boolean(selectedTag);
 
-  // Filter and Search logic
-  const searchResults = useMemo(() => {
-    if (!queryQ.trim() && filterCourse === 'all' && filterType === 'all' && selectedTagsParam.length === 0) {
-      return [];
+    if (!hasSearchCriteria) {
+      setResults([]);
+      setTotalCount(0);
+      setTotalPages(1);
+      setIsLoading(false);
+      setSearchError(null);
+      return;
     }
 
-    const qNorm = removeVietnameseAccents(queryQ.toLowerCase().trim());
+    setIsLoading(true);
+    setSearchError(null);
 
-    const filtered = enrichedMaterials.filter((item) => {
-      const mat = item.material;
+    try {
+      let res: PaginatedMaterialSearchResult;
 
-      // Course filter
-      if (filterCourse !== 'all' && mat.courseId !== filterCourse) return false;
-
-      // File type filter
-      if (filterType !== 'all' && item.fileType.toUpperCase() !== filterType.toUpperCase()) return false;
-
-      // Tag filter
-      if (selectedTagsParam.length > 0) {
-        const hasAllTags = selectedTagsParam.every((t) => mat.tags.includes(t));
-        if (!hasAllTags) return false;
+      if (filterCourse !== 'all') {
+        res = await materialsService.searchCourseMaterials(filterCourse, {
+          q: queryQ.trim() || undefined,
+          type: filterType !== 'all' ? filterType : undefined,
+          tag: selectedTag || undefined,
+          sort_by: sortBy,
+          page: currentPage,
+          page_size: 10,
+        });
+      } else {
+        res = await materialsService.searchGlobalMaterials({
+          q: queryQ.trim() || undefined,
+          type: filterType !== 'all' ? filterType : undefined,
+          tag: selectedTag || undefined,
+          sort_by: sortBy,
+          page: currentPage,
+          page_size: 10,
+        });
       }
 
-      // Query search
-      if (qNorm) {
-        const titleNorm = removeVietnameseAccents(mat.title.toLowerCase());
-        const tagNorms = mat.tags.map((t) => removeVietnameseAccents(t.toLowerCase())).join(' ');
-        const course = courses.find((c: Course) => c.id === mat.courseId);
-        const courseNorm = course ? removeVietnameseAccents(course.name.toLowerCase() + ' ' + course.code.toLowerCase()) : '';
-
-        return titleNorm.includes(qNorm) || tagNorms.includes(qNorm) || courseNorm.includes(qNorm);
+      if (currentSeq !== reqSeq.current) return;
+      setResults(res.items || []);
+      setTotalCount(res.pagination?.total_items || 0);
+      setTotalPages(res.pagination?.total_pages || 1);
+    } catch (err: unknown) {
+      if (currentSeq !== reqSeq.current) return;
+      const apiErr = err as { message?: string };
+      setSearchError(apiErr.message || 'Lỗi tra cứu máy chủ. Vui lòng thử lại.');
+    } finally {
+      if (currentSeq === reqSeq.current) {
+        setIsLoading(false);
       }
-
-      return true;
-    });
-
-    // Sorting
-    if (sortBy === 'moi-nhat') {
-      filtered.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
     }
+  }, [queryQ, filterCourse, filterType, selectedTag, sortBy, currentPage]);
 
-    return filtered;
-  }, [enrichedMaterials, queryQ, filterCourse, filterType, selectedTagsParam, sortBy, courses]);
+  useEffect(() => {
+    void executeSearch();
+    return () => {
+      reqSeq.current += 1;
+    };
+  }, [executeSearch]);
 
-  // Handlers
+  // Handlers for Filters
   const handleDoSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const next = new URLSearchParams(searchParams);
-    if (searchInput.trim()) next.set('q', searchInput.trim());
-    else next.delete('q');
+    if (searchInput.trim()) {
+      next.set('q', searchInput.trim());
+    } else {
+      next.delete('q');
+    }
+    next.set('trang', '1');
     setSearchParams(next);
   };
 
   const handleCourseFilter = (cId: string) => {
     const next = new URLSearchParams(searchParams);
-    if (cId === 'all') next.delete('mon');
-    else next.set('mon', cId);
+    if (cId === 'all') {
+      next.delete('mon');
+    } else {
+      next.set('mon', cId);
+    }
+    next.set('trang', '1');
     setSearchParams(next);
   };
 
   const handleTypeFilter = (t: string) => {
     const next = new URLSearchParams(searchParams);
-    if (t === 'all') next.delete('loai');
-    else next.set('loai', t);
+    if (t === 'all') {
+      next.delete('loai');
+    } else {
+      next.set('loai', t);
+    }
+    next.set('trang', '1');
     setSearchParams(next);
   };
 
   const handleSortChange = (s: string) => {
     const next = new URLSearchParams(searchParams);
     next.set('sap-xep', s);
+    next.set('trang', '1');
     setSearchParams(next);
   };
 
-  const handleToggleTag = (tag: string) => {
+  const handleSelectTag = (tag: string) => {
     const next = new URLSearchParams(searchParams);
-    const existing = next.getAll('the');
-    next.delete('the');
-
-    if (existing.includes(tag)) {
-      existing.filter((t) => t !== tag).forEach((t) => next.append('the', t));
+    if (selectedTag === tag) {
+      next.delete('the');
     } else {
-      [...existing, tag].forEach((t) => next.append('the', t));
+      next.set('the', tag);
     }
+    next.set('trang', '1');
+    setSearchParams(next);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const next = new URLSearchParams(searchParams);
+    next.set('trang', newPage.toString());
     setSearchParams(next);
   };
 
@@ -171,18 +211,24 @@ export const StudentMaterialSearchPage: React.FC = () => {
     setSearchParams(new URLSearchParams());
   };
 
+  const hasSearchCriteria =
+    Boolean(queryQ.trim()) ||
+    filterCourse !== 'all' ||
+    filterType !== 'all' ||
+    Boolean(selectedTag);
+
   return (
     <div className="student-mat-search-page">
       <div className="search-header-row">
         <Breadcrumb
           items={[
             { label: 'Bàn làm việc', path: '/sv' },
-            { label: 'Tìm kiếm học liệu' }
+            { label: 'Tìm kiếm học liệu' },
           ]}
         />
         <h1 className="search-main-heading">Tra cứu học liệu học tập</h1>
         <p className="search-subheading">
-          Tìm kiếm tài liệu bài giảng, giáo trình và tài liệu tham khảo theo từ khóa, môn học hoặc nhãn phân loại.
+          Tìm kiếm toàn văn giáo trình, bài giảng và tài liệu đính kèm trong các môn học được phân quyền.
         </p>
       </div>
 
@@ -196,7 +242,7 @@ export const StudentMaterialSearchPage: React.FC = () => {
               className="main-search-input"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Nhập tên tài liệu, nội dung hoặc từ khóa kiến thức..."
+              placeholder="Nhập từ khóa tìm kiếm (tiêu đề, nội dung tệp, mã chương)..."
             />
           </div>
           <Button type="submit" variant="primary">
@@ -212,10 +258,14 @@ export const StudentMaterialSearchPage: React.FC = () => {
             <SelectField
               label="Môn học của tôi"
               value={filterCourse}
+              disabled={isCoursesLoading}
               onChange={(e) => handleCourseFilter(e.target.value)}
               options={[
-                { value: 'all', label: 'Tất cả các môn đang học' },
-                ...studentCourses.map((c: Course) => ({ value: c.id, label: `${c.code} — ${c.name}` }))
+                { value: 'all', label: 'Tất cả môn học đã ghi danh' },
+                ...studentCourses.map((c) => ({
+                  value: c.id,
+                  label: `${c.code} — ${c.name}`,
+                })),
               ]}
             />
           </div>
@@ -226,8 +276,10 @@ export const StudentMaterialSearchPage: React.FC = () => {
               value={filterType}
               onChange={(e) => handleTypeFilter(e.target.value)}
               options={[
-                { value: 'all', label: 'Mọi định dạng' },
-                ...fileTypes.map((t) => ({ value: t.toLowerCase(), label: t }))
+                { value: 'all', label: 'Tất cả định dạng' },
+                { value: 'pdf', label: 'Tài liệu PDF (.pdf)' },
+                { value: 'docx', label: 'Tài liệu Word (.docx)' },
+                { value: 'txt', label: 'Văn bản thuần (.txt)' },
               ]}
             />
           </div>
@@ -238,50 +290,55 @@ export const StudentMaterialSearchPage: React.FC = () => {
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
               options={[
-                { value: 'moi-nhat', label: 'Mới cập nhật nhất' },
-                { value: 'ten-az', label: 'Theo tên A-Z' }
+                { value: 'relevance', label: 'Mức độ phù hợp nhất' },
+                { value: 'newest', label: 'Mới cập nhật nhất' },
+                { value: 'title_asc', label: 'Tiêu đề A-Z' },
+                { value: 'title_desc', label: 'Tiêu đề Z-A' },
               ]}
             />
           </div>
         </div>
 
-        {/* Tags cloud */}
-        {allTags.length > 0 && (
-          <div className="tag-filter-section">
-            <div className="tag-section-label">
-              <Tag size={15} />
-              <span>Lọc nhanh theo nhãn chủ đề:</span>
-            </div>
-            <div className="tag-chips-wrap">
-              {allTags.map((tag) => {
-                const isSelected = selectedTagsParam.includes(tag);
-                return (
-                  <button
-                    key={tag}
-                    type="button"
-                    className={`tag-chip-btn ${isSelected ? 'selected' : ''}`}
-                    onClick={() => handleToggleTag(tag)}
-                  >
-                    <span>#{tag}</span>
-                  </button>
-                );
-              })}
-            </div>
+        {/* Selected Tag Indicator */}
+        {selectedTag && (
+          <div className="active-tag-banner">
+            <span>Đang lọc theo thẻ: <strong>#{selectedTag}</strong></span>
+            <button
+              type="button"
+              className="clear-tag-btn"
+              onClick={() => handleSelectTag(selectedTag)}
+            >
+              Bỏ lọc thẻ
+            </button>
           </div>
         )}
       </div>
 
       {/* Results Section */}
       <div className="search-results-section">
-        {!queryQ.trim() && filterCourse === 'all' && filterType === 'all' && selectedTagsParam.length === 0 ? (
+        {isLoading ? (
+          <div className="search-loading-card">
+            <p>Đang tìm kiếm học liệu từ máy chủ...</p>
+          </div>
+        ) : searchError ? (
           <EmptyState
-            title="Sẵn sàng tìm kiếm"
-            description="Nhập từ khóa tìm kiếm hoặc chọn bộ lọc môn học ở trên để hiển thị danh sách tài liệu."
+            title="Lỗi tra cứu"
+            description={searchError}
+            action={
+              <Button variant="secondary" onClick={executeSearch} icon={<RefreshCw size={16} />}>
+                Thử lại
+              </Button>
+            }
           />
-        ) : searchResults.length === 0 ? (
+        ) : !hasSearchCriteria ? (
+          <EmptyState
+            title="Sẵn sàng tra cứu học liệu"
+            description="Nhập từ khóa tìm kiếm hoặc chọn môn học ở bộ lọc phía trên để hiển thị các tài liệu phù hợp."
+          />
+        ) : results.length === 0 ? (
           <EmptyState
             title="Không tìm thấy kết quả phù hợp"
-            description="Không tìm thấy học liệu nào phù hợp với điều kiện tra cứu hiện tại."
+            description="Không tìm thấy học liệu nào phù hợp với điều kiện tra cứu hiện tại. Hãy thử từ khóa ngắn hơn hoặc kiểm tra môn học đã chọn."
             action={
               <Button variant="secondary" onClick={handleClearFilters}>
                 Xóa toàn bộ bộ lọc
@@ -291,55 +348,119 @@ export const StudentMaterialSearchPage: React.FC = () => {
         ) : (
           <div className="results-list-wrap">
             <div className="results-count-banner">
-              <span>Tìm thấy <strong>{searchResults.length}</strong> học liệu phù hợp</span>
+              <span>
+                Tìm thấy <strong>{totalCount}</strong> học liệu phù hợp (Trang {currentPage} /{' '}
+                {totalPages})
+              </span>
             </div>
 
             <div className="results-cards-grid">
-              {searchResults.map(({ material: mat, fileType, versionNumber, updatedAt }) => {
-                const c = courses.find((crs: Course) => crs.id === mat.courseId);
-                const l = lessons.find((lsn: Lesson) => lsn.id === mat.lessonId);
+              {results.map((mat) => {
+                const targetLink = `/sv/mon-hoc/${mat.course_id}/hoc-lieu/${mat.id}`;
 
                 return (
-                  <Link
-                    key={mat.id}
-                    to={`/sv/hoc-lieu/${mat.id}`}
-                    className="result-material-card"
-                  >
+                  <article key={mat.id} className="result-material-card">
                     <div className="res-icon-wrap">
-                      <FileText size={24} />
+                      <FileText size={26} />
                     </div>
 
                     <div className="res-info-wrap">
                       <div className="res-course-line">
-                        <span className="res-course-code">{c?.code}</span>
-                        <span className="res-course-name">{c?.name}</span>
-                        {l && <span className="res-lesson-name">• {l.title}</span>}
+                        <span className="res-course-code">{mat.course_code}</span>
+                        <span className="res-course-name">{mat.course_name}</span>
+                        {mat.chapter_title && (
+                          <span className="res-chapter-name">• Chương: {mat.chapter_title}</span>
+                        )}
+                        {mat.lesson_title && (
+                          <span className="res-lesson-name">• Bài: {mat.lesson_title}</span>
+                        )}
                       </div>
 
-                      <h2 className="res-material-title">{mat.title}</h2>
+                      <h2 className="res-material-title">
+                        <Link to={targetLink} className="res-title-link">
+                          {mat.title}
+                        </Link>
+                      </h2>
+
+                      {mat.description && (
+                        <p className="res-material-desc">{mat.description}</p>
+                      )}
 
                       <div className="res-meta-line">
-                        <span className="res-type-pill">{fileType}</span>
-                        <span className="res-version">Phiên bản {versionNumber}</span>
-                        <span className="res-date">Cập nhật {formatDateVN(updatedAt)}</span>
+                        <span className="res-type-pill">{mat.material_type.toUpperCase()}</span>
+                        <span className="res-version">Phiên bản v{mat.version_number}</span>
+                        <span className="res-date">Cập nhật {formatDateVN(mat.updated_at)}</span>
                       </div>
 
-                      {mat.tags.length > 0 && (
+                      {mat.tags && mat.tags.length > 0 && (
                         <div className="res-tags-line">
                           {mat.tags.map((t) => (
-                            <span key={t} className="res-tag-pill">#{t}</span>
+                            <button
+                              key={t}
+                              type="button"
+                              className={`res-tag-btn ${selectedTag === t ? 'active' : ''}`}
+                              onClick={() => handleSelectTag(t)}
+                              title={`Lọc theo thẻ #${t}`}
+                            >
+                              #{t}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Provenance Match Snippets (Search Highlights) */}
+                      {mat.matches && mat.matches.length > 0 && (
+                        <div className="res-matches-section">
+                          <div className="matches-heading">
+                            <Sparkles size={14} style={{ color: 'var(--accent)' }} />
+                            <span>Điểm khớp trong nội dung tệp đã quét:</span>
+                          </div>
+                          {mat.matches.map((m, mIdx) => (
+                            <div key={mIdx} className="match-snippet-box">
+                              <span className="match-provenance-file">
+                                {m.file_name} {m.page_number ? `(Trang ${m.page_number})` : ''}:
+                              </span>
+                              <span className="match-snippet-text">{m.snippet}</span>
+                            </div>
                           ))}
                         </div>
                       )}
                     </div>
 
                     <div className="res-arrow-wrap">
-                      <ArrowRight size={18} />
+                      <Link to={targetLink} className="view-detail-btn" title="Xem chi tiết học liệu">
+                        <ArrowRight size={20} />
+                      </Link>
                     </div>
-                  </Link>
+                  </article>
                 );
               })}
             </div>
+
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="pagination-bar" role="navigation" aria-label="Phân trang tìm kiếm">
+                <Button
+                  variant="secondary"
+                  disabled={currentPage <= 1}
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  icon={<ChevronLeft size={16} />}
+                >
+                  Trang trước
+                </Button>
+                <span className="pagination-indicator">
+                  Trang {currentPage} / {totalPages}
+                </span>
+                <Button
+                  variant="secondary"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  icon={<ChevronRight size={16} />}
+                >
+                  Trang sau
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </div>

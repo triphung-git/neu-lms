@@ -381,8 +381,8 @@ describe('B07-05: Student Courses & Enrollment Requests UI', () => {
       expect(screen.getByRole('heading', { name: 'Bài 1: Giới thiệu chung' })).toBeInTheDocument();
       expect(screen.getByText('Nội dung tổng quan về học phần.')).toBeInTheDocument();
 
-      // Verify unintegrated materials notice (no fake demo seed)
-      expect(screen.getByText(/Phân hệ Quản lý Học liệu & Tập tin \(B08\)/)).toBeInTheDocument();
+      // Verify integrated materials section
+      expect(screen.getByRole('heading', { name: /Học liệu bài học/i })).toBeInTheDocument();
     });
 
     it('navigates to next lesson when clicking "Bài tiếp theo"', async () => {

@@ -17,12 +17,18 @@ export type BadgeVariant =
   | 'active'
   | 'locked'
   | 'pending'
-  | 'withdrawn';
+  | 'withdrawn'
+  | 'success'
+  | 'warning'
+  | 'danger'
+  | 'info'
+  | 'neutral';
 
 interface BadgeProps {
   variant: BadgeVariant;
   label?: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 const defaultLabels: Record<BadgeVariant, string> = {
@@ -42,10 +48,15 @@ const defaultLabels: Record<BadgeVariant, string> = {
   locked: 'Đã khóa',
   pending: 'Chờ kích hoạt',
   withdrawn: 'Đã rút',
+  success: 'Thành công',
+  warning: 'Cảnh báo',
+  danger: 'Lỗi',
+  info: 'Thông tin',
+  neutral: 'Mặc định',
 };
 
-export const Badge: React.FC<BadgeProps> = ({ variant, label, className = '' }) => {
-  const text = label || defaultLabels[variant];
+export const Badge: React.FC<BadgeProps> = ({ variant, label, className = '', children }) => {
+  const text = label || children || defaultLabels[variant];
 
   return (
     <span className={`badge badge-${variant} ${className}`}>

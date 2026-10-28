@@ -553,3 +553,161 @@
   border-top: 1px solid var(--border-soft);
   padding-top: var(--space-2);
 }
+
+/* Lesson Materials Grid */
+.lesson-materials-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.lesson-material-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color var(--duration-fast) ease;
+}
+
+.lesson-material-card:hover {
+  border-color: var(--accent);
+}
+
+.mat-card-icon {
+  width: 36px;
+  height: 36px;
+  background: var(--surface-hover);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.mat-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.mat-card-title {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--ink);
+  margin: 0 0 2px 0;
+  word-break: break-word;
+}
+
+.mat-card-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.mat-type {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+/* Course Materials Hub Tab */
+.course-materials-hub-grid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.course-material-hub-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-fast) ease, box-shadow var(--duration-fast) ease;
+}
+
+.course-material-hub-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.mat-hub-icon {
+  width: 44px;
+  height: 44px;
+  background: var(--surface-hover);
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+
+.mat-hub-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.mat-hub-top {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+}
+
+.mat-type-pill {
+  padding: 1px 6px;
+  background: var(--surface-hover);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.mat-version-pill {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.mat-chapter-pill {
+  color: var(--muted);
+}
+
+.mat-hub-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--ink);
+  margin: var(--space-1) 0;
+  word-break: break-word;
+}
+
+.mat-hub-desc {
+  font-size: var(--text-sm);
+  color: var(--muted);
+  margin: 0 0 var(--space-1) 0;
+  line-height: 1.4;
+}
+
+.mat-hub-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--muted);
+}
+
+.mat-hub-tags {
+  color: var(--accent);
+}

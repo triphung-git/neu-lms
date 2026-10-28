@@ -16,3 +16,4 @@ export * from './adminService';
 export * from './authService';
 export * from './coursesService';
 export * from './filesService';
+export * from './materialsService';

@@ -780,6 +780,248 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_id}/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Quản lý danh sách và tạo học liệu mới cho môn học. */
+        get: operations["courses_materials_list"];
+        put?: never;
+        /** @description Quản lý danh sách và tạo học liệu mới cho môn học. */
+        post: operations["courses_materials_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        get: operations["courses_materials_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        delete: operations["courses_materials_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        patch: operations["courses_materials_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp tin học liệu có kiểm tra quyền và tính toàn vẹn. */
+        get: operations["courses_materials_files_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước tệp tin học liệu trong sandbox an toàn. */
+        get: operations["courses_materials_files_preview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Ẩn học liệu khỏi sinh viên. */
+        post: operations["courses_materials_hide_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Công bố một phiên bản đã đóng băng làm con trỏ công bố chính thức. */
+        post: operations["courses_materials_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/unhide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Mở lại học liệu đã ẩn nếu đã có phiên bản công bố. */
+        post: operations["courses_materials_unhide_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu. */
+        get: operations["courses_materials_versions_list"];
+        put?: never;
+        /** @description Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu. */
+        post: operations["courses_materials_versions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Chi tiết một phiên bản học liệu kèm danh sách tệp manifest. */
+        get: operations["courses_materials_versions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Thêm tệp tin vào manifest của phiên bản nháp. */
+        post: operations["courses_materials_versions_files_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Xóa tệp tin khỏi manifest của phiên bản nháp. */
+        delete: operations["courses_materials_versions_files_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Đóng băng manifest của phiên bản nháp, tính toán sha256 và snapshot policy. */
+        post: operations["courses_materials_versions_finalize_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base API View cho phân hệ Học liệu: chuẩn hóa mã lỗi và bảo vệ security headers. */
+        post: operations["courses_materials_versions_retry_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tìm kiếm học liệu trong phạm vi một môn học với phân rã provenance và phân quyền. */
+        get: operations["courses_materials_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/{course_id}/members": {
         parameters: {
             query?: never;
@@ -1028,6 +1270,40 @@ export interface paths {
          * @description Kiểm tra kết nối cơ sở dữ liệu PostgreSQL. Trả về 200 nếu sẵn sàng, 503 nếu DB gián đoạn.
          */
         get: operations["get_health_ready"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết học liệu tra cứu trực tiếp theo ID (hỗ trợ deep link sinh viên/giảng viên). */
+        get: operations["materials_retrieve_global"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tìm kiếm học liệu trên tất cả các môn học người dùng có quyền tham gia/giảng dạy. */
+        get: operations["materials_search_global"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1408,9 +1684,244 @@ export interface components {
             title: string;
             description?: string;
         };
+        /**
+         * @description * `draft` - Đang soạn thảo
+         *     * `finalized` - Đã đóng băng
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        LifecycleStatusEnum: "draft" | "finalized" | "archived";
         LivenessResponse: {
             /** @default ok */
             status: string;
+        };
+        /** @description Payload tạo học liệu mới. */
+        MaterialCreateRequestRequest: {
+            title: string;
+            /** @default  */
+            description: string;
+            /** @default document */
+            material_type: components["schemas"]["MaterialTypeEnum"];
+            tags?: string[];
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            initial_file_ids?: string[];
+        };
+        /** @description Chi tiết học liệu kèm thông tin phiên bản công bố và danh sách các phiên bản. */
+        MaterialDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            /** Format: uuid */
+            readonly chapter: string | null;
+            readonly chapter_title: string;
+            /** Format: uuid */
+            readonly lesson: string | null;
+            readonly lesson_title: string;
+            readonly title: string;
+            readonly description: string;
+            readonly tags: unknown;
+            readonly material_type: components["schemas"]["MaterialTypeEnum"];
+            /** @description Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên */
+            readonly is_hidden: boolean;
+            readonly visibility: string;
+            readonly published_version: components["schemas"]["MaterialVersionDetail"];
+            readonly latest_version: {
+                [key: string]: unknown;
+            } | null;
+            readonly total_versions: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Payload thêm tệp vào manifest của phiên bản nháp. */
+        MaterialFileAddRequestRequest: {
+            /** Format: uuid */
+            file_id: string;
+            /** @default  */
+            label: string;
+            position?: number;
+        };
+        /** @description Chi tiết một tệp tin trong manifest của phiên bản học liệu. */
+        MaterialFileManifestItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly file_id: string;
+            /** @description Thứ tự hiển thị tệp trong manifest của phiên bản (1, 2, ...) */
+            readonly position: number;
+            /** @description Nhãn hoặc tiêu đề tùy chọn cho tệp trong manifest */
+            readonly label: string;
+            readonly file_name: string;
+            readonly file_size: number;
+            readonly mime_type: string;
+            readonly sha256_hash: string;
+            readonly download_url: string;
+            readonly preview_url: string | null;
+            readonly extraction_status: string;
+            readonly extraction_error: string;
+            readonly extraction_page_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Mục học liệu hiển thị trong danh sách phân trang. */
+        MaterialListItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            /** Format: uuid */
+            readonly chapter: string | null;
+            readonly chapter_title: string;
+            /** Format: uuid */
+            readonly lesson: string | null;
+            readonly lesson_title: string;
+            readonly title: string;
+            readonly tags: unknown;
+            readonly material_type: components["schemas"]["MaterialTypeEnum"];
+            /** @description Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên */
+            readonly is_hidden: boolean;
+            readonly visibility: string;
+            readonly published_version_number: number | null;
+            readonly latest_version_number: number;
+            readonly file_count: number;
+            readonly total_size_bytes: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Payload công bố phiên bản học liệu. */
+        MaterialPublishRequestRequest: {
+            /** Format: uuid */
+            version_id: string;
+        };
+        /** @description Chi tiết điểm khớp tìm kiếm trong tệp hoặc metadata. */
+        MaterialSearchMatch: {
+            /** Format: uuid */
+            file_id: string | null;
+            file_name: string;
+            mime_type: string;
+            page_number: number | null;
+            snippet: string;
+            match_type: string;
+        };
+        /** @description Kết quả tìm kiếm học liệu với provenance và điểm xếp hạng. */
+        MaterialSearchResult: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            course_code: string;
+            title: string;
+            description: string;
+            tags: string[];
+            material_type: string;
+            /** Format: uuid */
+            chapter_id: string | null;
+            chapter_title: string | null;
+            /** Format: uuid */
+            lesson_id: string | null;
+            lesson_title: string | null;
+            /** Format: uuid */
+            version_id: string | null;
+            version_number: number;
+            is_hidden: boolean;
+            /** Format: date-time */
+            published_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: double */
+            rank: number;
+            matches: components["schemas"]["MaterialSearchMatch"][];
+        };
+        /**
+         * @description * `document` - Tài liệu
+         *     * `slide` - Bài giảng/Slide
+         *     * `syllabus` - Đề cương
+         *     * `reference` - Tài liệu tham khảo
+         *     * `exercise` - Bài tập rèn luyện
+         *     * `other` - Khác
+         * @enum {string}
+         */
+        MaterialTypeEnum: "document" | "slide" | "syllabus" | "reference" | "exercise" | "other";
+        /** @description Payload tạo revision (phiên bản nháp mới). */
+        MaterialVersionCreateRequestRequest: {
+            /** @default  */
+            changelog: string;
+            /** Format: uuid */
+            clone_from_version_id?: string | null;
+        };
+        /** @description Chi tiết phiên bản học liệu kèm danh sách tệp tin đóng băng trong manifest. */
+        MaterialVersionDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly material_id: string;
+            readonly material_title: string;
+            readonly version_number: number;
+            readonly title: string;
+            readonly description: string;
+            /** @description Ghi chú thay đổi nội dung ở phiên bản này */
+            readonly changelog: string;
+            readonly lifecycle_status: components["schemas"]["LifecycleStatusEnum"];
+            readonly processing_status: components["schemas"]["ProcessingStatusEnum"];
+            /** @description Đánh dấu phiên bản này đã từng hoặc đang được công bố */
+            readonly is_published: boolean;
+            /** Format: date-time */
+            readonly finalized_at: string | null;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** @description SHA-256 hash của manifest đóng băng */
+            readonly manifest_hash: string;
+            /** @description Tổng kích thước bytes của tất cả tệp trong manifest */
+            readonly total_size_bytes: number;
+            /** @description Số lượng tệp trong manifest */
+            readonly file_count: number;
+            /** @description Snapshot của CourseFilePolicy áp dụng tại thời điểm đóng băng */
+            readonly policy_snapshot: unknown;
+            /** @description Tóm tắt nội dung đã được xác nhận của phiên bản học liệu */
+            readonly summary: string;
+            /** Format: date-time */
+            readonly summary_confirmed_at: string | null;
+            readonly created_by_name: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly files: components["schemas"]["MaterialFileManifestItem"][];
+        };
+        /** @description Tóm tắt ngắn gọn phiên bản học liệu dùng trong danh sách. */
+        MaterialVersionSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly version_number: number;
+            readonly title: string;
+            /** @description Ghi chú thay đổi nội dung ở phiên bản này */
+            readonly changelog: string;
+            readonly lifecycle_status: components["schemas"]["LifecycleStatusEnum"];
+            readonly processing_status: components["schemas"]["ProcessingStatusEnum"];
+            /** @description Đánh dấu phiên bản này đã từng hoặc đang được công bố */
+            readonly is_published: boolean;
+            /** @description Số lượng tệp trong manifest */
+            readonly file_count: number;
+            /** @description Tổng kích thước bytes của tất cả tệp trong manifest */
+            readonly total_size_bytes: number;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly finalized_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
         };
         PaginatedAdminAccountListItemList: {
             items: components["schemas"]["AdminAccountListItem"][];
@@ -1497,6 +2008,16 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        /** @description Dữ liệu phân trang danh sách học liệu chuẩn StandardPageNumberPagination. */
+        PaginatedMaterialList: {
+            items: components["schemas"]["MaterialListItem"][];
+            pagination: components["schemas"]["PaginationInfo"];
+        };
+        /** @description Dữ liệu phân trang kết quả tìm kiếm học liệu chuẩn StandardPageNumberPagination. */
+        PaginatedMaterialSearchResult: {
+            items: components["schemas"]["MaterialSearchResult"][];
+            pagination: components["schemas"]["PaginationInfo"];
+        };
         PaginatedStoredFileList: {
             items: components["schemas"]["StoredFile"][];
             pagination: {
@@ -1537,6 +2058,15 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        /** @description Metadata phân trang chuẩn toàn hệ thống. */
+        PaginationInfo: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
         PasswordChangeRequest: {
             current_password: string;
             new_password: string;
@@ -1564,9 +2094,31 @@ export interface components {
             title?: string;
             description?: string;
         };
+        /** @description Payload cập nhật metadata học liệu. */
+        PatchedMaterialUpdateRequestRequest: {
+            title?: string;
+            description?: string;
+            material_type?: components["schemas"]["MaterialTypeEnum"];
+            tags?: string[];
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            is_hidden?: boolean;
+        };
         PatchedUpdateFilePublishRequest: {
             is_published?: boolean;
         };
+        /**
+         * @description * `pending` - Chờ xử lý
+         *     * `processing` - Đang xử lý
+         *     * `ready` - Sẵn sàng
+         *     * `failed` - Thất bại
+         *     * `no_text` - Không có văn bản
+         *     * `unsupported` - Không hỗ trợ
+         * @enum {string}
+         */
+        ProcessingStatusEnum: "pending" | "processing" | "ready" | "failed" | "no_text" | "unsupported";
         ReadinessSuccessResponse: {
             /** @default ok */
             status: string;
@@ -3197,6 +3749,453 @@ export interface operations {
             };
         };
     };
+    courses_materials_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương */
+                chapter_id?: string;
+                /** @description Tìm kiếm theo tiêu đề/tag */
+                search?: string;
+                /** @description Lọc theo visibility (chỉ GV) */
+                visibility?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialList"];
+                };
+            };
+        };
+    };
+    courses_materials_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_materials_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_files_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_materials_files_preview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_materials_hide_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialPublishRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialPublishRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialPublishRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_unhide_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionSummary"][];
+                };
+            };
+        };
+    };
+    courses_materials_versions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MaterialVersionCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialVersionCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialVersionCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_files_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialFileAddRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialFileAddRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialFileAddRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileManifestItem"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_files_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_materials_versions_finalize_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_retry_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_search: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo mã chương */
+                chapter_id?: string;
+                /** @description Từ khóa tìm kiếm (tối đa 200 ký tự) */
+                q?: string;
+                /** @description Sắp xếp: relevance, newest, title_asc, title_desc */
+                sort_by?: string;
+                /** @description Lọc theo thẻ */
+                tag?: string;
+                /** @description Lọc theo loại tệp (all, pdf, docx, txt) */
+                type?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialSearchResult"];
+                };
+            };
+        };
+    };
     courses_members_list: {
         parameters: {
             query?: {
@@ -3604,6 +4603,59 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadinessUnavailableResponse"];
+                };
+            };
+        };
+    };
+    materials_retrieve_global: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    materials_search_global: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo mã chương */
+                chapter_id?: string;
+                /** @description Lọc theo môn học cụ thể */
+                course_id?: string;
+                /** @description Từ khóa tìm kiếm (tối đa 200 ký tự) */
+                q?: string;
+                /** @description Sắp xếp: relevance, newest, title_asc, title_desc */
+                sort_by?: string;
+                /** @description Lọc theo thẻ */
+                tag?: string;
+                /** @description Lọc theo loại tệp (all, pdf, docx, txt) */
+                type?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialSearchResult"];
                 };
             };
         };
