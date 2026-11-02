@@ -100,6 +100,45 @@ def tokenize(value: str) -> list[str]:
     ]
 
 
+def _bm25_terms(value: str) -> list[str]:
+    """
+    Tạo tập đặc trưng cho BM25:
+    - Unigram: từng từ riêng lẻ.
+    - Bigram: hai từ liên tiếp để nhận diện cụm từ.
+
+    Ví dụ:
+    'cơ sở dữ liệu'
+    -> co, so, du, lieu
+    -> __bi__co_so
+    -> __bi__so_du
+    -> __bi__du_lieu
+    """
+
+    normalized = normalize_text(value)
+    raw_tokens = WORD_RE.findall(normalized)
+
+    # Giữ các từ có ý nghĩa tìm kiếm.
+    unigrams = [
+        token
+        for token in raw_tokens
+        if len(token) > 1 and token not in STOP_WORDS
+    ]
+
+    # Chỉ tạo bigram từ hai từ liên tiếp trong văn bản gốc.
+    bigrams = []
+
+    for left, right in zip(raw_tokens, raw_tokens[1:]):
+        if (
+            len(left) > 1
+            and len(right) > 1
+            and left not in STOP_WORDS
+            and right not in STOP_WORDS
+        ):
+            bigrams.append(f"__bi__{left}_{right}")
+
+    return unigrams + bigrams
+
+
 def filter_relevant_candidates(query: str, candidates: list):
     """
     Loại các đoạn tài liệu không chứa đủ từ khóa
@@ -247,15 +286,22 @@ def chunk_extraction_text(text: str):
     return chunks
 
 
-def _bm25_scores(query: str, documents: list[str]):
 
-    query_terms = set(tokenize(query))
+def _bm25_scores(query: str, documents: list[str]) -> list[float]:
+    """
+    BM25 with Vietnamese unigram + bigram features.
+
+    Exact adjacent phrases receive higher weight than
+    isolated word matches.
+    """
+
+    query_terms = set(_bm25_terms(query))
 
     if not query_terms or not documents:
         return [0.0] * len(documents)
 
     tokenized_docs = [
-        tokenize(document)
+        _bm25_terms(document)
         for document in documents
     ]
 
@@ -267,39 +313,32 @@ def _bm25_scores(query: str, documents: list[str]):
     )
 
     document_frequency = Counter()
-
     term_frequencies = []
 
     for tokens in tokenized_docs:
-
         frequencies = Counter(tokens)
-
         term_frequencies.append(frequencies)
 
-        document_frequency.update(
-            frequencies.keys()
-        )
-
-    scores = []
+        document_frequency.update(frequencies.keys())
 
     k1 = 1.5
     b = 0.75
+    phrase_weight = 2.0
+
+    scores = []
 
     for tokens, frequencies in zip(
         tokenized_docs,
         term_frequencies,
         strict=True
     ):
-
         doc_length = len(tokens)
-
         score = 0.0
 
         for term in query_terms:
-
             frequency = frequencies.get(term, 0)
 
-            if not frequency:
+            if frequency == 0:
                 continue
 
             df = document_frequency[term]
@@ -311,24 +350,28 @@ def _bm25_scores(query: str, documents: list[str]):
                 )
             )
 
-            denominator = (
-                frequency
-                + k1 * (
-                    1 - b
-                    + b * doc_length / max(avg_length, 1)
-                )
+            denominator = frequency + k1 * (
+                1 - b
+                + b * doc_length / max(avg_length, 1)
             )
 
-            score += (
+            term_score = (
                 inverse_frequency
                 * frequency
                 * (k1 + 1)
                 / denominator
             )
 
+            # Boost exact adjacent phrase matches.
+            if term.startswith("__bi__"):
+                term_score *= phrase_weight
+
+            score += term_score
+
         scores.append(score)
 
     return scores
+
 
 
 def retrieve_course_chunks(

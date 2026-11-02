@@ -119,3 +119,28 @@ def test_bm25_returns_zero_for_unrelated_documents():
     )
 
     assert scores == [0.0, 0.0]
+
+
+def test_bm25_prefers_exact_vietnamese_phrase():
+    documents = [
+        "Cơ sở dữ liệu quan hệ",
+        "Cơ chế sở hữu dữ liệu quan hệ",
+    ]
+
+    scores = _bm25_scores(
+        "cơ sở dữ liệu quan hệ",
+        documents
+    )
+
+    assert scores[0] > scores[1]
+
+
+def test_bm25_matches_vietnamese_phrase_without_diacritics():
+    scores = _bm25_scores(
+        "cơ sở dữ liệu",
+        [
+            "co so du lieu"
+        ]
+    )
+
+    assert scores[0] > 0
