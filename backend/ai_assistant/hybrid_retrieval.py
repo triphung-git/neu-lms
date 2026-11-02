@@ -3,6 +3,13 @@ from __future__ import annotations
 
 import hashlib
 import logging
+import re
+
+from .retrieval import (
+    RetrievedChunk,
+    retrieve_course_chunks,
+    normalize_text,
+)
 
 from dataclasses import replace
 
@@ -26,6 +33,63 @@ from .retrieval import (
     retrieve_course_chunks,
 )
 
+SITUATION_PATTERN = re.compile(
+    r"\btinh\s+huong\s*(iv|iii|ii|i|v|[1-5])\b"
+)
+
+ROMAN_TO_NUMBER = {
+    "i": "1",
+    "ii": "2",
+    "iii": "3",
+    "iv": "4",
+    "v": "5",
+}
+
+
+def extract_situation_number(text: str):
+    """
+    Nhận diện nhãn Tình huống I, II, III, IV, V
+    hoặc Tình huống 1, 2, 3, 4, 5.
+    """
+
+    normalized = normalize_text(text or "")
+    match = SITUATION_PATTERN.search(normalized)
+
+    if not match:
+        return None
+
+    label = match.group(1)
+    return ROMAN_TO_NUMBER.get(label, label)
+
+
+def filter_situation_mismatches(query: str, chunks: list):
+    """
+    Nếu câu hỏi chỉ rõ một tình huống,
+    loại các chunk ghi rõ tình huống khác.
+
+    Chunk không có nhãn tình huống vẫn được giữ lại
+    để tránh loại nhầm nội dung khi tiêu đề bị tách riêng.
+    """
+
+    expected = extract_situation_number(query)
+
+    if expected is None:
+        return chunks
+
+    filtered = []
+
+    for chunk in chunks:
+        normalized = normalize_text(chunk.text or "")
+
+        labels = {
+            ROMAN_TO_NUMBER.get(match.group(1), match.group(1))
+            for match in SITUATION_PATTERN.finditer(normalized)
+        }
+
+        if not labels or expected in labels:
+            filtered.append(chunk)
+
+    return filtered
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +110,7 @@ def _chunk_identity(chunk: RetrievedChunk) -> tuple:
     )
 
 
+
 def reciprocal_rank_fusion(
     lexical_results: list[RetrievedChunk],
     semantic_results: list[RetrievedChunk],
@@ -55,17 +120,25 @@ def reciprocal_rank_fusion(
     Merge lexical and semantic rankings using RRF.
 
     RRF(d) = sum(1 / (k + rank))
+
+    Tie-breaking:
+    1. Higher RRF score first.
+    2. Better semantic rank first.
+    3. Better lexical rank first.
     """
 
     fused_scores = {}
     chunk_lookup = {}
 
+    lexical_ranks = {}
+    semantic_ranks = {}
+
     result_lists = [
-        lexical_results,
-        semantic_results,
+        ("lexical", lexical_results),
+        ("semantic", semantic_results),
     ]
 
-    for ranked_results in result_lists:
+    for source, ranked_results in result_lists:
 
         for rank, chunk in enumerate(
             ranked_results,
@@ -78,20 +151,35 @@ def reciprocal_rank_fusion(
                 + 1.0 / (RRF_K + rank)
             )
 
-            # Keep the first representation of a chunk.
             chunk_lookup.setdefault(key, chunk)
 
+            if source == "semantic":
+                semantic_ranks[key] = min(
+                    rank,
+                    semantic_ranks.get(key, rank),
+                )
+            else:
+                lexical_ranks[key] = min(
+                    rank,
+                    lexical_ranks.get(key, rank),
+                )
+
+    # Sort by RRF score first.
+    # When scores are equal, prioritize semantic rank.
     ranked = sorted(
-        fused_scores.items(),
-        key=lambda item: item[1],
-        reverse=True,
+        fused_scores.keys(),
+        key=lambda key: (
+            -fused_scores[key],
+            semantic_ranks.get(key, float("inf")),
+            lexical_ranks.get(key, float("inf")),
+        ),
     )
 
     limit = max(1, min(int(top_k), 10))
 
     results = []
 
-    for index, (key, fused_score) in enumerate(
+    for index, key in enumerate(
         ranked[:limit],
         start=1,
     ):
@@ -101,11 +189,12 @@ def reciprocal_rank_fusion(
             replace(
                 chunk,
                 citation_id=f"S{index}",
-                score=round(fused_score, 8),
+                score=round(fused_scores[key], 8),
             )
         )
 
     return results
+
 
 
 def _expected_content_hash(
@@ -316,6 +405,7 @@ def _get_semantic_results(
     return ranked[:min(MAX_RANKED_CANDIDATES, max(1, top_k * 5))]
 
 
+
 def retrieve_course_chunks_hybrid(
     course,
     question: str,
@@ -349,6 +439,10 @@ def retrieve_course_chunks_hybrid(
             exc_info=True,
         )
 
+        lexical_results = filter_situation_mismatches(
+            question,
+            lexical_results,
+        )
         return lexical_results[:top_k]
 
     except (ValueError, TypeError):
@@ -358,7 +452,22 @@ def retrieve_course_chunks_hybrid(
             exc_info=True,
         )
 
+        lexical_results = filter_situation_mismatches(
+            question,
+            lexical_results,
+        )
         return lexical_results[:top_k]
+
+    # Filter situation labels before merging BM25 and Semantic.
+    lexical_results = filter_situation_mismatches(
+        question,
+        lexical_results,
+    )
+
+    semantic_results = filter_situation_mismatches(
+        question,
+        semantic_results,
+    )
 
     return reciprocal_rank_fusion(
         lexical_results=lexical_results,

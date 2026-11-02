@@ -2,6 +2,12 @@
 from ai_assistant.hybrid_retrieval import reciprocal_rank_fusion
 from ai_assistant.retrieval import RetrievedChunk
 
+import pytest
+
+from ai_assistant.hybrid_retrieval import (
+    reciprocal_rank_fusion,
+    extract_situation_number,
+)
 
 def make_chunk(
     material_id,
@@ -102,3 +108,23 @@ def test_rrf_rewards_chunks_found_by_both_methods():
 
     assert results[0].text == "Python Regex"
     assert results[0].score > results[1].score
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Tình huống I", "1"),
+        ("Tình huống II", "2"),
+        ("Tình huống III", "3"),
+        ("Tình huống IV", "4"),
+        ("Tình huống V", "5"),
+        ("Tình huống 2", "2"),
+        ("Tình huốngV", "5"),
+        ("Tình huốngIII", "3"),
+        ("Tình huống IV:", "4"),
+    ],
+)
+def test_extract_situation_number_handles_ocr_spacing(
+    text,
+    expected,
+):
+    assert extract_situation_number(text) == expected

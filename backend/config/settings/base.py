@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     "files",
     "materials",
     "assignments",
+    "ai_assistant",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []
@@ -164,6 +165,34 @@ DATABASES = {
     }
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# AI Assistant Configuration
+
+AI_API_KEY = os.environ.get(
+    "AI_API_KEY", ""
+).strip()
+
+AI_API_BASE_URL = os.environ.get(
+    "AI_API_BASE_URL",
+    "https://api.openai.com/v1"
+).rstrip("/")
+
+AI_CHAT_MODEL = os.environ.get(
+    "AI_CHAT_MODEL", ""
+).strip()
+
+AI_REQUEST_TIMEOUT_SECONDS = int(
+    os.environ.get(
+        "AI_REQUEST_TIMEOUT_SECONDS",
+        "45"
+    )
+)
+
+AI_RAG_TOP_K = int(
+    os.environ.get(
+        "AI_RAG_TOP_K",
+        "5"
+    )
+)
 LANGUAGE_CODE = "vi"
 TIME_ZONE = "Asia/Ho_Chi_Minh"
 USE_I18N = True
@@ -261,3 +290,37 @@ CELERY_BEAT_SCHEDULE = {
 }
 
 CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "files")
+
+# Gemini Embeddings
+AI_EMBEDDING_MODEL = os.environ.get(
+    "AI_EMBEDDING_MODEL",
+    "gemini-embedding-2"
+).strip()
+
+AI_EMBEDDING_DIMENSIONS = int(
+    os.environ.get(
+        "AI_EMBEDDING_DIMENSIONS",
+        "768"
+    )
+)
+
+AI_EMBEDDING_TIMEOUT_SECONDS = int(
+    os.environ.get(
+        "AI_EMBEDDING_TIMEOUT_SECONDS",
+        "45"
+    )
+)
+
+AI_RAG_MIN_COSINE_SIMILARITY = float(
+    os.environ.get(
+        "AI_RAG_MIN_COSINE_SIMILARITY",
+        "0.66"
+    )
+)
+
+AI_RAG_MAX_VECTOR_CANDIDATES = int(
+    os.environ.get(
+        "AI_RAG_MAX_VECTOR_CANDIDATES",
+        "2000"
+    )
+)
