@@ -6,6 +6,12 @@ from ai_assistant.retrieval import (
     _title_relevance_boost,
 )
 
+from ai_assistant.embeddings import (
+    cosine_similarity,
+    prepare_document_input,
+    prepare_query_input,
+)
+
 
 def make_candidate(text, page=1):
     """Tạo candidate giả lập để kiểm thử retrieval."""
@@ -179,3 +185,103 @@ def test_empty_query_has_neutral_title_boost():
     )
 
     assert score == 1.0
+
+import pytest
+
+
+def test_prepare_query_input():
+    result = prepare_query_input(
+        "Kiểm tra định dạng email bằng Python Regex"
+    )
+
+    assert result.startswith(
+        "task: question answering | query:"
+    )
+
+
+def test_prepare_document_input():
+    result = prepare_document_input(
+        "Nội dung bài học về Python Regex",
+        "Chương 1 - Python Method",
+    )
+
+    assert "title: Chương 1 - Python Method" in result
+    assert "text: Nội dung bài học" in result
+
+
+def test_cosine_similarity_identical_vectors():
+    score = cosine_similarity(
+        [1.0, 0.0, 0.0],
+        [1.0, 0.0, 0.0],
+    )
+
+    assert score == pytest.approx(1.0)
+
+
+def test_cosine_similarity_orthogonal_vectors():
+    score = cosine_similarity(
+        [1.0, 0.0],
+        [0.0, 1.0],
+    )
+
+    assert score == pytest.approx(0.0)
+
+
+def test_cosine_similarity_rejects_different_dimensions():
+    with pytest.raises(ValueError):
+        cosine_similarity(
+            [1.0, 0.0],
+            [1.0, 0.0, 0.0],
+        )
+        
+
+def test_bm25_expands_email_synonym():
+    query = (
+        "xác thực địa chỉ thư điện tử"
+    )
+
+    documents = [
+        (
+            "Người dùng nhập địa chỉ email. "
+            "Kiểm tra định dạng email bằng Regex."
+        ),
+        (
+            "Hệ thống ATM cho phép người dùng "
+            "tạo tài khoản và thực hiện giao dịch rút tiền."
+        ),
+    ]
+
+    scores = _bm25_scores(query, documents)
+
+    assert scores[0] > scores[1]
+
+
+def test_filter_keeps_email_chunk_for_synonym_query():
+    query = (
+        "Làm thế nào để xác thực địa chỉ "
+        "thư điện tử do người dùng nhập?"
+    )
+
+    email_candidate = make_candidate(
+        "Tình huống II: Người dùng nhập một "
+        "địa chỉ email từ bàn phím. "
+        "Kiểm tra định dạng email bằng Regex."
+    )
+
+    atm_candidate = make_candidate(
+        "Tình huống IV: Hệ thống ATM cho phép "
+        "người dùng tạo tài khoản và thực hiện "
+        "giao dịch rút tiền."
+    )
+
+    results = filter_relevant_candidates(
+        query,
+        [
+            atm_candidate,
+            email_candidate,
+        ]
+    )
+
+    assert email_candidate in results
+    assert atm_candidate not in results
+    assert results == [email_candidate]

@@ -139,36 +139,119 @@ def _bm25_terms(value: str) -> list[str]:
     return unigrams + bigrams
 
 
+QUERY_SYNONYMS = {
+    "thu dien tu": (
+        "email",
+        "e-mail",
+    ),
+    "dia chi thu dien tu": (
+        "email address",
+        "email",
+    ),
+    "xac thuc": (
+        "kiem tra",
+        "validate",
+    ),
+    "xac minh": (
+        "kiem tra",
+        "verify",
+    ),
+    "kiem chung": (
+        "verify",
+        "validation",
+    ),
+}
+
+
+def _expanded_query_terms(query: str) -> set[str]:
+    """
+    Expand Vietnamese query terms with controlled synonyms.
+
+    Original query terms are retained. Synonyms are additional
+    retrieval features and do not change the source document.
+    """
+
+    normalized = normalize_text(query)
+
+    expanded_terms = set(_bm25_terms(query))
+
+    for phrase, alternatives in QUERY_SYNONYMS.items():
+        if phrase in normalized:
+            for alternative in alternatives:
+                expanded_terms.update(
+                    _bm25_terms(alternative)
+                )
+
+    return expanded_terms
+
+def _required_synonym_groups(query: str) -> list[set[str]]:
+    """
+    Return synonym groups triggered by phrases in the query.
+
+    Each group requires at least one matching term in a document.
+    """
+
+    normalized = normalize_text(query)
+    groups = []
+
+    for phrase, alternatives in QUERY_SYNONYMS.items():
+        if phrase not in normalized:
+            continue
+
+        terms = set()
+
+        for alternative in alternatives:
+            terms.update(_bm25_terms(alternative))
+
+        if terms and terms not in groups:
+            groups.append(terms)
+
+    return groups
+
+
 def filter_relevant_candidates(query: str, candidates: list):
     """
-    Loại các đoạn tài liệu không chứa đủ từ khóa
-    quan trọng từ câu hỏi.
-
-    Returns:
-        List of candidates đủ điều kiện truy xuất.
+    Filter documents using:
+    1. Original query overlap.
+    2. Expanded synonym overlap.
+    3. Required synonym groups.
     """
 
-    query_terms = set(tokenize(query))
+    original_query_terms = set(tokenize(query))
+    expanded_query_terms = _expanded_query_terms(query)
+    required_groups = _required_synonym_groups(query)
 
-    if not query_terms:
+    if not original_query_terms:
         return []
 
-    if len(query_terms) <= 2:
+    if len(original_query_terms) <= 2:
         min_overlap = 1
     else:
         min_overlap = max(
             MIN_QUERY_OVERLAP_TERMS,
             math.ceil(
-                len(query_terms) * MIN_QUERY_COVERAGE
+                len(original_query_terms) * MIN_QUERY_COVERAGE
             )
         )
 
     relevant = []
 
     for candidate in candidates:
-        document_terms = set(tokenize(candidate[2]))
 
-        overlap = query_terms.intersection(document_terms)
+        document_terms = set(_bm25_terms(candidate[2]))
+
+        # Every triggered synonym group must match.
+        required_groups_matched = all(
+            bool(group.intersection(document_terms))
+            for group in required_groups
+        )
+
+        if not required_groups_matched:
+            continue
+
+        overlap = expanded_query_terms.intersection(
+            document_terms
+        )
 
         if len(overlap) >= min_overlap:
             relevant.append(candidate)
@@ -295,7 +378,7 @@ def _bm25_scores(query: str, documents: list[str]) -> list[float]:
     isolated word matches.
     """
 
-    query_terms = set(_bm25_terms(query))
+    query_terms = _expanded_query_terms(query)
 
     if not query_terms or not documents:
         return [0.0] * len(documents)
