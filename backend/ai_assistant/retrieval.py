@@ -373,6 +373,31 @@ def _bm25_scores(query: str, documents: list[str]) -> list[float]:
     return scores
 
 
+def _title_relevance_boost(
+    query: str,
+    title: str,
+    weight: float = 0.25,
+) -> float:
+    """
+    Tăng nhẹ điểm truy xuất khi tiêu đề học liệu
+    chứa các từ hoặc cụm từ trong câu hỏi.
+
+    Maximum boost: 25%.
+    """
+
+    query_terms = set(_bm25_terms(query))
+    title_terms = set(_bm25_terms(title))
+
+    if not query_terms:
+        return 1.0
+
+    overlap = len(query_terms.intersection(title_terms))
+
+    coverage = overlap / len(query_terms)
+
+    return 1.0 + weight * coverage
+
+
 
 def retrieve_course_chunks(
     course,
@@ -473,19 +498,46 @@ def retrieve_course_chunks(
         return []
     
     # Step 2: Rank relevant passages using BM25.
+    
     scores = _bm25_scores(
         question,
         [item[2] for item in candidates]
-    ) 
+    )
 
+    # Apply a small title relevance boost.
+    adjusted_results = []
+    
+    for candidate, score in zip(
+        candidates,
+        scores,
+        strict=True
+    ):
+        extraction = candidate[0]
+        
+        material_title = (
+            extraction.get(
+                "material_version__material__title"
+            ) or ""
+        )
+
+    boost = _title_relevance_boost(
+        question,
+        material_title,
+    )
+
+    adjusted_score = score * boost
+
+    adjusted_results.append(
+        (candidate, adjusted_score)
+    )
+    
     ranked = sorted(
-        zip(candidates, scores, strict=True),
+        adjusted_results,
         key=lambda item: item[1],
         reverse=True
     )
-
+    
     results = []
-
     seen = set()
 
     for (extraction, page_number, chunk), score in ranked:
@@ -544,5 +596,4 @@ def retrieve_course_chunks(
 
         if len(results) >= max(1, min(top_k, 10)):
             break
-
-    return results
+        return results

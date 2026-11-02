@@ -3,6 +3,7 @@ from ai_assistant.retrieval import (
     filter_relevant_candidates,
     normalize_text,
     tokenize,
+    _title_relevance_boost,
 )
 
 
@@ -144,3 +145,37 @@ def test_bm25_matches_vietnamese_phrase_without_diacritics():
     )
 
     assert scores[0] > 0
+
+
+def test_matching_material_title_gets_higher_boost():
+    query = "Python kiểm tra email bằng Regex"
+
+    matching_title = (
+        "Python Regex kiểm tra email"
+    )
+
+    unrelated_title = (
+        "Quản trị cơ sở dữ liệu"
+    )
+
+    matching_score = _title_relevance_boost(
+        query,
+        matching_title
+    )
+
+    unrelated_score = _title_relevance_boost(
+        query,
+        unrelated_title
+    )
+
+    assert matching_score > unrelated_score
+    assert matching_score <= 1.25
+
+
+def test_empty_query_has_neutral_title_boost():
+    score = _title_relevance_boost(
+        "và là của trong",
+        "Python Regex"
+    )
+
+    assert score == 1.0
