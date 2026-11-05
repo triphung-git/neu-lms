@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import type { Assignment, Course, Membership } from '../../../shared/kernel/types';
 
 export interface SubmissionEligibilityResult {
@@ -22,7 +23,7 @@ export function checkSubmissionEligibility(
       allowed: false,
       isLate: false,
       reason: 'ASSIGNMENT_NOT_PUBLISHED',
-      message: 'Bài tập không tồn tại hoặc chưa được công bố.'
+      message: uiText("Bài tập không tồn tại hoặc chưa được công bố.")
     };
   }
 
@@ -31,7 +32,7 @@ export function checkSubmissionEligibility(
       allowed: false,
       isLate: false,
       reason: 'COURSE_ARCHIVED',
-      message: 'Môn học đã lưu trữ, không nhận thêm bài nộp.'
+      message: uiText("Môn học đã lưu trữ, không nhận thêm bài nộp.")
     };
   }
 
@@ -40,7 +41,7 @@ export function checkSubmissionEligibility(
       allowed: false,
       isLate: false,
       reason: 'NOT_ENROLLED',
-      message: 'Người dùng chưa đăng nhập.'
+      message: uiText("Người dùng chưa đăng nhập.")
     };
   }
 
@@ -53,7 +54,7 @@ export function checkSubmissionEligibility(
       allowed: false,
       isLate: false,
       reason: 'NOT_ENROLLED',
-      message: 'Sinh viên chưa ghi danh hợp lệ vào môn học này.'
+      message: uiText("Sinh viên chưa ghi danh hợp lệ vào môn học này.")
     };
   }
 
@@ -65,7 +66,7 @@ export function checkSubmissionEligibility(
       allowed: false,
       isLate: true,
       reason: 'DEADLINE_PASSED',
-      message: 'Bài tập đã đóng nhận bài nộp thủ công.'
+      message: uiText("Bài tập đã đóng nhận bài nộp thủ công.")
     };
   }
 
@@ -87,6 +88,6 @@ export function checkSubmissionEligibility(
     allowed: false,
     isLate: true,
     reason: 'DEADLINE_PASSED',
-    message: 'Đã quá hạn nộp bài tập và bài tập không cho phép nộp muộn.'
+    message: uiText("Đã quá hạn nộp bài tập và bài tập không cho phép nộp muộn.")
   };
 }

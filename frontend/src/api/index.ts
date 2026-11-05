@@ -11,3 +11,11 @@ export async function fetchHealthLive(): Promise<components['schemas']['Liveness
 export async function fetchHealthReady(): Promise<components['schemas']['ReadinessSuccessResponse']> {
   return apiClient.get('/api/v1/health/ready');
 }
+
+export * from './adminService';
+export * from './announcementsService';
+export * from './assignmentsService';
+export * from './authService';
+export * from './coursesService';
+export * from './filesService';
+export * from './materialsService';

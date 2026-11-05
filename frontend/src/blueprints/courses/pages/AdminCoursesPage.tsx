@@ -1,170 +1,174 @@
-import React, { useState, useMemo } from 'react';
+import {uiText} from "../../../shared/i18n/translate";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
+import { coursesService, type Course } from '../../../api/coursesService';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { Badge } from '../../../shared/ui/Badge';
 import { Button } from '../../../shared/ui/Button';
-import { TextField, SelectField } from '../../../shared/ui/TextField';
 import { EmptyState } from '../../../shared/ui/EmptyState';
-import { removeVietnameseAccents } from '../../../shared/lib/search';
+import { ErrorBanner } from '../../../shared/ui/ErrorBanner';
+import { LoadingSkeleton } from '../../../shared/ui/LoadingSkeleton';
+import { SelectField, TextField } from '../../../shared/ui/TextField';
 import { AlertCircle, ArrowRight } from 'lucide-react';
 import './AdminCoursesPage.css';
 
+type CourseStatusFilter = 'all' | 'open' | 'archived';
+
 export const AdminCoursesPage: React.FC = () => {
-  const { courses, memberships, materials, users } = useDatabase();
+  const [courses, setCourses] = useState<Course[]>([]);
+  const [search, setSearch] = useState('');
+  const [term, setTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<CourseStatusFilter>('all');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCourses, setTotalCourses] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'archived'>('all');
-  const [termFilter, setTermFilter] = useState('all');
+  const loadSequence = useRef(0);
 
-  // Terms list
-  const termsList = useMemo(() => {
-    return Array.from(new Set(courses.map(c => c.term)));
-  }, [courses]);
+  const loadCourses = useCallback(async () => {
+    const sequence = ++loadSequence.current;
+    setIsLoading(true);
+    setError(null);
+    try {
+      const result = await coursesService.list({
+        search: search.trim() || undefined,
+        term: term.trim() || undefined,
+        status: statusFilter === 'all' ? undefined : statusFilter,
+        page,
+        page_size: 20,
+      });
+      if (sequence !== loadSequence.current) return;
+      setCourses(result.items);
+      setTotalPages(result.pagination.total_pages);
+      setTotalCourses(result.pagination.total_items);
+    } catch (cause) {
+      if (sequence !== loadSequence.current) return;
+      setError(cause instanceof Error ? cause.message : uiText("Không thể tải danh mục môn học."));
+    } finally {
+      if (sequence === loadSequence.current) setIsLoading(false);
+    }
+  }, [page, search, statusFilter, term]);
 
-  // Filtered courses
-  const filteredCourses = useMemo(() => {
-    return courses.filter(c => {
-      if (statusFilter !== 'all' && c.status !== statusFilter) return false;
-      if (termFilter !== 'all' && c.term !== termFilter) return false;
+  useEffect(() => {
+    void loadCourses();
+    return () => { loadSequence.current += 1; };
+  }, [loadCourses]);
 
-      if (searchQuery.trim()) {
-        const qNorm = removeVietnameseAccents(searchQuery.toLowerCase());
-        const nameNorm = removeVietnameseAccents(c.name.toLowerCase());
-        const codeNorm = c.code.toLowerCase();
-        const teacher = users.find(u => u.id === c.teacherId);
-        const teacherNorm = removeVietnameseAccents((teacher?.fullName || '').toLowerCase());
-
-        return (
-          nameNorm.includes(qNorm) ||
-          codeNorm.includes(qNorm) ||
-          teacherNorm.includes(qNorm)
-        );
-      }
-      return true;
-    });
-  }, [courses, users, statusFilter, termFilter, searchQuery]);
+  const clearFilters = () => {
+    setSearch('');
+    setTerm('');
+    setStatusFilter('all');
+    setPage(1);
+  };
 
   return (
     <div className="admin-courses-page">
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Danh mục môn học toàn trường' }
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Danh mục môn học toàn trường") },
           ]}
         />
-        <h1 className="page-heading">Quản lý môn học toàn trường</h1>
+        <h1 className="page-heading">{uiText("Quản lý môn học toàn trường")}</h1>
         <p className="page-subheading">
-          Theo dõi tổng thể các lớp học phần, tình trạng giảng dạy và thực hiện các nghiệp vụ vận hành ngoại lệ.
-        </p>
+          {uiText("Theo dõi học phần, điều chuyển giảng viên và lưu trữ môn học.")}</p>
       </div>
 
       <div className="admin-notice-box" role="note">
         <AlertCircle size={18} />
         <span>
-          <strong>Lưu ý nghiệp vụ:</strong> Quản trị viên không có quyền trực tiếp khởi tạo môn học. Chức năng tạo môn do Giảng viên thực hiện. Quản trị viên chỉ can thiệp điều chuyển giảng viên hoặc cưỡng chế lưu trữ khi cần thiết.
-        </span>
+          <strong>{uiText("Lưu ý:")}</strong> {uiText(" Quản trị viên không biên soạn môn học hoặc truy cập học liệu và bài nộp. Chỉ giảng viên phụ trách mới được quản lý nội dung.")}</span>
       </div>
 
-      {/* Filter and Search Bar */}
       <div className="filter-search-card">
         <div className="search-col">
           <TextField
-            label="Tìm kiếm môn học"
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Tìm theo tên môn, mã môn, hoặc giảng viên..."
+            label={uiText("Tìm kiếm")}
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            placeholder={uiText("Tên môn, mã môn hoặc giảng viên")}
           />
         </div>
-
+        <div className="filter-col">
+          <TextField
+            label={uiText("Học kỳ")}
+            value={term}
+            onChange={(event) => {
+              setTerm(event.target.value);
+              setPage(1);
+            }}
+            placeholder={uiText("Ví dụ: HK1-2026")}
+          />
+        </div>
         <div className="filter-col">
           <SelectField
-            label="Trạng thái"
+            label={uiText("Trạng thái")}
             value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value as any)}
+            onChange={(event) => {
+              setStatusFilter(event.target.value as CourseStatusFilter);
+              setPage(1);
+            }}
             options={[
-              { value: 'all', label: 'Tất cả trạng thái' },
-              { value: 'open', label: 'Đang mở (Open)' },
-              { value: 'archived', label: 'Đã lưu trữ (Archived)' }
-            ]}
-          />
-        </div>
-
-        <div className="filter-col">
-          <SelectField
-            label="Học kỳ"
-            value={termFilter}
-            onChange={e => setTermFilter(e.target.value)}
-            options={[
-              { value: 'all', label: 'Tất cả học kỳ' },
-              ...termsList.map(t => ({ value: t, label: t }))
+              { value: 'all', label: uiText("Tất cả trạng thái") },
+              { value: 'open', label: uiText("Đang mở") },
+              { value: 'archived', label: uiText("Đã lưu trữ") },
             ]}
           />
         </div>
       </div>
 
-      {/* Courses Table */}
-      {filteredCourses.length === 0 ? (
+      {error && (
+        <ErrorBanner
+          title={uiText("Không thể tải danh mục môn học")}
+          message={error}
+          onRetry={() => void loadCourses()}
+        />
+      )}
+
+      {isLoading ? (
+        <LoadingSkeleton lines={6} />
+      ) : error ? null : courses.length === 0 ? (
         <EmptyState
-          title="Không tìm thấy môn học phù hợp"
-          description="Không có môn học nào khớp với bộ lọc tìm kiếm hiện tại."
+          title={uiText("Không tìm thấy môn học phù hợp")}
+          description={uiText("Không có môn học nào khớp với bộ lọc hiện tại.")}
           action={
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setSearchQuery('');
-                setStatusFilter('all');
-                setTermFilter('all');
-              }}
-            >
-              Xóa bộ lọc
-            </Button>
+            <Button variant="secondary" onClick={clearFilters}>
+              {uiText("Xóa bộ lọc")}</Button>
           }
         />
       ) : (
-        <div className="admin-table-container">
-          <table className="npc-table">
-            <thead>
-              <tr>
-                <th>Mã môn</th>
-                <th>Tên môn học</th>
-                <th>Học kỳ</th>
-                <th>Giảng viên</th>
-                <th>Sinh viên</th>
-                <th>Học liệu</th>
-                <th>Trạng thái</th>
-                <th>Hành động</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredCourses.map(course => {
-                const svCount = memberships.filter(
-                  m => m.courseId === course.id && m.status === 'active'
-                ).length;
-                const matCount = materials.filter(m => m.courseId === course.id).length;
-                const teacher = users.find(u => u.id === course.teacherId);
-
-                return (
+        <>
+          <div className="admin-table-container">
+            <table className="npc-table">
+              <thead>
+                <tr>
+                  <th>{uiText("Mã môn")}</th>
+                  <th>{uiText("Tên môn học")}</th>
+                  <th>{uiText("Học kỳ")}</th>
+                  <th>{uiText("Giảng viên")}</th>
+                  <th>{uiText("Sinh viên")}</th>
+                  <th>{uiText("Trạng thái")}</th>
+                  <th>{uiText("Hành động")}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {courses.map((course) => (
                   <tr key={course.id}>
-                    <td>
-                      <span className="code-pill">{course.code}</span>
-                    </td>
-                    <td>
-                      <strong>{course.name}</strong>
-                    </td>
+                    <td><span className="code-pill">{course.code}</span></td>
+                    <td><strong>{course.name}</strong></td>
                     <td>{course.term}</td>
-                    <td>{teacher?.fullName || 'Giảng viên'}</td>
-                    <td>
-                      <span className="metric-pill">{svCount} sinh viên</span>
-                    </td>
-                    <td>
-                      <span className="metric-pill">{matCount} học liệu</span>
-                    </td>
+                    <td>{course.teacher_name || uiText("Giảng viên")}</td>
+                    <td><span className="metric-pill">{course.active_member_count} {uiText(" sinh viên")}</span></td>
                     <td>
                       <Badge
                         variant={course.status === 'open' ? 'published' : 'archived'}
-                        label={course.status === 'open' ? 'Đang mở' : 'Đã lưu trữ'}
+                        label={course.status === 'open' ? uiText("Đang mở") : uiText("Đã lưu trữ")}
                       />
                     </td>
                     <td>
@@ -172,16 +176,34 @@ export const AdminCoursesPage: React.FC = () => {
                         to={`/ad/mon-hoc/${course.id}`}
                         className="npc-btn npc-btn-secondary npc-btn-sm"
                       >
-                        <span>Chi tiết & Vận hành</span>
+                        <span>{uiText("Chi tiết & vận hành")}</span>
                         <ArrowRight size={14} />
                       </Link>
                     </td>
                   </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {totalPages > 1 && (
+            <div className="course-pagination" aria-label={uiText("Phân trang danh mục môn học")}>
+              <Button
+                variant="secondary"
+                disabled={page <= 1}
+                onClick={() => setPage((current) => current - 1)}
+              >
+                {uiText("Trang trước")}</Button>
+              <span>Trang {page} / {totalPages} · {totalCourses} {uiText(" môn học")}</span>
+              <Button
+                variant="secondary"
+                disabled={page >= totalPages}
+                onClick={() => setPage((current) => current + 1)}
+              >
+                Trang sau
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

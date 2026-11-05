@@ -50,6 +50,9 @@ __pycache__/
 htmlcov/
 *.egg-info/
 backend/.static/
+backend/quarantine/
+backend/active/
+backend/var/media/
 
 # Provider CA bundles belong outside source; test CA lives under backend/tests/fixtures.
 deploy/staging/certs/

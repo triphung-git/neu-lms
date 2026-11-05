@@ -1,45 +1,55 @@
-import { readFileSync, writeFileSync, unlinkSync } from 'node:fs';
+import { readFileSync, unlinkSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+const scriptDir = dirname(fileURLToPath(import.meta.url));
+const frontendDir = resolve(scriptDir, '..');
 
-const schemaPath = resolve(__dirname, '../../schema/openapi.json');
-const currentDtsPath = resolve(__dirname, '../src/api/schema.d.ts');
-const tempDtsPath = resolve(__dirname, '../src/api/.schema.d.ts.tmp');
+const schemaPath = resolve(frontendDir, '../schema/openapi.json');
+const currentPath = resolve(frontendDir, 'src/api/schema.d.ts');
+const tempPath = resolve(frontendDir, 'src/api/.schema.d.ts.tmp');
 
 try {
-  const currentDts = readFileSync(currentDtsPath, 'utf8').replace(/\r\n/g, '\n');
+  JSON.parse(readFileSync(schemaPath, 'utf8'));
 
-  // Run the generator into the temp file to get exact byte-for-byte CLI output
-  execSync(`npx openapi-typescript "${schemaPath}" -o "${tempDtsPath}"`, {
-    cwd: resolve(__dirname, '..'),
-    stdio: 'pipe',
-  });
+  const current = readFileSync(currentPath, 'utf8')
+    .replace(/\r\n/g, '\n');
 
-  const generatedDts = readFileSync(tempDtsPath, 'utf8').replace(/\r\n/g, '\n');
+  execFileSync(
+    process.execPath,
+    [
+      'node_modules/openapi-typescript/bin/cli.js',
+      '../schema/openapi.json',
+      '-o',
+      'src/api/.schema.d.ts.tmp',
+    ],
+    {
+      cwd: frontendDir,
+      stdio: 'pipe',
+    },
+  );
 
+  const generated = readFileSync(tempPath, 'utf8')
+    .replace(/\r\n/g, '\n');
+
+  if (current.trim() !== generated.trim()) {
+    console.error('Schema TypeScript chưa khớp với OpenAPI.');
+    console.error('Hãy chạy: npm run api:generate');
+    process.exitCode = 1;
+  } else {
+    console.log('OK: schema.d.ts khớp với openapi.json.');
+  }
+} catch (error) {
+  console.error(
+    'Không kiểm tra được API:',
+    error instanceof Error ? error.message : error,
+  );
+  process.exitCode = 1;
+} finally {
   try {
-    unlinkSync(tempDtsPath);
+    unlinkSync(tempPath);
   } catch {
-    // Ignore cleanup error
+    // Không cần xóa nếu tệp tạm chưa được tạo.
   }
-
-  if (currentDts.trim() !== generatedDts.trim()) {
-    console.error('❌ Drift detected between schema/openapi.json and frontend/src/api/schema.d.ts');
-    console.error('Run `npm run api:generate` in frontend to synchronize typed client.');
-    process.exit(1);
-  }
-
-  console.log('✅ Typed client schema.d.ts is up-to-date with schema/openapi.json');
-} catch (err) {
-  try {
-    unlinkSync(tempDtsPath);
-  } catch {
-    // Ignore
-  }
-  console.error('Error checking API drift:', err.message || err);
-  process.exit(1);
 }

@@ -1,26 +1,27 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import React from 'react';
-import { render, screen, act } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Routes, Route } from 'react-router-dom';
 import { storageManager } from '../infrastructure/persistence/storage';
 import { SessionProvider } from '../app/providers/SessionContext';
-import { DatabaseProvider, useDatabase } from '../app/providers/DatabaseContext';
+import { DatabaseProvider } from '../app/providers/DatabaseContext';
 import { ClockProvider } from '../app/providers/ClockContext';
 import { NotificationProvider } from '../app/providers/NotificationContext';
 import { CourseTeacherLayout } from '../app/layouts/CourseTeacherLayout';
-import { TeacherGradingPage } from '../blueprints/grading/pages/TeacherGradingPage';
+import { ApiError } from '../api/client';
+import { coursesService } from '../api/coursesService';
 import {
   getLatestPublishedGrade,
   getLatestDraftGrade,
   canTeacherAccessCourse
 } from '../blueprints/grading/domain/gradingPolicies';
 import { checkSubmissionEligibility } from '../blueprints/assignments/domain/assignmentPolicies';
-import { mockAssignmentsAdapter } from '../blueprints/assignments/adapters/mockAssignmentsAdapter';
 import { mockGradingAdapter } from '../blueprints/grading/adapters/mockGradingAdapter';
 import type { GradeRevision, Course, Assignment, Membership } from '../shared/kernel/types';
 
 describe('Đợt 2: Assignment Submission & Grading Vertical Slice', () => {
   beforeEach(() => {
+    vi.restoreAllMocks();
     localStorage.clear();
     sessionStorage.clear();
     storageManager.resetDatabase();
@@ -44,10 +45,13 @@ describe('Đợt 2: Assignment Submission & Grading Vertical Slice', () => {
       expect(canTeacherAccessCourse(course, admin)).toBe(true);
     });
 
-    it('renders access denied in CourseTeacherLayout when cross-teacher access is attempted', () => {
+    it('renders access denied in CourseTeacherLayout when cross-teacher access is attempted', async () => {
       const db = storageManager.getDatabase();
       const course1 = db.courses.find((c) => c.teacherId === 'usr-gv-1')!;
       const teacher2 = db.users.find((u) => u.id === 'usr-gv-2')!;
+      const getCourse = vi.spyOn(coursesService, 'get').mockRejectedValue(
+        new ApiError(404, { code: 'not_found', message: 'Môn học không tồn tại.' }),
+      );
 
       storageManager.saveSession({
         userId: teacher2.id,
@@ -76,8 +80,9 @@ describe('Đợt 2: Assignment Submission & Grading Vertical Slice', () => {
       );
 
       // Should show course not found / unauthorized
-      expect(screen.getByText('Không tìm thấy môn học')).toBeDefined();
+      expect(await screen.findByText('Không tìm thấy môn học')).toBeDefined();
       expect(screen.queryByText('Nội dung môn học')).toBeNull();
+      expect(getCourse).toHaveBeenCalledWith(course1.id);
     });
   });
 

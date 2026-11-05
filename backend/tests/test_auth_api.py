@@ -382,6 +382,12 @@ class TestPasswordChangeAndReset:
             HTTP_X_CSRFTOKEN=csrftoken,
         )
         assert req_res.status_code == status.HTTP_202_ACCEPTED
+        assert len(mail.outbox) == 0
+
+        # Dispatch pending email out-of-request
+        from identity.transport import dispatch_pending_auth_emails
+
+        dispatch_pending_auth_emails()
         assert len(mail.outbox) == 1
         email_body = mail.outbox[0].body
         assert "Reset your password within 30 minutes" in email_body

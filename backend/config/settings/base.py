@@ -1,5 +1,8 @@
 import os
 from pathlib import Path
+from urllib.parse import urlparse
+
+from django.core.exceptions import ImproperlyConfigured
 
 from config.environment import csv_values, required
 
@@ -13,15 +16,21 @@ ASGI_APPLICATION = "config.asgi.application"
 
 AUTH_USER_MODEL = "identity.User"
 INSTALLED_APPS = [
+    "learning",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
+    "django.contrib.postgres",
     "rest_framework",
     "drf_spectacular",
     "health",
     "identity",
     "platform_core",
     "courses",
+    "files",
+    "materials",
+    "assignments",
+    "ai_assistant",
 ]
 # HTTP authentication/session middleware is introduced with the B03 login flow.
 AUTHENTICATION_BACKENDS = []
@@ -39,6 +48,7 @@ AUTH_PASSWORD_VALIDATORS = [
 MIDDLEWARE = [
     "platform_core.middleware.CorrelationIdMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -63,6 +73,18 @@ SPECTACULAR_SETTINGS = {
     "SCHEMA_PATH_PREFIX": r"/api/v1",
     "SCHEMA_PATH_PREFIX_TRIM": False,
     "COMPONENT_SPLIT_REQUEST": True,
+    "ENUM_NAME_OVERRIDES": {
+        "RequestableRoleEnum": ["student", "teacher"],
+        "UserRoleEnum": ["student", "teacher", "admin"],
+        "RoleRequestStatusEnum": ["pending", "approved", "rejected", "cancelled"],
+        "EnrollmentRequestStatusEnum": "courses.models.EnrollmentRequest.Status",
+        "CourseStatusEnum": "courses.models.Course.Status",
+        "CourseMemberStatusEnum": "courses.models.Membership.Status",
+        "StoredFileStatusEnum": "files.models.StoredFile.Status",
+        "StoredFilePurposeEnum": "files.models.StoredFile.Purpose",
+        "AssignmentStatusEnum": "assignments.models.AssignmentStatus",
+        "SubmissionGradeStatusEnum": "assignments.models.SubmissionGradeEntry.Status",
+    },
     "APPEND_COMPONENTS": {
         "securitySchemes": {
             "SessionCookieAuth": {
@@ -146,6 +168,19 @@ DATABASES = {
     }
 }
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+# AI Assistant Configuration
+
+AI_API_KEY = os.environ.get("AI_API_KEY", "").strip()
+
+AI_API_BASE_URL = os.environ.get(
+    "AI_API_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai"
+).rstrip("/")
+
+AI_CHAT_MODEL = os.environ.get("AI_CHAT_MODEL", "").strip()
+
+AI_REQUEST_TIMEOUT_SECONDS = int(os.environ.get("AI_REQUEST_TIMEOUT_SECONDS", "45"))
+
+AI_RAG_TOP_K = int(os.environ.get("AI_RAG_TOP_K", "5"))
 LANGUAGE_CODE = "vi"
 TIME_ZONE = "Asia/Ho_Chi_Minh"
 USE_I18N = True
@@ -187,7 +222,24 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
-PUBLIC_APP_ORIGIN = os.environ.get("PUBLIC_APP_ORIGIN", "http://localhost:5173")
+
+
+def validate_origin(origin_str: str) -> str:
+    parsed = urlparse(origin_str)
+    if parsed.scheme not in ("http", "https"):
+        raise ImproperlyConfigured(
+            f"PUBLIC_APP_ORIGIN scheme must be http or https, got: '{parsed.scheme}'"
+        )
+    if not parsed.netloc:
+        raise ImproperlyConfigured(f"PUBLIC_APP_ORIGIN host is missing in: '{origin_str}'")
+    if parsed.path not in ("", "/") or parsed.params or parsed.query or parsed.fragment:
+        raise ImproperlyConfigured(
+            f"PUBLIC_APP_ORIGIN must not contain path, query, or fragment: '{origin_str}'"
+        )
+    return f"{parsed.scheme}://{parsed.netloc}"
+
+
+PUBLIC_APP_ORIGIN = validate_origin(os.environ.get("PUBLIC_APP_ORIGIN", "http://localhost:5173"))
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@neu.edu.vn")
 EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.smtp.EmailBackend")
 EMAIL_HOST = os.environ.get("EMAIL_HOST", "127.0.0.1")
@@ -197,3 +249,86 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "false").lower() in ("true", "1", "yes")
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() in ("true", "1", "yes")
 EMAIL_TIMEOUT = int(os.environ.get("EMAIL_TIMEOUT", "10"))
+
+
+# Private file storage and asynchronous security scanning.
+MEDIA_ROOT = os.environ.get("MEDIA_ROOT", str(BASE_DIR / "var" / "media"))
+FILES_STORAGE_BACKEND = os.environ.get("FILES_STORAGE_BACKEND", "local")
+FILES_S3_BUCKET = os.environ.get("FILES_S3_BUCKET", "neu-lms-local")
+FILES_S3_ENDPOINT = os.environ.get("FILES_S3_ENDPOINT", "")
+FILES_S3_REGION = os.environ.get("FILES_S3_REGION", "ap-southeast-1")
+FILES_SYSTEM_MAX_SIZE = 52_428_800
+FILES_SCANNER_ENGINE = "clamav"
+FILES_ALLOW_TEST_SCANNERS = False
+CLAMAV_HOST = os.environ.get("CLAMAV_HOST", "127.0.0.1")
+CLAMAV_PORT = int(os.environ.get("CLAMAV_PORT", "3310"))
+CELERY_BROKER_URL = os.environ.get(
+    "CELERY_BROKER_URL", os.environ.get("REDIS_URL", "redis://localhost:56379/0")
+)
+CELERY_TASK_SERIALIZER = "json"
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_IGNORE_RESULT = True
+CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
+CELERY_BEAT_SCHEDULE = {
+    "quarantine-scan": {"task": "files.tasks.process_pending_files", "schedule": 5.0},
+    "material-extraction": {
+        "task": "materials.tasks.process_pending_material_extractions",
+        "schedule": 5.0,
+    },
+}
+
+CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "files")
+
+# Gemini Embeddings
+AI_EMBEDDING_MODEL = os.environ.get("AI_EMBEDDING_MODEL", "gemini-embedding-2").strip()
+
+AI_EMBEDDING_DIMENSIONS = int(os.environ.get("AI_EMBEDDING_DIMENSIONS", "768"))
+
+AI_EMBEDDING_TIMEOUT_SECONDS = int(os.environ.get("AI_EMBEDDING_TIMEOUT_SECONDS", "45"))
+
+AI_RAG_MIN_COSINE_SIMILARITY = float(os.environ.get("AI_RAG_MIN_COSINE_SIMILARITY", "0.66"))
+
+AI_RAG_MAX_VECTOR_CANDIDATES = int(os.environ.get("AI_RAG_MAX_VECTOR_CANDIDATES", "2000"))
+
+
+AI_AUTO_INDEX_ENABLED = os.environ.get("AI_AUTO_INDEX_ENABLED", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+NOTIFICATION_EMAIL_ENABLED = os.environ.get("NOTIFICATION_EMAIL_ENABLED", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+# Explicit cutoff prevents bulk mailing historical notifications when first enabled.
+NOTIFICATION_EMAIL_START_AT = os.environ.get("NOTIFICATION_EMAIL_START_AT", "")
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "ai-index-reconcile": {
+            "task": "ai_assistant.tasks.process_embedding_index",
+            "schedule": 60.0,
+        },
+        "notification-email": {
+            "task": "platform_core.tasks.process_notification_emails",
+            "schedule": 30.0,
+        },
+    }
+)
+
+# Long provider requests must not block malware scanning/extraction.
+CELERY_TASK_ROUTES = {
+    "ai_assistant.tasks.*": {"queue": "ai"},
+    "platform_core.tasks.process_notification_emails": {"queue": "notifications"},
+}
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+if NOTIFICATION_EMAIL_ENABLED:
+    from django.utils.dateparse import parse_datetime
+    from django.utils.timezone import is_naive
+
+    _notice_start = parse_datetime(NOTIFICATION_EMAIL_START_AT)
+    if _notice_start is None or is_naive(_notice_start):
+        raise ImproperlyConfigured(
+            "NOTIFICATION_EMAIL_START_AT must be an ISO timestamp with timezone "
+            "when email is enabled."
+        )

@@ -1,0 +1,15 @@
+import {useState} from 'react';
+import {Link} from 'react-router-dom';
+import {coursesService} from '../../api/coursesService';
+import {ActionForm,Input,Load,useData} from './ui';
+import {useLanguage} from './i18n';
+import './learning.css';
+type Catalog={items:{id:string;code:string;name:string;term:string;teacher__display_name:string;requires_password:boolean;joined:boolean;requested:boolean}[];terms:string[];total:number;page:number};
+export function EnrollmentPage(){
+ const {t}=useLanguage();const [q,setQ]=useState(''),[term,setTerm]=useState(''),[mode,setMode]=useState(''),[page,setPage]=useState(1),[error,setError]=useState(''),[busy,setBusy]=useState(false);
+ const state=useData<Catalog>('/enrollment?'+new URLSearchParams({q,term,mode,page:String(page)}));
+ return <section className="learning-page"><h1>{t('Ghi danh vào lớp','Join a course')}</h1><p>{t('Danh sách lớp đang mở ghi danh. Tìm theo tên, mã môn hoặc giảng viên.','Open courses. Search by course name, code or teacher.')}</p>
+ <div className="enrollment-filters"><label>{t('Tìm kiếm','Search')}<input value={q} onChange={e=>{setQ(e.target.value);setPage(1);}}/></label><label>{t('Học kỳ','Term')}<select value={term} onChange={e=>{setTerm(e.target.value);setPage(1);}}><option value="">{t('Tất cả','All')}</option>{state.data?.terms.map(x=><option key={x}>{x}</option>)}</select></label><label>{t('Cách ghi danh','Enrollment method')}<select value={mode} onChange={e=>{setMode(e.target.value);setPage(1);}}><option value="">{t('Tất cả','All')}</option><option value="password">{t('Có mật khẩu','Password')}</option><option value="approval">{t('Giảng viên duyệt','Teacher approval')}</option></select></label></div>
+ {error&&<p role="alert">{error}</p>}{!state.data?<Load {...state}/>:<><p role="status">{state.data.total} {t('lớp đang mở','open courses')}</p>{!state.data.items.length&&<p>{t('Không có lớp phù hợp với bộ lọc.','No matching courses.')}</p>}<div className="enrollment-grid">{state.data.items.map(c=><article className="learning-card" key={c.id}><h2>{c.code} — {c.name}</h2><p>{c.term} · {c.teacher__display_name}</p>{c.joined?<Link to={'/sv/mon-hoc/'+c.id}>{t('Đã ghi danh — Mở môn học','Enrolled — Open course')}</Link>:c.requested?<p>{t('Đang chờ giảng viên duyệt','Awaiting teacher approval')}</p>:c.requires_password?<ActionForm path="/enrollment" initial={{course_id:c.id}} done={state.reload} label={t('Tham gia','Join')}><Input name="password" type="password" label={t('Mật khẩu lớp','Course password')}/></ActionForm>:<button disabled={busy} onClick={async()=>{setBusy(true);setError('');try{await coursesService.enroll(c.id);state.reload();}catch(e){setError(e instanceof Error?e.message:String(e));}finally{setBusy(false);}}}>{t('Gửi yêu cầu ghi danh','Request enrollment')}</button>}</article>)}</div><nav className="learning-tabs" aria-label={t('Phân trang','Pagination')}><button disabled={page===1} onClick={()=>setPage(page-1)}>{t('Trước','Previous')}</button><span>{page} / {Math.max(1,Math.ceil(state.data.total/24))}</span><button disabled={page*24>=state.data.total} onClick={()=>setPage(page+1)}>{t('Tiếp','Next')}</button></nav></>}
+ </section>;
+}

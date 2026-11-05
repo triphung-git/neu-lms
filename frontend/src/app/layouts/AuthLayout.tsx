@@ -1,17 +1,22 @@
+import {uiText} from "../../shared/i18n/translate";
 import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import './AuthLayout.css';
+import { LanguageSwitch, useLanguage } from '../../blueprints/learning/i18n';
+import '../../blueprints/learning/learning.css';
 
 export const AuthLayout: React.FC = () => {
+  const { t } = useLanguage();
   return (
     <div className="auth-shell">
       <div className="auth-container">
         <div className="auth-header">
-          <Link to="/" className="auth-brand" aria-label="Trang chủ NEU LMS">
+          <LanguageSwitch />
+          <Link to="/" className="auth-brand" aria-label={uiText("Trang chủ NEU LMS")}>
             <div className="auth-logo" aria-hidden="true">
               <img
                 src="/neu-logo.webp"
-                alt="Biểu trưng Đại học Kinh tế Quốc dân"
+                alt={uiText("Biểu trưng Đại học Kinh tế Quốc dân")}
                 className="auth-logo-img"
               />
             </div>
@@ -25,9 +30,9 @@ export const AuthLayout: React.FC = () => {
           <Outlet />
         </main>
         <footer className="auth-footer">
-          <p>Dữ liệu minh họa phiên bản 2.0</p>
+          <p>{t('NEU LMS — Tài khoản học tập', 'NEU LMS — Learning account')}</p>
           <Link to="/" className="auth-back-link">
-            ← Quay lại trang chủ
+            {t('← Quay lại trang chủ', '← Back to home')}
           </Link>
         </footer>
       </div>

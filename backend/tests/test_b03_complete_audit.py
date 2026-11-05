@@ -199,6 +199,12 @@ class TestB03CompleteFlows:
             HTTP_X_CSRFTOKEN=csrf_reset,
         )
         assert req_res.status_code == status.HTTP_202_ACCEPTED
+        assert len(mail.outbox) == 0
+
+        # Dispatch pending emails out-of-request
+        from identity.transport import dispatch_pending_auth_emails
+
+        dispatch_pending_auth_emails()
         assert len(mail.outbox) == 1
         body = mail.outbox[0].body
         match = re.search(r"#token=([a-f0-9]+)", body)

@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "typecheck": "tsc -b --noEmit",
-    "lint": "oxlint",
+    "lint": "oxlint --ignore-pattern \"node_modules_old/**\"",
     "test": "vitest run",
     "preview": "vite preview",
     "api:generate": "openapi-typescript ../schema/openapi.json -o src/api/schema.d.ts",
@@ -16,9 +16,12 @@
   "dependencies": {
     "@fontsource-variable/plus-jakarta-sans": "^5.3.0",
     "lucide-react": "^1.59.0",
+    "pdfjs-dist": "^6.4.299",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
-    "react-router-dom": "^7.18.4"
+    "react-markdown": "^10.1.0",
+    "react-router-dom": "^7.18.4",
+    "remark-gfm": "^4.0.1"
   },
   "devDependencies": {
     "@testing-library/dom": "^10.4.2",

@@ -1,386 +1,412 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
-import { getLatestPublishedGrade } from '../../grading/domain/gradingPolicies';
-import { useClock } from '../../../app/providers/ClockContext';
+import {currentLocale} from '../../../shared/i18n/translate';
+import {uiText} from "../../../shared/i18n/translate";
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useNotifications } from '../../../app/providers/NotificationContext';
+import { getAssignmentService } from '../../../app/composition/assignmentWiring';
+import type { StudentAssignmentView } from '../contracts/assignmentsDto';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { Badge } from '../../../shared/ui/Badge';
 import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
+import { Modal } from '../../../shared/ui/Modal';
+import { PdfPreview } from '../../files/components/PdfPreview';
+import { SubmissionForm } from './SubmissionForm';
 import { formatDateVN, formatScoreVN } from '../../../shared/kernel/formatting';
+import { SubmissionGradePanel } from '../../submissions/pages/SubmissionGradePanel';
+import { SubmissionHistory } from '../../submissions/pages/SubmissionHistory';
 import {
-  Upload,
   Clock,
   Calendar,
   AlertTriangle,
-  CheckCircle2,
   Award,
   Download,
-  FileCheck
+  FileText,
+  Eye,
+  RefreshCw,
+  Info,
+  ShieldCheck,
 } from 'lucide-react';
 import './StudentAssignmentDetailPage.css';
 
 export const StudentAssignmentDetailPage: React.FC = () => {
-  const { baiTapId } = useParams<{ baiTapId: string }>();
-  const { assignments, submissions, gradeRevisions, courses, memberships, submitAssignment, systemSettings } = useDatabase();
-  const { currentUser } = useSession();
-  const { now } = useClock();
-  const { showNotification } = useNotifications();
+  const { monId, baiTapId } = useParams<{ monId?: string; baiTapId: string }>();
   const navigate = useNavigate();
+  const { showNotification } = useNotifications();
 
-  const assignment = assignments.find(a => a.id === baiTapId);
-  const course = assignment ? courses.find(c => c.id === assignment.courseId) : null;
-  const isArchived = course?.status === 'archived';
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<{ code: string; message: string } | null>(null);
+  const [viewData, setViewData] = useState<StudentAssignmentView | null>(null);
+  const [preview, setPreview] = useState<{ url: string; name: string } | null>(null);
 
-  // Current student submission
-  const mySubmission = useMemo(() => {
-    return submissions.find(
-      s => s.assignmentId === baiTapId && s.studentId === currentUser?.id
-    ) || null;
-  }, [submissions, baiTapId, currentUser]);
+  const fetchAssignmentData = useCallback(async (signal?: AbortSignal) => {
+    if (!baiTapId) return;
+    setLoading(true);
+    setError(null);
 
-  const latestRev = useMemo(() => {
-    if (!mySubmission) return null;
-    return mySubmission.revisions.find(r => r.id === mySubmission.latestRevisionId) || mySubmission.revisions[mySubmission.revisions.length - 1] || null;
-  }, [mySubmission]);
+    try {
+      const service = getAssignmentService();
+      const res = monId
+        ? await service.getStudentAssignment(monId, baiTapId, { signal })
+        : await service.getStudentAssignmentDirect(baiTapId, { signal });
 
-  const publishedGrade = useMemo(() => {
-    if (!mySubmission) return null;
-    return getLatestPublishedGrade(gradeRevisions, mySubmission.id);
-  }, [gradeRevisions, mySubmission]);
+      if (signal?.aborted) return;
 
-  // Upload state
-  const [selectedFileName, setSelectedFileName] = useState('');
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  if (!assignment || !course) {
-    return (
-      <div className="student-ass-container">
-        <EmptyState
-          title="Không tìm thấy bài tập"
-          description="Bài tập không tồn tại hoặc chưa được công bố."
-          action={
-            <Button variant="secondary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về môn học của tôi
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  const isEnrolled = memberships.some(
-    m => m.courseId === course.id && m.userId === currentUser?.id && m.status === 'active'
-  );
-
-  if (!isEnrolled) {
-    return (
-      <div className="student-ass-container">
-        <EmptyState
-          title="Chưa ghi danh môn học"
-          description="Bạn không thể nộp bài tập do chưa ghi danh vào môn học này."
-          action={
-            <Button variant="secondary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  // Time calculation
-  const nowDate = new Date(now).getTime();
-  const dueDate = new Date(assignment.dueAt).getTime();
-  const isPastDue = nowDate > dueDate;
-  const isClosed = assignment.status === 'archived' || (isPastDue && !assignment.allowLate);
-
-  // Download instructions template
-  const handleDownloadTemplate = () => {
-    showNotification('success', `Đang tải xuống tài liệu hướng dẫn làm bài: De_bai_${assignment.title}.pdf`);
-  };
-
-  // Submit file handler
-  const handleSimulateSubmit = () => {
-    if (!currentUser) return;
-    if (isClosed || isArchived) {
-      showNotification('error', 'Bài tập đã đóng nhận bài nộp.');
-      return;
-    }
-
-    const fileName = selectedFileName || `Bai_lam_${currentUser.fullName.replace(/\s+/g, '_')}_v${(latestRev?.revisionNumber || 0) + 1}.pdf`;
-    setIsUploading(true);
-    setUploadProgress(40);
-
-    setTimeout(() => {
-      setUploadProgress(85);
-      setTimeout(() => {
-        const nextRev = (latestRev?.revisionNumber || 0) + 1;
-        const res = submitAssignment(assignment.id, currentUser.id, {
-          filename: fileName,
-          size: 1850000
+      if (!res.ok) {
+        setError({
+          code: res.error.code || 'UNKNOWN_ERROR',
+          message: res.error.message || uiText("Không thể tải thông tin bài tập."),
         });
+      } else {
+        setViewData(res.data);
+      }
+    } catch (err: unknown) {
+      if (signal?.aborted) return;
+      const apiErr = err as { message?: string };
+      setError({
+        code: 'NETWORK_ERROR',
+        message: apiErr.message || uiText("Không thể kết nối đến máy chủ. Vui lòng thử lại."),
+      });
+    } finally {
+      if (!signal?.aborted) {
+        setLoading(false);
+      }
+    }
+  }, [monId, baiTapId]);
 
-        setIsUploading(false);
-        setUploadProgress(0);
-        setSelectedFileName('');
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchAssignmentData(controller.signal);
+    return () => {
+      controller.abort();
+    };
+  }, [fetchAssignmentData]);
 
-        if (res.ok) {
-          showNotification('success', mySubmission ? `Đã nộp thay thế bài làm thành công (Phiên bản ${nextRev}).` : 'Đã nộp bài tập thành công.');
-        } else {
-          showNotification('error', res.error?.message || 'Lỗi nộp bài');
-        }
-      }, 600);
-    }, 600);
+  // Handle download attachment via authenticated direct/course endpoint
+  const handleDownloadAttachment = (attachmentId: string, filename: string) => {
+    if (!viewData) return;
+    const courseId = viewData.assignment.courseId;
+    const assignmentId = viewData.assignment.id;
+    const url = `/api/v1/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/attachments/${encodeURIComponent(attachmentId)}/download`;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    showNotification('success', uiText("Đang tải xuống tệp: {0}",[filename]));
   };
+
+  // Handle preview attachment via authenticated endpoint
+  const handlePreviewAttachment = (attachmentId: string, name: string) => {
+    if (!viewData) return;
+    const courseId = viewData.assignment.courseId;
+    const assignmentId = viewData.assignment.id;
+    const url = `/api/v1/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/attachments/${encodeURIComponent(attachmentId)}/preview`;
+    setPreview({ url, name });
+  };
+
+  // Loading skeleton state
+  if (loading) {
+    return (
+      <div className="student-assignment-detail-page">
+        <div className="student-ass-container">
+          <div className="page-header" style={{ marginBottom: 'var(--space-6)' }}>
+            <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)' }}>
+              {uiText("Đang xác thực quyền và tải dữ liệu bài tập từ máy chủ...")}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state (401, 403, 404, etc.)
+  if (error || !viewData) {
+    const isForbidden = error?.code === '403' || error?.message?.includes('quyền') || error?.message?.includes('công bố');
+    return (
+      <div className="student-assignment-detail-page">
+        <div className="student-ass-container">
+          <EmptyState
+            title={isForbidden ? uiText("Không có quyền truy cập") : uiText("Không tìm thấy bài tập")}
+            description={
+              error?.message ||
+              uiText("Bài tập không tồn tại, bạn chưa ghi danh môn học hoặc bài tập chưa được giảng viên công bố.")
+            }
+            action={
+              <div style={{ display: 'flex', gap: 'var(--space-3)', justifyContent: 'center' }}>
+                <Button
+                  variant="secondary"
+                  onClick={() => fetchAssignmentData()}
+                  icon={<RefreshCw size={16} />}
+                >
+                  {uiText("Thử lại")}</Button>
+                <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
+                  {uiText("Về danh sách môn học")}</Button>
+              </div>
+            }
+          />
+        </div>
+      </div>
+    );
+  }
+
+  const { assignment, eligibility } = viewData;
+  const latest = viewData.submission?.latestRevision;
+  const isClosed = eligibility.isClosed || !eligibility.canSubmit;
+  const isLate = eligibility.isLate;
+
+  const breadcrumbs = [
+    { label: uiText("Trang chủ"), path: '/sv' },
+    { label: uiText("Môn học"), path: '/sv/mon-hoc' },
+    {
+      label: assignment.courseTitle || uiText("Môn học"),
+      path: `/sv/mon-hoc/${assignment.courseId}?tab=bai-tap`,
+    },
+    { label: assignment.title },
+  ];
 
   return (
-    <div className="student-assignment-detail-page">
+    <div className="student-assignment-detail-page" data-testid="student-assignment-detail">
+      {/* Header & Breadcrumb */}
       <div className="page-header">
-        <Breadcrumb
-          items={[
-            { label: 'Trang chủ', path: '/sv' },
-            { label: `${course.code} — ${course.name}`, path: `/sv/mon-hoc/${course.id}` },
-            { label: 'Bài tập', path: `/sv/mon-hoc/${course.id}?tab=bai-tap` },
-            { label: assignment.title }
-          ]}
-        />
+        <Breadcrumb items={breadcrumbs} />
+
         <div className="title-row">
-          <h1 className="ass-main-title">{assignment.title}</h1>
-          {mySubmission ? (
-            <Badge
-              variant={mySubmission.gradingStatus === 'graded' ? 'graded' : 'submitted'}
-              label={mySubmission.gradingStatus === 'graded' ? 'Đã chấm điểm' : 'Đã nộp bài'}
-            />
-          ) : (
-            <Badge
-              variant={isClosed ? 'archived' : 'draft'}
-              label={isClosed ? 'Đã đóng nộp' : 'Chưa nộp'}
-            />
-          )}
+          <h1 className="ass-main-title" data-testid="assignment-title">{assignment.title}</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
+            {isClosed ? (
+              <Badge variant="archived" label={eligibility.message || uiText("Đã đóng nộp")} />
+            ) : isLate ? (
+              <Badge variant="warning" label={uiText("Quá hạn (Cho nộp muộn)")} />
+            ) : (
+              <Badge variant="published" label={uiText("Đang nhận bài")} />
+            )}
+          </div>
         </div>
       </div>
 
-      {isArchived && (
-        <div className="archived-warning-alert" role="alert">
+      {/* Notice alert when closed or late */}
+      {isClosed && (
+        <div className="archived-warning-alert" role="alert" data-testid="closed-alert">
           <AlertTriangle size={20} />
-          <span>
-            Môn học đã lưu trữ: Bài tập ở chế độ chỉ đọc. Không thể nộp hoặc sửa đổi bài làm.
-          </span>
+          <div>
+            <strong>{uiText("Cổng nộp bài đã đóng")}</strong>
+            <p style={{ margin: 0, fontSize: 'var(--text-xs)' }}>
+              {eligibility.message || uiText("Bài tập đã hết hạn nộp hoặc được giảng viên đóng tiếp nhận.")}
+            </p>
+          </div>
         </div>
       )}
 
-      {/* Grid: 60% Left Instructions & Rubric / 40% Right Submission Zone */}
+      {!isClosed && isLate && (
+        <div className="late-warning-chip" role="alert" style={{ padding: 'var(--space-3) var(--space-4)', borderRadius: 'var(--radius-md)', background: '#fffbeb', border: '1px solid #fef3c7', color: '#92400e', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+          <AlertTriangle size={16} />
+          <span>{uiText("Thời hạn nộp ban đầu đã qua. Bài làm gửi trong thời gian này sẽ được ghi nhận là ")}<strong>{uiText("Nộp muộn")}</strong> {uiText(" theo chính sách của môn học.")}</span>
+        </div>
+      )}
+
+      {/* Main Grid: 60% Left Content / 40% Right Submission Panel */}
       <div className="assignment-detail-grid">
-        {/* Left Column */}
+        {/* Left Column: Instructions, Attachments, Rubric, Grades Notice */}
         <section className="assignment-instructions-panel">
+          {/* Card: Đề bài & Hướng dẫn */}
           <div className="card-box">
-            <h2 className="box-title">Đề bài & Hướng dẫn thực hiện</h2>
-            <div className="assignment-desc-content">
-              {assignment.instructions.split('\n').map((par, pIdx) => (
-                <p key={pIdx}>{par}</p>
-              ))}
+            <h2 className="box-title">{uiText("Đề bài & Hướng dẫn thực hiện")}</h2>
+            <div className="assignment-desc-content" data-testid="assignment-instructions">
+              {assignment.instructions ? (
+                assignment.instructions.split('\n').map((par, pIdx) => (
+                  <p key={pIdx} style={{ margin: '0 0 var(--space-2) 0' }}>{par}</p>
+                ))
+              ) : (
+                <p style={{ color: 'var(--muted)', fontStyle: 'italic' }}>{uiText("Không có hướng dẫn văn bản bổ sung.")}</p>
+              )}
             </div>
 
-            <div className="template-download-row">
-              <Button type="button" variant="secondary" onClick={handleDownloadTemplate}>
-                <Download size={16} />
-                <span>Tải tệp hướng dẫn đính kèm</span>
-              </Button>
-            </div>
+            {/* Attachments List */}
+            {assignment.attachments && assignment.attachments.length > 0 ? (
+              <div style={{ marginTop: 'var(--space-4)', borderTop: '1px solid var(--border-soft)', paddingTop: 'var(--space-4)' }}>
+                <h3 style={{ fontSize: 'var(--text-sm)', fontWeight: 600, color: 'var(--ink)', marginBottom: 'var(--space-3)' }}>
+                  {uiText("Tài liệu đề bài đính kèm (")}{assignment.attachments.length})
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                  {assignment.attachments.map((att) => (
+                    <div
+                      key={att.id}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: 'var(--space-3)',
+                        background: 'var(--surface-hover)',
+                        borderRadius: 'var(--radius-md)',
+                        border: '1px solid var(--border)',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)', overflow: 'hidden' }}>
+                        <FileText size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          <strong style={{ fontSize: 'var(--text-sm)', color: 'var(--ink)' }}>{att.filename}</strong>
+                          <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', marginLeft: 'var(--space-2)' }}>
+                            ({(att.sizeBytes / 1024).toFixed(1)} KB)
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<Download size={14} />}
+                          onClick={() => handleDownloadAttachment(att.id, att.filename)}
+                        >
+                          {uiText("Tải về")}</Button>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          icon={<Eye size={14} />}
+                          onClick={() => handlePreviewAttachment(att.id, att.filename)}
+                          disabled={!att.previewUrl}
+                        >
+                          {uiText("Xem trước")}</Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
-          {/* Rubric Criteria Table */}
-          <div className="card-box">
+          {/* Card: Tiêu chí chấm điểm (Rubric) */}
+          <div className="card-box" data-testid="rubric-card">
             <div className="rubric-header">
               <Award size={20} className="rubric-icon" />
               <div>
-                <h2 className="box-title">Tiêu chí chấm điểm (Rubric)</h2>
-                <span className="rubric-subtext">Tổng điểm tối đa của bài: <strong>{assignment.maxScore} điểm</strong></span>
+                <h2 className="box-title">{uiText("Tiêu chí chấm điểm (Rubric)")}</h2>
+                <span className="rubric-subtext">
+                  {uiText("Tổng điểm tối đa của bài tập: ")}<strong>{formatScoreVN(assignment.totalScore)} {uiText(" điểm")}</strong>
+                </span>
               </div>
             </div>
 
-            <div className="rubric-table-wrap">
-              <table className="npc-table">
-                <thead>
-                  <tr>
-                    <th>Tiêu chí đánh giá</th>
-                    <th>Mô tả chi tiết</th>
-                    <th className="text-right">Điểm tối đa</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(assignment.rubricCriteria || []).map(item => (
-                    <tr key={item.id}>
-                      <td><strong>{item.title}</strong></td>
-                      <td>{item.description || 'Theo yêu cầu đề bài'}</td>
-                      <td className="text-right">
-                        <strong className="score-pts">{formatScoreVN(item.maxScore)} đ</strong>
-                      </td>
+            {assignment.rubricCriteria && assignment.rubricCriteria.length > 0 ? (
+              <div className="rubric-table-wrap">
+                <table className="npc-table">
+                  <thead>
+                    <tr>
+                      <th style={{ width: '35%' }}>{uiText("Tiêu chí đánh giá")}</th>
+                      <th>{uiText("Mô tả chi tiết")}</th>
+                      <th className="text-right" style={{ width: '120px' }}>{uiText("Điểm tối đa")}</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {assignment.rubricCriteria.map((item, idx) => (
+                      <tr key={item.id || idx}>
+                        <td><strong>{item.title}</strong></td>
+                        <td>{item.description || uiText("Theo yêu cầu của đề bài")}</td>
+                        <td className="text-right">
+                          <strong className="score-pts">{formatScoreVN(item.maxScore)} {uiText(" đ")}</strong>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 0 }}>
+                {uiText("Giảng viên không thiết lập bảng tiêu chí chấm điểm chi tiết cho bài tập này.")}</p>
+            )}
           </div>
 
-          {/* Published Grades Section (If graded) */}
-          {mySubmission && mySubmission.gradingStatus === 'graded' && publishedGrade && (
-            <div className="card-box graded-result-card">
-              <div className="grade-result-top">
-                <CheckCircle2 size={24} className="grade-check-icon" />
-                <div>
-                  <h2 className="grade-card-title">Kết quả chấm điểm chính thức</h2>
-                  <span className="grade-time">Điểm số đã được Giảng viên công bố</span>
-                </div>
-                <div className="score-big-pill">
-                  <span className="score-val">{formatScoreVN(publishedGrade.total)}</span>
-                  <span className="score-max">/ {assignment.maxScore}</span>
-                </div>
-              </div>
-
-              {publishedGrade.feedback && (
-                <div className="feedback-content-box">
-                  <strong>Nhận xét chung của Giảng viên:</strong>
-                  <p>{publishedGrade.feedback}</p>
-                </div>
-              )}
-
-              {/* Rubric Breakdown */}
-              {publishedGrade.criterionScores && (
-                <div className="rubric-breakdown-list">
-                  <strong>Điểm chi tiết theo tiêu chí:</strong>
-                  <ul>
-                    {(assignment.rubricCriteria || []).map(cr => {
-                      const scoreItem = publishedGrade.criterionScores?.find(cs => cs.criterionId === cr.id);
-                      const scoreVal = scoreItem ? scoreItem.score : 0;
-                      return (
-                        <li key={cr.id} className="rubric-breakdown-row">
-                          <span>{cr.title}</span>
-                          <span>
-                            <strong>{formatScoreVN(scoreVal)}</strong> / {formatScoreVN(cr.maxScore)} đ
-                          </span>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-            </div>
-          )}
+          {/* Card: Phân hệ B12 Thông báo kết quả chấm */}
+          <div className="card-box">
+            <h2 className="box-title">{uiText("Điểm và nhận xét")}</h2>
+            
+            {latest ? (
+              <>
+                <p>{uiText("Kết quả lần nộp ")}{latest.revisionNumber}</p>
+                <SubmissionGradePanel submissionId={latest.id} />
+              </>
+            ) : (
+              <p>{uiText("Bạn chưa nộp bài.")}</p>
+            )}
+          </div>
         </section>
 
         {/* Right Column: Submission Status & Action */}
         <aside className="submission-action-panel">
           <div className="card-box">
-            <h2 className="box-title">Thời hạn & Trạng thái nộp</h2>
+            <h2 className="box-title">{uiText("Thời hạn & Trạng thái nộp")}</h2>
 
             <div className="due-date-meta-box">
               <div className="meta-row">
                 <Calendar size={16} />
-                <span>Hạn chót: <strong>{formatDateVN(assignment.dueAt)}</strong></span>
+                <span>{uiText("Hạn chót: ")}<strong>{formatDateVN(assignment.dueAt)}</strong></span>
               </div>
               <div className="meta-row">
                 <Clock size={16} />
                 <span>
-                  Chế độ nộp muộn: {assignment.allowLate ? (
-                    <strong className="text-warning">Cho phép nộp muộn</strong>
+                  {uiText("Chính sách nộp muộn: ")}{assignment.allowLate ? (
+                    <strong style={{ color: '#d97706' }}>{uiText("Cho phép nộp muộn")}</strong>
                   ) : (
-                    <strong>Khóa ngay khi hết hạn</strong>
+                    <strong>{uiText("Khóa khi hết hạn")}</strong>
                   )}
                 </span>
               </div>
-              {isPastDue && (
-                <div className="late-warning-chip">
-                  <AlertTriangle size={14} />
-                  <span>Đã quá thời hạn nộp bài</span>
-                </div>
-              )}
+              <div className="meta-row" style={{ marginTop: 'var(--space-1)', fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
+                <ShieldCheck size={14} />
+                <span>{uiText("Giờ máy chủ: ")}{formatDateVN(eligibility.serverTime)}</span>
+              </div>
             </div>
 
-            {/* Current Submission Info if exists */}
-            {mySubmission && latestRev && (
-              <div className="current-sub-info-card">
-                <div className="sub-info-top">
-                  <FileCheck size={20} className="file-check-icon" />
-                  <div>
-                    <strong className="sub-file-title">{latestRev.filename}</strong>
-                    <span className="sub-file-meta">
-                      Phiên bản {latestRev.revisionNumber} • {formatDateVN(latestRev.submittedAt)}
-                    </span>
-                  </div>
-                </div>
+            {/* Submission Requirements Policy */}
+            <div style={{ borderTop: '1px solid var(--border-soft)', paddingTop: 'var(--space-3)', fontSize: 'var(--text-xs)', color: 'var(--ink-soft)' }}>
+              <strong>{uiText("Quy định tệp nộp bài:")}</strong>
+              <ul style={{ margin: 'var(--space-1) 0 0 var(--space-4)', padding: 0 }}>
+                <li>{uiText("Dung lượng tối đa: ")}{Math.round(assignment.filePolicy.maxFileSizeBytes / (1024 * 1024))} {uiText(" MB/tệp")}</li>
+                <li>{uiText("Số tệp tối đa: ")}{assignment.filePolicy.maxFilesPerSubmission} {uiText(" tệp")}</li>
+                <li>{uiText("Định dạng: ")}{assignment.filePolicy.allowedMimeTypes.map(m => m.split('/')[1] || m).join(', ')}</li>
+              </ul>
+            </div>
 
-                <div className="sub-status-pills">
-                  <Badge
-                    variant="published"
-                    label="Tệp đã quét an toàn"
-                  />
-                  {latestRev.isLate && (
-                    <span className="late-badge">Nộp muộn</span>
-                  )}
-                </div>
-              </div>
+            {latest && (
+              <p role="status">
+                {uiText("Đã nộp ")}<strong>{latest.filename}</strong>
+                {' · '}{uiText("Lần ")}{latest.revisionNumber}
+                {' · '}{new Date(latest.submittedAt).toLocaleString(currentLocale())}
+                {' · '}{latest.isLate ? uiText("Nộp muộn") : uiText("Đúng hạn")}
+              </p>
             )}
 
-            {/* Upload Zone */}
-            {!isClosed && !isArchived ? (
-              <div className="submit-action-zone">
-                <div className="upload-drop-placeholder">
-                  <Upload size={24} className="up-icon" />
-                  <label className="npc-btn npc-btn-secondary npc-btn-sm file-picker-label">
-                    <span>{mySubmission ? 'Chọn tệp thay thế...' : 'Chọn tệp bài làm...'}</span>
-                    <input
-                      type="file"
-                      className="sr-only"
-                      onChange={e => {
-                        const f = e.target.files?.[0];
-                        if (f) setSelectedFileName(f.name);
-                      }}
-                    />
-                  </label>
-                  {selectedFileName && (
-                    <span className="chosen-filename">{selectedFileName}</span>
-                  )}
+            <SubmissionHistory 
+            key={latest?.id ?? 'empty'}
+            courseId={assignment.courseId}
+            assignmentId={assignment.id}
+            />
+
+            {/* Submission Action */}
+            <div className="submit-action-zone" style={{ marginTop: 'var(--space-2)' }}>
+              {eligibility.isGroupAssignment ? (
+                <Link to={`/sv/hoc-tap?course=${assignment.courseId}&tab=groups`}>
+                  {uiText("Bài tập nhóm: quản lý nhóm, nộp bài và xem điểm / Group workspace")}</Link>
+              ) : isClosed ? (
+                <div className="submission-locked-notice" role="status" data-testid="submission-locked">
+                  <AlertTriangle size={18} />
+                  <span>{eligibility.message || uiText("Bài tập đã đóng nhận bài nộp.")}</span>
                 </div>
-
-                {isUploading && (
-                  <div className="uploading-progress-box">
-                    <span className="progress-label">Đang tải lên và quét an ninh... {uploadProgress}%</span>
-                    <div className="progress-bar-track">
-                      <div className="progress-bar-fill" style={{ width: `${uploadProgress}%` }}></div>
-                    </div>
-                  </div>
-                )}
-
-                <Button
-                  type="button"
-                  variant="primary"
-                  className="w-full"
-                  isLoading={isUploading}
-                  onClick={handleSimulateSubmit}
-                >
-                  <Upload size={16} />
-                  <span>{mySubmission ? 'Nộp thay thế bài làm' : 'Xác nhận nộp bài'}</span>
-                </Button>
-                <p className="submit-note-text">
-                  Dung lượng tối đa: {systemSettings.maxSubmissionFileMB} MB. Chỉ chấp nhận các định dạng cho phép: {systemSettings.studentSubmissionFormats.join(', ')}.
-                </p>
-              </div>
-            ) : (
-              <div className="submission-locked-notice">
-                <AlertTriangle size={18} />
-                <span>
-                  {isArchived ? 'Môn học đã lưu trữ. Không thể nộp bài.' : 'Bài tập đã đóng nhận bài nộp.'}
-                </span>
-              </div>
-            )}
+              ) : (
+              <SubmissionForm
+                  key={assignment.id}
+                  assignment={assignment}
+                  onSubmitted={() => void fetchAssignmentData()}
+                />
+              )}
+            </div>
           </div>
         </aside>
       </div>
+      {preview && (
+        <Modal isOpen onClose={() => setPreview(null)} title={uiText("Xem trước: {0}",[preview.name])} size="lg">
+          {preview.name.toLowerCase().endsWith('.pdf') ? (
+            <PdfPreview url={preview.url} />
+          ) : /\.(png|jpe?g|gif|webp)$/i.test(preview.name) ? (
+            <img src={preview.url} alt={preview.name} style={{ maxWidth: '100%' }} />
+          ) : <p>{uiText("Định dạng này chưa hỗ trợ xem trực tuyến. Vui lòng tải tệp để xem.")}</p>}
+        </Modal>
+      )}
     </div>
   );
 };

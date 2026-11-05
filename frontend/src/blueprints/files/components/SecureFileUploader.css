@@ -1,0 +1,316 @@
+/* ==========================================================================
+   SecureFileUploader.css — Design Tokens & UI Styles for NEU LMS File Upload
+   ========================================================================== */
+
+.secure-file-uploader-container {
+  width: 100%;
+  margin-bottom: var(--space-4, 1rem);
+  font-family: inherit;
+}
+
+/* 1. Dropzone Card */
+.dropzone-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3, 0.75rem);
+  padding: var(--space-8, 2rem) var(--space-4, 1rem);
+  border: 2px dashed var(--color-border, #cbd5e1);
+  border-radius: var(--radius-lg, 0.75rem);
+  background-color: var(--color-surface, #ffffff);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropzone-card:hover:not(.disabled) {
+  border-color: var(--color-primary-500, #0284c7);
+  background-color: var(--color-primary-50, #f0f9ff);
+  transform: translateY(-1px);
+}
+
+.dropzone-card.drag-over {
+  border-color: var(--color-primary-600, #0369a1);
+  background-color: var(--color-primary-100, #e0f2fe);
+  box-shadow: 0 0 0 4px rgba(2, 132, 199, 0.15);
+}
+
+.dropzone-card.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  border-color: var(--color-border-subtle, #e2e8f0);
+  background-color: var(--color-bg-subtle, #f8fafc);
+}
+
+.dropzone-icon-box {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: var(--color-primary-50, #f0f9ff);
+  color: var(--color-primary-600, #0284c7);
+  transition: transform 0.2s ease;
+}
+
+.dropzone-card:hover .dropzone-icon-box {
+  transform: scale(1.05);
+}
+
+.dropzone-title {
+  margin: 0 0 var(--space-1, 0.25rem) 0;
+  font-size: var(--text-base, 1rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #0f172a);
+}
+
+.dropzone-desc {
+  margin: 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #64748b);
+  line-height: 1.4;
+}
+
+.dropzone-browse-btn {
+  margin-top: var(--space-2, 0.5rem);
+}
+
+/* 2. Upload Status Card */
+.upload-status-card {
+  border-radius: var(--radius-lg, 0.75rem);
+  border: 1px solid var(--color-border, #e2e8f0);
+  background-color: var(--color-surface, #ffffff);
+  padding: var(--space-4, 1rem);
+  box-shadow: var(--shadow-sm, 0 1px 2px 0 rgba(0, 0, 0, 0.05));
+  animation: fadeIn 0.2s ease-out;
+}
+
+.status-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3, 0.75rem);
+}
+
+.status-file-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3, 0.75rem);
+  min-width: 0;
+}
+
+.file-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: var(--color-bg-subtle, #f1f5f9);
+  flex-shrink: 0;
+}
+
+.file-info-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.file-name {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: var(--color-text-primary, #0f172a);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 320px;
+}
+
+.file-size-status {
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #64748b);
+}
+
+.status-close-btn {
+  background: none;
+  border: none;
+  padding: var(--space-1, 0.25rem);
+  color: var(--color-text-secondary, #94a3b8);
+  cursor: pointer;
+  border-radius: var(--radius-sm, 0.25rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.status-close-btn:hover {
+  color: var(--color-text-primary, #0f172a);
+  background-color: var(--color-bg-subtle, #f1f5f9);
+}
+
+/* 3. Upload Progress Section */
+.upload-progress-section {
+  margin-top: var(--space-3, 0.75rem);
+}
+
+.progress-bar-track {
+  width: 100%;
+  height: 6px;
+  background-color: var(--color-bg-subtle, #e2e8f0);
+  border-radius: var(--radius-full, 9999px);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #0284c7 0%, #38bdf8 100%);
+  border-radius: var(--radius-full, 9999px);
+  transition: width 0.3s ease-in-out;
+}
+
+.progress-status-note {
+  margin: var(--space-2, 0.5rem) 0 0 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: var(--color-text-secondary, #64748b);
+}
+
+/* 4. Scanning & Quarantine Section */
+.scanning-quarantine-box {
+  margin-top: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+}
+
+.scanner-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.scanning-label {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: #b45309;
+}
+
+.scanning-details {
+  margin: var(--space-1, 0.25rem) 0 0 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: #92400e;
+  line-height: 1.4;
+}
+
+/* 5. Clean Success Box */
+.clean-success-box {
+  margin-top: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.success-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.success-label {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: #15803d;
+}
+
+.success-details {
+  margin: var(--space-1, 0.25rem) 0 0 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: #166534;
+}
+
+.success-details code {
+  background-color: rgba(22, 101, 52, 0.1);
+  padding: 1px 4px;
+  border-radius: 3px;
+  font-family: monospace;
+}
+
+/* 6. Infected Alert Box */
+.infected-alert-box {
+  margin-top: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.infected-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.infected-title {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 700;
+  color: #b91c1c;
+}
+
+.infected-details {
+  margin: var(--space-1, 0.25rem) 0 var(--space-2, 0.5rem) 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+/* 7. Error Alert Box */
+.error-alert-box {
+  margin-top: var(--space-3, 0.75rem);
+  padding: var(--space-3, 0.75rem);
+  border-radius: var(--radius-md, 0.5rem);
+  background-color: #fef2f2;
+  border: 1px solid #fecaca;
+}
+
+.error-badge-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2, 0.5rem);
+}
+
+.error-title {
+  font-size: var(--text-sm, 0.875rem);
+  font-weight: 600;
+  color: #b91c1c;
+}
+
+.error-details {
+  margin: var(--space-1, 0.25rem) 0 var(--space-2, 0.5rem) 0;
+  font-size: var(--text-xs, 0.75rem);
+  color: #991b1b;
+  line-height: 1.4;
+}
+
+/* Helpers */
+.text-success { color: #16a34a; }
+.text-warning { color: #d97706; }
+.text-danger  { color: #dc2626; }
+.text-primary { color: #0284c7; }
+
+.spin-slow {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

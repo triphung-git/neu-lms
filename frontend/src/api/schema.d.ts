@@ -4,6 +4,516 @@
  */
 
 export interface paths {
+    "/api/v1/admin/accounts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_accounts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_accounts_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/lock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_lock_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/request-reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_request_reset_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/roles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_roles_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/roles/{grant_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_roles_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/state": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_state_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/accounts/{id}/unlock": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_accounts_unlock_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_audit_log_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/courses/{course_id}/transfer": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_courses_transfer_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/file-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_file_limits_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/grants/{grant_id}/revoke": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_grants_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_overview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recent-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_recent_activity_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/role-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_role_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/role-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_role_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/role-requests/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_role_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/runtime-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Expose non-secret configuration flags so the admin UI cannot fake settings. */
+        get: operations["admin_runtime_settings_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/teacher-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_teacher_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/teacher-requests/{id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_teacher_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/teacher-requests/{id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["admin_teacher_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ai_courses_chat_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/chat/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ai_courses_chat_history_list"];
+        put?: never;
+        post?: never;
+        delete: operations["ai_courses_chat_history_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/materials/{material_id}/summary-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Generate a pending summary from clean extracted text; never publish automatically. */
+        post: operations["ai_courses_materials_summary_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/teacher/summary-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List summary drafts belonging only to courses owned by the current teacher. */
+        get: operations["ai_teacher_summary_drafts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/teacher/summary-drafts/{draft_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Confirm a teacher-edited summary or discard it; confirmation updates the version only. */
+        post: operations["ai_teacher_summary_drafts_review_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết bài tập trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/attachments/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_attachment_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/attachments/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước trực tuyến tệp đính kèm tài liệu đề bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_attachment_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Thẩm định tính hợp lệ nộp bài trực tiếp qua assignment ID. */
+        get: operations["assignments_direct_eligibility_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["teacher_submission_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/auth/csrf": {
         parameters: {
             query?: never;
@@ -12,6 +522,22 @@ export interface paths {
             cookie?: never;
         };
         get: operations["auth_csrf_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/grants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_grants_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -132,6 +658,102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/auth/register": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_register_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/resend-verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_resend_verification_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/role-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_role_requests_list"];
+        put?: never;
+        post: operations["auth_role_requests_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/role-requests/{id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_role_requests_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/verification": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["auth_verification_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/auth/verify-email": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["auth_verify_email_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses": {
         parameters: {
             query?: never;
@@ -148,6 +770,865 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_id}/assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học. */
+        get: operations["teacher_assignments_list"];
+        put?: never;
+        /** @description Danh sách bài tập và tạo mới bài tập cho giảng viên phụ trách môn học. */
+        post: operations["teacher_assignments_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        get: operations["teacher_assignments_retrieve"];
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        put: operations["teacher_assignments_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /** @description Xem chi tiết và chỉnh sửa bài tập của giảng viên phụ trách môn học. */
+        patch: operations["teacher_assignments_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Lưu trữ bài tập. */
+        post: operations["teacher_assignments_archive"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp đính kèm tài liệu đề bài của bài tập. */
+        get: operations["assignments_attachment_download"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/attachments/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước trực tuyến tệp đính kèm tài liệu đề bài của bài tập. */
+        get: operations["assignments_attachment_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Đóng nhận bài sớm thủ công hoặc mở lại bài tập kèm gia hạn thời hạn nộp bài. */
+        post: operations["teacher_assignments_close"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/eligibility": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Thẩm định tính hợp lệ nộp bài của sinh viên theo Thẩm quyền Máy chủ.
+         *
+         *     Không dùng ClockContext hay client timestamp làm authority.
+         */
+        get: operations["assignments_eligibility_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước bài tập dưới góc nhìn sinh viên. */
+        get: operations["teacher_assignments_preview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Công bố bài tập cho sinh viên và đóng băng đề bài cùng rubric. */
+        post: operations["teacher_assignments_publish"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Endpoint mở lại bài tập đã đóng nhận bài. */
+        post: operations["teacher_assignments_reopen"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp. */
+        get: operations["teacher_assignments_reopen_windows_list"];
+        put?: never;
+        /** @description Quản lý các cửa sổ mở lại / ngoại lệ nộp bài do giảng viên chủ động cấp. */
+        post: operations["teacher_assignments_reopen_windows_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/reopen-windows/{window_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Thu hồi / hủy hiệu lực một cửa sổ mở lại. */
+        delete: operations["teacher_assignments_reopen_windows_revoke"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/submission-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["courses_assignments_submission_history_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_assignments_submissions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_chapters_list"];
+        put?: never;
+        post: operations["courses_chapters_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["courses_chapters_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_chapters_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_chapters_lessons_list"];
+        put?: never;
+        post: operations["courses_chapters_lessons_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/{lesson_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["courses_chapters_lessons_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_chapters_lessons_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/{chapter_id}/lessons/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_chapters_lessons_reorder_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/chapters/reorder": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_chapters_reorder_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Gửi yêu cầu ghi danh môn học
+         * @description Sinh viên gửi yêu cầu ghi danh vào môn học đang mở nhận đăng ký.
+         */
+        post: operations["courses_enroll_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/enrollment-requests": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách yêu cầu ghi danh của môn học (Giảng viên)
+         * @description Giảng viên phụ trách xem hàng đợi yêu cầu ghi danh của môn học.
+         */
+        get: operations["courses_enrollment_requests_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/file-policy": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_file_policy_retrieve"];
+        put: operations["courses_file_policy_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: operations["courses_file_policy_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_retrieve"];
+        put?: never;
+        post?: never;
+        delete: operations["courses_files_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_files_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/commit": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_files_commit_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/content": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put: operations["courses_files_content_update"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["courses_files_preview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/files/upload-intent": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_files_upload_intent_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/gradebook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["courses_gradebook_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Quản lý danh sách và tạo học liệu mới cho môn học. */
+        get: operations["courses_materials_list"];
+        put?: never;
+        /** @description Quản lý danh sách và tạo học liệu mới cho môn học. */
+        post: operations["courses_materials_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        get: operations["courses_materials_retrieve"];
+        put?: never;
+        post?: never;
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        delete: operations["courses_materials_destroy"];
+        options?: never;
+        head?: never;
+        /** @description Xem chi tiết, cập nhật metadata và xóa học liệu. */
+        patch: operations["courses_materials_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/download": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tải xuống tệp tin học liệu có kiểm tra quyền và tính toàn vẹn. */
+        get: operations["courses_materials_files_download_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/files/{file_id}/preview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem trước tệp tin học liệu trong sandbox an toàn. */
+        get: operations["courses_materials_files_preview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/hide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Ẩn học liệu khỏi sinh viên. */
+        post: operations["courses_materials_hide_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Công bố một phiên bản đã đóng băng làm con trỏ công bố chính thức. */
+        post: operations["courses_materials_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/unhide": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Mở lại học liệu đã ẩn nếu đã có phiên bản công bố. */
+        post: operations["courses_materials_unhide_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu. */
+        get: operations["courses_materials_versions_list"];
+        put?: never;
+        /** @description Danh sách các phiên bản và tạo phiên bản nháp mới cho học liệu. */
+        post: operations["courses_materials_versions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Chi tiết một phiên bản học liệu kèm danh sách tệp manifest. */
+        get: operations["courses_materials_versions_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Thêm tệp tin vào manifest của phiên bản nháp. */
+        post: operations["courses_materials_versions_files_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/files/{file_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** @description Xóa tệp tin khỏi manifest của phiên bản nháp. */
+        delete: operations["courses_materials_versions_files_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/finalize": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Đóng băng manifest của phiên bản nháp, tính toán sha256 và snapshot policy. */
+        post: operations["courses_materials_versions_finalize_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/{id}/versions/{version_id}/retry": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Base API View cho phân hệ Học liệu: chuẩn hóa mã lỗi và bảo vệ security headers. */
+        post: operations["courses_materials_versions_retry_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/materials/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tìm kiếm học liệu trong phạm vi một môn học với phân rã provenance và phân quyền. */
+        get: operations["courses_materials_search"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách thành viên môn học
+         * @description Giảng viên phụ trách xem danh sách thành viên của môn học.
+         */
+        get: operations["courses_members_list"];
+        put?: never;
+        /**
+         * Thêm thành viên vào môn học
+         * @description Giảng viên phụ trách thêm sinh viên vào môn học bằng email.
+         */
+        post: operations["courses_members_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members/{student_id}/re-enroll": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Khôi phục thành viên môn học
+         * @description Giảng viên phụ trách khôi phục thành viên đã rút lui.
+         */
+        post: operations["courses_members_re_enroll_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/members/{student_id}/withdraw": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Rút thành viên khỏi môn học
+         * @description Sinh viên tự rút lui hoặc giảng viên phụ trách gỡ thành viên khỏi môn học.
+         */
+        post: operations["courses_members_withdraw_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/published-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Danh sách bài tập đã công bố của môn học dành cho sinh viên và giảng viên. */
+        get: operations["courses_published_assignments_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/{id}": {
         parameters: {
             query?: never;
@@ -156,6 +1637,142 @@ export interface paths {
             cookie?: never;
         };
         get: operations["courses_retrieve"];
+        put: operations["courses_update"];
+        post?: never;
+        delete: operations["courses_destroy"];
+        options?: never;
+        head?: never;
+        patch: operations["courses_partial_update"];
+        trace?: never;
+    };
+    "/api/v1/courses/{id}/archive": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_archive_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/catalog": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh mục môn học đang mở nhận ghi danh
+         * @description Tra cứu danh mục môn học đang mở nhận ghi danh kèm trạng thái đăng ký của sinh viên.
+         */
+        get: operations["courses_catalog_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/approve": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Duyệt yêu cầu ghi danh
+         * @description Giảng viên phụ trách duyệt yêu cầu ghi danh vào môn học.
+         */
+        post: operations["courses_enrollment_requests_approve_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/cancel": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hủy yêu cầu ghi danh
+         * @description Sinh viên hủy yêu cầu ghi danh đang ở trạng thái pending của chính mình.
+         */
+        post: operations["courses_enrollment_requests_cancel_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/{request_id}/reject": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Từ chối yêu cầu ghi danh
+         * @description Giảng viên phụ trách từ chối yêu cầu ghi danh vào môn học kèm lý do.
+         */
+        post: operations["courses_enrollment_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/enrollment-requests/my": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Danh sách yêu cầu ghi danh của sinh viên
+         * @description Lấy danh sách các yêu cầu ghi danh của chính sinh viên đang đăng nhập.
+         */
+        get: operations["courses_enrollment_requests_my_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/summary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Lấy tổng quan môn học theo vai trò cá nhân
+         * @description Trả về các chỉ số thống kê môn học thực tế cho giảng viên phụ trách hoặc sinh viên đang tham gia.
+         */
+        get: operations["courses_summary_retrieve"];
         put?: never;
         post?: never;
         delete?: never;
@@ -204,10 +1821,1102 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/learning/courses/{course_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["learning_courses_actions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_appeals_retrieve"];
+        put?: never;
+        post: operations["learning_courses_appeals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_attendance_retrieve"];
+        put?: never;
+        post: operations["learning_courses_attendance_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/discussion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_discussion_retrieve"];
+        put?: never;
+        post: operations["learning_courses_discussion_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/downloads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_downloads_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/group-appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_group_appeals_retrieve"];
+        put?: never;
+        post: operations["learning_courses_group_appeals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_groups_retrieve"];
+        put?: never;
+        post: operations["learning_courses_groups_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_progress_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["learning_drafts_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/enrollment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_enrollment_retrieve"];
+        put?: never;
+        post: operations["learning_enrollment_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/group-files/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_group_files_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_library_retrieve"];
+        put?: never;
+        post: operations["learning_library_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/library/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_library_file"];
+        put?: never;
+        post?: never;
+        delete: operations["learning_library_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_reports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Xem chi tiết học liệu tra cứu trực tiếp theo ID (hỗ trợ deep link sinh viên/giảng viên). */
+        get: operations["materials_retrieve_global"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/materials/search": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Tìm kiếm học liệu trên tất cả các môn học người dùng có quyền tham gia/giảng dạy. */
+        get: operations["materials_search_global"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_course_announcements_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["me_course_announcements_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["me_course_announcements_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/unread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_course_announcements_unread_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grade_notices_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["me_grade_notices_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["me_grade_notices_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/unread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grade_notices_unread_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grades_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/upcoming-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_upcoming_assignments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["submissions_grade_retrieve"];
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["submissions_grade_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}/grade-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["submissions_grade_history_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teacher/course-announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["teacher_course_announcements_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teacher/course-announcements/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["teacher_course_announcements_publish_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        AddMemberRequest: {
+            /** Format: email */
+            student_email: string;
+        };
+        AdminAccountDetail: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            display_name: string;
+            is_active: boolean;
+            email_verified: boolean;
+            /** Format: date-time */
+            verified_at: string | null;
+            roles: components["schemas"]["AdminAccountRoleItem"][];
+            role_requests: components["schemas"]["AdminAccountRoleRequestItem"][];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        AdminAccountListItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            display_name: string;
+            is_active: boolean;
+            email_verified: boolean;
+            roles: string[];
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        AdminAccountRoleGrantRequest: {
+            role: components["schemas"]["UserRoleEnum"];
+            current_password?: string;
+        };
+        AdminAccountRoleGrantResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            role: string;
+            /** Format: date-time */
+            granted_at: string;
+        };
+        AdminAccountRoleItem: {
+            /** Format: uuid */
+            id: string;
+            role: components["schemas"]["UserRoleEnum"];
+            /** Format: date-time */
+            granted_at: string;
+            /** Format: uuid */
+            granted_by: string | null;
+            grant_source: string;
+            /** Format: date-time */
+            revoked_at: string | null;
+            /** @default  */
+            revoke_reason: string;
+        };
+        AdminAccountRoleRequestItem: {
+            /** Format: uuid */
+            id: string;
+            role: components["schemas"]["RequestableRoleEnum"];
+            status: components["schemas"]["RoleRequestStatusEnum"];
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            reviewed_at: string | null;
+            /** Format: uuid */
+            reviewed_by: string | null;
+            /** @default  */
+            review_reason: string;
+        };
+        AdminAccountRoleRevokeResponse: {
+            /** Format: uuid */
+            id: string;
+            role: string;
+            /** Format: date-time */
+            revoked_at: string;
+        };
+        AdminAccountStateResponse: {
+            /** Format: uuid */
+            id: string;
+            is_active: boolean;
+        };
+        AdminAccountStateUpdateRequest: {
+            is_active: boolean;
+            current_password?: string;
+        };
+        AdminFileLimits: {
+            max_file_bytes: number;
+            max_course_quota_bytes: number;
+            default_file_bytes: number;
+            default_course_quota_bytes: number;
+            default_extensions: string[];
+        };
+        AdminOverviewNumbers: {
+            active_users: number;
+            inactive_users: number;
+            open_courses: number;
+            archived_courses: number;
+            infected_material_files: number;
+            scanning_material_files: number;
+            pending_teacher_requests: number;
+        };
+        AdminPasswordResetResponse: {
+            message: string;
+        };
+        AdminReauthRequest: {
+            current_password?: string;
+        };
+        AdminRecentEvent: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurred_at: string;
+            actor_name: string;
+            action: string;
+            resource_type: string;
+        };
+        AdminRuntimeSettings: {
+            ai_auto_index_enabled: boolean;
+            ai_index_failed: number;
+            ai_index_ready: number;
+            notification_email_enabled: boolean;
+            notification_email_failed: number;
+            notification_email_pending: number;
+            ai_chat_configured: boolean;
+            ai_chat_model: string;
+            ai_embedding_configured: boolean;
+            ai_embedding_model: string;
+            email_backend: string;
+            email_host_configured: boolean;
+            email_auth_configured: boolean;
+            email_sender_configured: boolean;
+            file_storage_backend: string;
+            s3_storage_configured: boolean;
+            clamav_configured: boolean;
+            celery_broker_configured: boolean;
+        };
+        AdminTeacherApprovalResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            role: string;
+            status: string;
+            /** Format: date-time */
+            granted_at: string;
+        };
+        AdminTeacherRejectResponse: {
+            /** Format: uuid */
+            id: string;
+            status: string;
+            /** Format: date-time */
+            reviewed_at: string;
+        };
+        AdminTeacherRequestItem: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            user_id: string;
+            /** Format: email */
+            user_email: string;
+            user_display_name: string;
+            role: string;
+            status: string;
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            reviewed_at: string | null;
+            /** Format: uuid */
+            reviewed_by: string | null;
+            /** @default  */
+            review_reason: string;
+        };
+        /** @description Serializer cho chính sách tệp áp dụng cho lần nộp tiếp theo. */
+        ApplicableFilePolicy: {
+            version: number;
+            max_files: number;
+            max_file_size_bytes: number;
+            allowed_extensions: string[];
+        };
+        /** @description Serializer cho tệp đính kèm tài liệu đề bài của giảng viên. */
+        AssignmentAttachment: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly file_id: string;
+            name: string;
+            /** Format: int64 */
+            size_bytes: number;
+            readonly mime_type: string;
+            readonly sha256_hash: string;
+            readonly download_url: string;
+            readonly preview_url: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Schema dữ liệu yêu cầu đóng hoặc mở lại cửa sổ nhận bài. */
+        AssignmentCloseRequestRequest: {
+            /** @default manual_close */
+            close_type: components["schemas"]["CloseTypeEnum"];
+            /** Format: date-time */
+            reopen_until?: string | null;
+            /** @default all */
+            target_type: string;
+            reopen_student_ids?: string[];
+            /** @default all_actions */
+            scope: string;
+            /** @default  */
+            reason: string;
+        };
+        /** @description Schema dữ liệu yêu cầu tạo bài tập mới từ giảng viên. */
+        AssignmentCreateRequestRequest: {
+            title: string;
+            /** @default  */
+            instructions: string;
+            /** Format: date-time */
+            due_at: string;
+            /** @default false */
+            allow_late: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            /** @default false */
+            ai_grading_opt_in: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            /** @default false */
+            publish_immediately: boolean;
+        };
+        /** @description Serializer đầy đủ thông tin bài tập phục vụ xem chi tiết và biên soạn. */
+        AssignmentDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)
+             */
+            readonly course_id: string;
+            /**
+             * Format: uuid
+             * @description Chương học chứa bài tập (xóa chương sẽ gán NULL)
+             */
+            readonly chapter_id: string | null;
+            /**
+             * Format: uuid
+             * @description Bài học gắn với bài tập (xóa bài học sẽ gán NULL)
+             */
+            readonly lesson_id: string | null;
+            /** @description Tiêu đề bài tập */
+            readonly title: string;
+            /** @description Nội dung yêu cầu, chỉ dẫn làm bài */
+            readonly instructions: string;
+            /**
+             * @description Trạng thái vòng đời: draft -> published -> closed/archived
+             *
+             *     * `draft` - Bản nháp
+             *     * `published` - Đã công bố
+             *     * `closed` - Đã đóng nhận bài
+             *     * `archived` - Đã lưu trữ
+             */
+            readonly status: components["schemas"]["AssignmentStatusEnum"];
+            /**
+             * Format: date-time
+             * @description Hạn chót nộp bài
+             */
+            readonly due_at: string;
+            /** @description Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ) */
+            readonly allow_late: boolean;
+            /**
+             * Format: date-time
+             * @description Thời điểm giảng viên chủ động đóng thu nhận bài sớm
+             */
+            readonly manually_closed_at: string | null;
+            readonly rubric_criteria: components["schemas"]["AssignmentRubricCriterion"][];
+            /** Format: double */
+            readonly total_score: number;
+            readonly file_policy: components["schemas"]["AssignmentFilePolicy"];
+            readonly attachments: components["schemas"]["AssignmentAttachment"][];
+            /** @description Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt) */
+            readonly ai_grading_opt_in: boolean;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** @description Phiên bản tương tranh lạc quan (OCC) */
+            readonly version: number;
+            readonly is_submission_window_open: boolean;
+        };
+        /** @description Serializer cho chính sách tệp đính kèm khi nộp bài. */
+        AssignmentFilePolicy: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: int64
+             * @description Số lượng tệp tối đa trong một lần nộp (1 đến 10)
+             */
+            max_files_per_submission?: number;
+            /**
+             * Format: int64
+             * @description Dung lượng tối đa mỗi tệp (bytes)
+             */
+            max_file_size_bytes?: number;
+            /** @description Danh sách phần mở rộng hợp lệ (chữ thường, không chứa dấu chấm) */
+            allowed_extensions?: unknown;
+            /** @description Phiên bản chính sách tệp cho lần nộp tương lai */
+            readonly version: number;
+        };
+        /** @description Schema phản hồi cho chức năng xem trước bài tập dưới góc nhìn sinh viên. */
+        AssignmentPreview: {
+            assignment: components["schemas"]["AssignmentDetail"];
+            /** @default true */
+            preview_mode: boolean;
+        };
+        /** @description Schema dữ liệu yêu cầu công bố bài tập. */
+        AssignmentPublishRequestRequest: {
+            expected_version?: number;
+        };
+        /** @description Serializer cho chi tiết cửa sổ mở lại do giảng viên chủ động cấp. */
+        AssignmentReopenWindow: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Bài tập được áp dụng cửa sổ mở lại
+             */
+            readonly assignment_id: string;
+            /**
+             * @description Đối tượng áp dụng: all (toàn bộ lớp) hoặc student (sinh viên cụ thể)
+             *
+             *     * `all` - Toàn bộ lớp
+             *     * `student` - Sinh viên cụ thể
+             */
+            target_type?: components["schemas"]["TargetTypeEnum"];
+            /**
+             * Format: uuid
+             * @description Sinh viên cụ thể nếu target_type='student'
+             */
+            readonly student_id: string | null;
+            readonly student_display_name: string;
+            readonly student_email: string;
+            /**
+             * Format: date-time
+             * @description Thời điểm bắt đầu hiệu lực của cửa sổ
+             */
+            start_at?: string;
+            /**
+             * Format: date-time
+             * @description Thời điểm kết thúc của cửa sổ mở lại
+             */
+            end_at: string;
+            /**
+             * @description Phạm vi: all_actions (nộp mới và thay thế) hoặc first_only (chỉ lần đầu)
+             *
+             *     * `all_actions` - Cho phép nộp mới và nộp lại
+             *     * `first_only` - Chỉ cho phép nộp lần đầu
+             */
+            scope?: components["schemas"]["ScopeEnum"];
+            /** @description Lý do giảng viên cấp cửa sổ mở lại / ngoại lệ */
+            reason?: string;
+            /** @description Cờ kích hoạt của cửa sổ mở lại */
+            readonly is_active: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Serializer cho tiêu chí đánh giá rubric của bài tập. */
+        AssignmentRubricCriterion: {
+            /** Format: uuid */
+            readonly id: string;
+            /** @description Tên tiêu chí đánh giá */
+            title: string;
+            /** @description Mô tả mức độ đạt và hướng dẫn chấm */
+            description?: string;
+            /**
+             * Format: decimal
+             * @description Điểm tối đa của tiêu chí (phải > 0)
+             */
+            max_score?: string;
+            /**
+             * Format: int64
+             * @description Thứ tự hiển thị tiêu chí
+             */
+            position?: number;
+        };
+        /**
+         * @description * `draft` - Bản nháp
+         *     * `published` - Đã công bố
+         *     * `closed` - Đã đóng nhận bài
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        AssignmentStatusEnum: "draft" | "published" | "closed" | "archived";
+        /** @description Serializer tóm tắt bài tập hiển thị trong danh sách môn học của giảng viên. */
+        AssignmentSummaryItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /**
+             * Format: uuid
+             * @description Môn học sở hữu bài tập (chặn xóa nếu còn bài tập)
+             */
+            readonly course_id: string;
+            /**
+             * Format: uuid
+             * @description Chương học chứa bài tập (xóa chương sẽ gán NULL)
+             */
+            readonly chapter_id: string | null;
+            /**
+             * Format: uuid
+             * @description Bài học gắn với bài tập (xóa bài học sẽ gán NULL)
+             */
+            readonly lesson_id: string | null;
+            /** @description Tiêu đề bài tập */
+            readonly title: string;
+            /**
+             * @description Trạng thái vòng đời: draft -> published -> closed/archived
+             *
+             *     * `draft` - Bản nháp
+             *     * `published` - Đã công bố
+             *     * `closed` - Đã đóng nhận bài
+             *     * `archived` - Đã lưu trữ
+             */
+            readonly status: components["schemas"]["AssignmentStatusEnum"];
+            /**
+             * Format: date-time
+             * @description Hạn chót nộp bài
+             */
+            readonly due_at: string;
+            /** @description Cho phép nộp muộn sau deadline hay không (đánh dấu nộp trễ) */
+            readonly allow_late: boolean;
+            /**
+             * Format: date-time
+             * @description Thời điểm giảng viên chủ động đóng thu nhận bài sớm
+             */
+            readonly manually_closed_at: string | null;
+            /** Format: double */
+            readonly total_score: number;
+            readonly rubric_count: number;
+            readonly attachment_count: number;
+            /** @default 0 */
+            readonly submission_count: number;
+            /** @default 0 */
+            readonly graded_count: number;
+            /** @description Tùy chọn bật hỗ trợ chấm bài bằng AI (B24, mặc định tắt) */
+            readonly ai_grading_opt_in: boolean;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            /** @description Phiên bản tương tranh lạc quan (OCC) */
+            readonly version: number;
+        };
+        /** @description Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan. */
+        AssignmentUpdateRequestRequest: {
+            title?: string;
+            instructions?: string;
+            /** Format: date-time */
+            due_at?: string;
+            allow_late?: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            ai_grading_opt_in?: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            expected_version?: number;
+        };
+        AuditListResult: {
+            items: components["schemas"]["AuditRow"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        AuditRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurred_at: string;
+            actor_name: string;
+            action: string;
+            resource_type: string;
+            /** Format: uuid */
+            resource_id: string;
+            /** Format: uuid */
+            correlation_id: string;
+        };
+        Chapter: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course: string;
+            title: string;
+            readonly position: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        ChapterRequest: {
+            title: string;
+        };
+        ChatTurn: {
+            id: number;
+            /** Format: uuid */
+            request_id: string;
+            question: string;
+            answer: string;
+            citations: {
+                [key: string]: unknown;
+            }[];
+            /** Format: date-time */
+            created_at: string;
+        };
+        /**
+         * @description * `manual_close` - manual_close
+         *     * `reopen` - reopen
+         * @enum {string}
+         */
+        CloseTypeEnum: "manual_close" | "reopen";
+        CommitUploadRequest: {
+            /** @default  */
+            client_checksum: string;
+        };
+        CommitUploadResponse: {
+            /** Format: uuid */
+            file_id: string;
+            file_name: string;
+            file_size: number;
+            status: string;
+            sha256_hash: string;
+        };
+        CountResult: {
+            unread_count: number;
+        };
         Course: {
             /** Format: uuid */
             readonly id: string;
@@ -218,23 +2927,242 @@ export interface components {
             /** Format: uuid */
             readonly teacher: string;
             readonly teacher_name: string;
-            readonly status: components["schemas"]["StatusEnum"];
+            readonly status: components["schemas"]["CourseStatusEnum"];
+            enrollment_open?: boolean;
+            /** Format: date-time */
+            readonly archived_at: string | null;
+            /** @default 0 */
+            readonly active_member_count: number;
             /** Format: date-time */
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        CourseCatalogItem: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            term: string;
+            description: string;
+            teacher_name: string;
+            enrollment_open: boolean;
+            active_member_count: number;
+            my_enrollment_status: string;
+            /** Format: uuid */
+            pending_request_id: string | null;
+            /** Format: date-time */
+            created_at: string;
+        };
+        CourseChatCitation: {
+            /** Format: uuid */
+            version_id?: string;
+            /** Format: uuid */
+            file_id?: string;
+            file_hash?: string;
+            id: string;
+            /** Format: uuid */
+            material_id: string;
+            material_title: string;
+            course_code: string;
+            course_name: string;
+            file_name: string;
+            page_number: number | null;
+            excerpt: string;
+        };
+        CourseChatCourse: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+        };
+        CourseChatHistoryMessageRequest: {
+            role: components["schemas"]["CourseChatHistoryMessageRoleEnum"];
+            content: string;
+        };
+        /**
+         * @description * `user` - user
+         *     * `assistant` - assistant
+         * @enum {string}
+         */
+        CourseChatHistoryMessageRoleEnum: "user" | "assistant";
+        CourseChatRequestRequest: {
+            /** Format: uuid */
+            request_id?: string;
+            /** @description Câu hỏi cần trợ lý AI trả lời dựa trên học liệu. */
+            question: string;
+            /** @description Tối đa 8 lượt hội thoại gần nhất; chỉ dùng để hiểu ngữ cảnh, không phải nguồn dữ kiện để trả lời. */
+            history?: components["schemas"]["CourseChatHistoryMessageRequest"][];
+        };
+        CourseChatResponse: {
+            answer: string;
+            citations: components["schemas"]["CourseChatCitation"][];
+            course: components["schemas"]["CourseChatCourse"];
+        };
+        CourseFilePolicy: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            /** Format: int64 */
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            readonly used_quota_bytes: number;
+            readonly reserved_quota_bytes: number;
+            readonly version: number;
+            preview_allowed?: boolean;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        CourseFilePolicyRequest: {
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            /** Format: int64 */
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            preview_allowed?: boolean;
+        };
+        CourseMember: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly student_id: string;
+            readonly student_name: string;
+            /** Format: email */
+            readonly student_email: string;
+            readonly status: components["schemas"]["CourseMemberStatusEnum"];
+            /** Format: date-time */
+            readonly added_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /**
+         * @description * `active` - Đang tham gia
+         *     * `withdrawn` - Đã rút
+         * @enum {string}
+         */
+        CourseMemberStatusEnum: "active" | "withdrawn";
+        CourseOption: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            status: string;
         };
         CourseRequest: {
             code: string;
             name: string;
             term: string;
             description?: string;
+            enrollment_open?: boolean;
+        };
+        /**
+         * @description * `open` - Đang mở
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        CourseStatusEnum: "open" | "archived";
+        CourseSummaryItem: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+            term: string;
+            status: string;
+            enrollment_open: boolean;
+            active_member_count?: number | null;
+            teacher_name?: string;
+            chapter_count: number;
+            lesson_count: number;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+        };
+        CourseSummaryResponse: {
+            pending_assignments?: components["schemas"]["PendingAssignment"][];
+            role: components["schemas"]["RequestableRoleEnum"];
+            total_courses?: number | null;
+            open_courses?: number | null;
+            archived_courses?: number | null;
+            enrollment_open_courses?: number | null;
+            total_memberships?: number | null;
+            distinct_students?: number | null;
+            pending_submissions?: number | null;
+            scanning_materials?: number;
+            problem_materials?: number | null;
+            pending_ai_drafts?: number | null;
+            total_enrolled_courses?: number | null;
+            open_enrolled_courses?: number | null;
+            archived_enrolled_courses?: number | null;
+            withdrawn_courses?: number | null;
+            recent_grades?: number | null;
+            recent_announcements?: number | null;
+            total_chapters: number;
+            total_lessons: number;
+            upcoming_deadlines?: number | null;
+            recent_courses: components["schemas"]["CourseSummaryItem"][];
+            unavailable_metrics: string[];
+        };
+        CourseTransferRequest: {
+            /** Format: uuid */
+            teacher_id: string;
+        };
+        /** @description Serializer cho yêu cầu tạo cửa sổ mở lại nộp bài. */
+        CreateAssignmentReopenWindowRequest: {
+            /** @default all */
+            target_type: components["schemas"]["TargetTypeEnum"];
+            /** Format: uuid */
+            student_id?: string | null;
+            /** Format: date-time */
+            start_at?: string | null;
+            /** Format: date-time */
+            end_at: string;
+            /** @default all_actions */
+            scope: components["schemas"]["ScopeEnum"];
+            /** @default  */
+            reason: string;
+        };
+        CreateRoleRequestRequest: {
+            role: components["schemas"]["RequestableRoleEnum"];
         };
         CredentialsRequest: {
             /** Format: email */
             email: string;
             password: string;
         };
+        CriterionScoreInputRequest: {
+            /** Format: uuid */
+            criterion_id: string;
+            /** Format: decimal */
+            score: string;
+        };
+        CriterionScoreOutput: {
+            /** Format: uuid */
+            criterion_id: string;
+            /** Format: decimal */
+            score: string;
+            title: string;
+            /** Format: decimal */
+            max_score: string;
+        };
+        /**
+         * @description * `pending` - Đang chờ duyệt
+         *     * `approved` - Đã duyệt
+         *     * `rejected` - Đã từ chối
+         *     * `cancelled` - Đã hủy
+         * @enum {string}
+         */
+        EnrollmentRequestStatusEnum: "pending" | "approved" | "rejected" | "cancelled";
         ErrorEnvelope: {
             error: {
                 /**
@@ -264,9 +3192,472 @@ export interface components {
                 correlation_id: string;
             };
         };
+        /** @description Schema dữ liệu đầu vào cho chính sách tệp nộp bài. */
+        FilePolicyInputRequest: {
+            max_files_per_submission?: number;
+            max_file_size_bytes?: number;
+            allowed_extensions?: string[];
+        };
+        GradeCriterion: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: decimal */
+            max_score: string;
+        };
+        GradeDetail: {
+            /** Format: decimal */
+            total_score: string;
+            rubric: components["schemas"]["GradeCriterion"][];
+            grade: components["schemas"]["GradeOutput"] | null;
+        };
+        GradeHistoryResult: {
+            items: components["schemas"]["GradeOutput"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        GradeInputRequest: {
+            /** Format: decimal */
+            score?: string;
+            rubric_scores?: components["schemas"]["CriterionScoreInputRequest"][];
+            feedback?: string;
+            status: components["schemas"]["SubmissionGradeStatusEnum"];
+            expected_version: number;
+        };
+        GradeNotice: {
+            id: number;
+            /** Format: date-time */
+            readonly read_at: string | null;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            revision: number;
+            /** Format: decimal */
+            score: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        GradeNoticeList: {
+            items: components["schemas"]["GradeNotice"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        GradeOutput: {
+            /** Format: int64 */
+            version: number;
+            /** Format: decimal */
+            score: string;
+            feedback?: string;
+            status: components["schemas"]["SubmissionGradeStatusEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly rubric_breakdown: components["schemas"]["CriterionScoreOutput"][];
+        };
+        GradeReadAllResult: {
+            updated_count: number;
+        };
+        GradebookAssignment: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+        };
+        GradebookRow: {
+            /** Format: uuid */
+            student_id: string;
+            name: string;
+            /** Format: email */
+            email: string;
+            revision_number: number | null;
+            latest_grade: components["schemas"]["GradeOutput"] | null;
+            published_grade: components["schemas"]["GradeOutput"] | null;
+        };
+        LatestSubmission: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+        };
+        Lesson: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly chapter: string;
+            title: string;
+            description?: string;
+            readonly position: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        LessonRequest: {
+            title: string;
+            description?: string;
+        };
+        /**
+         * @description * `draft` - Đang soạn thảo
+         *     * `finalized` - Đã đóng băng
+         *     * `archived` - Đã lưu trữ
+         * @enum {string}
+         */
+        LifecycleStatusEnum: "draft" | "finalized" | "archived";
         LivenessResponse: {
             /** @default ok */
             status: string;
+        };
+        /** @description Payload tạo học liệu mới. */
+        MaterialCreateRequestRequest: {
+            title: string;
+            /** @default  */
+            description: string;
+            /** @default document */
+            material_type: components["schemas"]["MaterialTypeEnum"];
+            tags?: string[];
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            initial_file_ids?: string[];
+        };
+        /** @description Chi tiết học liệu kèm thông tin phiên bản công bố và danh sách các phiên bản. */
+        MaterialDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            /** Format: uuid */
+            readonly chapter: string | null;
+            readonly chapter_title: string;
+            /** Format: uuid */
+            readonly lesson: string | null;
+            readonly lesson_title: string;
+            readonly title: string;
+            readonly description: string;
+            readonly tags: unknown;
+            readonly material_type: components["schemas"]["MaterialTypeEnum"];
+            /** @description Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên */
+            readonly is_hidden: boolean;
+            readonly visibility: string;
+            readonly published_version: components["schemas"]["MaterialVersionDetail"];
+            readonly latest_version: {
+                [key: string]: unknown;
+            } | null;
+            readonly total_versions: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Payload thêm tệp vào manifest của phiên bản nháp. */
+        MaterialFileAddRequestRequest: {
+            /** Format: uuid */
+            file_id: string;
+            /** @default  */
+            label: string;
+            position?: number;
+        };
+        /** @description Chi tiết một tệp tin trong manifest của phiên bản học liệu. */
+        MaterialFileManifestItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly file_id: string;
+            /** @description Thứ tự hiển thị tệp trong manifest của phiên bản (1, 2, ...) */
+            readonly position: number;
+            /** @description Nhãn hoặc tiêu đề tùy chọn cho tệp trong manifest */
+            readonly label: string;
+            readonly file_name: string;
+            readonly file_size: number;
+            readonly mime_type: string;
+            readonly sha256_hash: string;
+            readonly download_url: string;
+            readonly preview_url: string | null;
+            readonly extraction_status: string;
+            readonly extraction_error: string;
+            readonly extraction_page_count: number;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        /** @description Mục học liệu hiển thị trong danh sách phân trang. */
+        MaterialListItem: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            /** Format: uuid */
+            readonly chapter: string | null;
+            readonly chapter_title: string;
+            /** Format: uuid */
+            readonly lesson: string | null;
+            readonly lesson_title: string;
+            readonly title: string;
+            readonly tags: unknown;
+            readonly material_type: components["schemas"]["MaterialTypeEnum"];
+            /** @description Khi bật, ẩn học liệu khỏi danh sách hiển thị của sinh viên */
+            readonly is_hidden: boolean;
+            readonly visibility: string;
+            readonly published_version_number: number | null;
+            readonly latest_version_number: number;
+            readonly file_count: number;
+            readonly total_size_bytes: number;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        /** @description Payload công bố phiên bản học liệu. */
+        MaterialPublishRequestRequest: {
+            /** Format: uuid */
+            version_id: string;
+        };
+        /** @description Chi tiết điểm khớp tìm kiếm trong tệp hoặc metadata. */
+        MaterialSearchMatch: {
+            /** Format: uuid */
+            file_id: string | null;
+            file_name: string;
+            mime_type: string;
+            page_number: number | null;
+            snippet: string;
+            match_type: string;
+        };
+        /** @description Kết quả tìm kiếm học liệu với provenance và điểm xếp hạng. */
+        MaterialSearchResult: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            course_code: string;
+            title: string;
+            description: string;
+            tags: string[];
+            material_type: string;
+            /** Format: uuid */
+            chapter_id: string | null;
+            chapter_title: string | null;
+            /** Format: uuid */
+            lesson_id: string | null;
+            lesson_title: string | null;
+            /** Format: uuid */
+            version_id: string | null;
+            version_number: number;
+            is_hidden: boolean;
+            /** Format: date-time */
+            published_at: string | null;
+            /** Format: date-time */
+            created_at: string;
+            /** Format: date-time */
+            updated_at: string;
+            /** Format: double */
+            rank: number;
+            matches: components["schemas"]["MaterialSearchMatch"][];
+        };
+        MaterialSummaryDraft: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            readonly course_name: string;
+            /** Format: uuid */
+            readonly material_id: string;
+            readonly material_title: string;
+            /** Format: uuid */
+            readonly material_version_id: string;
+            readonly version_number: number;
+            readonly summary: string;
+            readonly source_file_names: string[];
+            readonly status: components["schemas"]["MaterialSummaryDraftStatusEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+        };
+        MaterialSummaryDraftReviewRequest: {
+            status: components["schemas"]["MaterialSummaryDraftReviewStatusEnum"];
+            summary?: string;
+        };
+        /**
+         * @description * `confirmed` - confirmed
+         *     * `discarded` - discarded
+         * @enum {string}
+         */
+        MaterialSummaryDraftReviewStatusEnum: "confirmed" | "discarded";
+        /**
+         * @description * `pending` - pending
+         *     * `confirmed` - confirmed
+         *     * `discarded` - discarded
+         * @enum {string}
+         */
+        MaterialSummaryDraftStatusEnum: "pending" | "confirmed" | "discarded";
+        /**
+         * @description * `document` - Tài liệu
+         *     * `slide` - Bài giảng/Slide
+         *     * `syllabus` - Đề cương
+         *     * `reference` - Tài liệu tham khảo
+         *     * `exercise` - Bài tập rèn luyện
+         *     * `other` - Khác
+         * @enum {string}
+         */
+        MaterialTypeEnum: "document" | "slide" | "syllabus" | "reference" | "exercise" | "other";
+        /** @description Payload tạo revision (phiên bản nháp mới). */
+        MaterialVersionCreateRequestRequest: {
+            /** @default  */
+            changelog: string;
+            /** Format: uuid */
+            clone_from_version_id?: string | null;
+        };
+        /** @description Chi tiết phiên bản học liệu kèm danh sách tệp tin đóng băng trong manifest. */
+        MaterialVersionDetail: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly material_id: string;
+            readonly material_title: string;
+            readonly version_number: number;
+            readonly title: string;
+            readonly description: string;
+            /** @description Ghi chú thay đổi nội dung ở phiên bản này */
+            readonly changelog: string;
+            readonly lifecycle_status: components["schemas"]["LifecycleStatusEnum"];
+            readonly processing_status: components["schemas"]["ProcessingStatusEnum"];
+            /** @description Đánh dấu phiên bản này đã từng hoặc đang được công bố */
+            readonly is_published: boolean;
+            /** Format: date-time */
+            readonly finalized_at: string | null;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** @description SHA-256 hash của manifest đóng băng */
+            readonly manifest_hash: string;
+            /** @description Tổng kích thước bytes của tất cả tệp trong manifest */
+            readonly total_size_bytes: number;
+            /** @description Số lượng tệp trong manifest */
+            readonly file_count: number;
+            /** @description Snapshot của CourseFilePolicy áp dụng tại thời điểm đóng băng */
+            readonly policy_snapshot: unknown;
+            /** @description Tóm tắt nội dung đã được xác nhận của phiên bản học liệu */
+            readonly summary: string;
+            /** Format: date-time */
+            readonly summary_confirmed_at: string | null;
+            readonly created_by_name: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+            readonly files: components["schemas"]["MaterialFileManifestItem"][];
+        };
+        /** @description Tóm tắt ngắn gọn phiên bản học liệu dùng trong danh sách. */
+        MaterialVersionSummary: {
+            /** Format: uuid */
+            readonly id: string;
+            readonly version_number: number;
+            readonly title: string;
+            /** @description Ghi chú thay đổi nội dung ở phiên bản này */
+            readonly changelog: string;
+            readonly lifecycle_status: components["schemas"]["LifecycleStatusEnum"];
+            readonly processing_status: components["schemas"]["ProcessingStatusEnum"];
+            /** @description Đánh dấu phiên bản này đã từng hoặc đang được công bố */
+            readonly is_published: boolean;
+            /** @description Số lượng tệp trong manifest */
+            readonly file_count: number;
+            /** @description Tổng kích thước bytes của tất cả tệp trong manifest */
+            readonly total_size_bytes: number;
+            /** Format: date-time */
+            readonly published_at: string | null;
+            /** Format: date-time */
+            readonly finalized_at: string | null;
+            /** Format: date-time */
+            readonly created_at: string;
+        };
+        NoticeFeed: {
+            items: components["schemas"]["NoticeRow"][];
+            courses: components["schemas"]["CourseOption"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        NoticeInputRequest: {
+            /** Format: uuid */
+            request_key: string;
+            /** Format: uuid */
+            course_id: string;
+            title: string;
+            body: string;
+        };
+        NoticeRow: {
+            id: number;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            author_name: string;
+            title: string;
+            body: string;
+            /** Format: date-time */
+            published_at: string;
+            is_read: boolean;
+            recipients: number;
+        };
+        PaginatedAdminAccountListItemList: {
+            items: components["schemas"]["AdminAccountListItem"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        PaginatedAdminTeacherRequestItemList: {
+            items: components["schemas"]["AdminTeacherRequestItem"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        /** @description Serializer phân trang cho danh sách bài tập của môn học. */
+        PaginatedAssignmentSummaryList: {
+            items: components["schemas"]["AssignmentSummaryItem"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        PaginatedCourseCatalogItemList: {
+            items: components["schemas"]["CourseCatalogItem"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
         };
         PaginatedCourseList: {
             items: components["schemas"]["Course"][];
@@ -285,9 +3676,171 @@ export interface components {
                 has_previous: boolean;
             };
         };
+        PaginatedCourseMemberList: {
+            items: components["schemas"]["CourseMember"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        /** @description Dữ liệu phân trang danh sách học liệu chuẩn StandardPageNumberPagination. */
+        PaginatedMaterialList: {
+            items: components["schemas"]["MaterialListItem"][];
+            pagination: components["schemas"]["PaginationInfo"];
+        };
+        /** @description Dữ liệu phân trang kết quả tìm kiếm học liệu chuẩn StandardPageNumberPagination. */
+        PaginatedMaterialSearchResult: {
+            items: components["schemas"]["MaterialSearchResult"][];
+            pagination: components["schemas"]["PaginationInfo"];
+        };
+        PaginatedStoredFileList: {
+            items: components["schemas"]["StoredFile"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        PaginatedStudentEnrollmentRequestList: {
+            items: components["schemas"]["StudentEnrollmentRequest"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        PaginatedTeacherEnrollmentRequestList: {
+            items: components["schemas"]["TeacherEnrollmentRequest"][];
+            pagination: {
+                /** @example 1 */
+                page: number;
+                /** @example 20 */
+                page_size: number;
+                /** @example 100 */
+                total_items: number;
+                /** @example 5 */
+                total_pages: number;
+                /** @example true */
+                has_next: boolean;
+                /** @example false */
+                has_previous: boolean;
+            };
+        };
+        /** @description Metadata phân trang chuẩn toàn hệ thống. */
+        PaginationInfo: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
+        PaginationMeta: {
+            page: number;
+            page_size: number;
+            total_items: number;
+            total_pages: number;
+            has_next: boolean;
+            has_previous: boolean;
+        };
         PasswordChangeRequest: {
             current_password: string;
             new_password: string;
+        };
+        /** @description Schema dữ liệu yêu cầu cập nhật bài tập có kiểm soát tương tranh lạc quan. */
+        PatchedAssignmentUpdateRequestRequest: {
+            title?: string;
+            instructions?: string;
+            /** Format: date-time */
+            due_at?: string;
+            allow_late?: boolean;
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            ai_grading_opt_in?: boolean;
+            rubric_criteria?: components["schemas"]["RubricCriterionInputRequest"][];
+            file_policy?: components["schemas"]["FilePolicyInputRequest"];
+            attachment_file_ids?: string[];
+            expected_version?: number;
+        };
+        PatchedChapterRequest: {
+            title?: string;
+        };
+        PatchedCourseFilePolicyRequest: {
+            allowed_extensions?: unknown;
+            /** Format: int64 */
+            max_file_size_bytes?: number;
+            /** Format: int64 */
+            max_files_per_assignment?: number;
+            /** Format: int64 */
+            course_quota_bytes?: number;
+            preview_allowed?: boolean;
+        };
+        PatchedCourseRequest: {
+            code?: string;
+            name?: string;
+            term?: string;
+            description?: string;
+            enrollment_open?: boolean;
+        };
+        PatchedLessonRequest: {
+            title?: string;
+            description?: string;
+        };
+        /** @description Payload cập nhật metadata học liệu. */
+        PatchedMaterialUpdateRequestRequest: {
+            title?: string;
+            description?: string;
+            material_type?: components["schemas"]["MaterialTypeEnum"];
+            tags?: string[];
+            /** Format: uuid */
+            chapter_id?: string | null;
+            /** Format: uuid */
+            lesson_id?: string | null;
+            is_hidden?: boolean;
+        };
+        PatchedUpdateFilePublishRequest: {
+            is_published?: boolean;
+        };
+        PendingAssignment: {
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            course_name: string;
+            waiting: number;
+            /** Format: date-time */
+            oldest: string;
+        };
+        /**
+         * @description * `pending` - Chờ xử lý
+         *     * `processing` - Đang xử lý
+         *     * `ready` - Sẵn sàng
+         *     * `failed` - Thất bại
+         *     * `no_text` - Không có văn bản
+         *     * `unsupported` - Không hỗ trợ
+         * @enum {string}
+         */
+        ProcessingStatusEnum: "pending" | "processing" | "ready" | "failed" | "no_text" | "unsupported";
+        PublishedNotice: {
+            id: number;
         };
         ReadinessSuccessResponse: {
             /** @default ok */
@@ -303,6 +3856,41 @@ export interface components {
                 [key: string]: string;
             };
         };
+        RegisterRequestRequest: {
+            /** Format: email */
+            email: string;
+            password: string;
+            /** @default  */
+            display_name: string;
+            requested_role: components["schemas"]["RequestableRoleEnum"];
+        };
+        RegisterResponse: {
+            /** Format: uuid */
+            id: string;
+            /** Format: email */
+            email: string;
+            display_name: string;
+            requested_role: components["schemas"]["RequestableRoleEnum"];
+            /** @default false */
+            email_verified: boolean;
+        };
+        RejectEnrollmentRequestRequest: {
+            /** @default  */
+            reason: string;
+        };
+        ReorderRequest: {
+            ids: string[];
+        };
+        /**
+         * @description * `student` - student
+         *     * `teacher` - teacher
+         * @enum {string}
+         */
+        RequestableRoleEnum: "student" | "teacher";
+        ResendVerificationRequestRequest: {
+            /** Format: email */
+            email: string;
+        };
         ResetConfirmRequest: {
             token: string;
             new_password: string;
@@ -311,31 +3899,324 @@ export interface components {
             /** Format: email */
             email: string;
         };
+        RoleGrantItem: {
+            /** Format: uuid */
+            id: string;
+            role: components["schemas"]["UserRoleEnum"];
+            grant_source: string;
+            /** Format: date-time */
+            granted_at: string;
+        };
+        RoleRequestItem: {
+            /** Format: uuid */
+            id: string;
+            role: components["schemas"]["RequestableRoleEnum"];
+            status: components["schemas"]["RoleRequestStatusEnum"];
+            /** Format: date-time */
+            requested_at: string;
+            /** Format: date-time */
+            reviewed_at: string | null;
+            /** @default  */
+            review_reason: string;
+        };
         /**
-         * @description * `student` - student
-         *     * `teacher` - teacher
-         *     * `admin` - admin
+         * @description * `pending` - pending
+         *     * `approved` - approved
+         *     * `rejected` - rejected
+         *     * `cancelled` - cancelled
          * @enum {string}
          */
-        RolesEnum: "student" | "teacher" | "admin";
+        RoleRequestStatusEnum: "pending" | "approved" | "rejected" | "cancelled";
+        /** @description Schema dữ liệu đầu vào cho một tiêu chí rubric. */
+        RubricCriterionInputRequest: {
+            /** Format: uuid */
+            id?: string | null;
+            title: string;
+            /** @default  */
+            description: string;
+            /**
+             * Format: decimal
+             * @default 10.00
+             */
+            max_score: string;
+            position?: number;
+        };
+        /**
+         * @description * `all_actions` - Cho phép nộp mới và nộp lại
+         *     * `first_only` - Chỉ cho phép nộp lần đầu
+         * @enum {string}
+         */
+        ScopeEnum: "all_actions" | "first_only";
         SessionInfo: {
             /** Format: uuid */
             id: string;
             /** Format: email */
             email: string;
             display_name: string;
-            roles: components["schemas"]["RolesEnum"][];
+            roles: components["schemas"]["UserRoleEnum"][];
+            email_verified: boolean;
+            pending_roles: components["schemas"]["RequestableRoleEnum"][];
             /** Format: date-time */
             idle_expires_at: string;
             /** Format: date-time */
             absolute_expires_at: string;
         };
+        StoredFile: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly uploader_id: string;
+            readonly uploader_name: string;
+            readonly file_name: string;
+            readonly file_size: number;
+            readonly status: components["schemas"]["StoredFileStatusEnum"];
+            readonly purpose: components["schemas"]["StoredFilePurposeEnum"];
+            /** @description Chỉ hiển thị cho sinh viên khi tệp clean và đã công bố */
+            readonly is_published: boolean;
+            readonly sha256_hash: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
         /**
-         * @description * `open` - Đang mở
-         *     * `archived` - Đã lưu trữ
+         * @description * `course_material` - Học liệu môn học
+         *     * `assignment_attachment` - Đính kèm bài tập
+         *     * `assignment_submission` - Bài nộp sinh viên
+         *     * `general` - Tệp chung
          * @enum {string}
          */
-        StatusEnum: "open" | "archived";
+        StoredFilePurposeEnum: "course_material" | "assignment_attachment" | "assignment_submission" | "general";
+        /**
+         * @description * `quarantine_pending` - Chờ cách ly
+         *     * `scanning` - Đang quét
+         *     * `clean` - An toàn
+         *     * `infected` - Nhiễm mã độc
+         *     * `deleted` - Đã xóa
+         * @enum {string}
+         */
+        StoredFileStatusEnum: "quarantine_pending" | "scanning" | "clean" | "infected" | "deleted";
+        StudentAssignmentEligibility: {
+            /** @default false */
+            is_group_assignment: boolean;
+            can_submit: boolean;
+            can_replace: boolean;
+            is_late: boolean;
+            reason: string | null;
+            /** Format: date-time */
+            server_time: string;
+            /** Format: date-time */
+            deadline: string;
+            /** Format: date-time */
+            effective_deadline: string;
+            allow_late: boolean;
+            manually_closed: boolean;
+            in_reopen_window: boolean;
+            reopen_window_id: string | null;
+            reopen_window_scope: string | null;
+            /** Format: date-time */
+            reopen_window_end: string | null;
+            has_existing_submission: boolean;
+            latest_submission?: components["schemas"]["LatestSubmission"] | null;
+            applicable_file_policy: components["schemas"]["ApplicableFilePolicy"];
+            contract_version: string;
+        };
+        StudentEnrollmentRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            readonly course_name: string;
+            readonly course_term: string;
+            readonly teacher_name: string;
+            readonly status: components["schemas"]["EnrollmentRequestStatusEnum"];
+            /** Format: date-time */
+            readonly requested_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            readonly rejection_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        StudentGradeList: {
+            items: components["schemas"]["StudentGradeRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        StudentGradeRow: {
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            course_code: string;
+            revision_number: number | null;
+            /** Format: decimal */
+            total_score: string;
+            grade: components["schemas"]["GradeOutput"] | null;
+        };
+        /**
+         * @description * `draft` - Nháp
+         *     * `published` - Đã công bố
+         * @enum {string}
+         */
+        SubmissionGradeStatusEnum: "draft" | "published";
+        SubmissionHistoryResult: {
+            items: components["schemas"]["SubmissionHistoryRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        SubmissionHistoryRow: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+            /** Format: uuid */
+            file_id: string;
+        };
+        SubmissionInputRequest: {
+            /** Format: uuid */
+            file_id: string;
+        };
+        SubmissionReceipt: {
+            readonly id: number;
+            /** Format: uuid */
+            readonly file_id: string;
+            /** Format: int64 */
+            number: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+        };
+        /**
+         * @description * `all` - Toàn bộ lớp
+         *     * `student` - Sinh viên cụ thể
+         * @enum {string}
+         */
+        TargetTypeEnum: "all" | "student";
+        TeacherEnrollmentRequest: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            /** Format: uuid */
+            readonly student_id: string;
+            readonly student_name: string;
+            /** Format: email */
+            readonly student_email: string;
+            readonly status: components["schemas"]["EnrollmentRequestStatusEnum"];
+            /** Format: date-time */
+            readonly requested_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+            readonly reviewed_by_name: string | null;
+            readonly rejection_reason: string;
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly updated_at: string;
+        };
+        TeacherGradebookResult: {
+            course_name: string;
+            assignments: components["schemas"]["GradebookAssignment"][];
+            /** Format: uuid */
+            assignment_id: string | null;
+            /** Format: decimal */
+            total_score: string | null;
+            items: components["schemas"]["GradebookRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        TeacherSubmissionList: {
+            title: string;
+            /** Format: uuid */
+            course_id: string;
+            items: components["schemas"]["TeacherSubmissionRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        TeacherSubmissionRow: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+            /** Format: uuid */
+            student_id: string;
+            student_name: string;
+            /** Format: email */
+            student_email: string;
+            /** Format: uuid */
+            file_id: string;
+        };
+        UnreadGradeCount: {
+            unread_count: number;
+        };
+        UpcomingResult: {
+            total: number;
+            items: components["schemas"]["UpcomingRow"][];
+        };
+        UpcomingRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            title: string;
+            /** Format: date-time */
+            deadline: string;
+        };
+        UploadIntentRequest: {
+            file_name: string;
+            file_size: number;
+            /** @default course_material */
+            purpose: components["schemas"]["StoredFilePurposeEnum"];
+            /** Format: uuid */
+            assignment_id?: string | null;
+        };
+        UploadIntentResponse: {
+            /** Format: uuid */
+            file_id: string;
+            file_name: string;
+            file_size: number;
+            storage_path: string;
+            status: string;
+            purpose?: string;
+            /** @default 900 */
+            expires_in_seconds: number;
+            /** Format: date-time */
+            expires_at: string;
+        };
+        /**
+         * @description * `admin` - admin
+         *     * `teacher` - teacher
+         *     * `student` - student
+         * @enum {string}
+         */
+        UserRoleEnum: "admin" | "teacher" | "student";
+        VerificationStatusResponse: {
+            /** Format: email */
+            email: string;
+            verified: boolean;
+            /** Format: date-time */
+            verified_at: string | null;
+        };
+        VerifyEmailRequestRequest: {
+            token: string;
+        };
+        VerifyEmailResponse: {
+            /** Format: email */
+            email: string;
+            verified: boolean;
+            granted_roles: components["schemas"]["UserRoleEnum"][];
+        };
     };
     responses: never;
     parameters: never;
@@ -345,6 +4226,760 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    admin_accounts_list: {
+        parameters: {
+            query?: {
+                /** @description Filter by email verified status */
+                email_verified?: boolean;
+                /** @description Filter by active status */
+                is_active?: boolean;
+                /** @description Page number */
+                page?: number;
+                /** @description Number of results per page */
+                page_size?: number;
+                /** @description Filter by active role: student, teacher, admin */
+                role?: string;
+                /** @description Search by email or display name */
+                search?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminAccountListItemList"];
+                };
+            };
+        };
+    };
+    admin_accounts_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountDetail"];
+                };
+            };
+        };
+    };
+    admin_accounts_lock_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AdminReauthRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminReauthRequest"];
+                "multipart/form-data": components["schemas"]["AdminReauthRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountStateResponse"];
+                };
+            };
+        };
+    };
+    admin_accounts_request_reset_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminPasswordResetResponse"];
+                };
+            };
+        };
+    };
+    admin_accounts_roles_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAccountRoleGrantRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminAccountRoleGrantRequest"];
+                "multipart/form-data": components["schemas"]["AdminAccountRoleGrantRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountRoleGrantResponse"];
+                };
+            };
+        };
+    };
+    admin_accounts_roles_revoke_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                grant_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AdminReauthRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminReauthRequest"];
+                "multipart/form-data": components["schemas"]["AdminReauthRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountRoleRevokeResponse"];
+                };
+            };
+        };
+    };
+    admin_accounts_state_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AdminAccountStateUpdateRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminAccountStateUpdateRequest"];
+                "multipart/form-data": components["schemas"]["AdminAccountStateUpdateRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountStateResponse"];
+                };
+            };
+        };
+    };
+    admin_accounts_unlock_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountStateResponse"];
+                };
+            };
+        };
+    };
+    admin_audit_log_retrieve: {
+        parameters: {
+            query?: {
+                end?: string;
+                page?: number;
+                search?: string;
+                start?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditListResult"];
+                };
+            };
+        };
+    };
+    admin_courses_transfer_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseTransferRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseTransferRequest"];
+                "multipart/form-data": components["schemas"]["CourseTransferRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    admin_file_limits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminFileLimits"];
+                };
+            };
+        };
+    };
+    admin_grants_revoke_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                grant_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AdminReauthRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AdminReauthRequest"];
+                "multipart/form-data": components["schemas"]["AdminReauthRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminAccountRoleRevokeResponse"];
+                };
+            };
+        };
+    };
+    admin_overview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverviewNumbers"];
+                };
+            };
+        };
+    };
+    admin_recent_activity_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRecentEvent"][];
+                };
+            };
+        };
+    };
+    admin_role_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Number of results per page */
+                page_size?: number;
+                /** @description Search by user email or display name */
+                search?: string;
+                /** @description Filter by status: pending, approved, rejected, cancelled, all */
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminTeacherRequestItemList"];
+                };
+            };
+        };
+    };
+    admin_role_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminTeacherApprovalResponse"];
+                };
+            };
+        };
+    };
+    admin_role_requests_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminTeacherRejectResponse"];
+                };
+            };
+        };
+    };
+    admin_runtime_settings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRuntimeSettings"];
+                };
+            };
+        };
+    };
+    admin_teacher_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: number;
+                /** @description Number of results per page */
+                page_size?: number;
+                /** @description Search by user email or display name */
+                search?: string;
+                /** @description Filter by status: pending, approved, rejected, cancelled, all */
+                status?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAdminTeacherRequestItemList"];
+                };
+            };
+        };
+    };
+    admin_teacher_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminTeacherApprovalResponse"];
+                };
+            };
+        };
+    };
+    admin_teacher_requests_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminTeacherRejectResponse"];
+                };
+            };
+        };
+    };
+    ai_courses_chat_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseChatRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseChatRequestRequest"];
+                "multipart/form-data": components["schemas"]["CourseChatRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseChatResponse"];
+                };
+            };
+        };
+    };
+    ai_courses_chat_history_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatTurn"][];
+                };
+            };
+        };
+    };
+    ai_courses_chat_history_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ai_courses_materials_summary_drafts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
+                };
+            };
+        };
+    };
+    ai_teacher_summary_drafts_list: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"][];
+                };
+            };
+        };
+    };
+    ai_teacher_summary_drafts_review_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+                "multipart/form-data": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
+                };
+            };
+        };
+    };
+    assignments_direct_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_direct_attachment_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_direct_attachment_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_direct_eligibility_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignmentEligibility"];
+                };
+            };
+        };
+    };
+    teacher_submission_list: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherSubmissionList"];
+                };
+            };
+        };
+    };
     auth_csrf_retrieve: {
         parameters: {
             query?: never;
@@ -360,6 +4995,25 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content?: never;
+            };
+        };
+    };
+    auth_grants_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleGrantItem"][];
+                };
             };
         };
     };
@@ -515,13 +5169,181 @@ export interface operations {
             };
         };
     };
+    auth_register_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["RegisterRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RegisterRequestRequest"];
+                "multipart/form-data": components["schemas"]["RegisterRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RegisterResponse"];
+                };
+            };
+        };
+    };
+    auth_resend_verification_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ResendVerificationRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ResendVerificationRequestRequest"];
+                "multipart/form-data": components["schemas"]["ResendVerificationRequestRequest"];
+            };
+        };
+        responses: {
+            /** @description No response body */
+            202: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    auth_role_requests_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleRequestItem"][];
+                };
+            };
+        };
+    };
+    auth_role_requests_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateRoleRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CreateRoleRequestRequest"];
+                "multipart/form-data": components["schemas"]["CreateRoleRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleRequestItem"];
+                };
+            };
+        };
+    };
+    auth_role_requests_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RoleRequestItem"];
+                };
+            };
+        };
+    };
+    auth_verification_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerificationStatusResponse"];
+                };
+            };
+        };
+    };
+    auth_verify_email_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["VerifyEmailRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["VerifyEmailRequestRequest"];
+                "multipart/form-data": components["schemas"]["VerifyEmailRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["VerifyEmailResponse"];
+                };
+            };
+        };
+    };
     courses_list: {
         parameters: {
             query?: {
+                /** @description Filter enrollment availability */
+                enrollment_open?: boolean;
                 /** @description A page number within the paginated result set. */
                 page?: number;
                 /** @description Number of results to return per page. */
                 page_size?: number;
+                /** @description Narrow to owned or enrolled courses */
+                role?: "student" | "teacher";
+                /** @description Search by course code, name, term or teacher */
+                search?: string;
+                /** @description Filter by open or archived status */
+                status?: string;
+                /** @description Filter by academic term */
+                term?: string;
             };
             header?: never;
             path?: never;
@@ -564,12 +5386,1679 @@ export interface operations {
             };
         };
     };
+    teacher_assignments_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương học */
+                chapter_id?: string;
+                /** @description Số trang hiển thị */
+                page?: number;
+                /** @description Kích thước mỗi trang */
+                page_size?: number;
+                /** @description Tìm kiếm theo tiêu đề bài tập */
+                search?: string;
+                /** @description Lọc theo trạng thái bài tập hoặc 'all' */
+                status?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAssignmentSummaryList"];
+                };
+            };
+        };
+    };
+    teacher_assignments_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["PatchedAssignmentUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_archive: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_attachment_download: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    assignments_attachment_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    teacher_assignments_close: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCloseRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCloseRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCloseRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    assignments_eligibility_check: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentAssignmentEligibility"];
+                };
+            };
+        };
+    };
+    teacher_assignments_preview: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentPreview"];
+                };
+            };
+        };
+    };
+    teacher_assignments_publish: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentPublishRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentPublishRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentPublishRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["AssignmentCloseRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AssignmentCloseRequestRequest"];
+                "multipart/form-data": components["schemas"]["AssignmentCloseRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentDetail"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"][];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+                "multipart/form-data": components["schemas"]["CreateAssignmentReopenWindowRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"];
+                };
+            };
+        };
+    };
+    teacher_assignments_reopen_windows_revoke: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                window_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssignmentReopenWindow"];
+                };
+            };
+        };
+    };
+    courses_assignments_submission_history_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+                student_id?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionHistoryResult"];
+                };
+            };
+        };
+    };
+    courses_assignments_submissions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmissionInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubmissionInputRequest"];
+                "multipart/form-data": components["schemas"]["SubmissionInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionReceipt"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionReceipt"];
+                };
+            };
+        };
+    };
+    courses_chapters_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"][];
+                };
+            };
+        };
+    };
+    courses_chapters_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChapterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ChapterRequest"];
+                "multipart/form-data": components["schemas"]["ChapterRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+        };
+    };
+    courses_chapters_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_chapters_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedChapterRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedChapterRequest"];
+                "multipart/form-data": components["schemas"]["PatchedChapterRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"][];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["LessonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["LessonRequest"];
+                "multipart/form-data": components["schemas"]["LessonRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_chapters_lessons_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+                lesson_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedLessonRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedLessonRequest"];
+                "multipart/form-data": components["schemas"]["PatchedLessonRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"];
+                };
+            };
+        };
+    };
+    courses_chapters_lessons_reorder_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                chapter_id: string;
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
+                "multipart/form-data": components["schemas"]["ReorderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Lesson"][];
+                };
+            };
+        };
+    };
+    courses_chapters_reorder_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["ReorderRequest"];
+                "multipart/form-data": components["schemas"]["ReorderRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Chapter"][];
+                };
+            };
+        };
+    };
+    courses_enroll_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái yêu cầu */
+                status?: "approved" | "cancelled" | "pending" | "rejected";
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedTeacherEnrollmentRequestList"];
+                };
+            };
+        };
+    };
+    courses_file_policy_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_file_policy_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CourseFilePolicyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseFilePolicyRequest"];
+                "multipart/form-data": components["schemas"]["CourseFilePolicyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_file_policy_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCourseFilePolicyRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCourseFilePolicyRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCourseFilePolicyRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseFilePolicy"];
+                };
+            };
+        };
+    };
+    courses_files_list: {
+        parameters: {
+            query?: {
+                page?: number;
+                page_size?: number;
+                purpose?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStoredFileList"];
+                };
+            };
+        };
+    };
+    courses_files_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFile"];
+                };
+            };
+        };
+    };
+    courses_files_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_files_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedUpdateFilePublishRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedUpdateFilePublishRequest"];
+                "multipart/form-data": components["schemas"]["PatchedUpdateFilePublishRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StoredFile"];
+                };
+            };
+        };
+    };
+    courses_files_commit_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["CommitUploadRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CommitUploadRequest"];
+                "multipart/form-data": components["schemas"]["CommitUploadRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CommitUploadResponse"];
+                };
+            };
+        };
+    };
+    courses_files_content_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/octet-stream": string;
+            };
+        };
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_files_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_files_preview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_files_upload_intent_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UploadIntentRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["UploadIntentRequest"];
+                "multipart/form-data": components["schemas"]["UploadIntentRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UploadIntentResponse"];
+                };
+            };
+        };
+    };
+    courses_gradebook_retrieve: {
+        parameters: {
+            query?: {
+                assignment_id?: string;
+                download?: "csv";
+                page?: number;
+                /** @description Một phần tên hoặc email sinh viên */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherGradebookResult"];
+                    "text/csv": string;
+                };
+            };
+        };
+    };
+    courses_materials_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương */
+                chapter_id?: string;
+                /** @description Tìm kiếm theo tiêu đề/tag */
+                search?: string;
+                /** @description Lọc theo visibility (chỉ GV) */
+                visibility?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialList"];
+                };
+            };
+        };
+    };
+    courses_materials_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_materials_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+                "multipart/form-data": components["schemas"]["PatchedMaterialUpdateRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_files_download_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_materials_files_preview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    courses_materials_hide_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialPublishRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialPublishRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialPublishRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_unhide_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionSummary"][];
+                };
+            };
+        };
+    };
+    courses_materials_versions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["MaterialVersionCreateRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialVersionCreateRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialVersionCreateRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_files_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialFileAddRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialFileAddRequestRequest"];
+                "multipart/form-data": components["schemas"]["MaterialFileAddRequestRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialFileManifestItem"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_files_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                file_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_materials_versions_finalize_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_versions_retry_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+                version_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialVersionDetail"];
+                };
+            };
+        };
+    };
+    courses_materials_search: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo mã chương */
+                chapter_id?: string;
+                /** @description Từ khóa tìm kiếm (tối đa 200 ký tự) */
+                q?: string;
+                /** @description Sắp xếp: relevance, newest, title_asc, title_desc */
+                sort_by?: string;
+                /** @description Lọc theo thẻ */
+                tag?: string;
+                /** @description Lọc theo loại tệp (all, pdf, docx, txt) */
+                type?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialSearchResult"];
+                };
+            };
+        };
+    };
+    courses_members_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái thành viên ('active' hoặc 'withdrawn') */
+                status?: "active" | "withdrawn";
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseMemberList"];
+                };
+            };
+        };
+    };
+    courses_members_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddMemberRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["AddMemberRequest"];
+                "multipart/form-data": components["schemas"]["AddMemberRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_members_re_enroll_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                student_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_members_withdraw_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                student_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseMember"];
+                };
+            };
+        };
+    };
+    courses_published_assignments_list: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo chương học */
+                chapter_id?: string;
+                /** @description Số trang hiển thị */
+                page?: number;
+                /** @description Kích thước mỗi trang */
+                page_size?: number;
+                /** @description Tìm kiếm theo tiêu đề bài tập */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedAssignmentSummaryList"];
+                };
+            };
+        };
+    };
     courses_retrieve: {
         parameters: {
             query?: never;
             header?: never;
             path: {
-                /** @description A UUID string identifying this course. */
                 id: string;
             };
             cookie?: never;
@@ -582,6 +7071,248 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseRequest"];
+                "multipart/form-data": components["schemas"]["CourseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    courses_partial_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["PatchedCourseRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["PatchedCourseRequest"];
+                "multipart/form-data": components["schemas"]["PatchedCourseRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_archive_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Course"];
+                };
+            };
+        };
+    };
+    courses_catalog_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang (bắt đầu từ 1) */
+                page?: number;
+                /** @description Số lượng mỗi trang (tối đa 100) */
+                page_size?: number;
+                /** @description Tìm kiếm theo mã, tên môn, học kỳ, giảng viên */
+                search?: string;
+                /** @description Lọc theo học kỳ */
+                term?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedCourseCatalogItemList"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_approve_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_cancel_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_reject_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                request_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": components["schemas"]["RejectEnrollmentRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["RejectEnrollmentRequestRequest"];
+                "multipart/form-data": components["schemas"]["RejectEnrollmentRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherEnrollmentRequest"];
+                };
+            };
+        };
+    };
+    courses_enrollment_requests_my_list: {
+        parameters: {
+            query?: {
+                /** @description Số trang */
+                page?: number;
+                /** @description Số lượng mỗi trang */
+                page_size?: number;
+                /** @description Lọc theo trạng thái yêu cầu */
+                status?: "approved" | "cancelled" | "pending" | "rejected";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedStudentEnrollmentRequestList"];
+                };
+            };
+        };
+    };
+    courses_summary_retrieve: {
+        parameters: {
+            query?: {
+                /** @description Vai trò workspace cần lấy summary ('teacher' hoặc 'student'). */
+                role?: "student" | "teacher";
+                /** @description Alias cho tham số role. */
+                workspace?: "student" | "teacher";
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseSummaryResponse"];
                 };
             };
         };
@@ -631,6 +7362,1001 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ReadinessUnavailableResponse"];
+                };
+            };
+        };
+    };
+    learning_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_actions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_appeals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_appeals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_attendance_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_attendance_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_discussion_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_discussion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_downloads_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_group_appeals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_group_appeals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_groups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_groups_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_drafts_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    learning_enrollment_retrieve: {
+        parameters: {
+            query?: {
+                mode?: "approval" | "password";
+                page?: number;
+                q?: string;
+                term?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_enrollment_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_group_files_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    learning_library_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_library_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_library_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    learning_library_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    learning_reports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    materials_retrieve_global: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialDetail"];
+                };
+            };
+        };
+    };
+    materials_search_global: {
+        parameters: {
+            query?: {
+                /** @description Lọc theo mã chương */
+                chapter_id?: string;
+                /** @description Lọc theo môn học cụ thể */
+                course_id?: string;
+                /** @description Từ khóa tìm kiếm (tối đa 200 ký tự) */
+                q?: string;
+                /** @description Sắp xếp: relevance, newest, title_asc, title_desc */
+                sort_by?: string;
+                /** @description Lọc theo thẻ */
+                tag?: string;
+                /** @description Lọc theo loại tệp (all, pdf, docx, txt) */
+                type?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaginatedMaterialSearchResult"];
+                };
+            };
+        };
+    };
+    me_course_announcements_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoticeFeed"];
+                };
+            };
+        };
+    };
+    me_course_announcements_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_course_announcements_read_all_create: {
+        parameters: {
+            query?: {
+                course_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_course_announcements_unread_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountResult"];
+                };
+            };
+        };
+    };
+    me_grade_notices_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeNoticeList"];
+                };
+            };
+        };
+    };
+    me_grade_notices_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_grade_notices_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeReadAllResult"];
+                };
+            };
+        };
+    };
+    me_grade_notices_unread_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadGradeCount"];
+                };
+            };
+        };
+    };
+    me_grades_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentGradeList"];
+                };
+            };
+        };
+    };
+    me_upcoming_assignments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpcomingResult"];
+                };
+            };
+        };
+    };
+    submissions_grade_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDetail"];
+                };
+            };
+        };
+    };
+    submissions_grade_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GradeInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["GradeInputRequest"];
+                "multipart/form-data": components["schemas"]["GradeInputRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeOutput"];
+                };
+            };
+        };
+    };
+    submissions_grade_history_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeHistoryResult"];
+                };
+            };
+        };
+    };
+    teacher_course_announcements_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoticeFeed"];
+                };
+            };
+        };
+    };
+    teacher_course_announcements_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoticeInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoticeInputRequest"];
+                "multipart/form-data": components["schemas"]["NoticeInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedNotice"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedNotice"];
                 };
             };
         };

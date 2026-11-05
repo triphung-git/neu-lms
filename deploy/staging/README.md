@@ -52,20 +52,25 @@ docker pull $API_IMAGE
 ### Bước 3: Kiểm tra cấu hình và chạy Migration độc lập
 ```bash
 # Chạy migration job riêng biệt
-docker compose -f compose.staging.yaml run --rm migrator
+docker compose --env-file .env.staging -f compose.staging.yaml run --rm migrator
 
 # Xác nhận trạng thái migration
-docker compose -f compose.staging.yaml run --rm api python manage.py migrate --check
+docker compose --env-file .env.staging -f compose.staging.yaml run --rm api python manage.py migrate --check
 ```
 
-### Bước 4: Khởi động hoặc cập nhật dịch vụ API
+### Bước 4: Khởi động toàn bộ dịch vụ runtime
 ```bash
-# Khởi động dịch vụ API ở chế độ detached
-docker compose -f compose.staging.yaml up -d api
+# API, auth email dispatcher, worker quét file và scheduler trích xuất học liệu
+docker compose --env-file .env.staging -f compose.staging.yaml up -d api auth-dispatcher file-worker file-scheduler
 
 # Kiểm tra trạng thái container và healthcheck
-docker compose -f compose.staging.yaml ps
+docker compose --env-file .env.staging -f compose.staging.yaml ps
 ```
+
+`file-worker` và duy nhất một replica `file-scheduler` là bắt buộc cho pipeline B08–B09.
+Không scale `file-scheduler` theo số replica API; Celery beat chỉ nên chạy một instance trong mỗi môi trường.
+Worker cần cùng PostgreSQL, Redis broker, S3 endpoint/credentials và ClamAV mà API sử dụng. Nếu thiếu
+worker hoặc scheduler, upload có thể ở trạng thái chờ quét và học liệu không được trích xuất để lập chỉ mục.
 
 ### Bước 5: Kiểm tra sức khỏe (Smoke Test)
 ```bash
@@ -76,11 +81,55 @@ curl -I http://127.0.0.1:8000/api/v1/health/live
 # Kiểm tra readiness
 curl -I http://127.0.0.1:8000/api/v1/health/ready
 # Kỳ vọng: HTTP/1.1 200 OK {"status": "ok", "checks": {"database": "ok"}}
+
+# Kiểm tra log của auth-dispatcher và pipeline file
+docker compose --env-file .env.staging -f compose.staging.yaml logs --tail=50 auth-dispatcher
+docker compose --env-file .env.staging -f compose.staging.yaml logs --tail=100 file-worker file-scheduler
 ```
 
 ---
 
-## 3. Kế hoạch Rollback (Khôi phục sự cố)
+## 3. Vận hành Auth Email Dispatcher và Maintenance Scheduler
+
+### 3.1. Cơ chế Dispatcher ngoài HTTP Request (Out-of-Request Email)
+- Toàn bộ HTTP request (`/api/v1/auth/password/request-reset` và email verification) **không gọi SMTP trực tiếp**. HTTP chỉ commit token và delivery record ở trạng thái `pending` rồi trả về `202 Accepted` ngay lập tức.
+- Service `auth-dispatcher` chạy tiến trình daemon:
+  `python manage.py dispatch_auth_emails --daemon --poll-interval 2`
+  liên tục quét các bản ghi `pending` hoặc `processing` bị treo (> 5 phút) để gửi email ngoài luồng HTTP.
+- Concurrency & Exactly-once:
+  - Khóa hàng bằng `SELECT FOR UPDATE` bên trong transaction ngắn hạn chuyển trạng thái sang `processing`.
+  - Gọi SMTP `send_mail` hoàn toàn nằm **ngoài** database transaction.
+  - SMTP là at-least-once (không cam kết exactly-once SMTP ở tầng mạng). Nếu worker crash sau khi SMTP chấp nhận gửi nhưng trước khi DB commit, cơ chế stale recovery (> 5 phút) sẽ thử lại tối đa `max_attempts` (mặc định 3).
+
+### 3.2. Monitoring & State Machine
+Bảng `PasswordResetDelivery` và `EmailVerificationDelivery` có 4 trạng thái:
+- `pending`: Đã được HTTP commit, đang đợi dispatcher gửi.
+- `processing`: Worker đang thực hiện gửi qua SMTP. Nếu kéo dài quá 5 phút, worker khác sẽ tự động thu hồi (stale recovery).
+- `sent`: Gửi thành công, có `sent_at` ghi nhận thời điểm.
+- `failed`: Thất bại vĩnh viễn (đã thử đủ 3 lần mà SMTP vẫn lỗi, hoặc token hết hạn, user bị thu hồi phiên `auth_version`, hoặc digest mismatch).
+
+Chỉ số giám sát cần thiết cho OPS:
+- Đếm bản ghi `status='failed'` trong 1 giờ qua: nếu > 0, kiểm tra `last_error_code` và log kết nối SMTP provider.
+- Đếm bản ghi `status='processing'` có `last_attempt_at < NOW() - 5 phút`: cảnh báo worker crash hoặc deadlock mạng.
+
+### 3.3. Tác động của xoay vòng khóa bí mật (SECRET_KEY Rotation)
+- Token reset mật khẩu và verify email được sinh bằng HMAC-SHA256 phụ thuộc vào `SECRET_KEY`.
+- Khi xoay vòng `SECRET_KEY`, các delivery chưa gửi hoặc token đã gửi nhưng chưa được người dùng click sẽ không khớp digest (`token_derivation_mismatch`). Dispatcher sẽ chuyển chúng sang `failed`. Người dùng cần bấm yêu cầu gửi lại liên kết mới.
+
+### 3.4. Phòng chống tấn công Timing Enumeration
+- Việc trả về response body giống nhau giữa tài khoản tồn tại và không tồn tại **không đủ** để chống suy đoán tài khoản nếu việc gửi email được thực hiện đồng bộ trong request (do network latency SMTP ~200-800ms sẽ để lộ tài khoản thật).
+- Bằng cách loại bỏ SMTP khỏi HTTP request và chỉ thực hiện câu lệnh DB transaction nhanh, thời gian phản hồi giữa tài khoản đã biết và chưa biết đồng nhất ở mức mili-giây.
+
+### 3.5. Tác vụ định kỳ (Cron / Systemd Timer)
+Cấu hình cron job chạy mỗi ngày (hoặc mỗi giờ) trên staging server để dọn dẹp các token/rate-limit buckets đã hết hạn:
+```bash
+0 2 * * * docker compose -f /path/to/deploy/staging/compose.staging.yaml exec -T api python manage.py cleanup_expired_auth
+```
+
+---
+
+## 4. Kế hoạch Rollback (Khôi phục sự cố)
+
 
 Trong trường hợp bản phát hành mới gặp lỗi nghiêm trọng sau khi triển khai:
 
@@ -89,7 +138,7 @@ Trong trường hợp bản phát hành mới gặp lỗi nghiêm trọng sau kh
    - Cập nhật biến môi trường: `export API_IMAGE="ghcr.io/neu-lms/api@sha256:<digest-truoc>"`.
 2. **Khởi động lại API container với image cũ**:
    ```bash
-   docker compose -f compose.staging.yaml up -d --no-deps api
+   docker compose --env-file .env.staging -f compose.staging.yaml up -d --no-deps api auth-dispatcher file-worker file-scheduler
    ```
 3. **Lưu ý về Database Rollback**:
    - Tuyệt đối không tự động reverse migrations trên cơ sở dữ liệu chứa dữ liệu thật.
@@ -97,12 +146,17 @@ Trong trường hợp bản phát hành mới gặp lỗi nghiêm trọng sau kh
 
 ---
 
-## 4. Các thành phần chưa triển khai (Planned Components)
+## 5. Phạm vi worker và phần tích hợp còn cần hoàn tất
 
-Các thành phần sau chưa có trong phiên bản hiện tại và sẽ được bổ sung theo lộ trình:
-- **Asynchronous Worker**: Celery worker xử lý outbox và email (B13).
-- **File Upload & Scanner**: Dịch vụ quét mã độc và pipeline trích xuất học liệu (B08–B09).
-- **Transactional Email Provider**: Cấu hình SendGrid / AWS SES thực tế (B13).
+Các tiến trình đã có trong source và compose staging:
+- **File pipeline (B08–B09)**: `file-worker` chạy các Celery tasks quét ClamAV và trích xuất học liệu; `file-scheduler` dispatch các tác vụ pending theo lịch. Hai service phải được khởi động cùng API.
+- **Auth email dispatcher (B03)**: `auth-dispatcher` gửi email xác thực và đặt lại mật khẩu ngoài HTTP request.
+- **In-app notifications (B13)**: Thông báo lớp học và thông báo điểm được lưu/đọc qua API trong ứng dụng.
+
+Các phần chưa được coi là hoàn tất:
+- **Transactional email provider**: SMTP/SendGrid/AWS SES thật phải được cấu hình và kiểm tra bằng credentials của môi trường; không dùng Mailpit trên staging.
+- **Generic platform outbox consumer**: `OutboxEvent` đang ghi audit/outbox cho các domain event, nhưng chưa có dispatcher tổng quát để chuyển tất cả event này thành email/push. Không được nhầm `auth-dispatcher` với generic outbox worker.
+- **Worker monitoring**: Cần alert cho queue backlog, task retry/failure, worker heartbeat và kiểm tra định kỳ rằng ClamAV/S3/Redis reachable.
 
 ## CA và proxy bắt buộc
 

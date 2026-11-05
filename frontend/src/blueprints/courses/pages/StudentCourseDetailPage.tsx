@@ -1,120 +1,185 @@
-import React, { useMemo } from 'react';
-import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
+import {uiText} from "../../../shared/i18n/translate";
+import {CourseAttendance} from '../../learning/LearningHub';
+import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
-import { useClock } from '../../../app/providers/ClockContext';
+import { useNotifications } from '../../../app/providers/NotificationContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
 import { Badge } from '../../../shared/ui/Badge';
 import { Button } from '../../../shared/ui/Button';
 import { EmptyState } from '../../../shared/ui/EmptyState';
-import { formatDateVN, formatScoreVN } from '../../../shared/kernel/formatting';
-import { BookOpen, FileText, AlertCircle, ArrowLeft, ArrowRight, Bell, Award, Calendar } from 'lucide-react';
+import { Modal } from '../../../shared/ui/Modal';
+import { coursesService, type Course, type Chapter, type Lesson } from '../../../api/coursesService';
+import { materialsService, type MaterialListItem } from '../../../api/materialsService';
+import { getAssignmentService } from '../../../app/composition/assignmentWiring';
+import type { AssignmentSummaryItem } from '../../assignments/contracts/assignmentsDto';
+import { formatDateVN } from '../../../shared/kernel/formatting';
+import {
+  BookOpen,
+  FileText,
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Bell,
+  Award,
+  LogOut,
+  RefreshCw,
+  Search,
+  Info,
+  Calendar,
+  Clock,
+} from 'lucide-react';
 import './StudentCourseDetailPage.css';
+
+interface LoadError {
+  message: string;
+  statusCode?: number;
+}
 
 export const StudentCourseDetailPage: React.FC = () => {
   const { monId } = useParams<{ monId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { courses, chapters, lessons, materials, materialVersions, assignments, submissions, gradeRevisions, announcements, memberships, users } = useDatabase();
   const { currentUser } = useSession();
-  const { now } = useClock();
+  const { showNotification } = useNotifications();
   const navigate = useNavigate();
 
-  const course = courses.find(c => c.id === monId);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<LoadError | null>(null);
+  const [course, setCourse] = useState<Course | null>(null);
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [materials, setMaterials] = useState<MaterialListItem[]>([]);
+  const [assignments, setAssignments] = useState<AssignmentSummaryItem[]>([]);
+  const [assignmentsError, setAssignmentsError] = useState(false);
 
-  // Check enrollment
-  const isEnrolled = memberships.some(
-    m => m.courseId === monId && m.userId === currentUser?.id && m.status === 'active'
-  );
+  const [materialsTotal, setMaterialsTotal] = useState(0);
+  const [materialsError, setMaterialsError] = useState(false);
+
+  // Withdraw state
+  const [isWithdrawModalOpen, setIsWithdrawModalOpen] = useState(false);
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+
+  // Stale response guard sequence
+  const loadSequence = useRef(0);
 
   const activeTab = searchParams.get('tab') || 'noi-dung';
   const selectedLessonId = searchParams.get('bai');
 
-  const courseChapters = useMemo(() => {
-    return chapters
-      .filter(ch => ch.courseId === monId)
-      .sort((a, b) => a.order - b.order);
-  }, [chapters, monId]);
+  const fetchCourseData = useCallback(async () => {
+    if (!monId) return;
+    const currentSeq = ++loadSequence.current;
+    setLoading(true);
+    setError(null);
 
-  const courseLessons = useMemo(() => {
-    const chIds = new Set(courseChapters.map(ch => ch.id));
-    return lessons
-      .filter(l => chIds.has(l.chapterId))
-      .sort((a, b) => a.order - b.order);
-  }, [lessons, courseChapters]);
+    try {
+      const courseData = await coursesService.get(monId);
+      if (currentSeq !== loadSequence.current) return;
+      setCourse(courseData);
+
+      // Load chapters
+      const chapterList = await coursesService.listChapters(monId);
+      if (currentSeq !== loadSequence.current) return;
+
+      const sortedChapters = [...chapterList].sort((a, b) => a.position - b.position);
+      setChapters(sortedChapters);
+
+      // Load lessons for all chapters
+      const lessonPromises = sortedChapters.map((ch) =>
+        coursesService.listLessons(monId, ch.id)
+      );
+      const lessonResults = await Promise.all(lessonPromises);
+      if (currentSeq !== loadSequence.current) return;
+
+      const allLessons = Array.from(
+        new Map(lessonResults.flatMap(items => [...items].sort((a, b) => a.position - b.position)).map((l) => [l.id, l])).values()
+      );
+      setLessons(allLessons);
+
+      // Load published materials for this course
+      try {
+        const matRes = await materialsService.listMaterials(monId);
+        if (currentSeq === loadSequence.current) {
+          setMaterials(matRes.items || []);
+          setMaterialsTotal(matRes.pagination?.total_items ?? matRes.items.length);
+          setMaterialsError(false);
+        }
+      } catch {
+        if (currentSeq === loadSequence.current) { setMaterials([]); setMaterialsError(true); }
+      }
+
+      // Load published assignments for this course (B10-06)
+      try {
+        const assRes = await getAssignmentService().listStudentAssignments(monId);
+        if (currentSeq === loadSequence.current) {
+          if (assRes.ok) {
+            setAssignments(assRes.data.items || []);
+            setAssignmentsError(false);
+          } else {
+            setAssignments([]);
+            setAssignmentsError(true);
+          }
+        }
+      } catch {
+        if (currentSeq === loadSequence.current) {
+          setAssignments([]);
+          setAssignmentsError(true);
+        }
+      }
+    } catch (err: unknown) {
+      if (currentSeq !== loadSequence.current) return;
+      const apiErr = err as { status?: number; message?: string };
+      const statusCode = apiErr.status;
+      const message =
+        statusCode === 404
+          ? uiText("Môn học không tồn tại hoặc bạn chưa được ghi danh vào môn học này.")
+          : statusCode === 403
+          ? uiText("Bạn không có quyền truy cập vào nội dung môn học này.")
+          : apiErr.message || uiText("Không thể tải thông tin môn học. Vui lòng thử lại.");
+      setError({ message, statusCode });
+    } finally {
+      if (currentSeq === loadSequence.current) {
+        setLoading(false);
+      }
+    }
+  }, [monId]);
+
+  useEffect(() => {
+    void fetchCourseData();
+    return () => { loadSequence.current += 1; };
+  }, [fetchCourseData]);
+
+  // Lessons list sorted
+  const sortedLessons = useMemo(() => {
+    return lessons;
+  }, [lessons]);
 
   // Current lesson
   const currentLesson = useMemo(() => {
     if (selectedLessonId) {
-      return courseLessons.find(l => l.id === selectedLessonId) || null;
+      return sortedLessons.find((l) => l.id === selectedLessonId) || null;
     }
-    return courseLessons.length > 0 ? courseLessons[0] : null;
-  }, [courseLessons, selectedLessonId]);
+    return sortedLessons.length > 0 ? sortedLessons[0] : null;
+  }, [sortedLessons, selectedLessonId]);
+
+  // Materials for current lesson
+  const lessonMaterials = useMemo(() => {
+    if (!currentLesson) return [];
+    return materials.filter(
+      (m) =>
+        m.lesson === currentLesson.id ||
+        (m.chapter === currentLesson.chapter && !m.lesson)
+    );
+  }, [materials, currentLesson]);
 
   // Current lesson index for prev/next
-  const currentLessonIndex = currentLesson ? courseLessons.findIndex(l => l.id === currentLesson.id) : -1;
-  const prevLesson = currentLessonIndex > 0 ? courseLessons[currentLessonIndex - 1] : null;
-  const nextLesson = currentLessonIndex >= 0 && currentLessonIndex < courseLessons.length - 1 ? courseLessons[currentLessonIndex + 1] : null;
-
-  // Published materials for current lesson
-  const currentMaterials = useMemo(() => {
-    if (!currentLesson) return [];
-    return materials
-      .filter(m => m.lessonId === currentLesson.id && m.visibility === 'class')
-      .map(m => {
-        const ver = materialVersions.find(v => v.id === m.currentVersionId) || materialVersions.find(v => v.materialId === m.id);
-        const fileType = ver?.filename.split('.').pop()?.toUpperCase() || 'PDF';
-        return {
-          ...m,
-          fileType,
-          versionNumber: ver?.versionNumber || 1,
-          updatedAt: ver?.uploadedAt || ''
-        };
-      });
-  }, [materials, materialVersions, currentLesson]);
-
-  // Assignments for course
-  const courseAssignments = useMemo(() => {
-    return assignments.filter(a => a.courseId === monId && a.status === 'published');
-  }, [assignments, monId]);
-
-  // Announcements for course
-  const courseAnnouncements = useMemo(() => {
-    return announcements
-      .filter(a => a.courseId === monId)
-      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-  }, [announcements, monId]);
-
-  if (!course) {
-    return (
-      <div className="course-detail-container">
-        <EmptyState
-          title="Không tìm thấy môn học"
-          description="Mã môn học không tồn tại trên hệ thống hoặc bạn không có quyền truy cập."
-          action={
-            <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
-
-  if (!isEnrolled) {
-    return (
-      <div className="course-detail-container">
-        <EmptyState
-          title="Chưa được ghi danh"
-          description={`Bạn chưa được ghi danh vào môn học ${course.code} — ${course.name}. Vui lòng liên hệ giảng viên hoặc phòng đào tạo.`}
-          action={
-            <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
-              Về môn học của tôi
-            </Button>
-          }
-        />
-      </div>
-    );
-  }
+  const currentLessonIndex = currentLesson
+    ? sortedLessons.findIndex((l) => l.id === currentLesson.id)
+    : -1;
+  const prevLesson = currentLessonIndex > 0 ? sortedLessons[currentLessonIndex - 1] : null;
+  const nextLesson =
+    currentLessonIndex >= 0 && currentLessonIndex < sortedLessons.length - 1
+      ? sortedLessons[currentLessonIndex + 1]
+      : null;
 
   const handleSelectTab = (tab: string) => {
     const nextParams = new URLSearchParams(searchParams);
@@ -129,16 +194,73 @@ export const StudentCourseDetailPage: React.FC = () => {
     setSearchParams(nextParams);
   };
 
-  const teacher = users.find(u => u.id === course.teacherId);
+  const handleWithdraw = async () => {
+    if (!course || !currentUser) return;
+    setIsWithdrawing(true);
+    try {
+      await coursesService.withdrawMember(course.id, currentUser.id);
+      showNotification('success', uiText("Bạn đã rút khỏi môn học {0} thành công.",[course.code]));
+      setIsWithdrawModalOpen(false);
+      navigate('/sv/mon-hoc');
+    } catch (err: unknown) {
+      const apiErr = err as { message?: string };
+      showNotification('error', apiErr.message || uiText("Không thể rút khỏi môn học. Vui lòng thử lại."));
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
+
+  // Loading skeleton
+  if (loading) {
+    return (
+      <div className="course-detail-page">
+        <div className="course-detail-header-nav">
+          <Breadcrumb
+            items={[
+              { label: uiText("Trang chủ"), path: '/sv' },
+              { label: uiText("Môn học"), path: '/sv/mon-hoc' },
+              { label: uiText("Đang tải...") },
+            ]}
+          />
+        </div>
+        <div className="course-detail-loading" style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
+          <p style={{ color: 'var(--muted)', fontSize: 'var(--text-base)' }}>{uiText("Đang tải nội dung môn học từ máy chủ...")}</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Error state
+  if (error || !course) {
+    return (
+      <div className="course-detail-container">
+        <EmptyState
+          title={error?.statusCode === 404 ? uiText("Chưa được ghi danh") : uiText("Không thể tải môn học")}
+          description={
+            error?.message ||
+            uiText("Mã môn học không tồn tại trên hệ thống hoặc bạn chưa có quyền truy cập.")
+          }
+          action={
+            <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
+              <Button variant="secondary" onClick={fetchCourseData} icon={<RefreshCw size={16} />}>
+                {uiText("Thử lại")}</Button>
+              <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
+                {uiText("Về danh sách môn học")}</Button>
+            </div>
+          }
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="course-detail-page">
       <div className="course-detail-header-nav">
         <Breadcrumb
           items={[
-            { label: 'Trang chủ', path: '/sv' },
-            { label: 'Môn học', path: '/sv/mon-hoc' },
-            { label: `${course.code} — ${course.name}` }
+            { label: uiText("Trang chủ"), path: '/sv' },
+            { label: uiText("Môn học"), path: '/sv/mon-hoc' },
+            { label: `${course.code} — ${course.name}` },
           ]}
         />
       </div>
@@ -147,35 +269,67 @@ export const StudentCourseDetailPage: React.FC = () => {
         <div className="archived-banner" role="alert">
           <AlertCircle size={20} />
           <div>
-            <strong>Môn học này đã được lưu trữ</strong>
-            <p>Toàn bộ nội dung ở trạng thái chỉ đọc. Không thể nộp bài tập hoặc chỉnh sửa dữ liệu.</p>
+            <strong>{uiText("Môn học này đã được lưu trữ")}</strong>
+            <p>{uiText("Toàn bộ nội dung ở trạng thái chỉ đọc. Không thể chỉnh sửa hoặc thao tác ghi danh.")}</p>
           </div>
         </div>
       )}
 
       <header className="course-header">
-        <div className="course-title-block">
-          <div className="course-code-badge">{course.code}</div>
-          <h1 className="course-title">{course.name}</h1>
-          <p className="course-meta">
-            <span>Học kỳ: <strong>{course.term}</strong></span>
-            <span className="dot-divider">•</span>
-            <span>Giảng viên: <strong>{teacher?.fullName || 'Giảng viên'}</strong></span>
-            <span className="dot-divider">•</span>
-            <span>Trạng thái: <Badge variant={course.status === 'open' ? 'published' : 'archived'} label={course.status === 'open' ? 'Đang học' : 'Đã lưu trữ'} /></span>
-          </p>
+        <div className="course-header-row">
+          <div className="course-title-block">
+            <div className="course-code-badge">{course.code}</div>
+            <h1 className="course-title">{course.name}</h1>
+<Link to={`/sv/hoc-tap?course=${monId}`}>{uiText("Điểm danh · Tiến độ · Thảo luận · Nhóm · Phúc khảo / Learning workspace")}</Link>
+            <p className="course-meta">
+              <span>{uiText("Học kỳ: ")}<strong>{course.term}</strong></span>
+              <span className="dot-divider">•</span>
+              <span>{uiText("Giảng viên: ")}<strong>{course.teacher_name || uiText("Chưa phân công")}</strong></span>
+              <span className="dot-divider">•</span>
+              <span>
+                {uiText("Trạng thái:")}{' '}
+                <Badge
+                  variant={course.status === 'open' ? 'published' : 'archived'}
+                  label={course.status === 'open' ? uiText("Đang học") : uiText("Đã lưu trữ")}
+                />
+              </span>
+            </p>
+          </div>
+
+          <div className="course-header-actions">
+            {course.status === 'open' && (
+              <button
+                type="button"
+                className="withdraw-btn"
+                onClick={() => setIsWithdrawModalOpen(true)}
+                title={uiText("Rút khỏi môn học")}
+              >
+                <LogOut size={16} />
+                <span>{uiText("Rút khỏi môn học")}</span>
+              </button>
+            )}
+          </div>
         </div>
       </header>
 
       {/* Course Subnav Tabs */}
-      <nav className="course-tabs" aria-label="Phân hệ môn học">
+      <nav className="course-tabs" aria-label={uiText("Phân hệ môn học")}>
+<button className={`course-tab-btn ${activeTab === "diem-danh" ? "active" : ""}`} onClick={()=>handleSelectTab("diem-danh")} aria-selected={activeTab === "diem-danh"}>{uiText("Điểm danh")}</button>
         <button
           className={`course-tab-btn ${activeTab === 'noi-dung' ? 'active' : ''}`}
           onClick={() => handleSelectTab('noi-dung')}
           aria-selected={activeTab === 'noi-dung'}
         >
           <BookOpen size={18} />
-          <span>Nội dung bài học</span>
+          <span>{uiText("Nội dung bài học")}</span>
+        </button>
+        <button
+          className={`course-tab-btn ${activeTab === 'hoc-lieu' ? 'active' : ''}`}
+          onClick={() => handleSelectTab('hoc-lieu')}
+          aria-selected={activeTab === 'hoc-lieu'}
+        >
+          <FileText size={18} />
+          <span>{uiText("Học liệu (")}{materialsTotal})</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'bai-tap' ? 'active' : ''}`}
@@ -183,7 +337,7 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'bai-tap'}
         >
           <FileText size={18} />
-          <span>Bài tập ({courseAssignments.length})</span>
+          <span>{uiText("Bài tập")}</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'diem' ? 'active' : ''}`}
@@ -191,7 +345,7 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'diem'}
         >
           <Award size={18} />
-          <span>Bảng điểm</span>
+          <span>{uiText("Bảng điểm")}</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'thong-bao' ? 'active' : ''}`}
@@ -199,32 +353,35 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'thong-bao'}
         >
           <Bell size={18} />
-          <span>Thông báo ({courseAnnouncements.length})</span>
+          <span>{uiText("Thông báo")}</span>
         </button>
       </nav>
 
-      {/* Tab: NỘI DUNG BÀI HỌC */}
+      {activeTab === 'diem-danh' && <CourseAttendance/>}
+{/* Tab: NỘI DUNG BÀI HỌC */}
       {activeTab === 'noi-dung' && (
         <div className="course-content-layout">
-          {/* 28% Sidebar Chapter Tree */}
-          <aside className="chapter-tree-sidebar" aria-label="Cây chương và bài học">
-            <h2 className="sidebar-heading">Mục lục khóa học</h2>
-            {courseChapters.length === 0 ? (
-              <p className="sidebar-empty">Chưa có chương học nào được tạo.</p>
+          {/* Sidebar Chapter Tree */}
+          <aside className="chapter-tree-sidebar" aria-label={uiText("Cây chương và bài học")}>
+            <h2 className="sidebar-heading">{uiText("Mục lục khóa học")}</h2>
+            {chapters.length === 0 ? (
+              <p className="sidebar-empty">{uiText("Chưa có chương học nào được tạo.")}</p>
             ) : (
               <div className="chapters-list">
-                {courseChapters.map((ch, chIdx) => {
-                  const chLessons = courseLessons.filter(l => l.chapterId === ch.id);
+                {chapters.map((ch, chIdx) => {
+                  const chLessons = lessons
+                    .filter((l) => l.chapter === ch.id)
+                    .sort((a, b) => a.position - b.position);
                   return (
                     <section key={ch.id} className="chapter-node">
                       <h3 className="chapter-title">
-                        Chương {chIdx + 1}: {ch.title}
+                        {uiText("Chương ")}{chIdx + 1}: {ch.title}
                       </h3>
                       {chLessons.length === 0 ? (
-                        <p className="lesson-empty">Chưa có bài học</p>
+                        <p className="lesson-empty">{uiText("Chưa có bài học")}</p>
                       ) : (
                         <ul className="lessons-list">
-                          {chLessons.map(lesson => {
+                          {chLessons.map((lesson) => {
                             const isCurrent = currentLesson?.id === lesson.id;
                             return (
                               <li key={lesson.id}>
@@ -249,56 +406,51 @@ export const StudentCourseDetailPage: React.FC = () => {
             )}
           </aside>
 
-          {/* 72% Lesson Detail Panel */}
+          {/* Lesson Detail Panel */}
           <main className="lesson-detail-panel">
             {currentLesson ? (
               <article className="lesson-article">
                 <header className="lesson-header">
                   <div className="lesson-breadcrumb-tag">
-                    {courseChapters.find(ch => ch.id === currentLesson.chapterId)?.title}
+                    {chapters.find((ch) => ch.id === currentLesson.chapter)?.title || uiText("Bài học")}
                   </div>
                   <h2 className="lesson-main-title">{currentLesson.title}</h2>
-                  <p className="lesson-description">{currentLesson.description || 'Chưa có mô tả chi tiết cho bài học này.'}</p>
+                  <p className="lesson-description">
+                    {currentLesson.description || uiText("Chưa có mô tả chi tiết cho bài học này.")}
+                  </p>
                 </header>
 
                 <section className="lesson-materials-section">
                   <h3 className="materials-heading">
                     <FileText size={18} />
-                    <span>Học liệu bài học ({currentMaterials.length})</span>
+                    <span>{uiText("Học liệu bài học (")}{lessonMaterials.length})</span>
                   </h3>
-
-                  {currentMaterials.length === 0 ? (
-                    <div className="materials-empty-box">
-                      <p>Chưa có học liệu công bố trong bài học này.</p>
-                    </div>
+                  {lessonMaterials.length === 0 ? (
+                    <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 'var(--space-2) 0' }}>
+                      {uiText("Chưa có học liệu nào được đính kèm cho bài học này.")}</p>
                   ) : (
-                    <div className="materials-grid">
-                      {currentMaterials.map(mat => (
-                        <Link
-                          key={mat.id}
-                          to={`/sv/hoc-lieu/${mat.id}`}
-                          className="material-card-item"
-                        >
-                          <div className="material-icon-wrap">
-                            <FileText size={22} />
+                    <div className="lesson-materials-grid">
+                      {lessonMaterials.map((mat) => (
+                        <div key={mat.id} className="lesson-material-card">
+                          <div className="mat-card-icon">
+                            <FileText size={20} />
                           </div>
-                          <div className="material-info-wrap">
-                            <h4 className="material-item-title">{mat.title}</h4>
-                            <div className="material-meta-row">
-                              <span className="material-type-pill">{mat.fileType.toUpperCase()}</span>
-                              <span className="material-version">Phiên bản {mat.versionNumber}</span>
-                              <span className="material-date">{formatDateVN(mat.updatedAt)}</span>
+                          <div className="mat-card-body">
+                            <h4 className="mat-card-title">{mat.title}</h4>
+                            <div className="mat-card-meta">
+                              <span className="mat-type">{mat.material_type.toUpperCase()}</span>
+                              <span className="mat-version">
+                                v{mat.published_version_number || 1}
+                              </span>
+                              <span className="mat-files">{mat.file_count || 1} {uiText(" tệp")}</span>
                             </div>
-                            {mat.tags.length > 0 && (
-                              <div className="material-tags-row">
-                                {mat.tags.map(t => (
-                                  <span key={t} className="tag-chip">#{t}</span>
-                                ))}
-                              </div>
-                            )}
                           </div>
-                          <span className="material-link-action">Xem học liệu →</span>
-                        </Link>
+                          <Button
+                            variant="secondary"
+                            onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
+                          >
+                            {uiText("Xem học liệu")}</Button>
+                        </div>
                       ))}
                     </div>
                   )}
@@ -313,11 +465,13 @@ export const StudentCourseDetailPage: React.FC = () => {
                     >
                       <ArrowLeft size={16} />
                       <div>
-                        <span className="nav-label">Bài trước</span>
+                        <span className="nav-label">{uiText("Bài trước")}</span>
                         <strong className="nav-title">{prevLesson.title}</strong>
                       </div>
                     </button>
-                  ) : <div />}
+                  ) : (
+                    <div />
+                  )}
 
                   {nextLesson && (
                     <button
@@ -325,8 +479,8 @@ export const StudentCourseDetailPage: React.FC = () => {
                       className="lesson-next-btn"
                       onClick={() => handleSelectLesson(nextLesson.id)}
                     >
-                      <div className="text-right">
-                        <span className="nav-label">Bài tiếp theo</span>
+                      <div className="text-right" style={{ textAlign: 'right' }}>
+                        <span className="nav-label">{uiText("Bài tiếp theo")}</span>
                         <strong className="nav-title">{nextLesson.title}</strong>
                       </div>
                       <ArrowRight size={16} />
@@ -337,8 +491,8 @@ export const StudentCourseDetailPage: React.FC = () => {
             ) : (
               <div className="lesson-not-selected">
                 <EmptyState
-                  title="Chọn một bài học"
-                  description="Chọn bài học từ cây mục lục bên trái để xem nội dung và học liệu tương ứng."
+                  title={uiText("Chưa có bài học")}
+                  description={uiText("Môn học này hiện chưa có bài học nào được công bố.")}
                 />
               </div>
             )}
@@ -346,80 +500,151 @@ export const StudentCourseDetailPage: React.FC = () => {
         </div>
       )}
 
-      {/* Tab: BÀI TẬP */}
-      {activeTab === 'bai-tap' && (
+      {/* Tab: HỌC LIỆU MÔN HỌC */}
+      {activeTab === 'hoc-lieu' && (
         <section className="course-tab-panel">
           <div className="panel-header-row">
-            <h2 className="panel-title">Danh sách bài tập môn học</h2>
-            <p className="panel-subtitle">Theo dõi hạn nộp và nộp bài trước thời hạn quy định.</p>
+            <div>
+              <h2 className="panel-title">{uiText("Tài liệu học tập môn học")}</h2>
+              <p className="panel-subtitle">
+                {uiText("Toàn bộ tài liệu bài giảng, giáo trình và tài liệu tham khảo chính thức của môn ")}{course.code}.
+              </p>
+            </div>
+            <Button
+              variant="secondary"
+              onClick={() => navigate(`/sv/tim-kiem?mon=${course.id}`)}
+              icon={<Search size={16} />}
+            >
+              {uiText("Tìm kiếm toàn văn môn này")}</Button>
           </div>
 
-          {courseAssignments.length === 0 ? (
-            <EmptyState
-              title="Chưa có bài tập"
-              description="Giảng viên chưa công bố bài tập nào cho môn học này."
-            />
+          {materialsError && <p role="alert">{uiText("Không thể tải học liệu. ")}<Button onClick={() => void fetchCourseData()}>{uiText("Thử lại")}</Button></p>}
+          {materialsTotal > materials.length && <p>{uiText("Hiển thị ")}{materials.length}/{materialsTotal} {uiText(" học liệu mới nhất. Dùng Tìm kiếm để xem đầy đủ.")}</p>}
+          {!materialsError && materials.length === 0 ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title={uiText("Chưa có học liệu")}
+                description={uiText("Giảng viên chưa công bố học liệu nào cho môn học này.")}
+              />
+            </div>
           ) : (
-            <div className="assignments-table-wrap">
-              <table className="npc-table">
-                <thead>
-                  <tr>
-                    <th>Bài tập</th>
-                    <th>Hạn nộp</th>
-                    <th>Trạng thái nộp</th>
-                    <th>Điểm số</th>
-                    <th>Hành động</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {courseAssignments.map(ass => {
-                    const sub = submissions.find(
-                      s => s.assignmentId === ass.id && s.studentId === currentUser?.id
-                    );
-                    const grade = sub ? gradeRevisions.find(gr => gr.submissionId === sub.id && gr.status === 'published') : null;
-                    const isPassed = new Date(ass.dueAt).getTime() < new Date(now).getTime();
+            <div className="course-materials-hub-grid" style={{ marginTop: 'var(--space-6)' }}>
+              {materials.map((mat) => (
+                <article key={mat.id} className="course-material-hub-card">
+                  <div className="mat-hub-icon">
+                    <FileText size={24} />
+                  </div>
+                  <div className="mat-hub-info">
+                    <div className="mat-hub-top">
+                      <span className="mat-type-pill">{mat.material_type.toUpperCase()}</span>
+                      <span className="mat-version-pill">
+                        v{mat.published_version_number || 1}
+                      </span>
+                      {mat.chapter_title && (
+                        <span className="mat-chapter-pill">{mat.chapter_title}</span>
+                      )}
+                    </div>
+                    <h3 className="mat-hub-title">{mat.title}</h3>
+                    <div className="mat-hub-meta">
+                      <span>{mat.file_count || 1} {uiText(" tệp đính kèm")}</span>
+                      {Array.isArray(mat.tags) && mat.tags.length > 0 && (
+                        <span className="mat-hub-tags">
+                          {(mat.tags as string[]).map((t: string) => `#${t}`).join(' ')}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
+                  >
+                    {uiText("Xem chi tiết")}</Button>
+                </article>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
-                    return (
-                      <tr key={ass.id}>
-                        <td>
-                          <strong>{ass.title}</strong>
-                          <div className="table-subtext">Tổng thang điểm: {ass.maxScore} điểm</div>
-                        </td>
-                        <td>
-                          <div className="date-cell">
-                            <Calendar size={14} />
-                            <span>{formatDateVN(ass.dueAt)}</span>
-                          </div>
-                          {isPassed && (
-                            <span className="badge-late-warning">Đã quá hạn</span>
-                          )}
-                        </td>
-                        <td>
-                          {grade ? (
-                            <Badge variant="graded" label="Đã chấm điểm" />
-                          ) : sub ? (
-                            <Badge variant="submitted" label="Đã nộp bài" />
-                          ) : (
-                            <Badge variant="pending" label="Chưa nộp" />
-                          )}
-                        </td>
-                        <td>
-                          {grade ? (
-                            <strong className="score-highlight">{formatScoreVN(grade.total)} / {ass.maxScore}</strong>
-                          ) : (
-                            <span className="text-muted">—</span>
-                          )}
-                        </td>
-                        <td>
-                          <Link to={`/sv/bai-tap/${ass.id}`} className="npc-btn npc-btn-secondary npc-btn-sm">
-                            {sub ? 'Xem bài nộp' : 'Nộp bài'}
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+      {/* Tab: BÀI TẬP */}
+      {activeTab === 'bai-tap' && (
+        <section className="course-tab-panel" data-testid="student-assignments-tab">
+          <div className="panel-header-row">
+            <div>
+              <h2 className="panel-title">{uiText("Danh sách bài tập môn học")}</h2>
+              <p className="panel-subtitle">{uiText("Theo dõi các bài tập và hạn nộp được giao.")}</p>
+            </div>
+          </div>
+
+          {assignmentsError ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title={uiText("Không thể tải danh sách bài tập")}
+                description={uiText("Đã xảy ra lỗi khi tải dữ liệu bài tập từ máy chủ.")}
+                action={
+                  <Button variant="secondary" onClick={fetchCourseData} icon={<RefreshCw size={16} />}>
+                    {uiText("Thử lại")}</Button>
+                }
+              />
+            </div>
+          ) : assignments.length === 0 ? (
+            <div style={{ marginTop: 'var(--space-6)' }}>
+              <EmptyState
+                title={uiText("Chưa có bài tập nào")}
+                description={uiText("Giảng viên chưa công bố bài tập nào cho môn học này.")}
+              />
+            </div>
+          ) : (
+            <div className="mat-hub-list" style={{ marginTop: 'var(--space-6)' }}>
+              {assignments.map((ass) => (
+                <article key={ass.id} className="mat-hub-card" data-testid={`assignment-item-${ass.id}`}>
+                  <div className="mat-hub-card-body">
+                    <div className="mat-hub-top-row">
+                      <Badge
+                        variant={
+                          ass.status === 'archived'
+                            ? 'archived'
+                            : ass.status === 'closed'
+                            ? 'archived'
+                            : 'published'
+                        }
+                        label={
+                          ass.status === 'archived'
+                            ? uiText("Lưu trữ")
+                            : ass.status === 'closed'
+                            ? uiText("Đã đóng nộp")
+                            : uiText("Đang mở")
+                        }
+                      />
+                      <span className="mat-hub-format" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Award size={14} />
+                        {ass.totalScore} {uiText(" điểm")}</span>
+                    </div>
+                    <h3 className="mat-hub-title">{ass.title}</h3>
+                    <div className="mat-hub-meta" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
+                        <Calendar size={14} />
+                        {uiText("Hạn nộp: ")}{formatDateVN(ass.dueAt)}
+                      </span>
+                      {ass.allowLate && (
+                        <span style={{ color: '#d97706', fontSize: 'var(--text-xs)' }}>
+                          {uiText("(Cho phép nộp muộn)")}</span>
+                      )}
+                      {ass.rubricCount > 0 && (
+                        <span>{ass.rubricCount} {uiText(" tiêu chí rubric")}</span>
+                      )}
+                      {ass.attachmentCount > 0 && (
+                        <span>{ass.attachmentCount} {uiText(" tệp đính kèm")}</span>
+                      )}
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    onClick={() => navigate(`/sv/mon-hoc/${monId}/bai-tap/${ass.id}`)}
+                  >
+                    {uiText("Xem chi tiết")}</Button>
+                </article>
+              ))}
             </div>
           )}
         </section>
@@ -430,61 +655,17 @@ export const StudentCourseDetailPage: React.FC = () => {
         <section className="course-tab-panel">
           <div className="panel-header-row">
             <div>
-              <h2 className="panel-title">Bảng điểm môn học</h2>
-              <p className="panel-subtitle">Điểm số chính thức sau khi giảng viên công bố.</p>
+              <h2 className="panel-title">{uiText("Bảng điểm môn học")}</h2>
+              <p className="panel-subtitle">{uiText("Điểm số chính thức sau khi giảng viên công bố.")}</p>
             </div>
-            <Link to={`/sv/diem?mon=${course.id}`} className="npc-btn npc-btn-secondary npc-btn-sm">
-              Xem toàn bộ bảng điểm của tôi →
-            </Link>
           </div>
-
-          <div className="assignments-table-wrap">
-            <table className="npc-table">
-              <thead>
-                <tr>
-                  <th>Bài tập</th>
-                  <th>Hạn nộp</th>
-                  <th>Điểm công bố</th>
-                  <th>Trạng thái</th>
-                  <th>Chi tiết</th>
-                </tr>
-              </thead>
-              <tbody>
-                {courseAssignments.map(ass => {
-                  const sub = submissions.find(
-                    s => s.assignmentId === ass.id && s.studentId === currentUser?.id
-                  );
-                  const grade = sub ? gradeRevisions.find(gr => gr.submissionId === sub.id && gr.status === 'published') : null;
-                  return (
-                    <tr key={ass.id}>
-                      <td><strong>{ass.title}</strong></td>
-                      <td>{formatDateVN(ass.dueAt)}</td>
-                      <td>
-                        {grade ? (
-                          <strong className="score-highlight">{formatScoreVN(grade.total)} / {ass.maxScore}</strong>
-                        ) : (
-                          <span className="text-muted">Chưa có điểm</span>
-                        )}
-                      </td>
-                      <td>
-                        {grade ? (
-                          <Badge variant="published" label="Đã công bố" />
-                        ) : sub ? (
-                          <Badge variant="submitted" label="Đang chờ chấm" />
-                        ) : (
-                          <Badge variant="pending" label="Chưa nộp" />
-                        )}
-                      </td>
-                      <td>
-                        <Link to={`/sv/bai-tap/${ass.id}`} className="npc-link-action">
-                          Xem bài làm
-                        </Link>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+          <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
+            <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <div>
+              <strong>{uiText("Phân hệ Chấm điểm & Bảng điểm (B12)")}</strong>
+              <span>
+                {uiText("Bảng điểm tổng hợp đang được phát triển tại phân hệ B12. Kết quả học tập và phản hồi chấm điểm sẽ được hiển thị khi phân hệ B12 được tích hợp.")}</span>
+            </div>
           </div>
         </section>
       )}
@@ -493,38 +674,55 @@ export const StudentCourseDetailPage: React.FC = () => {
       {activeTab === 'thong-bao' && (
         <section className="course-tab-panel">
           <div className="panel-header-row">
-            <h2 className="panel-title">Thông báo từ giảng viên</h2>
-            <Link to={`/sv/thong-bao?mon=${course.id}`} className="npc-btn npc-btn-secondary npc-btn-sm">
-              Tất cả thông báo →
-            </Link>
-          </div>
-
-          {courseAnnouncements.length === 0 ? (
-            <EmptyState
-              title="Không có thông báo"
-              description="Giảng viên chưa đăng thông báo nào trong môn học này."
-            />
-          ) : (
-            <div className="announcements-stack">
-              {courseAnnouncements.map(ann => {
-                const author = users.find(u => u.id === ann.authorId);
-                return (
-                  <article key={ann.id} className="announcement-item-card">
-                    <header className="ann-card-header">
-                      <h3 className="ann-card-title">{ann.title}</h3>
-                      <span className="ann-card-date">{formatDateVN(ann.publishedAt)}</span>
-                    </header>
-                    <p className="ann-card-content">{ann.body}</p>
-                    <footer className="ann-card-footer">
-                      <span className="ann-author">Người đăng: {author?.fullName || 'Giảng viên'}</span>
-                    </footer>
-                  </article>
-                );
-              })}
+            <div>
+              <h2 className="panel-title">{uiText("Thông báo từ giảng viên")}</h2>
+              <p className="panel-subtitle">{uiText("Các tin tức và cập nhật quan trọng từ giảng viên phụ trách môn học.")}</p>
             </div>
-          )}
+          </div>
+          <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
+            <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
+            <div>
+              <strong>{uiText("Kênh thông báo lớp học")}</strong>
+              <span>
+                {uiText("Kênh thông báo đang được nâng cấp đồng bộ theo thời gian thực với máy chủ.")}</span>
+            </div>
+          </div>
         </section>
       )}
+
+      {/* Modal xác nhận rút khỏi môn học */}
+      <Modal
+        isOpen={isWithdrawModalOpen}
+        onClose={() => !isWithdrawing && setIsWithdrawModalOpen(false)}
+        title={uiText("Xác nhận rút khỏi môn học")}
+        description={uiText("Bạn có chắc chắn muốn rút khỏi môn học \"{0} — {1}\"?",[course.code,course.name])}
+        size="sm"
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)' }}>
+            <Button
+              variant="secondary"
+              onClick={() => setIsWithdrawModalOpen(false)}
+              disabled={isWithdrawing}
+            >
+              {uiText("Hủy bỏ")}</Button>
+            <Button
+              variant="danger"
+              onClick={handleWithdraw}
+              disabled={isWithdrawing}
+              icon={<LogOut size={16} />}
+            >
+              {isWithdrawing ? uiText("Đang xử lý...") : uiText("Xác nhận rút môn")}
+            </Button>
+          </div>
+        }
+      >
+        <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-soft)', lineHeight: 1.6 }}>
+          <p style={{ margin: '0 0 var(--space-2) 0' }}>
+            {uiText("Sau khi rút khỏi môn học, bạn sẽ không còn quyền truy cập vào danh sách bài học và tài liệu của môn học này.")}</p>
+          <p style={{ margin: 0, color: 'var(--danger, #dc2626)' }}>
+            {uiText("Lưu ý: Để tham gia lại môn học, bạn sẽ cần gửi yêu cầu ghi danh mới và chờ giảng viên phê duyệt.")}</p>
+        </div>
+      </Modal>
     </div>
   );
 };

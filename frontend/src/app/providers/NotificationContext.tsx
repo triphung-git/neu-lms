@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
 import './Notification.css';
@@ -62,7 +63,7 @@ export const NotificationProvider: React.FC<{ children: React.ReactNode }> = ({ 
             <button
               className="toast-close"
               onClick={() => removeToast(t.id)}
-              aria-label="Đóng thông báo"
+              aria-label={uiText("Đóng thông báo")}
             >
               <X size={14} />
             </button>

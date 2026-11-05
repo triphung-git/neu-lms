@@ -159,3 +159,12 @@
 .w-full {
   width: 100%;
 }
+
+.course-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  color: var(--muted);
+  font-size: var(--text-sm);
+}

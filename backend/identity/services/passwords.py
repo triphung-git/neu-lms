@@ -53,7 +53,17 @@ def cleanup_expired_auth_data(*, now=None):
         models.Q(expires_at__lt=now) | models.Q(used_at__lt=token_cutoff)
     ).delete()
 
-    return {"buckets_deleted": buckets_deleted, "tokens_deleted": tokens_deleted}
+    from identity.models import EmailVerificationToken
+
+    verification_tokens_deleted, _ = EmailVerificationToken.objects.filter(
+        models.Q(expires_at__lt=now) | models.Q(used_at__lt=token_cutoff)
+    ).delete()
+
+    return {
+        "buckets_deleted": buckets_deleted,
+        "tokens_deleted": tokens_deleted,
+        "verification_tokens_deleted": verification_tokens_deleted,
+    }
 
 
 def rate_limit(*, scope, identity, maximum=10):
@@ -132,7 +142,7 @@ def request_password_reset(*, email):
     token.digest = digest(raw_token)
     token.save()
 
-    delivery = PasswordResetDelivery.objects.create(
+    PasswordResetDelivery.objects.create(
         token=token,
         user=user,
         email=user.email,
@@ -140,10 +150,7 @@ def request_password_reset(*, email):
         attempts=0,
         max_attempts=3,
     )
-
-    from identity.transport import deliver_password_reset
-
-    transaction.on_commit(lambda: deliver_password_reset(delivery.id))
+    # Delivery committed with status PENDING. Dispatcher will send email asynchronously.
 
 
 @transaction.atomic

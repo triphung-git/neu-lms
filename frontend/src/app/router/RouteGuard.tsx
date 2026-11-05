@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
 import { useSession } from '../providers/SessionContext';
@@ -19,10 +20,9 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({ allowedRoles, children }
   if (status === 'network-error') {
     return (
       <div className="network-error-fallback" style={{ padding: '2rem', textAlign: 'center' }} role="alert">
-        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>Không thể kết nối đến máy chủ</h2>
+        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, marginBottom: '0.5rem' }}>{uiText("Không thể kết nối đến máy chủ")}</h2>
         <p style={{ color: 'var(--text-muted, #64748b)', marginBottom: '1rem' }}>
-          Đã xảy ra lỗi kết nối mạng. Vui lòng kiểm tra lại đường truyền.
-        </p>
+          {uiText("Đã xảy ra lỗi kết nối mạng. Vui lòng kiểm tra lại đường truyền.")}</p>
         <button
           onClick={() => refreshSession()}
           style={{
@@ -34,8 +34,7 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({ allowedRoles, children }
             cursor: 'pointer',
           }}
         >
-          Thử lại
-        </button>
+          {uiText("Thử lại")}</button>
       </div>
     );
   }

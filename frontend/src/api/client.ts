@@ -1,3 +1,5 @@
+import {currentLanguage} from '../shared/i18n/translate';
+import {uiText} from "../shared/i18n/translate";
 import type { paths, components } from './schema';
 
 export type ErrorEnvelope = components['schemas']['ErrorEnvelope'];
@@ -13,7 +15,7 @@ export class ApiError extends Error {
     status: number,
     errorData: Partial<ErrorEnvelope['error']> & { message?: string; code?: string }
   ) {
-    super(errorData.message || 'Đã xảy ra lỗi API');
+    super(errorData.message || uiText("Đã xảy ra lỗi API"));
     this.name = 'ApiError';
     this.status = status;
     this.code = errorData.code || 'unknown_error';
@@ -213,6 +215,7 @@ export class ApiClient {
     }
 
     const reqHeaders = new Headers(headers);
+    if(!reqHeaders.has('Accept-Language'))reqHeaders.set('Accept-Language',currentLanguage());
     if (!reqHeaders.has('Accept')) {
       reqHeaders.set('Accept', 'application/json');
     }
@@ -281,7 +284,7 @@ export class ApiClient {
       }
       throw new ApiError(response.status, {
         code: 'http_error',
-        message: response.statusText || `Lỗi HTTP ${response.status}`,
+        message: response.statusText || uiText("Lỗi HTTP {0}",[response.status]),
         request_id: reqIdHeader,
         correlation_id: reqIdHeader,
       });

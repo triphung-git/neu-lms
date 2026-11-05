@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React from 'react';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -14,7 +15,7 @@ interface BreadcrumbProps {
 
 export const Breadcrumb: React.FC<BreadcrumbProps> = ({ items }) => {
   return (
-    <nav aria-label="Đường dẫn điều hướng" className="breadcrumb-nav">
+    <nav aria-label={uiText("Đường dẫn điều hướng")} className="breadcrumb-nav">
       <ol className="breadcrumb-list">
         {items.map((item, idx) => {
           const isLast = idx === items.length - 1;

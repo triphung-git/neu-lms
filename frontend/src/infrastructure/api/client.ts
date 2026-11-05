@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 const API_BASE = '/api/v1'
 
 export class ApiError extends Error {
@@ -31,7 +32,7 @@ function getErrorMessage(data: unknown): string {
       .join('\n')
   }
 
-  return 'Yêu cầu không thành công.'
+  return uiText("Yêu cầu không thành công.")
 }
 
 async function readResponse(response: Response): Promise<unknown> {
@@ -47,7 +48,7 @@ async function readResponse(response: Response): Promise<unknown> {
 
   // Không đưa nguyên trang lỗi HTML của server lên giao diện.
   throw new ApiError(
-    'Máy chủ trả về phản hồi không hợp lệ. Kiểm tra backend và proxy.',
+    uiText("Máy chủ trả về phản hồi không hợp lệ. Kiểm tra backend và proxy."),
     response.status,
   )
 }
@@ -70,7 +71,7 @@ async function getCsrfToken(): Promise<string> {
     !('csrfToken' in data) ||
     typeof data.csrfToken !== 'string'
   ) {
-    throw new ApiError('Không lấy được mã CSRF.', response.status)
+    throw new ApiError(uiText("Không lấy được mã CSRF."), response.status)
   }
 
   return data.csrfToken

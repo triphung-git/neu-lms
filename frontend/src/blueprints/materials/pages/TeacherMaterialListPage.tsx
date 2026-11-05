@@ -1,350 +1,521 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useNotification } from '../../../app/providers/NotificationContext';
-import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
-import { Badge } from '../../../shared/ui/Badge';
-import { Modal } from '../../../shared/ui/Modal';
-import { Button } from '../../../shared/ui/Button';
-import { SelectField } from '../../../shared/ui/TextField';
-import { EmptyState } from '../../../shared/ui/EmptyState';
-import { formatDateVN } from '../../../shared/kernel/formatting';
-import type { Material, MaterialVersion, Course, Lesson } from '../../../shared/kernel/types';
+import {currentLocale} from '../../../shared/i18n/translate';
+import {uiText} from "../../../shared/i18n/translate";
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { useParams, useOutletContext, useNavigate, Link } from 'react-router-dom';
 import {
-  Upload,
+  materialsService,
+  type MaterialListItem,
+} from '../../../api/materialsService';
+import { coursesService, type Chapter, type Course } from '../../../api/coursesService';
+import { CourseFilePolicyPage } from '../../files/pages/CourseFilePolicyPage';
+import { useNotification } from '../../../app/providers/NotificationContext';
+import { Badge } from '../../../shared/ui/Badge';
+import { Button } from '../../../shared/ui/Button';
+import { EmptyState } from '../../../shared/ui/EmptyState';
+import { ErrorBanner } from '../../../shared/ui/ErrorBanner';
+import { LoadingSkeleton } from '../../../shared/ui/LoadingSkeleton';
+import { Modal } from '../../../shared/ui/Modal';
+import { formatFileSize } from '../../../shared/kernel/formatting';
+import {
+  BookOpen,
+  FileText,
+  UploadCloud,
+  Layers,
+  Settings,
   Eye,
-  AlertTriangle,
-  ArrowRight
+  EyeOff,
+  Trash2,
+  CheckCircle2,
+  FolderOpen,
+  ExternalLink,
 } from 'lucide-react';
 import './TeacherMaterialListPage.css';
 
-export const TeacherMaterialListPage: React.FC = () => {
+export interface TeacherMaterialListPageProps {
+  initialTab?: 'materials' | 'files' | 'policy';
+}
+
+export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = ({
+  initialTab = 'materials',
+}) => {
   const { monId } = useParams<{ monId: string }>();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { courses, lessons, materials, materialVersions, updateMaterial } = useDatabase();
-  const { notifySuccess, notifyError } = useNotification();
+  const outletContext = useOutletContext<{ course?: Course; isArchived?: boolean } | null>();
   const navigate = useNavigate();
+  const { notifySuccess, notifyError } = useNotification();
 
-  const course = courses.find((c: Course) => c.id === monId || c.code.toLowerCase() === monId?.toLowerCase());
-  const isArchived = course?.status === 'archived';
+  const [course, setCourse] = useState<Course | null>(outletContext?.course || null);
+  const [courseLoading, setCourseLoading] = useState(!outletContext?.course);
+  const isArchived = Boolean(outletContext?.isArchived || course?.status === 'archived');
 
-  const filterLesson = searchParams.get('bai') || 'all';
-  const filterType = searchParams.get('loai') || 'all';
-  const filterVis = searchParams.get('quyen') || 'all';
+  const [activeTab, setActiveTab] = useState<'materials' | 'files' | 'policy'>(initialTab);
 
-  // Publish to class confirmation modal
-  const [pendingVisibilityChange, setPendingVisibilityChange] = useState<{
-    materialId: string;
-    newVis: 'draft' | 'class' | 'hidden';
-    materialTitle: string;
-  } | null>(null);
+  // Materials State
+  const [materials, setMaterials] = useState<MaterialListItem[]>([]);
+  const [materialsLoading, setMaterialsLoading] = useState(true);
+  const [materialsError, setMaterialsError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const courseLessons = useMemo(() => {
-    return lessons;
-  }, [lessons]);
+  // Filter States
+  const [chapters, setChapters] = useState<Chapter[]>([]);
+  const [selectedChapterId, setSelectedChapterId] = useState<string>('all');
+  const [tagFilter, setTagFilter] = useState<string>('');
 
-  const courseMaterials = useMemo(() => {
-    if (!course) return [];
-    return materials.filter((m: Material) => m.courseId === course.id);
-  }, [materials, course]);
+  // Mutation Action Loaders (per material ID)
+  const [actionLoading, setActionLoading] = useState<Record<string, boolean>>({});
 
-  const enrichedMaterials = useMemo(() => {
-    return courseMaterials.map((m: Material) => {
-      const ver = materialVersions.find((v: MaterialVersion) => v.id === m.currentVersionId);
-      const ext = ver?.filename ? ver.filename.split('.').pop()?.toUpperCase() || 'PDF' : 'PDF';
-      return {
-        material: m,
-        currentVersion: ver,
-        fileType: ext,
-        versionNumber: ver?.versionNumber || 1,
-        scanStatus: ver?.scanStatus || 'clean',
-        indexStatus: ver?.indexStatus || 'success',
-        updatedAt: ver?.uploadedAt || new Date().toISOString(),
-      };
-    });
-  }, [courseMaterials, materialVersions]);
+  // Delete Material Confirmation Modal
+  const [pendingDeleteMaterial, setPendingDeleteMaterial] = useState<MaterialListItem | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
-  const filteredMaterials = useMemo(() => {
-    return enrichedMaterials.filter((item) => {
-      const m = item.material;
-      if (filterLesson !== 'all' && m.lessonId !== filterLesson) return false;
-      if (filterType !== 'all' && item.fileType.toUpperCase() !== filterType.toUpperCase()) return false;
-      if (filterVis !== 'all' && m.visibility !== filterVis) return false;
-      return true;
-    });
-  }, [enrichedMaterials, filterLesson, filterType, filterVis]);
+  // Sequence guard
+  const reqSeq = useRef(0);
 
-  if (!course) {
+  // 1. Load course if not from outlet
+  useEffect(() => {
+    if (outletContext?.course) {
+      setCourse(outletContext.course);
+      setCourseLoading(false);
+      return;
+    }
+    if (!monId) return;
+
+    let mounted = true;
+    coursesService
+      .get(monId)
+      .then((c) => {
+        if (mounted) {
+          setCourse(c);
+          setCourseLoading(false);
+        }
+      })
+      .catch((err) => {
+        if (mounted) {
+          setMaterialsError(err instanceof Error ? err.message : uiText("Không thể tải thông tin môn học."));
+          setCourseLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [monId, outletContext]);
+
+  // 2. Load chapters for filter
+  useEffect(() => {
+    if (!monId) return;
+    coursesService
+      .listChapters(monId)
+      .then(setChapters)
+      .catch(() => setChapters([]));
+  }, [monId]);
+
+  // 3. Load Materials
+  const loadMaterials = useCallback(async () => {
+    if (!monId) return;
+    const seq = ++reqSeq.current;
+    setMaterialsLoading(true);
+    setMaterialsError(null);
+
+    try {
+      const res = await materialsService.listMaterials(monId, {
+        page,
+        page_size: 10,
+        chapter_id: selectedChapterId !== 'all' ? selectedChapterId : undefined,
+        tag: tagFilter.trim() || undefined,
+      });
+
+      if (seq !== reqSeq.current) return;
+      setMaterials(res.items || []);
+      setTotalPages(res.pagination?.total_pages || 1);
+      setTotalItems(res.pagination?.total_items || 0);
+    } catch (err) {
+      if (seq !== reqSeq.current) return;
+      setMaterialsError(err instanceof Error ? err.message : uiText("Lỗi khi tải danh sách học liệu."));
+    } finally {
+      if (seq === reqSeq.current) {
+        setMaterialsLoading(false);
+      }
+    }
+  }, [monId, page, selectedChapterId, tagFilter]);
+
+  useEffect(() => {
+    if (activeTab === 'materials' && monId) {
+      void loadMaterials();
+    }
+  }, [activeTab, monId, loadMaterials]);
+
+  // Action: Publish Latest Version
+  const handlePublish = async (mat: MaterialListItem) => {
+    if (!monId) return;
+    if (actionLoading[mat.id]) return;
+
+    setActionLoading((prev) => ({ ...prev, [mat.id]: true }));
+    try {
+      const versions = await materialsService.listVersions(monId, mat.id);
+      const targetVersion = versions.find((v) => v.lifecycle_status === 'finalized') || versions[0];
+      if (!targetVersion) {
+        throw new Error(uiText("Chưa có phiên bản nào sẵn sàng để công bố."));
+      }
+      await materialsService.publishMaterial(monId, mat.id, {
+        version_id: targetVersion.id,
+      });
+      notifySuccess(uiText("Đã công bố học liệu \"{0}\" (phiên bản v{1}).",[mat.title,targetVersion.version_number]));
+      await loadMaterials();
+    } catch (err) {
+      notifyError(err instanceof Error ? err.message : uiText("Công bố học liệu thất bại."));
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [mat.id]: false }));
+    }
+  };
+
+  // Action: Toggle Hide / Unhide
+  const handleToggleHide = async (mat: MaterialListItem) => {
+    if (!monId) return;
+    if (actionLoading[mat.id]) return;
+
+    setActionLoading((prev) => ({ ...prev, [mat.id]: true }));
+    try {
+      if (mat.is_hidden) {
+        await materialsService.unhideMaterial(monId, mat.id);
+        notifySuccess(uiText("Đã hiện học liệu \"{0}\" cho sinh viên.",[mat.title]));
+      } else {
+        await materialsService.hideMaterial(monId, mat.id);
+        notifySuccess(uiText("Đã ẩn học liệu \"{0}\" khỏi sinh viên.",[mat.title]));
+      }
+      await loadMaterials();
+    } catch (err) {
+      notifyError(err instanceof Error ? err.message : uiText("Thao tác ẩn/hiện thất bại."));
+    } finally {
+      setActionLoading((prev) => ({ ...prev, [mat.id]: false }));
+    }
+  };
+
+  // Action: Delete Material
+  const handleConfirmDelete = async () => {
+    if (!monId || !pendingDeleteMaterial) return;
+    setIsDeleting(true);
+    try {
+      await materialsService.deleteMaterial(monId, pendingDeleteMaterial.id);
+      notifySuccess(uiText("Đã xóa học liệu \"{0}\".",[pendingDeleteMaterial.title]));
+      setPendingDeleteMaterial(null);
+      await loadMaterials();
+    } catch (err) {
+      notifyError(err instanceof Error ? err.message : uiText("Xóa học liệu thất bại."));
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // If Tab is Files or Policy, render CourseFilePolicyPage preserving 100% B08 capability
+  if (activeTab === 'files') {
     return (
-      <div className="materials-list-container">
-        <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại trên hệ thống."
-          action={
-            <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
-          }
-        />
+      <div>
+        <div className="teacher-materials-nav-tabs" role="tablist">
+          <button
+            type="button"
+            className="teacher-materials-tab-btn"
+            onClick={() => setActiveTab('materials')}
+          >
+            <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
+          <button
+            type="button"
+            className="teacher-materials-tab-btn active"
+            onClick={() => setActiveTab('files')}
+          >
+            <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
+          <button
+            type="button"
+            className="teacher-materials-tab-btn"
+            onClick={() => setActiveTab('policy')}
+          >
+            <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
+        </div>
+        <CourseFilePolicyPage initialTab="files" />
       </div>
     );
   }
 
-  const handleLessonFilter = (lId: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (lId === 'all') next.delete('bai');
-    else next.set('bai', lId);
-    setSearchParams(next);
-  };
-
-  const handleTypeFilter = (t: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (t === 'all') next.delete('loai');
-    else next.set('loai', t);
-    setSearchParams(next);
-  };
-
-  const handleVisFilter = (v: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (v === 'all') next.delete('quyen');
-    else next.set('quyen', v);
-    setSearchParams(next);
-  };
-
-  const handleTriggerVisibility = (mat: Material, newVis: 'draft' | 'class' | 'hidden') => {
-    if (newVis === 'class') {
-      setPendingVisibilityChange({
-        materialId: mat.id,
-        newVis: 'class',
-        materialTitle: mat.title
-      });
-      return;
-    }
-
-    const res = updateMaterial(mat.id, { visibility: newVis });
-    if (res.ok) {
-      notifySuccess(`Đã chuyển quyền hiển thị học liệu sang "${newVis === 'draft' ? 'Bản nháp' : 'Tạm ẩn'}".`);
-    } else {
-      notifyError(res.error?.message || 'Có lỗi xảy ra');
-    }
-  };
-
-  const handleConfirmPublishToClass = () => {
-    if (!pendingVisibilityChange) return;
-
-    const targetMat = materials.find((m) => m.id === pendingVisibilityChange.materialId);
-    const publishedIds = targetMat?.publishedVersionIds ? [...targetMat.publishedVersionIds] : [];
-    if (targetMat?.currentVersionId && !publishedIds.includes(targetMat.currentVersionId)) {
-      publishedIds.push(targetMat.currentVersionId);
-    }
-
-    const res = updateMaterial(pendingVisibilityChange.materialId, {
-      visibility: 'class',
-      publishedVersionIds: publishedIds,
-    });
-    if (res.ok) {
-      notifySuccess(`Đã công bố học liệu "${pendingVisibilityChange.materialTitle}" cho toàn bộ sinh viên trong lớp.`);
-      setPendingVisibilityChange(null);
-    } else {
-      notifyError(res.error?.message || 'Có lỗi xảy ra');
-    }
-  };
-
-  return (
-    <div className="teacher-materials-page">
-      <div className="page-header-row">
-        <div>
-          <Breadcrumb
-            items={[
-              { label: 'Bàn làm việc', path: '/gv' },
-              { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-              { label: 'Quản lý học liệu' }
-            ]}
-          />
-          <h1 className="page-main-heading">Học liệu môn học</h1>
-          <p className="page-subtitle">
-            Tải lên tài liệu giảng dạy, theo dõi quét mã độc an ninh và quản lý quyền hiển thị cho sinh viên.
-          </p>
+  if (activeTab === 'policy') {
+    return (
+      <div>
+        <div className="teacher-materials-nav-tabs" role="tablist">
+          <button
+            type="button"
+            className="teacher-materials-tab-btn"
+            onClick={() => setActiveTab('materials')}
+          >
+            <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
+          <button
+            type="button"
+            className="teacher-materials-tab-btn"
+            onClick={() => setActiveTab('files')}
+          >
+            <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
+          <button
+            type="button"
+            className="teacher-materials-tab-btn active"
+            onClick={() => setActiveTab('policy')}
+          >
+            <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
         </div>
+        <CourseFilePolicyPage initialTab="policy" />
+      </div>
+    );
+  }
 
+  // Active Tab: Materials
+  return (
+    <div className="teacher-materials-container">
+      {/* Tab Navigation */}
+      <div className="teacher-materials-nav-tabs" role="tablist">
+        <button
+          type="button"
+          className="teacher-materials-tab-btn active"
+          onClick={() => setActiveTab('materials')}
+        >
+          <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
+        <button
+          type="button"
+          className="teacher-materials-tab-btn"
+          onClick={() => setActiveTab('files')}
+        >
+          <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
+        <button
+          type="button"
+          className="teacher-materials-tab-btn"
+          onClick={() => setActiveTab('policy')}
+        >
+          <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
+      </div>
+
+      {/* Header */}
+      <div className="teacher-materials-header">
+        <div>
+          <h2>{uiText("Quản lý học liệu môn học")}</h2>
+          <p>{uiText("Quản lý tài liệu theo phiên bản, trích xuất nội dung văn bản và kiểm soát xuất bản.")}</p>
+        </div>
         {!isArchived && (
-          <Link to={`/gv/mon-hoc/${course.id}/hoc-lieu/tai-len`} className="npc-btn npc-btn-primary">
-            <Upload size={18} />
-            <span>Tải lên học liệu</span>
-          </Link>
+          <Button
+            variant="primary"
+            icon={<UploadCloud size={16} />}
+            onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/tai-len`)}
+          >
+            {uiText("Tải lên học liệu mới")}</Button>
         )}
       </div>
 
-      {isArchived && (
-        <div className="archived-warning-alert" role="alert">
-          <AlertTriangle size={20} />
-          <span>
-            Môn học đã lưu trữ: Toàn bộ học liệu ở trạng thái chỉ đọc. Không thể tải lên phiên bản mới hoặc thay đổi quyền hiển thị.
-          </span>
-        </div>
-      )}
-
-      {/* Filters Bar */}
-      <div className="materials-filter-bar">
-        <div className="filter-item">
-          <SelectField
-            label="Lọc theo bài học"
-            value={filterLesson}
-            onChange={(e) => handleLessonFilter(e.target.value)}
-            options={[
-              { value: 'all', label: 'Tất cả bài học' },
-              ...courseLessons.map((l: Lesson) => ({ value: l.id, label: l.title }))
-            ]}
-          />
+      {/* Filter Bar */}
+      <div className="teacher-materials-filter-bar">
+        <div className="teacher-materials-filter-group">
+          <label htmlFor="chapter-filter">{uiText("Chương học:")}</label>
+          <select
+            id="chapter-filter"
+            value={selectedChapterId}
+            onChange={(e) => {
+              setSelectedChapterId(e.target.value);
+              setPage(1);
+            }}
+          >
+            <option value="all">{uiText("Tất cả chương")}</option>
+            {chapters.map((ch) => (
+              <option key={ch.id} value={ch.id}>
+                {ch.title}
+              </option>
+            ))}
+          </select>
         </div>
 
-        <div className="filter-item">
-          <SelectField
-            label="Loại tệp"
-            value={filterType}
-            onChange={(e) => handleTypeFilter(e.target.value)}
-            options={[
-              { value: 'all', label: 'Tất cả định dạng' },
-              { value: 'pdf', label: 'PDF' },
-              { value: 'docx', label: 'DOCX / Word' },
-              { value: 'pptx', label: 'PPTX / Slide' },
-              { value: 'zip', label: 'ZIP' }
-            ]}
-          />
-        </div>
-
-        <div className="filter-item">
-          <SelectField
-            label="Quyền hiển thị"
-            value={filterVis}
-            onChange={(e) => handleVisFilter(e.target.value)}
-            options={[
-              { value: 'all', label: 'Tất cả quyền' },
-              { value: 'class', label: 'Công khai cả lớp' },
-              { value: 'draft', label: 'Bản nháp riêng tư' },
-              { value: 'hidden', label: 'Tạm ẩn' }
-            ]}
+        <div className="teacher-materials-filter-group">
+          <label htmlFor="tag-filter">{uiText("Thẻ (Tag):")}</label>
+          <input
+            id="tag-filter"
+            type="text"
+            placeholder={uiText("Lọc theo thẻ...")}
+            value={tagFilter}
+            onChange={(e) => {
+              setTagFilter(e.target.value);
+              setPage(1);
+            }}
           />
         </div>
       </div>
 
-      {/* Table */}
-      {filteredMaterials.length === 0 ? (
+      {/* Content Area */}
+      {courseLoading || materialsLoading ? (
+        <LoadingSkeleton lines={6} />
+      ) : materialsError ? (
+        <ErrorBanner
+          title={uiText("Không thể tải danh sách học liệu")}
+          message={materialsError}
+          onRetry={() => void loadMaterials()}
+        />
+      ) : materials.length === 0 ? (
         <EmptyState
-          title="Chưa có học liệu"
-          description="Chưa có tài liệu nào trong môn học này hoặc không có tài liệu khớp với bộ lọc."
+          title={uiText("Chưa có học liệu nào")}
+          description={uiText("Môn học chưa có tài liệu học tập nào được tải lên.")}
           action={
             !isArchived ? (
-              <Button variant="primary" onClick={() => navigate(`/gv/mon-hoc/${course.id}/hoc-lieu/tai-len`)}>
-                Tải lên học liệu đầu tiên
-              </Button>
+              <Button
+                variant="primary"
+                icon={<UploadCloud size={16} />}
+                onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/tai-len`)}
+              >
+                {uiText("Tải lên học liệu đầu tiên")}</Button>
             ) : undefined
           }
         />
       ) : (
-        <div className="materials-table-wrapper">
-          <table className="npc-table">
-            <thead>
-              <tr>
-                <th>Tên học liệu</th>
-                <th>Bài học</th>
-                <th>Loại tệp</th>
-                <th>Phiên bản</th>
-                <th>Quét an ninh</th>
-                <th>Chỉ mục AI</th>
-                <th>Quyền hiển thị</th>
-                <th>Cập nhật</th>
-                <th>Thao tác</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredMaterials.map(({ material: mat, fileType, versionNumber, scanStatus, indexStatus, updatedAt }) => {
-                const l = lessons.find((lsn: Lesson) => lsn.id === mat.lessonId);
-                return (
-                  <tr key={mat.id}>
-                    <td>
-                      <Link to={`/gv/hoc-lieu/${mat.id}`} className="mat-title-link">
-                        <strong>{mat.title}</strong>
-                      </Link>
-                    </td>
-                    <td>{l ? l.title : '—'}</td>
-                    <td>
-                      <span className="file-badge">{fileType}</span>
-                    </td>
-                    <td>v{versionNumber}</td>
-                    <td>
-                      <Badge
-                        variant={scanStatus === 'clean' ? 'ready' : scanStatus === 'infected' ? 'error' : 'processing'}
-                        label={scanStatus === 'clean' ? 'Sạch' : scanStatus === 'infected' ? 'Mã độc' : 'Đang quét'}
-                      />
-                    </td>
-                    <td>
-                      <Badge
-                        variant={indexStatus === 'success' ? 'ready' : indexStatus === 'error' ? 'error' : 'processing'}
-                        label={indexStatus === 'success' ? 'Đã index' : indexStatus === 'error' ? 'Lỗi index' : 'Chờ xử lý'}
-                      />
-                    </td>
-                    <td>
-                      {!isArchived ? (
-                        <select
-                          className="vis-select-dropdown"
-                          value={mat.visibility}
-                          onChange={(e) => handleTriggerVisibility(mat, e.target.value as any)}
-                        >
-                          <option value="draft">Bản nháp</option>
-                          <option value="class">Cả lớp</option>
-                          <option value="hidden">Tạm ẩn</option>
-                        </select>
-                      ) : (
+        <div className="teacher-materials-grid">
+          {materials.map((mat) => {
+            const hasPublished = mat.published_version_number !== null;
+            const canPublish =
+              !isArchived &&
+              (mat.published_version_number === null ||
+                mat.published_version_number < mat.latest_version_number);
+            const tagList = Array.isArray(mat.tags) ? (mat.tags as string[]) : [];
+
+            return (
+              <div key={mat.id} className="teacher-material-card">
+                <div className="teacher-material-card-top">
+                  <div className="teacher-material-card-main">
+                    <Link
+                      to={`/gv/mon-hoc/${monId}/hoc-lieu/${mat.id}`}
+                      className="teacher-material-card-title"
+                    >
+                      <BookOpen size={18} />
+                      {mat.title}
+                    </Link>
+
+                    <div className="teacher-material-card-badges">
+                      <Badge variant="neutral" label={mat.material_type} />
+                      {hasPublished ? (
                         <Badge
-                          variant={mat.visibility === 'class' ? 'published' : 'draft'}
-                          label={mat.visibility === 'class' ? 'Cả lớp' : 'Bản nháp'}
+                          variant="published"
+                          label={uiText("Đã công bố (v{0})",[mat.published_version_number])}
                         />
+                      ) : (
+                        <Badge variant="draft" label={uiText("Bản nháp")} />
                       )}
-                    </td>
-                    <td>{formatDateVN(updatedAt)}</td>
-                    <td>
-                      <Link to={`/gv/hoc-lieu/${mat.id}`} className="npc-btn npc-btn-secondary npc-btn-sm">
-                        <span>Chi tiết</span>
-                        <ArrowRight size={14} />
-                      </Link>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      {mat.is_hidden && <Badge variant="locked" label={uiText("Đang ẩn")} />}
+                      {tagList.map((t) => (
+                        <Badge key={t} variant="info" label={`#${t}`} />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="teacher-material-card-actions">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      icon={<ExternalLink size={14} />}
+                      onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
+                    >
+                      {uiText("Chi tiết & Phiên bản")}</Button>
+
+                    {canPublish && (
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        disabled={actionLoading[mat.id]}
+                        icon={<CheckCircle2 size={14} />}
+                        onClick={() => void handlePublish(mat)}
+                      >
+                        {actionLoading[mat.id] ? uiText("Đang xử lý...") : uiText("Công bố v{0}",[mat.latest_version_number])}
+                      </Button>
+                    )}
+
+                    {hasPublished && !isArchived && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled={actionLoading[mat.id]}
+                        icon={mat.is_hidden ? <Eye size={14} /> : <EyeOff size={14} />}
+                        onClick={() => void handleToggleHide(mat)}
+                      >
+                        {mat.is_hidden ? uiText("Hiện") : uiText("Ẩn")}
+                      </Button>
+                    )}
+
+                    {!hasPublished && !isArchived && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        icon={<Trash2 size={14} />}
+                        onClick={() => setPendingDeleteMaterial(mat)}
+                      >
+                        {uiText("Xóa")}</Button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="teacher-material-card-meta">
+                  <span>
+                    <Layers size={14} style={{ display: 'inline', marginRight: 4 }} />
+                    {uiText("Phiên bản mới nhất: v")}{mat.latest_version_number}
+                  </span>
+                  <span>
+                    <FileText size={14} style={{ display: 'inline', marginRight: 4 }} />
+                    {mat.file_count} {uiText(" tệp tin (")}{formatFileSize(mat.total_size_bytes)})
+                  </span>
+                  <span>{uiText("Tạo ngày: ")}{new Date(mat.created_at).toLocaleDateString(currentLocale())}</span>
+                </div>
+              </div>
+            );
+          })}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="pagination-controls">
+              <span>
+                Trang {page} / {totalPages} {uiText(" (Tổng số ")}{totalItems} {uiText(" học liệu)")}</span>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                >
+                  {uiText("Trang trước")}</Button>
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  disabled={page >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                >
+                  Trang sau
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Modal Confirm Publish to Class */}
-      {pendingVisibilityChange && (
-        <Modal
-          title="Xác nhận công bố học liệu cho cả lớp"
-          isOpen={Boolean(pendingVisibilityChange)}
-          onClose={() => setPendingVisibilityChange(null)}
-        >
-          <div className="publish-modal-content">
-            <p>
-              Bạn sắp công bố tài liệu <strong>"{pendingVisibilityChange.materialTitle}"</strong> cho toàn bộ sinh viên đang học môn <strong>{course.name} ({course.code})</strong>.
-            </p>
-            <div className="alert-notice-box">
-              <Eye size={18} />
-              <span>
-                Sinh viên trong lớp sẽ có thể xem, tải xuống và tương tác hỏi đáp với Trợ lý AI dựa trên nội dung tài liệu này.
-              </span>
-            </div>
-            <div className="modal-actions-bar">
-              <Button type="button" variant="secondary" onClick={() => setPendingVisibilityChange(null)}>
-                Hủy bỏ
-              </Button>
-              <Button type="button" variant="primary" onClick={handleConfirmPublishToClass}>
-                Xác nhận công bố
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      {/* Delete Confirmation Modal */}
+      <Modal
+        isOpen={Boolean(pendingDeleteMaterial)}
+        onClose={() => setPendingDeleteMaterial(null)}
+        title={uiText("Xác nhận xóa bản nháp học liệu")}
+      >
+        <p>
+          {uiText("Bạn có chắc chắn muốn xóa học liệu ")}<strong>{pendingDeleteMaterial?.title}</strong>{uiText("? Thao tác này sẽ xóa bản nháp và không thể khôi phục.")}</p>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
+          <Button
+            variant="secondary"
+            onClick={() => setPendingDeleteMaterial(null)}
+            disabled={isDeleting}
+          >
+            {uiText("Hủy")}</Button>
+          <Button
+            variant="danger"
+            onClick={() => void handleConfirmDelete()}
+            disabled={isDeleting}
+          >
+            {isDeleting ? uiText("Đang xóa...") : uiText("Xóa học liệu")}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 };

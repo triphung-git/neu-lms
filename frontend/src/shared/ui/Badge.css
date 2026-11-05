@@ -99,3 +99,48 @@
 .badge-no-text .badge-dot {
   background-color: #999;
 }
+
+.badge-success {
+  background-color: #eaf5eb;
+  color: var(--success);
+  border-color: #c7e6c9;
+}
+.badge-success .badge-dot {
+  background-color: var(--success);
+}
+
+.badge-warning {
+  background-color: #fef7e0;
+  color: var(--warning);
+  border-color: #f9e29f;
+}
+.badge-warning .badge-dot {
+  background-color: var(--warning);
+}
+
+.badge-danger {
+  background-color: #fdeeee;
+  color: var(--danger);
+  border-color: #f8c8c6;
+}
+.badge-danger .badge-dot {
+  background-color: var(--danger);
+}
+
+.badge-info {
+  background-color: #e6f7fb;
+  color: #00677f;
+  border-color: #b8eaf5;
+}
+.badge-info .badge-dot {
+  background-color: var(--accent);
+}
+
+.badge-neutral {
+  background-color: var(--surface-soft);
+  color: var(--muted);
+  border-color: var(--border);
+}
+.badge-neutral .badge-dot {
+  background-color: var(--muted);
+}

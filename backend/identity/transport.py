@@ -157,7 +157,7 @@ def deliver_password_reset(delivery_id):
 
 
 def retry_pending_reset_deliveries(max_batch: int = 50):
-    """Retry deliveries that are pending or have stale processing status.
+    """Retry password reset deliveries that are pending or have stale processing status.
 
     Ignores expired or consumed tokens.
     """
@@ -183,3 +183,172 @@ def retry_pending_reset_deliveries(max_batch: int = 50):
         if delivery:
             results.append(delivery)
     return results
+
+
+def derive_email_verification_token(token) -> str:
+    """Deterministically derive a 256-bit token from verification token metadata and SECRET_KEY."""
+    import hashlib
+    import hmac
+
+    ts = int(token.created_at.timestamp())
+    msg = f"email-verification:{token.id}:{token.user_id}:{token.auth_version}:{ts}".encode()
+    secret = settings.SECRET_KEY.encode("utf-8")
+    return hmac.new(secret, msg, hashlib.sha256).hexdigest()
+
+
+def deliver_email_verification(delivery_id):
+    """Deliver email verification email with delivery state tracking and retry limits.
+
+    Invariants:
+    1. No network I/O in database transaction.
+    2. Idempotent & Duplicate-dispatch safe.
+    3. Zero token leakage.
+    4. Fragment-based URL: '#token=...'.
+    """
+    from identity.models import EmailVerificationDelivery
+    from identity.services.common import digest
+
+    # Step 1: Check and reserve delivery record inside a quick atomic transaction
+    with transaction.atomic():
+        delivery = (
+            EmailVerificationDelivery.objects.select_for_update()
+            .select_related("token", "user")
+            .filter(pk=delivery_id)
+            .first()
+        )
+        if delivery is None:
+            logger.warning(
+                "Email verification delivery record not found (delivery_id=%s)",
+                delivery_id,
+            )
+            return None
+
+        if delivery.status == EmailVerificationDelivery.Status.SENT:
+            return delivery
+
+        now = timezone.now()
+        if delivery.status == EmailVerificationDelivery.Status.PROCESSING:
+            stale_threshold = now - timezone.timedelta(minutes=5)
+            if delivery.last_attempt_at and delivery.last_attempt_at > stale_threshold:
+                return delivery
+
+        if delivery.attempts >= delivery.max_attempts:
+            logger.warning(
+                "Email verification delivery skipped: max attempts reached "
+                "(delivery_id=%s, attempts=%s)",
+                delivery.id,
+                delivery.attempts,
+            )
+            return delivery
+
+        token = delivery.token
+        if token.used_at or token.expires_at <= now:
+            delivery.status = EmailVerificationDelivery.Status.FAILED
+            delivery.last_error_code = "token_expired_or_used"
+            delivery.save(update_fields=["status", "last_error_code"])
+            return delivery
+
+        if token.auth_version != delivery.user.auth_version:
+            delivery.status = EmailVerificationDelivery.Status.FAILED
+            delivery.last_error_code = "stale_auth_version"
+            delivery.save(update_fields=["status", "last_error_code"])
+            return delivery
+
+        raw_token = derive_email_verification_token(token)
+        if digest(raw_token) != token.digest:
+            delivery.status = EmailVerificationDelivery.Status.FAILED
+            delivery.last_error_code = "token_derivation_mismatch"
+            delivery.save(update_fields=["status", "last_error_code"])
+            return delivery
+
+        delivery.status = EmailVerificationDelivery.Status.PROCESSING
+        delivery.attempts += 1
+        delivery.last_attempt_at = now
+        delivery.save(update_fields=["status", "attempts", "last_attempt_at"])
+
+        recipient_email = delivery.email
+        url = f"{settings.PUBLIC_APP_ORIGIN}/verify-email#token={quote(raw_token)}"
+
+    # Step 2: Network I/O strictly OUTSIDE transaction
+    send_success = False
+    error_code = ""
+    try:
+        send_mail(
+            "NEU LMS: verify your email address",
+            (
+                f"Verify your email address within 24 hours: {url}\n"
+                "If you did not create this account, please ignore this email."
+            ),
+            settings.DEFAULT_FROM_EMAIL,
+            [recipient_email],
+            fail_silently=False,
+        )
+        send_success = True
+    except (smtplib.SMTPException, OSError, ConnectionError, TimeoutError) as exc:
+        error_code = classify_smtp_error(exc)
+        logger.error(
+            "Email verification delivery attempt failed "
+            "(delivery_id=%s, error_code=%s, attempt=%s)",
+            delivery_id,
+            error_code,
+            delivery.attempts,
+        )
+
+    # Step 3: Record terminal result in a second quick transaction
+    with transaction.atomic():
+        delivery = EmailVerificationDelivery.objects.select_for_update().get(pk=delivery_id)
+        if send_success:
+            delivery.status = EmailVerificationDelivery.Status.SENT
+            delivery.sent_at = timezone.now()
+            delivery.last_error_code = ""
+        else:
+            if delivery.attempts >= delivery.max_attempts:
+                delivery.status = EmailVerificationDelivery.Status.FAILED
+            else:
+                delivery.status = EmailVerificationDelivery.Status.PENDING
+            delivery.last_error_code = error_code
+        delivery.save(update_fields=["status", "sent_at", "last_error_code"])
+
+    return delivery
+
+
+def retry_pending_verification_deliveries(max_batch: int = 50):
+    """Retry verification deliveries that are pending or have stale processing status."""
+    from identity.models import EmailVerificationDelivery
+
+    now = timezone.now()
+    stale_threshold = now - timezone.timedelta(minutes=5)
+    candidates = list(
+        EmailVerificationDelivery.objects.filter(
+            models.Q(status=EmailVerificationDelivery.Status.PENDING)
+            | models.Q(
+                status=EmailVerificationDelivery.Status.PROCESSING,
+                last_attempt_at__lt=stale_threshold,
+            ),
+            attempts__lt=models.F("max_attempts"),
+            token__expires_at__gt=now,
+            token__used_at__isnull=True,
+        )
+        .order_by("created_at")
+        .values_list("id", flat=True)[:max_batch]
+    )
+    results = []
+    for delivery_id in candidates:
+        delivery = deliver_email_verification(delivery_id)
+        if delivery:
+            results.append(delivery)
+    return results
+
+
+def dispatch_pending_auth_emails(max_batch: int = 50):
+    """Unified dispatcher for all pending and recoverable auth emails (reset + verification).
+
+    Processes up to max_batch deliveries of each type.
+    Safe against concurrent workers via row locks and stale processing timeouts.
+    """
+    reset_results = retry_pending_reset_deliveries(max_batch=max_batch)
+    verification_results = retry_pending_verification_deliveries(max_batch=max_batch)
+    return {
+        "password_reset": reset_results,
+        "email_verification": verification_results,
+    }

@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 import React, { useState } from 'react';
 import { useClock } from '../providers/ClockContext';
 import { useSession } from '../providers/SessionContext';
@@ -23,21 +24,21 @@ export const DemoControlBar: React.FC = () => {
   };
 
   return (
-    <div className="demo-bar" role="region" aria-label="Thanh điều khiển phiên bản minh họa">
+    <div className="demo-bar" role="region" aria-label={uiText("Thanh điều khiển phiên bản minh họa")}>
       <div className="demo-bar-inner">
         <div className="demo-bar-clock">
           <Clock size={15} aria-hidden="true" />
           <span className="demo-clock-text">
-            Thời gian minh họa: <strong>{formatDateTimeVN(currentTimeIso)}</strong>
+            {uiText("Thời gian minh họa: ")}<strong>{formatDateTimeVN(currentTimeIso)}</strong>
           </span>
           <div className="demo-clock-actions">
-            <button className="demo-pill-btn" onClick={() => advanceHours(2)} title="Tiến 2 giờ">
+            <button className="demo-pill-btn" onClick={() => advanceHours(2)} title={uiText("Tiến 2 giờ")}>
               +2h
             </button>
-            <button className="demo-pill-btn" onClick={() => advanceDays(1)} title="Tiến 1 ngày">
+            <button className="demo-pill-btn" onClick={() => advanceDays(1)} title={uiText("Tiến 1 ngày")}>
               +1d
             </button>
-            <button className="demo-pill-btn" onClick={() => advanceDays(3)} title="Tiến 3 ngày">
+            <button className="demo-pill-btn" onClick={() => advanceDays(3)} title={uiText("Tiến 3 ngày")}>
               +3d
             </button>
           </div>
@@ -46,7 +47,7 @@ export const DemoControlBar: React.FC = () => {
         {isMemoryOnly && (
           <div className="demo-bar-warning" role="alert">
             <AlertTriangle size={14} />
-            <span>Chỉ lưu bộ nhớ phiên (Memory-only)</span>
+            <span>{uiText("Chỉ lưu bộ nhớ phiên (Memory-only)")}</span>
           </div>
         )}
 
@@ -54,30 +55,27 @@ export const DemoControlBar: React.FC = () => {
           {currentUser && currentUser.roles && currentUser.roles.length > 1 && (
             <div className="demo-role-switcher">
               <UserCheck size={14} aria-hidden="true" />
-              <span className="demo-role-label">Chuyển vai trò:</span>
+              <span className="demo-role-label">{uiText("Chuyển vai trò:")}</span>
               {currentUser.roles.includes('student') && (
                 <button
                   className={`demo-role-btn ${role === 'student' ? 'active' : ''}`}
                   onClick={() => switchRoleQuick('student')}
                 >
-                  Sinh viên
-                </button>
+                  {uiText("Sinh viên")}</button>
               )}
               {currentUser.roles.includes('teacher') && (
                 <button
                   className={`demo-role-btn ${role === 'teacher' ? 'active' : ''}`}
                   onClick={() => switchRoleQuick('teacher')}
                 >
-                  Giảng viên
-                </button>
+                  {uiText("Giảng viên")}</button>
               )}
               {currentUser.roles.includes('admin') && (
                 <button
                   className={`demo-role-btn ${role === 'admin' ? 'active' : ''}`}
                   onClick={() => switchRoleQuick('admin')}
                 >
-                  Quản trị
-                </button>
+                  {uiText("Quản trị")}</button>
               )}
             </div>
           )}
@@ -85,7 +83,7 @@ export const DemoControlBar: React.FC = () => {
           <button
             className="demo-reset-btn"
             onClick={() => setIsResetModalOpen(true)}
-            title="Đặt lại dữ liệu gốc của phiên minh họa"
+            title={uiText("Đặt lại dữ liệu gốc của phiên minh họa")}
           >
             <RefreshCw size={13} />
             <span>Reset Demo</span>
@@ -96,22 +94,19 @@ export const DemoControlBar: React.FC = () => {
       <Modal
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
-        title="Xác nhận đặt lại dữ liệu minh họa"
-        description="Toàn bộ thay đổi về bài nộp, điểm số, học liệu, tài khoản đã thêm sẽ được khôi phục về trạng thái hạt giống (seed) ban đầu."
+        title={uiText("Xác nhận đặt lại dữ liệu minh họa")}
+        description={uiText("Toàn bộ thay đổi về bài nộp, điểm số, học liệu, tài khoản đã thêm sẽ được khôi phục về trạng thái hạt giống (seed) ban đầu.")}
         footer={
           <>
             <Button variant="secondary" onClick={() => setIsResetModalOpen(false)}>
-              Hủy bỏ
-            </Button>
+              {uiText("Hủy bỏ")}</Button>
             <Button variant="danger" onClick={handleConfirmReset}>
-              Xác nhận Đặt lại
-            </Button>
+              {uiText("Xác nhận Đặt lại")}</Button>
           </>
         }
       >
         <p style={{ color: 'var(--ink-soft)', lineHeight: '1.6' }}>
-          Hành động này sẽ xóa dữ liệu trong bộ nhớ namespace <code>npc-lms-demo:v1</code> và hủy phiên đăng nhập hiện tại.
-        </p>
+          {uiText("Hành động này sẽ xóa dữ liệu trong bộ nhớ namespace ")}<code>npc-lms-demo:v1</code> {uiText(" và hủy phiên đăng nhập hiện tại.")}</p>
       </Modal>
     </div>
   );
