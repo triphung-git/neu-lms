@@ -443,12 +443,12 @@ def test_draft_delete_retains_published_summary(setup):
         reviewed_by=t,
         reviewed_at=timezone.now(),
     )
-    version.summary = 'Published'
+    version.summary = "Published"
     version.summary_confirmed_at = timezone.now()
     version.save()
     assert client(t).delete(f"/api/v1/learning/drafts/{draft.pk}").status_code == 204
     version.refresh_from_db()
-    assert version.summary == 'Published' and version.summary_confirmed_at
+    assert version.summary == "Published" and version.summary_confirmed_at
     assert not MaterialSummaryDraft.objects.filter(pk=draft.pk).exists()
 
 
@@ -556,37 +556,70 @@ def test_library_file_cannot_be_aborted(setup):
 
 
 def test_enrollment_catalog_filters_and_membership(setup):
-    t,s,o,c,a=setup
-    c.enrollment_open=True
+    t, s, o, c, a = setup
+    c.enrollment_open = True
     c.save()
-    second=Course.objects.create(code='PASS',name='Password course',teacher=t,term='2027',enrollment_open=True)
-    EnrollmentKey.objects.create(course=second,password_hash='never-exposed')
-    response=client(s).get('/api/v1/learning/enrollment')
-    assert response.status_code==200 and response.data['total']==2
-    assert {x['requires_password'] for x in response.data['items']}=={True,False}
-    assert 'never-exposed' not in str(response.data)
-    assert next(x for x in response.data['items'] if x['code']==c.code)['joined']
-    filtered=client(s).get('/api/v1/learning/enrollment',{'term':'2027','q':'PASS','mode':'password'})
-    assert filtered.data['total']==1 and filtered.data['items'][0]['code']=='PASS'
-    second.enrollment_open=False
+    second = Course.objects.create(
+        code="PASS", name="Password course", teacher=t, term="2027", enrollment_open=True
+    )
+    EnrollmentKey.objects.create(course=second, password_hash="never-exposed")
+    response = client(s).get("/api/v1/learning/enrollment")
+    assert response.status_code == 200 and response.data["total"] == 2
+    assert {x["requires_password"] for x in response.data["items"]} == {True, False}
+    assert "never-exposed" not in str(response.data)
+    assert next(x for x in response.data["items"] if x["code"] == c.code)["joined"]
+    filtered = client(s).get(
+        "/api/v1/learning/enrollment", {"term": "2027", "q": "PASS", "mode": "password"}
+    )
+    assert filtered.data["total"] == 1 and filtered.data["items"][0]["code"] == "PASS"
+    second.enrollment_open = False
     second.save()
-    assert client(s).get('/api/v1/learning/enrollment').data['total']==1
+    assert client(s).get("/api/v1/learning/enrollment").data["total"] == 1
 
 
 def test_attendance_totals_survive_archive_and_include_all_sessions(setup):
-    t,s,o,c,a=setup
-    now=timezone.now()
-    sessions=[AttendanceSession.objects.create(course=c,title=f'Session {i}',code_hash='unused',opens_at=now-timedelta(hours=3),late_at=now-timedelta(hours=2),closes_at=now-timedelta(hours=1),closed=True) for i in range(102)]
-    AttendanceRecord.objects.bulk_create([AttendanceRecord(session=session,student=s,status='present' if i<60 else 'late' if i<70 else 'absent',checked_at=now-timedelta(hours=2) if i<70 else None) for i,session in enumerate(sessions)])
-    AttendanceRecord.objects.create(session=sessions[0],student=o,status='present',checked_at=now)
-    c.status='archived'
-    c.archived_at=now
+    t, s, o, c, a = setup
+    now = timezone.now()
+    sessions = [
+        AttendanceSession.objects.create(
+            course=c,
+            title=f"Session {i}",
+            code_hash="unused",
+            opens_at=now - timedelta(hours=3),
+            late_at=now - timedelta(hours=2),
+            closes_at=now - timedelta(hours=1),
+            closed=True,
+        )
+        for i in range(102)
+    ]
+    AttendanceRecord.objects.bulk_create(
+        [
+            AttendanceRecord(
+                session=session,
+                student=s,
+                status="present" if i < 60 else "late" if i < 70 else "absent",
+                checked_at=now - timedelta(hours=2) if i < 70 else None,
+            )
+            for i, session in enumerate(sessions)
+        ]
+    )
+    AttendanceRecord.objects.create(
+        session=sessions[0], student=o, status="present", checked_at=now
+    )
+    c.status = "archived"
+    c.archived_at = now
     c.save()
-    response=client(t).get(api(c,'/attendance'))
-    assert response.status_code==200 and response.data['total_sessions']==102
-    row=next(r for r in response.data['summary'] if r['student_id']==s.pk)
-    assert (row['attended'],row['total'],row['present'],row['late'],row['absent'])==(70,102,60,10,32)
-    own=client(s).get(api(c,'/attendance'))
-    assert len(own.data['summary'])==1 and own.data['summary'][0]['student_id']==s.pk
-    assert client(t).get(api(c,'/attendance')+'?export=summary').status_code==200
-    assert client(s).get(api(c,'/attendance')).data['summary']==own.data['summary']
+    response = client(t).get(api(c, "/attendance"))
+    assert response.status_code == 200 and response.data["total_sessions"] == 102
+    row = next(r for r in response.data["summary"] if r["student_id"] == s.pk)
+    assert (row["attended"], row["total"], row["present"], row["late"], row["absent"]) == (
+        70,
+        102,
+        60,
+        10,
+        32,
+    )
+    own = client(s).get(api(c, "/attendance"))
+    assert len(own.data["summary"]) == 1 and own.data["summary"][0]["student_id"] == s.pk
+    assert client(t).get(api(c, "/attendance") + "?export=summary").status_code == 200
+    assert client(s).get(api(c, "/attendance")).data["summary"] == own.data["summary"]

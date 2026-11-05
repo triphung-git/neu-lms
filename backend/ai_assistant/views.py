@@ -1,4 +1,3 @@
-from rest_framework import serializers
 import uuid
 
 from django.conf import settings
@@ -6,8 +5,8 @@ from django.db import IntegrityError, transaction
 from django.db.models import F
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-from rest_framework import exceptions, status
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework import exceptions, serializers, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -182,12 +181,14 @@ class TeacherAISummaryDraftListView(APIView):
             .select_related("course", "material", "material_version")
             .order_by("-created_at", "id")
         )
-        course_id = request.query_params.get('course_id')
+        course_id = request.query_params.get("course_id")
         if course_id:
             course_id = serializers.UUIDField().run_validation(course_id)
             drafts = drafts.filter(course_id=course_id)
-        page = serializers.IntegerField(min_value=1).run_validation(request.query_params.get('page', 1))
-        drafts = drafts[(page-1)*100:page*100]
+        page = serializers.IntegerField(min_value=1).run_validation(
+            request.query_params.get("page", 1)
+        )
+        drafts = drafts[(page - 1) * 100 : page * 100]
         payload = [_summary_draft_data(draft) for draft in drafts]
         return Response(MaterialSummaryDraftSerializer(payload, many=True).data)
 

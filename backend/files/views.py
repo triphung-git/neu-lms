@@ -360,9 +360,14 @@ class CourseFileDownloadView(FilesBaseView):
         ):
             raise exceptions.PermissionDenied("File integrity check failed.")
         from learning.models import DownloadEvent
+
         for assignment_id in item.assignment_attachments.values_list("assignment_id", flat=True):
-            DownloadEvent.objects.create(assignment_id=assignment_id, file=item, user=request.user,
-                                         kind="preview" if self.preview else "download")
+            DownloadEvent.objects.create(
+                assignment_id=assignment_id,
+                file=item,
+                user=request.user,
+                kind="preview" if self.preview else "download",
+            )
         response = HttpResponse(
             content, content_type=media_types.get(ext, "application/octet-stream")
         )

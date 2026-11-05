@@ -1359,7 +1359,11 @@ def test_course_announcement_delivery_and_read(api_client, test_setup):
     membership = test_setup["membership"]
     membership.status = Membership.Status.WITHDRAWN
     membership.save(update_fields=["status"])
-    assert fetch(fresh, inbox_url)["items"] == []
+
+    # Withdrawing from one course must preserve notices from another course.
+    remaining_items = fetch(fresh, inbox_url)["items"]
+    assert len(remaining_items) == 1
+    assert remaining_items[0]["course_id"] == str(other_course.pk)
 
 
 @pytest.mark.django_db

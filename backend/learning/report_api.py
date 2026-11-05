@@ -1,7 +1,8 @@
 from datetime import timedelta
-from django.utils import timezone
+
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
+from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import exceptions
@@ -67,9 +68,12 @@ class ReportsView(LearningBase):
             .annotate(count=Count("id"))
             .order_by("day")
         )
-        counts = {row['day']: row['count'] for row in trend}
+        counts = {row["day"]: row["count"] for row in trend}
         first, last = timezone.localdate(start), timezone.localdate(end)
-        trend = [{'day': first + timedelta(days=n), 'count': counts.get(first + timedelta(days=n), 0)} for n in range((last-first).days+1)]
+        trend = [
+            {"day": first + timedelta(days=n), "count": counts.get(first + timedelta(days=n), 0)}
+            for n in range((last - first).days + 1)
+        ]
         if request.query_params.get("export") == "csv":
             return csv_response(
                 [["metric", "value"]]

@@ -4,7 +4,7 @@ from django.db.models import Count, Exists, OuterRef, Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from drf_spectacular.types import OpenApiTypes
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import OpenApiParameter, extend_schema
 from rest_framework import exceptions
 from rest_framework.response import Response
 
@@ -72,31 +72,63 @@ class CourseHubView(LearningBase):
 
 
 class EnrollmentView(LearningBase):
-    @extend_schema(responses=OpenApiTypes.OBJECT, parameters=[OpenApiParameter("q", str), OpenApiParameter("term", str), OpenApiParameter("mode", str, enum=["password", "approval"]), OpenApiParameter("page", int)])
+    @extend_schema(
+        responses=OpenApiTypes.OBJECT,
+        parameters=[
+            OpenApiParameter("q", str),
+            OpenApiParameter("term", str),
+            OpenApiParameter("mode", str, enum=["password", "approval"]),
+            OpenApiParameter("page", int),
+        ],
+    )
     def get(self, request):
         if not has_role(request.user, Role.STUDENT):
             raise exceptions.PermissionDenied()
         qs = Course.objects.filter(status="open", enrollment_open=True)
-        terms = list(qs.order_by('term').values_list('term', flat=True).distinct())
+        terms = list(qs.order_by("term").values_list("term", flat=True).distinct())
         qs = qs.annotate(
-            requires_password=Exists(EnrollmentKey.objects.filter(course_id=OuterRef('pk'))),
-            joined=Exists(Membership.objects.filter(course_id=OuterRef('pk'), student=request.user, status='active')),
-            requested=Exists(EnrollmentRequest.objects.filter(course_id=OuterRef('pk'), student=request.user, status='pending')),
+            requires_password=Exists(EnrollmentKey.objects.filter(course_id=OuterRef("pk"))),
+            joined=Exists(
+                Membership.objects.filter(
+                    course_id=OuterRef("pk"), student=request.user, status="active"
+                )
+            ),
+            requested=Exists(
+                EnrollmentRequest.objects.filter(
+                    course_id=OuterRef("pk"), student=request.user, status="pending"
+                )
+            ),
         )
-        q = request.query_params.get('q', '').strip()
+        q = request.query_params.get("q", "").strip()
         if q:
-            qs = qs.filter(Q(code__icontains=q)|Q(name__icontains=q)|Q(teacher__display_name__icontains=q))
-        term = request.query_params.get('term')
+            qs = qs.filter(
+                Q(code__icontains=q) | Q(name__icontains=q) | Q(teacher__display_name__icontains=q)
+            )
+        term = request.query_params.get("term")
         if term:
             qs = qs.filter(term=term)
-        mode = request.query_params.get('mode')
-        if mode in ('password', 'approval'):
-            qs = qs.filter(requires_password=mode=='password')
+        mode = request.query_params.get("mode")
+        if mode in ("password", "approval"):
+            qs = qs.filter(requires_password=mode == "password")
         from rest_framework import serializers
-        page = serializers.IntegerField(min_value=1).run_validation(request.query_params.get('page', 1))
+
+        page = serializers.IntegerField(min_value=1).run_validation(
+            request.query_params.get("page", 1)
+        )
         total = qs.count()
-        items = list(qs.order_by('code', 'id').values('id','code','name','term','teacher__display_name','requires_password','joined','requested')[(page-1)*24:page*24])
-        return Response({'items': items, 'terms': terms, 'total': total, 'page': page})
+        items = list(
+            qs.order_by("code", "id").values(
+                "id",
+                "code",
+                "name",
+                "term",
+                "teacher__display_name",
+                "requires_password",
+                "joined",
+                "requested",
+            )[(page - 1) * 24 : page * 24]
+        )
+        return Response({"items": items, "terms": terms, "total": total, "page": page})
 
     @extend_schema(request=OpenApiTypes.OBJECT, responses=OpenApiTypes.OBJECT)
     def post(self, request):
@@ -249,20 +281,52 @@ class AttendanceView(LearningBase):
         # Aggregate persisted roster rows across all sessions, including archived courses.
         summary = {}
         for record in records:
-            row = summary.setdefault(record['student_id'], {
-                'student_id': record['student_id'], 'name': record['student__display_name'],
-                'email': record['student__email'], 'total': 0, 'attended': 0,
-                'present': 0, 'late': 0, 'absent': 0, 'pending': 0,
-            })
-            row['total'] += 1
-            row[record['status']] += 1
-            row['attended'] += record['status'] in ('present', 'late')
-        summary = sorted(summary.values(), key=lambda r: (r['name'], r['email']))
-        if request.query_params.get('export') == 'summary':
+            row = summary.setdefault(
+                record["student_id"],
+                {
+                    "student_id": record["student_id"],
+                    "name": record["student__display_name"],
+                    "email": record["student__email"],
+                    "total": 0,
+                    "attended": 0,
+                    "present": 0,
+                    "late": 0,
+                    "absent": 0,
+                    "pending": 0,
+                },
+            )
+            row["total"] += 1
+            row[record["status"]] += 1
+            row["attended"] += record["status"] in ("present", "late")
+        summary = sorted(summary.values(), key=lambda r: (r["name"], r["email"]))
+        if request.query_params.get("export") == "summary":
             return csv_response(
-                [['student', 'email', 'attended', 'assigned_sessions', 'present', 'late', 'absent', 'pending']]
-                + [[r['name'], r['email'], r['attended'], r['total'], r['present'], r['late'], r['absent'], r['pending']] for r in summary],
-                'attendance-summary.csv',
+                [
+                    [
+                        "student",
+                        "email",
+                        "attended",
+                        "assigned_sessions",
+                        "present",
+                        "late",
+                        "absent",
+                        "pending",
+                    ]
+                ]
+                + [
+                    [
+                        r["name"],
+                        r["email"],
+                        r["attended"],
+                        r["total"],
+                        r["present"],
+                        r["late"],
+                        r["absent"],
+                        r["pending"],
+                    ]
+                    for r in summary
+                ],
+                "attendance-summary.csv",
             )
         if request.query_params.get("export") == "csv":
             return csv_response(
@@ -273,7 +337,14 @@ class AttendanceView(LearningBase):
                 ],
                 "attendance.csv",
             )
-        return Response({"sessions": sessions, "records": records, "summary": summary, "total_sessions": len(sessions)})
+        return Response(
+            {
+                "sessions": sessions,
+                "records": records,
+                "summary": summary,
+                "total_sessions": len(sessions),
+            }
+        )
 
     @extend_schema(request=OpenApiTypes.OBJECT, responses=OpenApiTypes.OBJECT)
     def post(self, request, course_id):

@@ -58,6 +58,7 @@ class SubmissionView(APIView):
             course=course,
         )
         from learning.models import GroupPolicy
+
         if GroupPolicy.objects.filter(assignment=assignment).exists():
             raise ValidationError("Bài tập nhóm: nộp tại mục Học tập mở rộng / Submit via Groups.")
         item = get_object_or_404(

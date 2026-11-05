@@ -292,12 +292,14 @@ def abort_upload_intent(*, file_id, actor=None, system_actor=""):
         require_file_upload_permission(actor, item.course, item.purpose)
     if item.status == FileStatus.DELETED:
         return item
-    from learning.models import GroupSubmission, LibraryDocument
     from assignments.models import SubmissionRevision
+    from learning.models import GroupSubmission, LibraryDocument
 
-    if (LibraryDocument.objects.filter(file=item).exists()
-            or GroupSubmission.objects.filter(file=item).exists()
-            or SubmissionRevision.objects.filter(file=item).exists()):
+    if (
+        LibraryDocument.objects.filter(file=item).exists()
+        or GroupSubmission.objects.filter(file=item).exists()
+        or SubmissionRevision.objects.filter(file=item).exists()
+    ):
         raise DomainError("INVALID_FILE_STATE")
     if item.material_links.exists():
         raise DomainError("INVALID_FILE_STATE")

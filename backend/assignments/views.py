@@ -629,8 +629,13 @@ class CourseAssignmentAttachmentDownloadView(AssignmentsBaseView):
             "webp": "image/webp",
         }
         from learning.models import DownloadEvent
-        DownloadEvent.objects.create(assignment_id=id, file_id=file_id, user=request.user,
-                                     kind="preview" if self.preview else "download")
+
+        DownloadEvent.objects.create(
+            assignment_id=id,
+            file_id=file_id,
+            user=request.user,
+            kind="preview" if self.preview else "download",
+        )
         ext = attachment.name.rsplit(".", 1)[-1].lower()
         content_type = media_types.get(ext, "application/octet-stream")
 
@@ -691,7 +696,9 @@ class StudentAssignmentEligibilityView(AssignmentsBaseView):
         )
         from learning.models import GroupPolicy
 
-        eligibility["is_group_assignment"] = GroupPolicy.objects.filter(assignment=assignment).exists()
+        eligibility["is_group_assignment"] = GroupPolicy.objects.filter(
+            assignment=assignment
+        ).exists()
         eligibility["latest_submission"] = None
 
         if eligibility["has_existing_submission"]:
