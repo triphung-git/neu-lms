@@ -2673,10 +2673,7 @@ export interface components {
         AssignmentFilePolicy: {
             /** Format: uuid */
             readonly id: string;
-            /**
-             * Format: int64
-             * @description Số lượng tệp tối đa trong một lần nộp (1 đến 10)
-             */
+            /** @description Số lượng tệp tối đa trong một lần nộp (1 đến 10) */
             max_files_per_submission?: number;
             /**
              * Format: int64
@@ -2758,10 +2755,7 @@ export interface components {
              * @description Điểm tối đa của tiêu chí (phải > 0)
              */
             max_score?: string;
-            /**
-             * Format: int64
-             * @description Thứ tự hiển thị tiêu chí
-             */
+            /** @description Thứ tự hiển thị tiêu chí */
             position?: number;
         };
         /**
@@ -3007,7 +3001,6 @@ export interface components {
             allowed_extensions?: unknown;
             /** Format: int64 */
             max_file_size_bytes?: number;
-            /** Format: int64 */
             max_files_per_assignment?: number;
             /** Format: int64 */
             course_quota_bytes?: number;
@@ -3024,7 +3017,6 @@ export interface components {
             allowed_extensions?: unknown;
             /** Format: int64 */
             max_file_size_bytes?: number;
-            /** Format: int64 */
             max_files_per_assignment?: number;
             /** Format: int64 */
             course_quota_bytes?: number;
@@ -3244,7 +3236,6 @@ export interface components {
             pagination: components["schemas"]["PaginationMeta"];
         };
         GradeOutput: {
-            /** Format: int64 */
             version: number;
             /** Format: decimal */
             score: string;
@@ -3788,7 +3779,6 @@ export interface components {
             allowed_extensions?: unknown;
             /** Format: int64 */
             max_file_size_bytes?: number;
-            /** Format: int64 */
             max_files_per_assignment?: number;
             /** Format: int64 */
             course_quota_bytes?: number;
@@ -4089,7 +4079,6 @@ export interface components {
             readonly id: number;
             /** Format: uuid */
             readonly file_id: string;
-            /** Format: int64 */
             number: number;
             /** Format: date-time */
             submitted_at: string;
