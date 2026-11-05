@@ -1,3 +1,5 @@
+import {currentLocale} from '../../shared/i18n/translate';
+import {uiText} from "../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Outlet, NavLink, useParams, useNavigate, useLocation } from 'react-router-dom';
 import { ApiError } from '../../api/client';
@@ -33,7 +35,7 @@ export const CourseTeacherLayout: React.FC = () => {
 
   const loadCourse = useCallback(async () => {
     if (!monId) {
-      setLoadError('Thiếu mã môn học.');
+      setLoadError(uiText("Thiếu mã môn học."));
       setIsLoading(false);
       return;
     }
@@ -52,7 +54,7 @@ export const CourseTeacherLayout: React.FC = () => {
       if (error instanceof ApiError && error.status === 404) {
         setIsNotFound(true);
       } else {
-        setLoadError(error instanceof Error ? error.message : 'Không thể tải thông tin môn học.');
+        setLoadError(error instanceof Error ? error.message : uiText("Không thể tải thông tin môn học."));
       }
     } finally {
       if (sequence === loadSequence.current) setIsLoading(false);
@@ -70,10 +72,10 @@ export const CourseTeacherLayout: React.FC = () => {
     setIsSaving(true);
     try {
       setCourse(await coursesService.archive(course.id));
-      notifySuccess(`Đã chuyển môn ${course.code} sang trạng thái lưu trữ.`);
+      notifySuccess(uiText("Đã chuyển môn {0} sang trạng thái lưu trữ.",[course.code]));
       setIsArchiveModalOpen(false);
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : 'Không thể lưu trữ môn học.');
+      notifyError(error instanceof Error ? error.message : uiText("Không thể lưu trữ môn học."));
     } finally {
       setIsSaving(false);
     }
@@ -98,10 +100,10 @@ export const CourseTeacherLayout: React.FC = () => {
         description: courseDescription.trim(),
       });
       setCourse(updated);
-      notifySuccess('Đã cập nhật thông tin môn học.');
+      notifySuccess(uiText("Đã cập nhật thông tin môn học."));
       setIsEditModalOpen(false);
     } catch (error) {
-      notifyError(error instanceof Error ? error.message : 'Không thể cập nhật môn học.');
+      notifyError(error instanceof Error ? error.message : uiText("Không thể cập nhật môn học."));
     } finally {
       setIsSaving(false);
     }
@@ -115,12 +117,11 @@ export const CourseTeacherLayout: React.FC = () => {
     return (
       <div className="course-not-found">
         <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại hoặc bạn không có quyền truy cập."
+          title={uiText("Không tìm thấy môn học")}
+          description={uiText("Môn học không tồn tại hoặc bạn không có quyền truy cập.")}
           action={
             <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
+              {uiText("Về danh sách môn học")}</Button>
           }
         />
       </div>
@@ -131,29 +132,32 @@ export const CourseTeacherLayout: React.FC = () => {
     return (
       <div className="course-not-found">
         <ErrorBanner
-          title="Không thể tải môn học"
-          message={loadError || 'Môn học không tồn tại hoặc bạn không có quyền truy cập.'}
+          title={uiText("Không thể tải môn học")}
+          message={loadError || uiText("Môn học không tồn tại hoặc bạn không có quyền truy cập.")}
           onRetry={() => void loadCourse()}
         />
         <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-          Về danh sách môn học
-        </Button>
+          {uiText("Về danh sách môn học")}</Button>
       </div>
     );
   }
 
   const isArchived = course.status === 'archived';
   const navItems = [
-    { to: `/gv/mon-hoc/${course.id}`, label: 'Tổng quan', end: true },
-    { to: `/gv/mon-hoc/${course.id}/cau-truc`, label: 'Cấu trúc' },
-    { to: `/gv/mon-hoc/${course.id}/thanh-vien`, label: 'Thành viên' },
-    { to: `/gv/mon-hoc/${course.id}/hoc-lieu`, label: 'Học liệu' },
-    { to: `/gv/mon-hoc/${course.id}/bai-tap`, label: 'Bài tập' },
-    { to: `/gv/mon-hoc/${course.id}/diem`, label: 'Bảng điểm' },
+{to:`/gv/mon-hoc/${course.id}/diem-danh`,label:uiText("Điểm danh")},
+{to:`/gv/mon-hoc/${course.id}/ban-nhap-ai`,label:uiText("Bản nháp AI")},
+    { to: `/gv/mon-hoc/${course.id}`, label: uiText("Tổng quan"), end: true },
+    { to: `/gv/mon-hoc/${course.id}/cau-truc`, label: uiText("Cấu trúc") },
+    { to: `/gv/mon-hoc/${course.id}/thanh-vien`, label: uiText("Thành viên") },
+    { to: `/gv/mon-hoc/${course.id}/hoc-lieu`, label: uiText("Học liệu") },
+    { to: `/gv/mon-hoc/${course.id}/bai-tap`, label: uiText("Bài tập") },
+    { to: `/gv/mon-hoc/${course.id}/diem`, label: uiText("Bảng điểm") },
   ].filter((item) => {
     if (!isArchived) return true;
     return (
       item.to === `/gv/mon-hoc/${course.id}` ||
+      item.to.endsWith('/diem-danh') ||
+      item.to.endsWith('/ban-nhap-ai') ||
       item.to.endsWith('/cau-truc') ||
       item.to.endsWith('/thanh-vien') ||
       item.to.endsWith('/hoc-lieu') ||
@@ -164,6 +168,8 @@ export const CourseTeacherLayout: React.FC = () => {
   const archivedSubroute =
     isArchived &&
     location.pathname !== coursePath &&
+    location.pathname !== `${coursePath}/diem-danh` &&
+    location.pathname !== `${coursePath}/ban-nhap-ai` &&
     location.pathname !== `${coursePath}/cau-truc` &&
     location.pathname !== `${coursePath}/thanh-vien` &&
     location.pathname !== `${coursePath}/hoc-lieu` &&
@@ -178,14 +184,14 @@ export const CourseTeacherLayout: React.FC = () => {
         <div className="course-header-top">
           <button className="back-link-btn" onClick={() => navigate('/gv/mon-hoc')}>
             <ArrowLeft size={16} />
-            <span>Môn của tôi</span>
+            <span>{uiText("Môn của tôi")}</span>
           </button>
           <div className="course-meta-badges">
             <span className="course-code-pill">{course.code}</span>
             <span className="course-term-pill">{course.term}</span>
             <Badge
               variant={isArchived ? 'archived' : 'published'}
-              label={isArchived ? 'Đã lưu trữ' : 'Đang mở'}
+              label={isArchived ? uiText("Đã lưu trữ") : uiText("Đang mở")}
             />
           </div>
         </div>
@@ -193,6 +199,7 @@ export const CourseTeacherLayout: React.FC = () => {
         <div className="course-header-main">
           <div>
             <h1 className="course-title">{course.name}</h1>
+<NavLink to={`/gv/hoc-tap?course=${monId}`}>{uiText("Quản lý hoạt động lớp / Class activities")}</NavLink>
             <p className="course-desc">{course.description}</p>
           </div>
 
@@ -204,16 +211,14 @@ export const CourseTeacherLayout: React.FC = () => {
                 icon={<Edit2 size={15} />}
                 onClick={openEditModal}
               >
-                Sửa thông tin
-              </Button>
+                {uiText("Sửa thông tin")}</Button>
               <Button
                 variant="secondary"
                 size="sm"
                 icon={<Archive size={15} />}
                 onClick={() => setIsArchiveModalOpen(true)}
               >
-                Lưu trữ môn
-              </Button>
+                {uiText("Lưu trữ môn")}</Button>
             </div>
           )}
         </div>
@@ -222,16 +227,14 @@ export const CourseTeacherLayout: React.FC = () => {
           <div className="course-archived-banner" role="alert">
             <Archive size={16} />
             <span>
-              Môn học đã lưu trữ
-              {course.archived_at
-                ? ` vào ${new Date(course.archived_at).toLocaleDateString('vi-VN')}`
+              {uiText("Môn học đã lưu trữ")}{course.archived_at
+                ? uiText(" vào {0}",[new Date(course.archived_at).toLocaleDateString(currentLocale())])
                 : ''}
-              . Mọi thao tác thay đổi đã bị khóa.
-            </span>
+              {uiText(". Mọi thao tác thay đổi đã bị khóa.")}</span>
           </div>
         )}
 
-        <nav className="course-subnav" aria-label="Phân hệ môn học">
+        <nav className="course-subnav" aria-label={uiText("Phân hệ môn học")}>
           {navItems.map((item) => (
             <NavLink
               key={item.to}
@@ -248,8 +251,7 @@ export const CourseTeacherLayout: React.FC = () => {
       <div className="course-content-outlet">
         {archivedSubroute ? (
           <div className="course-archived-banner" role="alert">
-            Môn học đã lưu trữ. Khu vực này chưa có chế độ xem lưu trữ khả dụng.
-          </div>
+            {uiText("Môn học đã lưu trữ. Khu vực này chưa có chế độ xem lưu trữ khả dụng.")}</div>
         ) : (
           <Outlet key={`${course.id}:${course.updated_at}`} context={{ course, isArchived }} />
         )}
@@ -258,23 +260,23 @@ export const CourseTeacherLayout: React.FC = () => {
       <Modal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
-        title="Sửa thông tin môn học"
+        title={uiText("Sửa thông tin môn học")}
       >
         <form onSubmit={(event) => void handleSaveCourse(event)} className="modal-form-stack">
           <TextField
-            label="Tên môn học"
+            label={uiText("Tên môn học")}
             required
             value={courseName}
             onChange={(event) => setCourseName(event.target.value)}
           />
           <TextField
-            label="Học kỳ"
+            label={uiText("Học kỳ")}
             required
             value={courseTerm}
             onChange={(event) => setCourseTerm(event.target.value)}
           />
           <TextAreaField
-            label="Mô tả"
+            label={uiText("Mô tả")}
             value={courseDescription}
             onChange={(event) => setCourseDescription(event.target.value)}
             rows={4}
@@ -286,11 +288,9 @@ export const CourseTeacherLayout: React.FC = () => {
               onClick={() => setIsEditModalOpen(false)}
               disabled={isSaving}
             >
-              Hủy
-            </Button>
+              {uiText("Hủy")}</Button>
             <Button type="submit" variant="primary" isLoading={isSaving}>
-              Lưu thay đổi
-            </Button>
+              {uiText("Lưu thay đổi")}</Button>
           </div>
         </form>
       </Modal>
@@ -298,8 +298,8 @@ export const CourseTeacherLayout: React.FC = () => {
       <Modal
         isOpen={isArchiveModalOpen}
         onClose={() => setIsArchiveModalOpen(false)}
-        title={`Xác nhận lưu trữ môn ${course.code}`}
-        description="Môn học sau khi lưu trữ sẽ chuyển sang chế độ chỉ đọc vĩnh viễn và không thể khôi phục."
+        title={uiText("Xác nhận lưu trữ môn {0}",[course.code])}
+        description={uiText("Môn học sau khi lưu trữ sẽ chuyển sang chế độ chỉ đọc vĩnh viễn và không thể khôi phục.")}
         footer={
           <>
             <Button
@@ -307,20 +307,18 @@ export const CourseTeacherLayout: React.FC = () => {
               onClick={() => setIsArchiveModalOpen(false)}
               disabled={isSaving}
             >
-              Hủy
-            </Button>
+              {uiText("Hủy")}</Button>
             <Button
               variant="danger"
               onClick={() => void handleConfirmArchive()}
               isLoading={isSaving}
             >
-              Xác nhận Lưu trữ
-            </Button>
+              {uiText("Xác nhận Lưu trữ")}</Button>
           </>
         }
       >
         <p style={{ color: 'var(--ink-soft)' }}>
-          Bạn có chắc chắn muốn lưu trữ lớp học phần{' '}
+          {uiText("Bạn có chắc chắn muốn lưu trữ lớp học phần")}{' '}
           <strong>{course.name} ({course.code})</strong>?
         </p>
       </Modal>

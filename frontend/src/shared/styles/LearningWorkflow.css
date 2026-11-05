@@ -1,0 +1,258 @@
+/* Trang bài nộp và bảng điểm */
+.teacher-subs-container.teacher-submission-list,
+.student-grades-page {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  min-width: 0;
+  padding: clamp(16px, 3vw, 32px);
+  color: var(--ink);
+}
+
+:is(.teacher-submission-list, .student-grades-page) h1 {
+  margin: 0;
+  font-size: clamp(24px, 2.5vw, 32px);
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+:is(.teacher-submission-list, .student-grades-page) > p {
+  margin: 0;
+  color: var(--ink-soft);
+}
+
+:is(.teacher-submission-list, .student-grades-page) a {
+  color: var(--focus);
+  font-weight: 600;
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+
+:is(.teacher-submission-list, .student-grades-page) a:hover {
+  text-decoration: underline;
+}
+
+/* Bảng cuộn ngang trên màn hình nhỏ */
+.workflow-table-wrap,
+.student-grades-page .grades-table-card {
+  width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  box-shadow: var(--shadow-small);
+}
+
+:is(.teacher-submission-list, .student-grades-page) table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.teacher-submission-list table {
+  min-width: 1100px;
+}
+
+:is(.teacher-submission-list, .student-grades-page) th {
+  padding: 16px;
+  background: var(--surface-soft);
+  color: var(--ink-soft);
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+  border-bottom: 1px solid var(--border);
+}
+
+:is(.teacher-submission-list, .student-grades-page) td {
+  padding: 16px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--divider);
+  overflow-wrap: anywhere;
+  max-width: 360px;
+}
+
+:is(.teacher-submission-list, .student-grades-page) tr:last-child td {
+  border-bottom: 0;
+}
+
+:is(.teacher-submission-list, .student-grades-page) tbody tr:hover {
+  background: #f7fafb;
+}
+
+/* Ô chấm điểm và nộp bài */
+.grade-panel,
+.submission-form {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.grade-panel {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.teacher-submission-list .grade-panel {
+  width: 290px;
+}
+
+.grade-panel p {
+  margin: 0;
+}
+
+.grade-panel > p {
+  font-weight: 600;
+}
+
+.grade-panel small {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.grade-panel label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.grade-panel :is(input, textarea) {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid #aeb7c2;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+
+.grade-panel input {
+  min-height: 44px;
+}
+
+.grade-panel textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+
+.grade-panel :is(input, textarea):disabled {
+  background: var(--surface-soft);
+}
+
+/* Nút thao tác */
+:is(.grade-panel, .teacher-submission-list, .student-grades-page) button,
+.submission-form > button,
+.submission-start {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  cursor: pointer;
+  transition: background-color 150ms, border-color 150ms;
+}
+
+:is(.grade-panel, .teacher-submission-list, .student-grades-page) button:hover:not(:disabled),
+.submission-form > button:hover:not(:disabled) {
+  background: var(--surface-soft);
+  border-color: #8b98a5;
+}
+
+.grade-panel button.workflow-primary,
+.submission-form > button.workflow-primary,
+.submission-start {
+  background: var(--ink);
+  color: var(--on-dark);
+  border-color: var(--ink);
+}
+
+.grade-panel button.workflow-primary:hover:not(:disabled),
+.submission-form > button.workflow-primary:hover:not(:disabled),
+.submission-start:hover:not(:disabled) {
+  background: #303030;
+}
+
+.submission-start {
+  width: 100%;
+}
+
+:is(.grade-panel, .teacher-submission-list, .student-grades-page) button:disabled,
+.submission-form > button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Điều hướng bằng bàn phím */
+:is(.grade-panel, .teacher-submission-list, .student-grades-page, .submission-form)
+:is(button, input, textarea, a):focus-visible,
+.workflow-table-wrap:focus-visible,
+.grades-table-card:focus-visible,
+.submission-start:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+:is(.teacher-submission-list, .student-grades-page) nav,
+.student-grades-page .grades-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Thông báo lỗi và thành công */
+:is(.grade-panel, .submission-form, .student-grades-page, .teacher-submission-list)
+[role="alert"] {
+  padding: 12px 14px;
+  border: 1px solid #f0b9b5;
+  border-radius: 10px;
+  background: #fff4f3;
+  color: var(--danger);
+  overflow-wrap: anywhere;
+}
+
+.workflow-success {
+  padding: 12px 14px;
+  border: 1px solid #b6d9bc;
+  border-radius: 10px;
+  background: #edf8ef;
+  color: var(--success);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .teacher-subs-container.teacher-submission-list,
+  .student-grades-page {
+    padding: 12px;
+    gap: 16px;
+  }
+
+  .grade-panel {
+    padding: 12px;
+  }
+
+  .student-grades-page .grades-toolbar button {
+    flex: 1 1 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :is(.grade-panel, .teacher-submission-list, .student-grades-page) button,
+  .submission-form > button,
+  .submission-start {
+    transition: none;
+  }
+}

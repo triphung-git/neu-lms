@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useMemo } from 'react';
 import { useDatabase } from '../../../app/providers/DatabaseContext';
 import { useNotifications } from '../../../app/providers/NotificationContext';
@@ -70,12 +71,12 @@ export const AdminEligibleEmailsPage: React.FC = () => {
     const nameTrimmed = singleName.trim();
 
     if (!emTrimmed || !nameTrimmed) {
-      showNotification('error', 'Vui lòng nhập đầy đủ họ tên và email.');
+      showNotification('error', uiText("Vui lòng nhập đầy đủ họ tên và email."));
       return;
     }
 
     if (validEmails.some(ve => ve.emailNormalized.toLowerCase() === emTrimmed)) {
-      showNotification('error', `Email "${emTrimmed}" đã tồn tại trong danh sách hợp lệ.`);
+      showNotification('error', uiText("Email \"{0}\" đã tồn tại trong danh sách hợp lệ.",[emTrimmed]));
       return;
     }
 
@@ -87,19 +88,19 @@ export const AdminEligibleEmailsPage: React.FC = () => {
     }]);
 
     if (res.ok) {
-      showNotification('success', `Đã thêm email "${emTrimmed}" vào danh sách hợp lệ.`);
+      showNotification('success', uiText("Đã thêm email \"{0}\" vào danh sách hợp lệ.",[emTrimmed]));
       setShowSingleModal(false);
       setSingleEmail('');
       setSingleName('');
     } else {
-      showNotification('error', res.error?.message || 'Lỗi thêm email');
+      showNotification('error', res.error?.message || uiText("Lỗi thêm email"));
     }
   };
 
   // BULK CSV PREVIEW
   const handlePreviewBulkCsv = () => {
     if (!bulkCsvText.trim()) {
-      showNotification('error', 'Vui lòng nhập nội dung CSV.');
+      showNotification('error', uiText("Vui lòng nhập nội dung CSV."));
       return;
     }
 
@@ -108,7 +109,7 @@ export const AdminEligibleEmailsPage: React.FC = () => {
 
     const validRows: { email: string; name: string; role: 'student' | 'teacher' }[] = [];
     const duplicateRows: string[] = [];
-    const invalidRows: string[] = parseRes.invalidRows.map(r => `${r.rawEmail || '(trống)'} (${r.errorMessage || 'Lỗi dòng'})`);
+    const invalidRows: string[] = parseRes.invalidRows.map(r => `${r.rawEmail || uiText("(trống)")} (${r.errorMessage || uiText("Lỗi dòng")})`);
 
     parseRes.validRows.forEach(r => {
       const emailNorm = r.emailNormalized.toLowerCase();
@@ -118,7 +119,7 @@ export const AdminEligibleEmailsPage: React.FC = () => {
       }
       validRows.push({
         email: emailNorm,
-        name: r.fullName || 'Người dùng',
+        name: r.fullName || uiText("Người dùng"),
         role: r.assignedRole || 'student'
       });
       existingEmailSet.add(emailNorm);
@@ -139,27 +140,27 @@ export const AdminEligibleEmailsPage: React.FC = () => {
 
     const res = addEligibleEmails(toInsert);
     if (res.ok) {
-      showNotification('success', `Đã nhập thành công ${toInsert.length} email hợp lệ.`);
+      showNotification('success', uiText("Đã nhập thành công {0} email hợp lệ.",[toInsert.length]));
       setShowBulkModal(false);
       setBulkCsvText('');
       setBulkPreview(null);
     } else {
-      showNotification('error', res.error?.message || 'Lỗi nhập danh sách');
+      showNotification('error', res.error?.message || uiText("Lỗi nhập danh sách"));
     }
   };
 
   const handleDeleteEmail = (ve: ValidEmail) => {
     if (ve.registeredUserId) {
-      showNotification('error', 'Email đã được đăng ký tài khoản hoạt động, không thể xóa.');
+      showNotification('error', uiText("Email đã được đăng ký tài khoản hoạt động, không thể xóa."));
       return;
     }
 
-    if (window.confirm(`Xóa email "${ve.emailNormalized}" khỏi danh sách được phép đăng ký?`)) {
+    if (window.confirm(uiText("Xóa email \"{0}\" khỏi danh sách được phép đăng ký?",[ve.emailNormalized]))) {
       const res = deleteEligibleEmail(ve.emailNormalized);
       if (res.ok) {
-        showNotification('success', `Đã xóa email "${ve.emailNormalized}".`);
+        showNotification('success', uiText("Đã xóa email \"{0}\".",[ve.emailNormalized]));
       } else {
-        showNotification('error', res.error?.message || 'Lỗi xóa email');
+        showNotification('error', res.error?.message || uiText("Lỗi xóa email"));
       }
     }
   };
@@ -170,24 +171,23 @@ export const AdminEligibleEmailsPage: React.FC = () => {
         <div>
           <Breadcrumb
             items={[
-              { label: 'Bàn làm việc', path: '/ad' },
-              { label: 'Email hợp lệ' }
+              { label: uiText("Bàn làm việc"), path: '/ad' },
+              { label: uiText("Email hợp lệ") }
             ]}
           />
-          <h1 className="page-main-heading">Danh sách Email hợp lệ toàn trường</h1>
+          <h1 className="page-main-heading">{uiText("Danh sách Email hợp lệ toàn trường")}</h1>
           <p className="page-subtitle">
-            Kiểm soát danh sách cán bộ, giảng viên và sinh viên đủ điều kiện khởi tạo tài khoản trên hệ thống.
-          </p>
+            {uiText("Kiểm soát danh sách cán bộ, giảng viên và sinh viên đủ điều kiện khởi tạo tài khoản trên hệ thống.")}</p>
         </div>
 
         <div className="header-actions">
           <Button type="button" variant="secondary" onClick={() => setShowBulkModal(true)}>
             <Upload size={16} />
-            <span>Nhập tệp CSV</span>
+            <span>{uiText("Nhập tệp CSV")}</span>
           </Button>
           <Button type="button" variant="primary" onClick={() => setShowSingleModal(true)}>
             <UserPlus size={16} />
-            <span>Thêm một email</span>
+            <span>{uiText("Thêm một email")}</span>
           </Button>
         </div>
       </div>
@@ -196,35 +196,35 @@ export const AdminEligibleEmailsPage: React.FC = () => {
       <div className="filter-search-card">
         <div className="search-col">
           <TextField
-            label="Tìm kiếm theo email hoặc họ tên"
+            label={uiText("Tìm kiếm theo email hoặc họ tên")}
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
-            placeholder="Nhập email hoặc tên cần tìm..."
+            placeholder={uiText("Nhập email hoặc tên cần tìm...")}
           />
         </div>
 
         <div className="filter-col">
           <SelectField
-            label="Vai trò"
+            label={uiText("Vai trò")}
             value={roleFilter}
             onChange={e => setRoleFilter(e.target.value as any)}
             options={[
-              { value: 'all', label: 'Tất cả vai trò' },
-              { value: 'student', label: 'Sinh viên' },
-              { value: 'teacher', label: 'Giảng viên' }
+              { value: 'all', label: uiText("Tất cả vai trò") },
+              { value: 'student', label: uiText("Sinh viên") },
+              { value: 'teacher', label: uiText("Giảng viên") }
             ]}
           />
         </div>
 
         <div className="filter-col">
           <SelectField
-            label="Trạng thái kích hoạt"
+            label={uiText("Trạng thái kích hoạt")}
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value as any)}
             options={[
-              { value: 'all', label: 'Tất cả trạng thái' },
-              { value: 'registered', label: 'Đã đăng ký tài khoản' },
-              { value: 'unregistered', label: 'Chưa đăng ký' }
+              { value: 'all', label: uiText("Tất cả trạng thái") },
+              { value: 'registered', label: uiText("Đã đăng ký tài khoản") },
+              { value: 'unregistered', label: uiText("Chưa đăng ký") }
             ]}
           />
         </div>
@@ -233,8 +233,8 @@ export const AdminEligibleEmailsPage: React.FC = () => {
       {/* Table */}
       {filteredEmails.length === 0 ? (
         <EmptyState
-          title="Không tìm thấy email"
-          description="Không có email nào phù hợp với bộ lọc tìm kiếm hiện tại."
+          title={uiText("Không tìm thấy email")}
+          description={uiText("Không có email nào phù hợp với bộ lọc tìm kiếm hiện tại.")}
           action={
             <Button
               variant="secondary"
@@ -244,8 +244,7 @@ export const AdminEligibleEmailsPage: React.FC = () => {
                 setStatusFilter('all');
               }}
             >
-              Xóa bộ lọc
-            </Button>
+              {uiText("Xóa bộ lọc")}</Button>
           }
         />
       ) : (
@@ -253,12 +252,12 @@ export const AdminEligibleEmailsPage: React.FC = () => {
           <table className="npc-table">
             <thead>
               <tr>
-                <th>Địa chỉ Email</th>
-                <th>Họ và tên</th>
-                <th>Vai trò được cấp</th>
-                <th>Trạng thái tài khoản</th>
-                <th>Ngày cập nhật</th>
-                <th>Thao tác</th>
+                <th>{uiText("Địa chỉ Email")}</th>
+                <th>{uiText("Họ và tên")}</th>
+                <th>{uiText("Vai trò được cấp")}</th>
+                <th>{uiText("Trạng thái tài khoản")}</th>
+                <th>{uiText("Ngày cập nhật")}</th>
+                <th>{uiText("Thao tác")}</th>
               </tr>
             </thead>
             <tbody>
@@ -270,13 +269,13 @@ export const AdminEligibleEmailsPage: React.FC = () => {
                   <td>{ve.fullName}</td>
                   <td>
                     <span className="role-tag">
-                      {ve.assignedRole === 'teacher' ? 'Giảng viên' : 'Sinh viên'}
+                      {ve.assignedRole === 'teacher' ? uiText("Giảng viên") : uiText("Sinh viên")}
                     </span>
                   </td>
                   <td>
                     <Badge
                       variant={ve.registeredUserId ? 'published' : 'draft'}
-                      label={ve.registeredUserId ? 'Đã kích hoạt' : 'Chưa đăng ký'}
+                      label={ve.registeredUserId ? uiText("Đã kích hoạt") : uiText("Chưa đăng ký")}
                     />
                   </td>
                   <td>{formatDateVN(ve.addedAt)}</td>
@@ -284,16 +283,15 @@ export const AdminEligibleEmailsPage: React.FC = () => {
                     {ve.registeredUserId ? (
                       <span
                         className="text-muted text-disabled-btn"
-                        title="Email đã kích hoạt tài khoản thực tế, không thể xóa"
+                        title={uiText("Email đã kích hoạt tài khoản thực tế, không thể xóa")}
                       >
-                        Đã đăng ký (Khóa)
-                      </span>
+                        {uiText("Đã đăng ký (Khóa)")}</span>
                     ) : (
                       <button
                         type="button"
                         className="icon-delete-btn"
                         onClick={() => handleDeleteEmail(ve)}
-                        title="Xóa email khỏi danh sách hợp lệ"
+                        title={uiText("Xóa email khỏi danh sách hợp lệ")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -309,13 +307,13 @@ export const AdminEligibleEmailsPage: React.FC = () => {
       {/* Modal Single Add */}
       {showSingleModal && (
         <Modal
-          title="Thêm email hợp lệ đơn lẻ"
+          title={uiText("Thêm email hợp lệ đơn lẻ")}
           isOpen={showSingleModal}
           onClose={() => setShowSingleModal(false)}
         >
           <form onSubmit={handleSingleAdd} className="modal-form-stack">
             <TextField
-              label="Địa chỉ email trường"
+              label={uiText("Địa chỉ email trường")}
               required
               type="email"
               value={singleEmail}
@@ -323,28 +321,26 @@ export const AdminEligibleEmailsPage: React.FC = () => {
               placeholder="nguyenvana@school.edu.vn"
             />
             <TextField
-              label="Họ và tên đầy đủ"
+              label={uiText("Họ và tên đầy đủ")}
               required
               value={singleName}
               onChange={e => setSingleName(e.target.value)}
-              placeholder="Nguyễn Văn A"
+              placeholder={uiText("Nguyễn Văn A")}
             />
             <SelectField
-              label="Vai trò cấp quyền"
+              label={uiText("Vai trò cấp quyền")}
               value={singleRole}
               onChange={e => setSingleRole(e.target.value as any)}
               options={[
-                { value: 'student', label: 'Sinh viên' },
-                { value: 'teacher', label: 'Giảng viên' }
+                { value: 'student', label: uiText("Sinh viên") },
+                { value: 'teacher', label: uiText("Giảng viên") }
               ]}
             />
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowSingleModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="primary">
-                Lưu vào danh sách
-              </Button>
+                {uiText("Lưu vào danh sách")}</Button>
             </div>
           </form>
         </Modal>
@@ -353,7 +349,7 @@ export const AdminEligibleEmailsPage: React.FC = () => {
       {/* Modal Bulk CSV Import */}
       {showBulkModal && (
         <Modal
-          title="Nhập danh sách Email hợp lệ qua CSV"
+          title={uiText("Nhập danh sách Email hợp lệ qua CSV")}
           isOpen={showBulkModal}
           onClose={() => {
             setShowBulkModal(false);
@@ -362,11 +358,11 @@ export const AdminEligibleEmailsPage: React.FC = () => {
         >
           <div className="bulk-csv-stack">
             <TextAreaField
-              label="Dán dữ liệu CSV (Có hỗ trợ tiêu đề email, name, role)"
+              label={uiText("Dán dữ liệu CSV (Có hỗ trợ tiêu đề email, name, role)")}
               required
               value={bulkCsvText}
               onChange={e => setBulkCsvText(e.target.value)}
-              placeholder="email,name,role&#10;sinhvien1@school.edu.vn,Nguyễn Văn 1,student&#10;giangvien1@school.edu.vn,TS. Trần Văn 2,teacher"
+              placeholder={uiText("email,name,role&#10;sinhvien1@school.edu.vn,Nguyễn Văn 1,student&#10;giangvien1@school.edu.vn,TS. Trần Văn 2,teacher")}
               rows={6}
               helperText="Hệ thống hỗ trợ chuẩn RFC 4180, loại bỏ UTF-8 BOM và các dấu ngoặc kép an toàn."
             />
@@ -374,7 +370,7 @@ export const AdminEligibleEmailsPage: React.FC = () => {
             <div className="preview-action-row">
               <Button type="button" variant="secondary" onClick={handlePreviewBulkCsv}>
                 <FileText size={16} />
-                <span>Kiểm tra & Xem trước danh sách</span>
+                <span>{uiText("Kiểm tra & Xem trước danh sách")}</span>
               </Button>
             </div>
 
@@ -382,17 +378,17 @@ export const AdminEligibleEmailsPage: React.FC = () => {
               <div className="csv-preview-results-box">
                 <div className="preview-pill success">
                   <CheckCircle2 size={16} />
-                  <span>{bulkPreview.validRows.length} dòng hợp lệ sẵn sàng nhập</span>
+                  <span>{bulkPreview.validRows.length} {uiText(" dòng hợp lệ sẵn sàng nhập")}</span>
                 </div>
                 {bulkPreview.duplicateRows.length > 0 && (
                   <div className="preview-pill info">
-                    <span>{bulkPreview.duplicateRows.length} email trùng lặp (đã bỏ qua)</span>
+                    <span>{bulkPreview.duplicateRows.length} {uiText(" email trùng lặp (đã bỏ qua)")}</span>
                   </div>
                 )}
                 {bulkPreview.invalidRows.length > 0 && (
                   <div className="preview-pill danger">
                     <XCircle size={16} />
-                    <span>{bulkPreview.invalidRows.length} dòng lỗi định dạng</span>
+                    <span>{bulkPreview.invalidRows.length} {uiText(" dòng lỗi định dạng")}</span>
                   </div>
                 )}
               </div>
@@ -407,16 +403,14 @@ export const AdminEligibleEmailsPage: React.FC = () => {
                   setBulkPreview(null);
                 }}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="primary"
                 disabled={!bulkPreview || bulkPreview.validRows.length === 0}
                 onClick={handleConfirmBulkAdd}
               >
-                Xác nhận nhập vào hệ thống
-              </Button>
+                {uiText("Xác nhận nhập vào hệ thống")}</Button>
             </div>
           </div>
         </Modal>

@@ -688,3 +688,56 @@ class AssignmentReopenWindow(models.Model):
             return False
         now = current_time or timezone.now()
         return self.start_at <= now <= self.end_at
+
+
+class SubmissionRevision(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.PROTECT)
+    student = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.PROTECT)
+    file = models.OneToOneField("files.StoredFile", on_delete=models.PROTECT)
+    number = models.PositiveIntegerField()
+    submitted_at = models.DateTimeField()
+    is_late = models.BooleanField()
+
+
+class Meta:
+    constraints = [
+        models.UniqueConstraint(
+            fields=["assignment", "student", "number"],
+            name="unique_student_submission_revision",
+        )
+    ]
+
+
+class SubmissionGradeEntry(models.Model):
+    class Status(models.TextChoices):
+        DRAFT = "draft", "Nháp"
+        PUBLISHED = "published", "Đã công bố"
+
+    submission = models.ForeignKey(
+        SubmissionRevision,
+        on_delete=models.PROTECT,
+        related_name="grade_entries",
+    )
+    version = models.PositiveIntegerField()
+    notice_read_at = models.DateTimeField(null=True, blank=True)
+    score = models.DecimalField(max_digits=10, decimal_places=2)
+    rubric_breakdown = models.JSONField(default=list, blank=True)
+    feedback = models.TextField(blank=True)
+    status = models.CharField(max_length=10, choices=Status.choices)
+    graded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["submission", "version"],
+                name="unique_submission_grade_version",
+            ),
+            models.CheckConstraint(
+                condition=models.Q(score__gte=0),
+                name="grade_score_nonnegative",
+            ),
+        ]

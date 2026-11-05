@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
@@ -39,7 +40,7 @@ export const HomePage: React.FC = () => {
   // 1. Title & Metadata
   useEffect(() => {
     const originalTitle = document.title;
-    document.title = 'NEU LMS — Hệ thống quản lý học tập';
+    document.title = uiText("NEU LMS — Hệ thống quản lý học tập");
     return () => {
       document.title = originalTitle;
     };
@@ -202,38 +203,35 @@ export const HomePage: React.FC = () => {
         <nav
           ref={navRef}
           className={`nav ${isMobileMenuOpen ? 'is-open' : ''}`}
-          aria-label="Điều hướng chính"
+          aria-label={uiText("Điều hướng chính")}
         >
           <div className="nav__brand">
             <div className="logo">
               <img
                 src="/neu-logo.webp"
-                alt="Biểu trưng Đại học Kinh tế Quốc dân"
+                alt={uiText("Biểu trưng Đại học Kinh tế Quốc dân")}
                 className="logo__img"
                 width={40}
                 height={40}
               />
             </div>
             <div className="wordmark">
-              <span className="wordmark__lockup">ĐẠI HỌC KINH TẾ QUỐC DÂN</span>
+              <span className="wordmark__lockup">{uiText("ĐẠI HỌC KINH TẾ QUỐC DÂN")}</span>
             </div>
           </div>
 
           <div className="nav__links">
             <Link to="/tinh-nang" className="link l1">
-              Tính năng
-            </Link>
+              {uiText("Tính năng")}</Link>
             <Link to="/huong-dan" className="link l2">
-              Hướng dẫn
-            </Link>
+              {uiText("Hướng dẫn")}</Link>
             <a
               href="https://neu.edu.vn/he-thong-nhan-dien/"
               className="link l3"
               target="_self"
               rel="noopener noreferrer"
             >
-              Về NEU
-            </a>
+              {uiText("Về NEU")}</a>
             <Link to="/huong-dan" className="link l4">
               FAQ
             </Link>
@@ -244,8 +242,7 @@ export const HomePage: React.FC = () => {
             className="btn btn--nav"
             onClick={handleNavLogin}
           >
-            Đăng nhập
-          </button>
+            {uiText("Đăng nhập")}</button>
 
           {/* Mobile Burger Button */}
           <button
@@ -253,7 +250,7 @@ export const HomePage: React.FC = () => {
             type="button"
             className="burger"
             onClick={toggleBurger}
-            aria-label={isMobileMenuOpen ? 'Đóng menu' : 'Mở menu'}
+            aria-label={isMobileMenuOpen ? uiText("Đóng menu") : uiText("Mở menu")}
             aria-expanded={isMobileMenuOpen}
             aria-controls="nav-menu"
           >
@@ -272,15 +269,13 @@ export const HomePage: React.FC = () => {
               className="navmenu__link"
               onClick={closeBurger}
             >
-              Tính năng
-            </Link>
+              {uiText("Tính năng")}</Link>
             <Link
               to="/huong-dan"
               className="navmenu__link"
               onClick={closeBurger}
             >
-              Hướng dẫn
-            </Link>
+              {uiText("Hướng dẫn")}</Link>
             <a
               href="https://neu.edu.vn/he-thong-nhan-dien/"
               className="navmenu__link"
@@ -288,8 +283,7 @@ export const HomePage: React.FC = () => {
               rel="noopener noreferrer"
               onClick={closeBurger}
             >
-              Về NEU
-            </a>
+              {uiText("Về NEU")}</a>
             <Link
               to="/huong-dan"
               className="navmenu__link"
@@ -305,8 +299,7 @@ export const HomePage: React.FC = () => {
                 handleNavLogin();
               }}
             >
-              Đăng nhập
-            </button>
+              {uiText("Đăng nhập")}</button>
             <button
               type="button"
               className="navmenu__cta navmenu__cta--register"
@@ -315,19 +308,18 @@ export const HomePage: React.FC = () => {
                 handleHeroRegister();
               }}
             >
-              Đăng ký
-            </button>
+              {uiText("Đăng ký")}</button>
           </div>
         </nav>
 
         {/* 2. Hero Headline */}
         <h1 className="hero-h1 t-display">
-          {`Kết nối tri thức,\nchủ động học tập cùng NEU`}
+          {uiText("Kết nối tri thức,\nchủ động học tập cùng NEU")}
         </h1>
 
         {/* 3. Hero Subtitle */}
         <p className="hero-sub t-body">
-          {`Không gian học tập trực tuyến dành cho giảng viên và sinh viên NEU.\nTheo dõi học phần, tài liệu và nhiệm vụ học tập tại một nơi.`}
+          {uiText("Không gian học tập trực tuyến dành cho giảng viên và sinh viên NEU.\nTheo dõi học phần, tài liệu và nhiệm vụ học tập tại một nơi.")}
         </p>
 
         {/* 4. Hero CTA Button */}
@@ -336,8 +328,7 @@ export const HomePage: React.FC = () => {
           className="btn btn--hero"
           onClick={handleHeroRegister}
         >
-          Đăng ký
-        </button>
+          {uiText("Đăng ký")}</button>
 
         {/* 5. Full-bleed Cyan Video Band */}
         <div className="band" role="presentation">
@@ -359,9 +350,8 @@ export const HomePage: React.FC = () => {
         {/* 6. Fixed-Proportion Product Mockup Card */}
         <div className="card" ref={cardRef}>
           <div className="eyebrow t-eyebrow">
-            # NEU LMS / Không gian học tập
-          </div>
-          <div className="cardtitle t-title">Tổng quan học tập</div>
+            {uiText("# NEU LMS / Không gian học tập")}</div>
+          <div className="cardtitle t-title">{uiText("Tổng quan học tập")}</div>
 
           <div className="meta t-meta">
             <div className="avatars" aria-hidden="true">
@@ -386,28 +376,23 @@ export const HomePage: React.FC = () => {
               />
             </svg>
             <div className="metatext">
-              Hôm nay <span className="sep">&bull;</span> Học kỳ hiện tại{' '}
-              <span className="sep">&bull;</span> Đang học
-            </div>
+              {uiText("Hôm nay ")}<span className="sep">&bull;</span> {uiText(" Học kỳ hiện tại")}{' '}
+              <span className="sep">&bull;</span> {uiText(" Đang học")}</div>
           </div>
 
           <div className="tabs" role="tablist">
             <div className="tab is-active t-tab" role="tab" aria-selected="true">
-              Tổng quan
-            </div>
+              {uiText("Tổng quan")}</div>
             <div className="tab t2 t-tab" role="tab" aria-selected="false">
-              Học phần
-            </div>
+              {uiText("Học phần")}</div>
             <div className="tab t3 t-tab" role="tab" aria-selected="false">
-              Bài tập
-            </div>
+              {uiText("Bài tập")}</div>
             <div className="tab t4 t-tab" role="tab" aria-selected="false">
-              Thông báo
-            </div>
+              {uiText("Thông báo")}</div>
           </div>
 
-          <div className="panel" role="region" aria-label="Nhiệm vụ học tập">
-            <div className="panel__heading t-heading">Nhiệm vụ học tập</div>
+          <div className="panel" role="region" aria-label={uiText("Nhiệm vụ học tập")}>
+            <div className="panel__heading t-heading">{uiText("Nhiệm vụ học tập")}</div>
 
             <div className="row row1">
               <div className="dot dot--check" aria-hidden="true">
@@ -429,11 +414,9 @@ export const HomePage: React.FC = () => {
                 </svg>
               </div>
               <div className="rowtitle t-item">
-                Hoàn thành bài học mở đầu
-              </div>
+                {uiText("Hoàn thành bài học mở đầu")}</div>
               <div className="rowowner t-caption">
-                Trạng thái: Đã hoàn thành
-              </div>
+                {uiText("Trạng thái: Đã hoàn thành")}</div>
             </div>
 
             <div className="row row2">
@@ -456,11 +439,9 @@ export const HomePage: React.FC = () => {
                 </svg>
               </div>
               <div className="rowtitle t-item">
-                Chuẩn bị nội dung cho buổi học tiếp theo
-              </div>
+                {uiText("Chuẩn bị nội dung cho buổi học tiếp theo")}</div>
               <div className="rowowner t-caption">
-                Trạng thái: Cần thực hiện
-              </div>
+                {uiText("Trạng thái: Cần thực hiện")}</div>
             </div>
           </div>
         </div>

@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { useParams, useSearchParams, useNavigate, useOutletContext } from 'react-router-dom';
 import {
@@ -110,21 +111,21 @@ export const TeacherAssignmentEditPage: React.FC = () => {
   const [rubricItems, setRubricItems] = useState<RubricItemState[]>([
     {
       id: 'cr-default-1',
-      title: 'Tính đúng đắn và đầy đủ chức năng',
+      title: uiText("Tính đúng đắn và đầy đủ chức năng"),
       maxScore: 5,
-      description: 'Hoàn thành toàn bộ ca kiểm thử chức năng yêu cầu',
+      description: uiText("Hoàn thành toàn bộ ca kiểm thử chức năng yêu cầu"),
     },
     {
       id: 'cr-default-2',
-      title: 'Kiến trúc mã nguồn và phong cách viết',
+      title: uiText("Kiến trúc mã nguồn và phong cách viết"),
       maxScore: 3,
-      description: 'Phân tách module rõ ràng, clean code',
+      description: uiText("Phân tách module rõ ràng, clean code"),
     },
     {
       id: 'cr-default-3',
-      title: 'Tài liệu hướng dẫn và báo cáo kiểm thử',
+      title: uiText("Tài liệu hướng dẫn và báo cáo kiểm thử"),
       maxScore: 2,
-      description: 'Tài liệu Markdown chuẩn, bằng chứng kết quả kiểm thử',
+      description: uiText("Tài liệu Markdown chuẩn, bằng chứng kết quả kiểm thử"),
     },
   ]);
 
@@ -261,7 +262,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
         );
       }
     } catch (err) {
-      if (mounted.current && sequence === loadSequence.current) notifyErrorRef.current(err instanceof Error ? err.message : 'Không thể tải thông tin bài tập.');
+      if (mounted.current && sequence === loadSequence.current) notifyErrorRef.current(err instanceof Error ? err.message : uiText("Không thể tải thông tin bài tập."));
     } finally {
       if (mounted.current && sequence === loadSequence.current) setAssignmentLoading(false);
     }
@@ -284,12 +285,11 @@ export const TeacherAssignmentEditPage: React.FC = () => {
     return (
       <div className="teacher-ass-edit-container">
         <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại trên hệ thống hoặc bạn không có quyền truy cập."
+          title={uiText("Không tìm thấy môn học")}
+          description={uiText("Môn học không tồn tại trên hệ thống hoặc bạn không có quyền truy cập.")}
           action={
             <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
+              {uiText("Về danh sách môn học")}</Button>
           }
         />
       </div>
@@ -300,15 +300,14 @@ export const TeacherAssignmentEditPage: React.FC = () => {
     return (
       <div className="teacher-ass-edit-container">
         <EmptyState
-          title="Không tìm thấy bài tập"
-          description="Bài tập bạn yêu cầu chỉnh sửa không tồn tại."
+          title={uiText("Không tìm thấy bài tập")}
+          description={uiText("Bài tập bạn yêu cầu chỉnh sửa không tồn tại.")}
           action={
             <Button
               variant="secondary"
               onClick={() => navigate(`/gv/mon-hoc/${course.id}/bai-tap`)}
             >
-              Về danh sách bài tập
-            </Button>
+              {uiText("Về danh sách bài tập")}</Button>
           }
         />
       </div>
@@ -320,9 +319,9 @@ export const TeacherAssignmentEditPage: React.FC = () => {
     if (isAlreadyPublished || isReadOnly) return;
     const newItem: RubricItemState = {
       id: `cr-${Date.now()}`,
-      title: 'Tiêu chí đánh giá mới',
+      title: uiText("Tiêu chí đánh giá mới"),
       maxScore: 1,
-      description: 'Mô tả yêu cầu đạt điểm tối đa',
+      description: uiText("Mô tả yêu cầu đạt điểm tối đa"),
     };
     setRubricItems((prev) => [...prev, newItem]);
   };
@@ -337,7 +336,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
   const handleDeleteCriterion = (id: string) => {
     if (isAlreadyPublished || isReadOnly) return;
     if (rubricItems.length <= 1) {
-      notifyError('Bài tập phải có ít nhất một tiêu chí chấm điểm trong rubric.');
+      notifyError(uiText("Bài tập phải có ít nhất một tiêu chí chấm điểm trong rubric."));
       return;
     }
     setRubricItems((prev) => prev.filter((item) => item.id !== id));
@@ -372,7 +371,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       let targetAssignmentId = existingAssignment?.id;
       if (!targetAssignmentId) {
         const payload = buildPayload();
-        if (!payload.trimmedTitle) throw new Error('Nhập tiêu đề trước khi tải tệp đính kèm.');
+        if (!payload.trimmedTitle) throw new Error(uiText("Nhập tiêu đề trước khi tải tệp đính kèm."));
         const draft = await assignmentsService.createAssignment(course.id, {
           title: payload.trimmedTitle,
           instructions: description.trim(),
@@ -425,8 +424,8 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       if (!storedFile || storedFile.status !== 'clean') {
         const errorMsg =
           storedFile?.status === 'infected'
-            ? 'Tệp tải lên phát hiện mã độc (Infected) và đã bị hệ thống cách ly!'
-            : 'Tệp tải lên chưa vượt qua vòng kiểm duyệt bảo mật.';
+            ? uiText("Tệp tải lên phát hiện mã độc (Infected) và đã bị hệ thống cách ly!")
+            : uiText("Tệp tải lên chưa vượt qua vòng kiểm duyệt bảo mật.");
         notifyError(errorMsg);
         setUploadingFiles((prev) =>
           prev.map((f) =>
@@ -452,9 +451,9 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       ]);
 
       setUploadingFiles((prev) => prev.filter((f) => f.fileName !== fileName));
-      notifySuccess(`Đã tải lên và quét an toàn tệp "${fileName}".`);
+      notifySuccess(uiText("Đã tải lên và quét an toàn tệp \"{0}\".",[fileName]));
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Lỗi tải lên tệp đính kèm.';
+      const errorMsg = err instanceof Error ? err.message : uiText("Lỗi tải lên tệp đính kèm.");
       notifyError(errorMsg);
       setUploadingFiles((prev) =>
         prev.map((f) =>
@@ -518,7 +517,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       buildPayload();
 
     if (!trimmedTitle) {
-      notifyError('Vui lòng nhập tiêu đề bài tập.');
+      notifyError(uiText("Vui lòng nhập tiêu đề bài tập."));
       return;
     }
 
@@ -544,7 +543,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
           },
           { ifMatch: assignmentVersion }
         );
-        notifySuccess('Đã lưu cập nhật bản nháp bài tập thành công.');
+        notifySuccess(uiText("Đã lưu cập nhật bản nháp bài tập thành công."));
       } else {
         // Create new draft
         await assignmentsService.createAssignment(course.id, {
@@ -559,17 +558,17 @@ export const TeacherAssignmentEditPage: React.FC = () => {
           publish_immediately: false,
           ai_grading_opt_in: false,
         }, { idempotencyKey: creationKey.current });
-        notifySuccess('Đã tạo bản nháp bài tập mới thành công.');
+        notifySuccess(uiText("Đã tạo bản nháp bài tập mới thành công."));
       }
 
       navigate(`/gv/mon-hoc/${course.id}/bai-tap`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setStaleConflictError(
-          'Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới dữ liệu để xem phiên bản mới nhất.'
+          uiText("Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới dữ liệu để xem phiên bản mới nhất.")
         );
       } else {
-        notifyError(err instanceof Error ? err.message : 'Lỗi khi lưu bản nháp.');
+        notifyError(err instanceof Error ? err.message : uiText("Lỗi khi lưu bản nháp."));
       }
     } finally {
       setIsSubmitting(false);
@@ -596,15 +595,15 @@ export const TeacherAssignmentEditPage: React.FC = () => {
         },
         { ifMatch: assignmentVersion }
       );
-      notifySuccess('Đã lưu cập nhật hạn nộp và thiết lập bài tập.');
+      notifySuccess(uiText("Đã lưu cập nhật hạn nộp và thiết lập bài tập."));
       navigate(`/gv/mon-hoc/${course.id}/bai-tap`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setStaleConflictError(
-          'Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới trang.'
+          uiText("Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới trang.")
         );
       } else {
-        notifyError(err instanceof Error ? err.message : 'Lỗi khi cập nhật thiết lập bài tập.');
+        notifyError(err instanceof Error ? err.message : uiText("Lỗi khi cập nhật thiết lập bài tập."));
       }
     } finally {
       setIsSubmitting(false);
@@ -618,12 +617,12 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       buildPayload();
 
     if (!trimmedTitle) {
-      notifyError('Vui lòng nhập tiêu đề bài tập.');
+      notifyError(uiText("Vui lòng nhập tiêu đề bài tập."));
       return;
     }
 
     if (rubricItems.length === 0) {
-      notifyError('Bài tập phải có ít nhất một tiêu chí Rubric trước khi công bố.');
+      notifyError(uiText("Bài tập phải có ít nhất một tiêu chí Rubric trước khi công bố."));
       return;
     }
 
@@ -668,15 +667,15 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       }
 
       setShowPublishModal(false);
-      notifySuccess(`Đã công bố bài tập "${trimmedTitle}" thành công cho sinh viên.`);
+      notifySuccess(uiText("Đã công bố bài tập \"{0}\" thành công cho sinh viên.",[trimmedTitle]));
       navigate(`/gv/mon-hoc/${course.id}/bai-tap`);
     } catch (err) {
       if (err instanceof ApiError && err.status === 409) {
         setStaleConflictError(
-          'Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới trang.'
+          uiText("Dữ liệu bài tập đã được cập nhật bởi một phiên làm việc khác (Xung đột phiên bản OCC). Vui lòng làm mới trang.")
         );
       } else {
-        notifyError(err instanceof Error ? err.message : 'Lỗi khi công bố bài tập.');
+        notifyError(err instanceof Error ? err.message : uiText("Lỗi khi công bố bài tập."));
       }
     } finally {
       setIsSubmitting(false);
@@ -688,19 +687,19 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/gv' },
+            { label: uiText("Bàn làm việc"), path: '/gv' },
             { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-            { label: 'Bài tập', path: `/gv/mon-hoc/${course.id}/bai-tap` },
+            { label: uiText("Bài tập"), path: `/gv/mon-hoc/${course.id}/bai-tap` },
             {
               label: existingAssignment
-                ? `Chỉnh sửa: ${existingAssignment.title}`
-                : 'Soạn bài tập mới',
+                ? uiText("Chỉnh sửa: {0}",[existingAssignment.title])
+                : uiText("Soạn bài tập mới"),
             },
           ]}
         />
         <div className="title-row">
           <h1 className="edit-main-title">
-            {existingAssignment ? 'Chỉnh sửa bài tập' : 'Soạn bài tập mới'}
+            {existingAssignment ? uiText("Chỉnh sửa bài tập") : uiText("Soạn bài tập mới")}
           </h1>
           {existingAssignment && (
             <Badge
@@ -715,12 +714,12 @@ export const TeacherAssignmentEditPage: React.FC = () => {
               }
               label={
                 existingAssignment.status === 'published'
-                  ? 'Đã công bố'
+                  ? uiText("Đã công bố")
                   : existingAssignment.status === 'closed'
-                    ? 'Đã đóng nộp'
+                    ? uiText("Đã đóng nộp")
                     : existingAssignment.status === 'archived'
-                      ? 'Đã lưu trữ'
-                      : 'Bản nháp'
+                      ? uiText("Đã lưu trữ")
+                      : uiText("Bản nháp")
               }
             />
           )}
@@ -730,7 +729,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       {isReadOnly && (
         <div className="archived-warning-alert" role="alert">
           <AlertTriangle size={20} />
-          <span>Môn học hoặc bài tập đã lưu trữ: Toàn bộ thông tin ở chế độ chỉ đọc.</span>
+          <span>{uiText("Môn học hoặc bài tập đã lưu trữ: Toàn bộ thông tin ở chế độ chỉ đọc.")}</span>
         </div>
       )}
 
@@ -738,7 +737,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
         <div className="published-lock-alert" role="alert">
           <Lock size={18} />
           <span>
-            <strong>Bài tập đã được công bố:</strong> Tiêu đề, đề bài, tệp đính kèm và tiêu chí Rubric được khóa cố định để đảm bảo sự công bằng cho sinh viên đã nộp bài. Bạn chỉ có thể điều chỉnh <strong>Hạn nộp</strong>, <strong>Cho phép nộp muộn</strong> và <strong>Chính sách tệp nộp bài</strong>.
+            <strong>{uiText("Bài tập đã được công bố:")}</strong> {uiText(" Tiêu đề, đề bài, tệp đính kèm và tiêu chí Rubric được khóa cố định để đảm bảo sự công bằng cho sinh viên đã nộp bài. Bạn chỉ có thể điều chỉnh ")}<strong>{uiText("Hạn nộp")}</strong>, <strong>{uiText("Cho phép nộp muộn")}</strong> {uiText(" và ")}<strong>{uiText("Chính sách tệp nộp bài")}</strong>.
           </span>
         </div>
       )}
@@ -760,7 +759,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
           aria-selected={activeTab === 'soan'}
         >
           <FileText size={16} />
-          <span>Soạn thảo bài tập</span>
+          <span>{uiText("Soạn thảo bài tập")}</span>
         </button>
         <button
           type="button"
@@ -770,7 +769,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
           aria-selected={activeTab === 'xem-truoc'}
         >
           <Eye size={16} />
-          <span>Xem trước như sinh viên</span>
+          <span>{uiText("Xem trước như sinh viên")}</span>
         </button>
       </div>
 
@@ -780,37 +779,37 @@ export const TeacherAssignmentEditPage: React.FC = () => {
           <div className="editor-main-form">
             {/* Statement Section */}
             <section className="form-section-card">
-              <h2 className="section-title">Thông tin đề bài</h2>
+              <h2 className="section-title">{uiText("Thông tin đề bài")}</h2>
               <div className="fields-stack">
                 <TextField
-                  label="Tiêu đề bài tập"
+                  label={uiText("Tiêu đề bài tập")}
                   required
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Ví dụ: Bài tập lớn: Thiết kế hệ thống thông tin"
+                  placeholder={uiText("Ví dụ: Bài tập lớn: Thiết kế hệ thống thông tin")}
                   disabled={isAlreadyPublished || isReadOnly}
                 />
 
                 <TextAreaField
-                  label="Yêu cầu đề bài & Hướng dẫn sinh viên"
+                  label={uiText("Yêu cầu đề bài & Hướng dẫn sinh viên")}
                   required
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Mô tả chi tiết yêu cầu, quy ước đặt tên, kịch bản nghiệp vụ..."
+                  placeholder={uiText("Mô tả chi tiết yêu cầu, quy ước đặt tên, kịch bản nghiệp vụ...")}
                   rows={6}
                   disabled={isAlreadyPublished || isReadOnly}
                 />
 
                 {chapters.length > 0 && (
                   <div className="form-group-item">
-                    <label className="field-label">Gắn với chương học:</label>
+                    <label className="field-label">{uiText("Gắn với chương học:")}</label>
                     <select
                       className="field-select"
                       value={chapterId}
                       onChange={(e) => setChapterId(e.target.value)}
                       disabled={isAlreadyPublished || isReadOnly}
                     >
-                      <option value="">Không gắn với chương cụ thể</option>
+                      <option value="">{uiText("Không gắn với chương cụ thể")}</option>
                       {chapters.map((ch) => (
                         <option key={ch.id} value={ch.id}>
                           {ch.title}
@@ -822,7 +821,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
 
                 <div className="form-row-dates">
                   <TextField
-                    label="Hạn nộp bài (Ngày)"
+                    label={uiText("Hạn nộp bài (Ngày)")}
                     required
                     type="date"
                     value={dueDateStr}
@@ -831,7 +830,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                   />
 
                   <TextField
-                    label="Giờ chót"
+                    label={uiText("Giờ chót")}
                     required
                     type="time"
                     value={dueTimeStr}
@@ -847,11 +846,10 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                         onChange={(e) => setAllowLate(e.target.checked)}
                         disabled={isReadOnly}
                       />
-                      <span>Cho phép nộp muộn sau deadline</span>
+                      <span>{uiText("Cho phép nộp muộn sau deadline")}</span>
                     </label>
                     <span className="checkbox-subtext">
-                      Sinh viên nộp muộn sẽ được gắn nhãn nộp trễ và hiển thị rõ ràng khi chấm.
-                    </span>
+                      {uiText("Sinh viên nộp muộn sẽ được gắn nhãn nộp trễ và hiển thị rõ ràng khi chấm.")}</span>
                   </div>
                 </div>
               </div>
@@ -860,10 +858,9 @@ export const TeacherAssignmentEditPage: React.FC = () => {
             {/* Attachments Section */}
             <section className="form-section-card">
               <div className="section-header-row">
-                <h2 className="section-title">Tệp đính kèm tài liệu đề bài</h2>
+                <h2 className="section-title">{uiText("Tệp đính kèm tài liệu đề bài")}</h2>
                 <span className="section-desc">
-                  Tài liệu đề bài được quét mã độc tự động trước khi công bố cho sinh viên.
-                </span>
+                  {uiText("Tài liệu đề bài được quét mã độc tự động trước khi công bố cho sinh viên.")}</span>
               </div>
 
               {/* Attachments List */}
@@ -883,7 +880,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                           target="_blank"
                           rel="noreferrer"
                           className="att-link-btn"
-                          title="Tải về"
+                          title={uiText("Tải về")}
                         >
                           <Download size={15} />
                         </a>
@@ -893,7 +890,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                           type="button"
                           className="icon-btn danger"
                           onClick={() => handleRemoveAttachment(att.fileId)}
-                          title="Xóa tệp đính kèm này"
+                          title={uiText("Xóa tệp đính kèm này")}
                         >
                           <Trash2 size={15} />
                         </button>
@@ -913,15 +910,14 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       <span className="att-name">{up.fileName}</span>
                       <span className="att-status">
                         {up.status === 'uploading'
-                          ? 'Đang tải lên...'
+                          ? uiText("Đang tải lên...")
                           : up.status === 'scanning'
-                            ? 'Đang quét mã độc (Antivirus)...'
-                            : up.errorMsg || 'Lỗi tải lên'}
+                            ? uiText("Đang quét mã độc (Antivirus)...")
+                            : up.errorMsg || uiText("Lỗi tải lên")}
                       </span>
                       {up.status === 'error' && (
                         <button type="button" onClick={() => setUploadingFiles(prev => prev.filter((_, index) => index !== idx))}>
-                          Bỏ tệp lỗi
-                        </button>
+                          {uiText("Bỏ tệp lỗi")}</button>
                       )}
                     </div>
                   </div>
@@ -932,7 +928,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                 <div className="upload-trigger-wrap">
                   <label className="npc-btn npc-btn-secondary file-upload-button">
                     <Upload size={16} />
-                    <span>Tải lên tệp tài liệu đề</span>
+                    <span>{uiText("Tải lên tệp tài liệu đề")}</span>
                     <input
                       type="file"
                       className="hidden-file-input"
@@ -940,22 +936,20 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                     />
                   </label>
                   <span className="upload-hint-text">
-                    Hỗ trợ PDF, Word, Excel, ZIP. Tệp sẽ được tự động quét an toàn.
-                  </span>
+                    {uiText("Hỗ trợ PDF, Word, Excel, ZIP. Tệp sẽ được tự động quét an toàn.")}</span>
                 </div>
               )}
             </section>
 
             {/* Submission File Policy Section */}
             <section className="form-section-card">
-              <h2 className="section-title">Chính sách tệp nộp bài của sinh viên</h2>
+              <h2 className="section-title">{uiText("Chính sách tệp nộp bài của sinh viên")}</h2>
               <p className="section-desc">
-                Quy định định dạng và giới hạn dung lượng tệp sinh viên được phép nộp cho bài tập này.
-              </p>
+                {uiText("Quy định định dạng và giới hạn dung lượng tệp sinh viên được phép nộp cho bài tập này.")}</p>
 
               <div className="form-row-dates">
                 <TextField
-                  label="Số tệp tối đa mỗi lần nộp"
+                  label={uiText("Số tệp tối đa mỗi lần nộp")}
                   type="number"
                   min="1"
                   max="10"
@@ -965,7 +959,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                 />
 
                 <TextField
-                  label="Dung lượng tối đa mỗi tệp (MB)"
+                  label={uiText("Dung lượng tối đa mỗi tệp (MB)")}
                   type="number"
                   min="1"
                   max="100"
@@ -975,7 +969,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                 />
 
                 <TextField
-                  label="Định dạng cho phép (cách nhau bởi dấu phẩy)"
+                  label={uiText("Định dạng cho phép (cách nhau bởi dấu phẩy)")}
                   placeholder="pdf, docx, zip"
                   value={allowedExtsStr}
                   onChange={(e) => setAllowedExtsStr(e.target.value)}
@@ -988,14 +982,13 @@ export const TeacherAssignmentEditPage: React.FC = () => {
             <section className="form-section-card">
               <div className="rubric-builder-header">
                 <div>
-                  <h2 className="section-title">Tiêu chí chấm điểm (Rubric)</h2>
+                  <h2 className="section-title">{uiText("Tiêu chí chấm điểm (Rubric)")}</h2>
                   <p className="section-desc">
-                    Thiết lập các tiêu chí cụ thể để chấm điểm minh bạch và chuẩn xác.
-                  </p>
+                    {uiText("Thiết lập các tiêu chí cụ thể để chấm điểm minh bạch và chuẩn xác.")}</p>
                 </div>
                 <div className="total-score-chip">
-                  <span>Tổng điểm: </span>
-                  <strong>{totalScore} điểm</strong>
+                  <span>{uiText("Tổng điểm: ")}</span>
+                  <strong>{totalScore} {uiText(" điểm")}</strong>
                 </div>
               </div>
 
@@ -1007,7 +1000,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                     onClick={() => setShowAiDrawer(true)}
                   >
                     <Sparkles size={16} />
-                    <span>Xem mẫu tiêu chí gợi ý chuẩn</span>
+                    <span>{uiText("Xem mẫu tiêu chí gợi ý chuẩn")}</span>
                   </Button>
                 </div>
               )}
@@ -1018,7 +1011,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                     <div className="rubric-item-inputs">
                       <div className="input-title-col">
                         <TextField
-                          label={`Tiêu chí ${idx + 1}`}
+                          label={uiText("Tiêu chí {0}",[idx + 1])}
                           value={item.title}
                           onChange={(e) =>
                             handleUpdateCriterion(item.id, { title: e.target.value })
@@ -1028,7 +1021,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       </div>
                       <div className="input-pts-col">
                         <TextField
-                          label="Điểm tối đa"
+                          label={uiText("Điểm tối đa")}
                           type="number"
                           step="0.5"
                           min="0.1"
@@ -1043,7 +1036,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       </div>
                       <div className="input-desc-col">
                         <TextField
-                          label="Mô tả yêu cầu đạt điểm"
+                          label={uiText("Mô tả yêu cầu đạt điểm")}
                           value={item.description}
                           onChange={(e) =>
                             handleUpdateCriterion(item.id, { description: e.target.value })
@@ -1060,7 +1053,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                           className="icon-btn"
                           onClick={() => handleMoveCriterion(idx, 'up')}
                           disabled={idx === 0}
-                          title="Di chuyển lên"
+                          title={uiText("Di chuyển lên")}
                         >
                           <ArrowUp size={15} />
                         </button>
@@ -1069,7 +1062,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                           className="icon-btn"
                           onClick={() => handleMoveCriterion(idx, 'down')}
                           disabled={idx === rubricItems.length - 1}
-                          title="Di chuyển xuống"
+                          title={uiText("Di chuyển xuống")}
                         >
                           <ArrowDown size={15} />
                         </button>
@@ -1077,7 +1070,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                           type="button"
                           className="icon-btn danger"
                           onClick={() => handleDeleteCriterion(item.id)}
-                          title="Xóa tiêu chí này"
+                          title={uiText("Xóa tiêu chí này")}
                         >
                           <Trash2 size={15} />
                         </button>
@@ -1091,7 +1084,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                 <div className="add-criterion-row">
                   <Button type="button" variant="ghost" onClick={handleAddCriterion}>
                     <Plus size={16} />
-                    <span>+ Thêm tiêu chí đánh giá</span>
+                    <span>{uiText("+ Thêm tiêu chí đánh giá")}</span>
                   </Button>
                 </div>
               )}
@@ -1105,8 +1098,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                   variant="secondary"
                   onClick={() => navigate(`/gv/mon-hoc/${course.id}/bai-tap`)}
                 >
-                  Hủy bỏ
-                </Button>
+                  {uiText("Hủy bỏ")}</Button>
 
                 {!isAlreadyPublished ? (
                   <>
@@ -1118,8 +1110,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       onClick={handleSaveDraft}
                       data-testid="btn-save-draft"
                     >
-                      Lưu bản nháp
-                    </Button>
+                      {uiText("Lưu bản nháp")}</Button>
                     <Button
                       type="button"
                       variant="primary"
@@ -1129,7 +1120,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       data-testid="btn-open-publish-modal"
                     >
                       <CheckCircle2 size={16} />
-                      <span>Công bố bài tập cho sinh viên</span>
+                      <span>{uiText("Công bố bài tập cho sinh viên")}</span>
                     </Button>
                   </>
                 ) : (
@@ -1142,7 +1133,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                     data-testid="btn-save-published-settings"
                   >
                     <CheckCircle2 size={16} />
-                    <span>Lưu cập nhật hạn nộp & thiết lập</span>
+                    <span>{uiText("Lưu cập nhật hạn nộp & thiết lập")}</span>
                   </Button>
                 )}
               </div>
@@ -1156,29 +1147,28 @@ export const TeacherAssignmentEditPage: React.FC = () => {
         <div className="preview-container">
           <div className="preview-watermark-card">
             <span className="preview-badge">
-              GIAO DIỆN XEM TRƯỚC (DÀNH CHO GIẢNG VIÊN KIỂM TRA ĐỀ BÀI)
-            </span>
-            <h2 className="preview-title">{title || 'Tiêu đề bài tập chưa đặt'}</h2>
+              {uiText("GIAO DIỆN XEM TRƯỚC (DÀNH CHO GIẢNG VIÊN KIỂM TRA ĐỀ BÀI)")}</span>
+            <h2 className="preview-title">{title || uiText("Tiêu đề bài tập chưa đặt")}</h2>
             <p className="preview-course-meta">
-              Học phần: <strong>{course.name}</strong> • Hạn nộp:{' '}
+              {uiText("Học phần: ")}<strong>{course.name}</strong> {uiText(" • Hạn nộp:")}{' '}
               <strong>
                 {dueDateStr} {dueTimeStr}
               </strong>{' '}
-              {allowLate && <span className="badge-allow-late">Cho phép nộp muộn</span>}
+              {allowLate && <span className="badge-allow-late">{uiText("Cho phép nộp muộn")}</span>}
             </p>
 
             <hr className="preview-divider" />
 
             <div className="preview-section">
-              <h3>Đề bài & Yêu cầu:</h3>
+              <h3>{uiText("Đề bài & Yêu cầu:")}</h3>
               <p className="preview-desc-text">
-                {description || 'Chưa nhập nội dung hướng dẫn đề bài.'}
+                {description || uiText("Chưa nhập nội dung hướng dẫn đề bài.")}
               </p>
             </div>
 
             {attachments.length > 0 && (
               <div className="preview-section">
-                <h3>Tài liệu đính kèm ({attachments.length}):</h3>
+                <h3>{uiText("Tài liệu đính kèm (")}{attachments.length}):</h3>
                 <ul className="preview-attachments-list">
                   {attachments.map((att) => (
                     <li key={att.fileId}>
@@ -1193,20 +1183,20 @@ export const TeacherAssignmentEditPage: React.FC = () => {
             )}
 
             <div className="preview-section">
-              <h3>Chính sách tệp nộp bài:</h3>
+              <h3>{uiText("Chính sách tệp nộp bài:")}</h3>
               <p className="preview-policy-text">
-                Tối đa {maxFiles} tệp mỗi lần nộp • Dung lượng tối đa {maxFileSizeMb} MB/tệp • Định dạng chấp nhận: {allowedExtsStr}
+                {uiText("Tối đa ")}{maxFiles} {uiText(" tệp mỗi lần nộp • Dung lượng tối đa ")}{maxFileSizeMb} {uiText(" MB/tệp • Định dạng chấp nhận: ")}{allowedExtsStr}
               </p>
             </div>
 
             <div className="preview-section">
-              <h3>Tiêu chí chấm điểm (Rubric) — Tổng {totalScore} điểm:</h3>
+              <h3>{uiText("Tiêu chí chấm điểm (Rubric) — Tổng ")}{totalScore} {uiText(" điểm:")}</h3>
               <table className="npc-table">
                 <thead>
                   <tr>
-                    <th>Tiêu chí</th>
-                    <th>Yêu cầu</th>
-                    <th>Điểm</th>
+                    <th>{uiText("Tiêu chí")}</th>
+                    <th>{uiText("Yêu cầu")}</th>
+                    <th>{uiText("Điểm")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -1217,7 +1207,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                       </td>
                       <td>{item.description}</td>
                       <td>
-                        <strong>{formatScoreVN(item.maxScore)} đ</strong>
+                        <strong>{formatScoreVN(item.maxScore)} {uiText(" đ")}</strong>
                       </td>
                     </tr>
                   ))}
@@ -1231,7 +1221,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       {/* AI Assistant Reference Modal (Honest Presentation) */}
       {showAiDrawer && (
         <Modal
-          title="Bộ tiêu chí Rubric mẫu tham khảo"
+          title={uiText("Bộ tiêu chí Rubric mẫu tham khảo")}
           isOpen={showAiDrawer}
           onClose={() => setShowAiDrawer(false)}
         >
@@ -1239,31 +1229,29 @@ export const TeacherAssignmentEditPage: React.FC = () => {
             <div className="alert-notice-box">
               <Sparkles size={18} />
               <span>
-                <strong>Ghi chú quy chuẩn:</strong> Tính năng AI sinh đề tự động đang được chuẩn bị cho Milestone B24. Dưới đây là các tiêu chí đánh giá chuẩn học thuật của trường bạn có thể tham khảo hoặc sao chép:
-              </span>
+                <strong>{uiText("Ghi chú quy chuẩn:")}</strong> {uiText(" Tính năng AI sinh đề tự động đang được chuẩn bị cho Milestone B24. Dưới đây là các tiêu chí đánh giá chuẩn học thuật của trường bạn có thể tham khảo hoặc sao chép:")}</span>
             </div>
             <div className="ai-suggested-list">
               <div className="ai-sugg-item">
-                <strong>1. Chức năng và đáp ứng yêu cầu nghiệp vụ (4 đ)</strong>
-                <p>Thực thi chính xác theo đặc tả kỹ thuật và trường hợp kiểm thử.</p>
+                <strong>{uiText("1. Chức năng và đáp ứng yêu cầu nghiệp vụ (4 đ)")}</strong>
+                <p>{uiText("Thực thi chính xác theo đặc tả kỹ thuật và trường hợp kiểm thử.")}</p>
               </div>
               <div className="ai-sugg-item">
-                <strong>2. Chất lượng kiến trúc và khả năng kiểm thử (3 đ)</strong>
-                <p>Mã nguồn rõ ràng, phân tách module, có unit test bao phủ.</p>
+                <strong>{uiText("2. Chất lượng kiến trúc và khả năng kiểm thử (3 đ)")}</strong>
+                <p>{uiText("Mã nguồn rõ ràng, phân tách module, có unit test bao phủ.")}</p>
               </div>
               <div className="ai-sugg-item">
-                <strong>3. Trải nghiệm người dùng và chuẩn tiếp cận WCAG (2 đ)</strong>
-                <p>Giao diện tương tác mượt mà, hỗ trợ điều hướng bàn phím đầy đủ.</p>
+                <strong>{uiText("3. Trải nghiệm người dùng và chuẩn tiếp cận WCAG (2 đ)")}</strong>
+                <p>{uiText("Giao diện tương tác mượt mà, hỗ trợ điều hướng bàn phím đầy đủ.")}</p>
               </div>
               <div className="ai-sugg-item">
-                <strong>4. Báo cáo kỹ thuật và xử lý ngoại lệ (1 đ)</strong>
-                <p>Tài liệu hướng dẫn rõ ràng, bắt lỗi và ghi nhận nhật ký an toàn.</p>
+                <strong>{uiText("4. Báo cáo kỹ thuật và xử lý ngoại lệ (1 đ)")}</strong>
+                <p>{uiText("Tài liệu hướng dẫn rõ ràng, bắt lỗi và ghi nhận nhật ký an toàn.")}</p>
               </div>
             </div>
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowAiDrawer(false)}>
-                Đóng
-              </Button>
+                {uiText("Đóng")}</Button>
             </div>
           </div>
         </Modal>
@@ -1272,38 +1260,34 @@ export const TeacherAssignmentEditPage: React.FC = () => {
       {/* Confirm Publish Modal */}
       {showPublishModal && (
         <Modal
-          title="Xác nhận công bố bài tập"
+          title={uiText("Xác nhận công bố bài tập")}
           isOpen={showPublishModal}
           onClose={() => setShowPublishModal(false)}
         >
           <div className="modal-content-stack">
             <p>
-              Bạn chuẩn bị công bố bài tập <strong>"{title}"</strong> cho toàn bộ sinh viên trong lớp học phần.
-            </p>
+              {uiText("Bạn chuẩn bị công bố bài tập ")}<strong>"{title}"</strong> {uiText(" cho toàn bộ sinh viên trong lớp học phần.")}</p>
             <div className="publish-summary-card">
               <div>
-                Hạn nộp chính thức: <strong>{dueDateStr} lúc {dueTimeStr}</strong>
+                {uiText("Hạn nộp chính thức: ")}<strong>{dueDateStr} {uiText(" lúc ")}{dueTimeStr}</strong>
               </div>
               <div>
-                Cho phép nộp muộn: <strong>{allowLate ? 'Có' : 'Không'}</strong>
+                {uiText("Cho phép nộp muộn: ")}<strong>{allowLate ? uiText("Có") : uiText("Không")}</strong>
               </div>
               <div>
-                Tổng thang điểm: <strong>{totalScore} điểm</strong> ({rubricItems.length} tiêu chí)
-              </div>
+                {uiText("Tổng thang điểm: ")}<strong>{totalScore} {uiText(" điểm")}</strong> ({rubricItems.length} {uiText(" tiêu chí)")}</div>
               <div>
-                Số tệp tài liệu đề: <strong>{attachments.length} tệp đã quét an toàn</strong>
+                {uiText("Số tệp tài liệu đề: ")}<strong>{attachments.length} {uiText(" tệp đã quét an toàn")}</strong>
               </div>
             </div>
             <div className="alert-notice-box">
               <AlertTriangle size={18} />
               <span>
-                <strong>Quy tắc đóng băng bất biến:</strong> Sau khi công bố, tiêu đề, nội dung yêu cầu, tệp đính kèm và bộ tiêu chí Rubric sẽ được <strong>khóa cố định vĩnh viễn</strong> để đảm bảo sự công bằng cho sinh viên. Giảng viên chỉ được phép điều chỉnh hạn nộp và chính sách nộp bài cho tương lai.
-              </span>
+                <strong>{uiText("Quy tắc đóng băng bất biến:")}</strong> {uiText(" Sau khi công bố, tiêu đề, nội dung yêu cầu, tệp đính kèm và bộ tiêu chí Rubric sẽ được ")}<strong>{uiText("khóa cố định vĩnh viễn")}</strong> {uiText(" để đảm bảo sự công bằng cho sinh viên. Giảng viên chỉ được phép điều chỉnh hạn nộp và chính sách nộp bài cho tương lai.")}</span>
             </div>
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowPublishModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="primary"
@@ -1312,8 +1296,7 @@ export const TeacherAssignmentEditPage: React.FC = () => {
                 onClick={handleConfirmPublish}
                 data-testid="confirm-publish-submit-btn"
               >
-                Xác nhận công bố bài tập
-              </Button>
+                {uiText("Xác nhận công bố bài tập")}</Button>
             </div>
           </div>
         </Modal>

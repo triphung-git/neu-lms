@@ -1,0 +1,219 @@
+.learning-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  color: #172033;
+  display: grid;
+  gap: 20px;
+}
+.learning-page h1 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  margin: 0;
+}
+.learning-page h2,
+.learning-page h3 {
+  margin: 0 0 12px;
+}
+.learning-card {
+  background: #fff;
+  border: 1px solid #dce3eb;
+  border-radius: 16px;
+  padding: 24px;
+  min-width: 0;
+  box-shadow: 0 3px 12px #17203306;
+}
+.learning-toolbar,
+.learning-tabs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.learning-tabs {
+  padding: 8px;
+  background: #edf2f7;
+  border-radius: 14px;
+}
+.learning-page button,
+.learning-page a {
+  font: inherit;
+}
+.learning-page button {
+  border: 1px solid #cad6e2;
+  border-radius: 9px;
+  padding: 10px 16px;
+  cursor: pointer;
+  background: #fff;
+  color: #19324b;
+}
+.learning-page button[type="submit"],
+.learning-tabs button[aria-pressed="true"] {
+  background: #125a96;
+  color: #fff;
+  border-color: #125a96;
+}
+.learning-page button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.learning-page button:focus-visible,
+.learning-page a:focus-visible {
+  outline: 3px solid #4da8e8;
+  outline-offset: 3px;
+}
+.learning-page input:not([type="checkbox"]),
+.learning-page select,
+.learning-page textarea {
+  width: 100%;
+  min-width: 0;
+  font: inherit;
+  border: 1px solid #bdcada;
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff;
+  color: #172033;
+}
+.learning-page input[type="checkbox"] {
+  margin-right: 8px;
+}
+.learning-page label {
+  display: grid;
+  gap: 6px;
+  font-weight: 500;
+}
+.learning-form {
+  margin: 16px 0;
+  display: grid;
+  gap: 12px;
+}
+.learning-form fieldset {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.learning-form label:has(input[type="checkbox"]) {
+  display: block;
+}
+.learning-form button {
+  justify-self: start;
+}
+.learning-page a {
+  color: #075a98;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.learning-error {
+  border: 1px solid #edaaaa;
+  background: #fff2f2;
+  color: #9c1f1f;
+  padding: 12px;
+  border-radius: 8px;
+}
+.learning-table {
+  overflow: auto;
+  border: 1px solid #dce3eb;
+  border-radius: 10px;
+  margin: 16px 0;
+}
+.learning-table table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.learning-table th,
+.learning-table td {
+  padding: 12px;
+  border-bottom: 1px solid #e6ebf1;
+  vertical-align: top;
+}
+.learning-table th {
+  background: #eff4fa;
+  white-space: nowrap;
+}
+.learning-reply,
+.learning-group {
+  padding: 16px;
+  margin: 12px 0;
+  border-left: 3px solid #72acd8;
+  background: #f7faff;
+  border-radius: 8px;
+}
+.learning-text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.learning-page small {
+  color: #526579;
+}
+.learning-page summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.library-grid,
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 16px;
+}
+.metric-number {
+  display: block;
+  font-size: 2.2rem;
+  color: #125a96;
+  margin-top: 8px;
+}
+.learning-chart > div {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin: 8px 0;
+}
+.learning-chart meter {
+  flex: 1;
+  height: 26px;
+}
+.learning-page progress {
+  width: 130px;
+  accent-color: #167a64;
+}
+.language-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0 10px;
+}
+.language-switch select {
+  padding: 7px;
+  border: 1px solid #cad6e2;
+  border-radius: 8px;
+  background: white;
+  color: #172033;
+}
+@media (max-width: 640px) {
+  .learning-card {
+    padding: 16px;
+  }
+  .learning-tabs {
+    flex-wrap: nowrap;
+    overflow: auto;
+  }
+  .learning-tabs button {
+    white-space: nowrap;
+  }
+  .learning-page {
+    gap: 14px;
+  }
+  .learning-table th,
+  .learning-table td {
+    padding: 8px;
+  }
+  .language-switch select {
+    max-width: 95px;
+  }
+}
+.enrollment-filters,.enrollment-grid,.reports-charts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.25rem}.enrollment-filters{grid-template-columns:2fr 1fr 1fr;margin:1.5rem 0}.enrollment-filters label{display:grid;gap:.5rem}.enrollment-filters input,.enrollment-filters select{min-width:0;width:100%;padding:.75rem;border:1px solid #cbd5e1;border-radius:8px}.reports-charts figure{margin:1.25rem 0;padding:1rem;background:var(--bg-card,#fff);border:1px solid #e2e8f0;border-radius:16px;min-width:0}.reports-charts figcaption{font-weight:700;margin-bottom:1rem}.reports-charts svg{width:100%;height:auto}.reports-charts text{font-size:13px;fill:currentColor}@media(max-width:900px){.reports-charts,.enrollment-grid,.enrollment-filters{grid-template-columns:1fr}}
+
+.attendance-email{display:block;color:#64748b;margin-top:4px;font-size:.8rem}.attendance-summary strong{font-variant-numeric:tabular-nums}
+
+.chart-legend{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}.chart-legend span{display:inline-flex;align-items:center;gap:8px}.chart-legend i{width:12px;height:12px;border-radius:50%;display:inline-block}

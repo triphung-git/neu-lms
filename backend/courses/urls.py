@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework.routers import DefaultRouter
 
+from .announcement_api import urlpatterns as announcement_urls
 from .views import (
     AdminCourseTransferView,
     CourseCatalogView,
@@ -32,6 +33,7 @@ router.register(
 )
 
 urlpatterns = [
+    *announcement_urls,
     path("courses/summary", CourseSummaryView.as_view()),
     path("courses/catalog", CourseCatalogView.as_view()),
     path("courses/enrollment-requests/my", StudentMyEnrollmentRequestsView.as_view()),

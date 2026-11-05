@@ -4,6 +4,8 @@ import uuid
 from django.core.exceptions import PermissionDenied as DjangoPermissionDenied
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import transaction
+from django.db.models import Count, OuterRef, Subquery
+from django.db.models.functions import Coalesce
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils.http import content_disposition_header
@@ -26,11 +28,13 @@ from .exceptions import (
     AssignmentValidationError,
     CourseArchivedError,
 )
+from .grade_progress import latest_revisions_with_publication
 from .models import (
     Assignment,
     AssignmentStatus,
     ReopenWindowScope,
     ReopenWindowTarget,
+    SubmissionRevision,
 )
 from .serializers import (
     AssignmentCloseRequestSerializer,
@@ -44,6 +48,8 @@ from .serializers import (
     CreateAssignmentReopenWindowSerializer,
     PaginatedAssignmentSummaryListSerializer,
     StudentAssignmentEligibilitySerializer,
+    TeacherSubmissionListSerializer,
+    TeacherSubmissionRowSerializer,
 )
 from .services import (
     _check_assignment_read_permission,
@@ -193,8 +199,24 @@ class TeacherAssignmentListView(AssignmentsBaseView):
             course_id, request.user, for_update=False
         )
 
+        graded_by_assignment = (
+            latest_revisions_with_publication()
+            .filter(
+                assignment_id=OuterRef("pk"),
+                has_publication=True,
+            )
+            .order_by()
+            .values("assignment_id")
+            .annotate(total=Count("pk"))
+            .values("total")
+        )
+
         queryset = (
             Assignment.objects.filter(course=course)
+            .annotate(
+                submission_count=Count("submissionrevision__student", distinct=True),
+                graded_count=Coalesce(Subquery(graded_by_assignment), 0),
+            )
             .select_related("chapter", "lesson")
             .prefetch_related("rubric_criteria", "attachments")
             .order_by("-created_at")
@@ -606,6 +628,9 @@ class CourseAssignmentAttachmentDownloadView(AssignmentsBaseView):
             "gif": "image/gif",
             "webp": "image/webp",
         }
+        from learning.models import DownloadEvent
+        DownloadEvent.objects.create(assignment_id=id, file_id=file_id, user=request.user,
+                                     kind="preview" if self.preview else "download")
         ext = attachment.name.rsplit(".", 1)[-1].lower()
         content_type = media_types.get(ext, "application/octet-stream")
 
@@ -663,8 +688,25 @@ class StudentAssignmentEligibilityView(AssignmentsBaseView):
         eligibility = check_student_eligibility(
             assignment=assignment,
             student=request.user,
-            has_existing_submission=False,
         )
+        from learning.models import GroupPolicy
+
+        eligibility["is_group_assignment"] = GroupPolicy.objects.filter(assignment=assignment).exists()
+        eligibility["latest_submission"] = None
+
+        if eligibility["has_existing_submission"]:
+            _check_assignment_read_permission(course.id, assignment.id, request.user)
+
+            eligibility["latest_submission"] = (
+                SubmissionRevision.objects.filter(
+                    assignment=assignment,
+                    student=request.user,
+                )
+                .select_related("file")
+                .order_by("-number")
+                .first()
+            )
+
         return Response(StudentAssignmentEligibilitySerializer(eligibility).data)
 
 
@@ -842,3 +884,32 @@ class CourseAssignmentAttachmentPreviewDirectView(CourseAssignmentAttachmentPrev
         return super().get(
             request, course_id=assignment.course_id, id=assignment.id, file_id=file_id
         )
+
+
+class TeacherSubmissionListView(AssignmentsBaseView):
+    @extend_schema(
+        operation_id="teacher_submission_list",
+        parameters=[OpenApiParameter("page", int)],
+        responses={200: TeacherSubmissionListSerializer},
+    )
+    def get(self, request, id):
+        assignment = get_object_or_404(Assignment, pk=id)
+        _check_teacher_assignment_permission(assignment.course_id, request.user)
+
+        rows = (
+            SubmissionRevision.objects.filter(assignment=assignment)
+            .select_related("student", "file")
+            .order_by("student_id", "-number")
+            .distinct("student_id")
+        )
+
+        paginator = StandardPageNumberPagination()
+        page = paginator.paginate_queryset(rows, request)
+        response = paginator.get_paginated_response(
+            TeacherSubmissionRowSerializer(page, many=True).data
+        )
+        response.data.update(
+            title=assignment.title,
+            course_id=str(assignment.course_id),
+        )
+        return response

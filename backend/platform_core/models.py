@@ -94,3 +94,36 @@ class IdempotencyRecord(models.Model):
                 condition=Q(expires_at__gt=models.F("created_at")), name="idempotency_expiry_valid"
             ),
         ]
+
+
+class NotificationEmailDelivery(models.Model):
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    kind = models.CharField(
+        max_length=16, choices=[("announcement", "Announcement"), ("grade", "Grade")]
+    )
+    source_id = models.PositiveBigIntegerField()
+    status = models.CharField(
+        max_length=16,
+        default="pending",
+        choices=[
+            ("pending", "Pending"),
+            ("processing", "Processing"),
+            ("sent", "Sent"),
+            ("failed", "Failed"),
+            ("skipped", "Skipped"),
+        ],
+    )
+    attempts = models.PositiveIntegerField(default=0)
+    available_at = models.DateTimeField(default=timezone.now)
+    locked_at = models.DateTimeField(null=True)
+    sent_at = models.DateTimeField(null=True)
+    last_error_code = models.CharField(max_length=64, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["recipient", "kind", "source_id"], name="notice_email_source_unique"
+            )
+        ]
+        indexes = [models.Index(fields=["status", "available_at"], name="notice_email_queue_idx")]

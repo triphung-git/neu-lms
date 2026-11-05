@@ -308,7 +308,31 @@ class ApplicableFilePolicySerializer(serializers.Serializer):
     allowed_extensions = serializers.ListField(child=serializers.CharField())
 
 
+class LatestSubmissionSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    number = serializers.IntegerField()
+    file_name = serializers.CharField(source="file.file_name")
+    file_size = serializers.IntegerField(source="file.file_size")
+    submitted_at = serializers.DateTimeField()
+    is_late = serializers.BooleanField()
+
+
+class TeacherSubmissionRowSerializer(LatestSubmissionSerializer):
+    student_id = serializers.UUIDField()
+    student_name = serializers.CharField(source="student.display_name")
+    student_email = serializers.EmailField(source="student.email")
+    file_id = serializers.UUIDField()
+
+
+class TeacherSubmissionListSerializer(serializers.Serializer):
+    title = serializers.CharField()
+    course_id = serializers.UUIDField()
+    items = TeacherSubmissionRowSerializer(many=True)
+    pagination = PaginationMetaSerializer()
+
+
 class StudentAssignmentEligibilitySerializer(serializers.Serializer):
+    is_group_assignment = serializers.BooleanField(required=False, default=False)
     """Serializer cho kết quả thẩm định hợp lệ nộp bài theo Thẩm quyền Máy chủ."""
 
     can_submit = serializers.BooleanField()
@@ -325,6 +349,7 @@ class StudentAssignmentEligibilitySerializer(serializers.Serializer):
     reopen_window_scope = serializers.CharField(allow_null=True)
     reopen_window_end = serializers.DateTimeField(allow_null=True)
     has_existing_submission = serializers.BooleanField()
+    latest_submission = LatestSubmissionSerializer(allow_null=True, required=False)
     applicable_file_policy = ApplicableFilePolicySerializer()
     contract_version = serializers.CharField()
 

@@ -1,0 +1,89 @@
+.grade-notices {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.grade-notices header,
+.grade-notices nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.grade-notices header { justify-content: space-between; }
+.grade-notices h2 { font-size: 20px; }
+
+.grade-notices ol {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.grade-notices li {
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--surface-soft);
+  overflow-wrap: anywhere;
+}
+
+.grade-notices time { color: var(--muted); font-size: 13px; }
+
+.grade-notices a {
+  justify-self: start;
+  color: var(--focus);
+  text-decoration: underline;
+}
+
+.grade-notices button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.grade-notices button:disabled { opacity: 0.5; cursor: not-allowed; }
+.grade-notices [role="alert"] { color: var(--danger); }
+
+.grade-notices .notice-unread {
+  border-inline-start: 4px solid var(--focus);
+}
+
+.grade-notices .notice-read {
+  border-inline-start: 4px solid var(--border);
+}
+
+.grade-notices li > button {
+  justify-self: start;
+  color: var(--focus);
+}
+
+.grade-notices li > small {
+  color: var(--muted);
+}
+
+.grade-notices .grade-notices-read-all {
+  color: var(--focus);
+  font-weight: 600;
+}
+
+.grade-notices .grade-notices-result {
+  color: var(--success);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .grade-notices .grade-notices-read-all {
+    width: 100%;
+  }
+}

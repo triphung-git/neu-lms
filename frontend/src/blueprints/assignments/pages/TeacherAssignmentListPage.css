@@ -282,3 +282,20 @@
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
+
+.assignment-grade-progress {
+  display: grid;
+  gap: 4px;
+  min-width: 9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.assignment-grade-progress progress {
+  width: 100%;
+  height: 8px;
+  accent-color: var(--success);
+}
+
+.assignment-grade-progress small {
+  color: var(--muted);
+}

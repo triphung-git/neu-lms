@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 
@@ -38,11 +37,7 @@ def precision_at_k(
     relevant = set(relevant_pages)
     retrieved = ranked_unique_pages(results)[:k]
 
-    hits = sum(
-        1
-        for page in retrieved
-        if page in relevant
-    )
+    hits = sum(1 for page in retrieved if page in relevant)
 
     return hits / k
 
@@ -65,9 +60,7 @@ def recall_at_k(
     if not relevant:
         return 0.0
 
-    retrieved = set(
-        ranked_unique_pages(results)[:k]
-    )
+    retrieved = set(ranked_unique_pages(results)[:k])
 
     return len(relevant.intersection(retrieved)) / len(relevant)
 
@@ -108,5 +101,6 @@ def hit_at_k(
             results,
             relevant_pages,
             k,
-        ) > 0
+        )
+        > 0
     )

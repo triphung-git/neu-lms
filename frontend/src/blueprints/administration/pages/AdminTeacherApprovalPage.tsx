@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useId, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -79,7 +80,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       setTotalCount(res.pagination?.total_items ?? (res.items ? res.items.length : 0));
     } catch (err: unknown) {
       if (sequence !== loadSequence.current) return;
-      const msg = err instanceof Error ? err.message : 'Không thể tải danh sách yêu cầu giảng viên.';
+      const msg = err instanceof Error ? err.message : uiText("Không thể tải danh sách yêu cầu giảng viên.");
       setErrorMessage(msg);
       setRequests([]);
       setTotalCount(0);
@@ -122,17 +123,17 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       await service.approveTeacherRequest(approveModalItem.id);
       showNotification(
         'success',
-        `Đã phê duyệt vai trò Giảng viên cho tài khoản ${approveModalItem.user_display_name}.`
+        uiText("Đã phê duyệt vai trò Giảng viên cho tài khoản {0}.",[approveModalItem.user_display_name])
       );
       setApproveModalItem(null);
       await fetchRequests();
     } catch (err: unknown) {
       if (err instanceof ApiError && err.code === 'email_not_verified') {
-        showNotification('error', 'Không thể duyệt: Tài khoản người dùng chưa xác minh địa chỉ email.');
+        showNotification('error', uiText("Không thể duyệt: Tài khoản người dùng chưa xác minh địa chỉ email."));
       } else {
         showNotification(
           'error',
-          err instanceof Error ? err.message : 'Lỗi khi phê duyệt yêu cầu giảng viên.'
+          err instanceof Error ? err.message : uiText("Lỗi khi phê duyệt yêu cầu giảng viên.")
         );
       }
     } finally {
@@ -148,14 +149,14 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       await service.rejectTeacherRequest(rejectModalItem.id);
       showNotification(
         'success',
-        `Đã từ chối yêu cầu vai trò Giảng viên của ${rejectModalItem.user_display_name}.`
+        uiText("Đã từ chối yêu cầu vai trò Giảng viên của {0}.",[rejectModalItem.user_display_name])
       );
       setRejectModalItem(null);
       await fetchRequests();
     } catch (err: unknown) {
       showNotification(
         'error',
-        err instanceof Error ? err.message : 'Lỗi khi từ chối yêu cầu giảng viên.'
+        err instanceof Error ? err.message : uiText("Lỗi khi từ chối yêu cầu giảng viên.")
       );
     } finally {
       setIsSubmittingReject(false);
@@ -167,18 +168,17 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Duyệt giảng viên' },
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Duyệt giảng viên") },
           ]}
         />
-        <h1 className="page-heading">Hàng đợi xét duyệt vai trò Giảng viên</h1>
+        <h1 className="page-heading">{uiText("Hàng đợi xét duyệt vai trò Giảng viên")}</h1>
         <p className="page-subheading">
-          Danh sách yêu cầu vai trò Giảng viên. Chỉ tài khoản đã xác minh email mới được phê duyệt.
-        </p>
+          {uiText("Danh sách yêu cầu vai trò Giảng viên. Chỉ tài khoản đã xác minh email mới được phê duyệt.")}</p>
       </div>
 
       {/* Status Filter Tabs */}
-      <div className="approval-tabs-bar" role="tablist" aria-label="Bộ lọc trạng thái yêu cầu">
+      <div className="approval-tabs-bar" role="tablist" aria-label={uiText("Bộ lọc trạng thái yêu cầu")}>
         <button
           type="button"
           role="tab"
@@ -190,7 +190,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
           }}
         >
           <Clock size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
-          <span>Chờ xét duyệt</span>
+          <span>{uiText("Chờ xét duyệt")}</span>
         </button>
         <button
           type="button"
@@ -203,7 +203,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
           }}
         >
           <CheckCircle size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
-          <span>Đã phê duyệt</span>
+          <span>{uiText("Đã phê duyệt")}</span>
         </button>
         <button
           type="button"
@@ -216,7 +216,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
           }}
         >
           <XCircle size={16} style={{ display: 'inline', marginRight: '6px', verticalAlign: 'text-bottom' }} />
-          <span>Đã từ chối</span>
+          <span>{uiText("Đã từ chối")}</span>
         </button>
         <button
           type="button"
@@ -228,7 +228,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
             setCurrentPage(1);
           }}
         >
-          <span>Tất cả yêu cầu</span>
+          <span>{uiText("Tất cả yêu cầu")}</span>
         </button>
       </div>
 
@@ -237,21 +237,19 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
         <div className="search-col" style={{ flex: 1 }}>
           <TextField
             id={searchInputId}
-            label="Tìm kiếm yêu cầu"
+            label={uiText("Tìm kiếm yêu cầu")}
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            placeholder="Tìm theo họ tên hoặc email người gửi yêu cầu..."
+            placeholder={uiText("Tìm theo họ tên hoặc email người gửi yêu cầu...")}
           />
         </div>
 
         <div className="filter-actions-col" style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
           <Button type="submit" variant="primary">
-            Tìm kiếm
-          </Button>
+            {uiText("Tìm kiếm")}</Button>
           {(activeSearch || statusFilter !== 'pending') && (
             <Button type="button" variant="secondary" onClick={handleClearFilters} icon={<RotateCcw size={14} />}>
-              Đặt lại
-            </Button>
+              {uiText("Đặt lại")}</Button>
           )}
         </div>
       </form>
@@ -259,7 +257,7 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       {/* Error state */}
       {errorMessage && (
         <ErrorBanner
-          title="Không thể tải danh sách xét duyệt"
+          title={uiText("Không thể tải danh sách xét duyệt")}
           message={errorMessage}
           onRetry={fetchRequests}
         />
@@ -273,33 +271,32 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       ) : errorMessage ? null : requests.length === 0 ? (
         /* Empty State */
         <EmptyState
-          title="Không có yêu cầu giảng viên nào"
+          title={uiText("Không có yêu cầu giảng viên nào")}
           description={
             statusFilter === 'pending'
-              ? 'Hiện không có giảng viên nào đang chờ phê duyệt trong hệ thống.'
-              : 'Không có bản ghi yêu cầu nào phù hợp với bộ lọc hiện tại.'
+              ? uiText("Hiện không có giảng viên nào đang chờ phê duyệt trong hệ thống.")
+              : uiText("Không có bản ghi yêu cầu nào phù hợp với bộ lọc hiện tại.")
           }
           action={
             (activeSearch || statusFilter !== 'pending') ? (
               <Button variant="secondary" onClick={handleClearFilters}>
-                Xem yêu cầu chờ duyệt
-              </Button>
+                {uiText("Xem yêu cầu chờ duyệt")}</Button>
             ) : undefined
           }
         />
       ) : (
         /* Table of Requests */
         <div className="approval-table-wrapper">
-          <table className="npc-table" aria-label="Bảng yêu cầu vai trò giảng viên">
+          <table className="npc-table" aria-label={uiText("Bảng yêu cầu vai trò giảng viên")}>
             <thead>
               <tr>
-                <th scope="col">Họ và tên</th>
-                <th scope="col">Địa chỉ Email</th>
-                <th scope="col">Thời điểm gửi</th>
-                <th scope="col">Trạng thái</th>
-                <th scope="col">Thời điểm duyệt</th>
-                <th scope="col">Ghi chú</th>
-                <th scope="col">Thao tác</th>
+                <th scope="col">{uiText("Họ và tên")}</th>
+                <th scope="col">{uiText("Địa chỉ Email")}</th>
+                <th scope="col">{uiText("Thời điểm gửi")}</th>
+                <th scope="col">{uiText("Trạng thái")}</th>
+                <th scope="col">{uiText("Thời điểm duyệt")}</th>
+                <th scope="col">{uiText("Ghi chú")}</th>
+                <th scope="col">{uiText("Thao tác")}</th>
               </tr>
             </thead>
             <tbody>
@@ -323,12 +320,12 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
                       }
                       label={
                         req.status === 'approved'
-                          ? 'Đã duyệt'
+                          ? uiText("Đã duyệt")
                           : req.status === 'pending'
-                          ? 'Chờ duyệt'
+                          ? uiText("Chờ duyệt")
                           : req.status === 'rejected'
-                          ? 'Đã từ chối'
-                          : 'Đã hủy'
+                          ? uiText("Đã từ chối")
+                          : uiText("Đã hủy")
                       }
                     />
                   </td>
@@ -345,27 +342,27 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
                             size="sm"
                             onClick={() => setApproveModalItem(req)}
                             icon={<CheckCircle size={14} />}
-                            aria-label={`Duyệt yêu cầu của ${req.user_display_name}`}
+                            aria-label={uiText("Duyệt yêu cầu của {0}",[req.user_display_name])}
                           >
-                            <span>Duyệt</span>
+                            <span>{uiText("Duyệt")}</span>
                           </Button>
                           <Button
                             variant="secondary"
                             size="sm"
                             onClick={() => setRejectModalItem(req)}
                             icon={<XCircle size={14} />}
-                            aria-label={`Từ chối yêu cầu của ${req.user_display_name}`}
+                            aria-label={uiText("Từ chối yêu cầu của {0}",[req.user_display_name])}
                           >
-                            <span>Từ chối</span>
+                            <span>{uiText("Từ chối")}</span>
                           </Button>
                         </>
                       ) : (
                         <Link
                           to={`/ad/tai-khoan/${req.user_id}`}
                           className="npc-btn npc-btn-secondary npc-btn-sm"
-                          aria-label={`Xem tài khoản ${req.user_display_name}`}
+                          aria-label={uiText("Xem tài khoản {0}",[req.user_display_name])}
                         >
-                          <span>Xem tài khoản</span>
+                          <span>{uiText("Xem tài khoản")}</span>
                           <ArrowRight size={14} />
                         </Link>
                       )}
@@ -379,9 +376,8 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
           {/* Pagination Controls */}
           <div className="table-pagination-bar">
             <span className="page-info-text">
-              Hiển thị {(currentPage - 1) * PAGE_SIZE + 1} -{' '}
-              {Math.min(currentPage * PAGE_SIZE, totalCount)} trên tổng số {totalCount} yêu cầu
-            </span>
+              {uiText("Hiển thị ")}{(currentPage - 1) * PAGE_SIZE + 1} -{' '}
+              {Math.min(currentPage * PAGE_SIZE, totalCount)} {uiText(" trên tổng số ")}{totalCount} {uiText(" yêu cầu")}</span>
 
             <div className="pagination-buttons">
               <button
@@ -389,10 +385,10 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
                 className="page-btn"
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                aria-label="Trang trước"
+                aria-label={uiText("Trang trước")}
               >
                 <ChevronLeft size={16} />
-                <span>Trước</span>
+                <span>{uiText("Trước")}</span>
               </button>
 
               <span className="current-page-pill" aria-current="page">
@@ -417,33 +413,30 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       {/* APPROVE MODAL */}
       {approveModalItem && (
         <Modal
-          title="Xác nhận phê duyệt Giảng viên"
+          title={uiText("Xác nhận phê duyệt Giảng viên")}
           isOpen={Boolean(approveModalItem)}
           onClose={() => setApproveModalItem(null)}
         >
           <div className="modal-content-stack">
             <p>
-              Bạn chuẩn bị phê duyệt yêu cầu vai trò Giảng viên cho người dùng{' '}
+              {uiText("Bạn chuẩn bị phê duyệt yêu cầu vai trò Giảng viên cho người dùng")}{' '}
               <strong>{approveModalItem.user_display_name}</strong> ({approveModalItem.user_email}).
             </p>
             <div className="alert-warning-card">
               <UserCheck size={18} />
               <span>
-                <strong>Cấp quyền & Làm mới phiên:</strong> Sau khi phê duyệt, tài khoản sẽ được cấp vai trò Giảng viên (`teacher`) chính thức trong hệ thống. Phiên làm việc hiện tại của người dùng sẽ được thu hồi để nhận quyền hạn mới ngay khi đăng nhập lại hoặc làm mới trang.
-              </span>
+                <strong>{uiText("Cấp quyền & Làm mới phiên:")}</strong> {uiText(" Sau khi phê duyệt, tài khoản sẽ được cấp vai trò Giảng viên (`teacher`) chính thức trong hệ thống. Phiên làm việc hiện tại của người dùng sẽ được thu hồi để nhận quyền hạn mới ngay khi đăng nhập lại hoặc làm mới trang.")}</span>
             </div>
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setApproveModalItem(null)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="primary"
                 isLoading={isSubmittingApprove}
                 onClick={handleApproveConfirm}
               >
-                Xác nhận phê duyệt
-              </Button>
+                {uiText("Xác nhận phê duyệt")}</Button>
             </div>
           </div>
         </Modal>
@@ -452,30 +445,27 @@ export const AdminTeacherApprovalPage: React.FC<AdminTeacherApprovalPageProps> =
       {/* REJECT MODAL */}
       {rejectModalItem && (
         <Modal
-          title="Xác nhận từ chối yêu cầu"
+          title={uiText("Xác nhận từ chối yêu cầu")}
           isOpen={Boolean(rejectModalItem)}
           onClose={() => setRejectModalItem(null)}
         >
           <div className="modal-content-stack">
             <p>
-              Bạn chuẩn bị từ chối yêu cầu vai trò Giảng viên của người dùng{' '}
+              {uiText("Bạn chuẩn bị từ chối yêu cầu vai trò Giảng viên của người dùng")}{' '}
               <strong>{rejectModalItem.user_display_name}</strong> ({rejectModalItem.user_email}).
             </p>
             <p className="text-sm text-muted">
-              Yêu cầu sẽ được chuyển sang trạng thái <strong>Đã từ chối (rejected)</strong>. Người dùng vẫn giữ các vai trò học tập hiện tại.
-            </p>
+              {uiText("Yêu cầu sẽ được chuyển sang trạng thái ")}<strong>{uiText("Đã từ chối (rejected)")}</strong>{uiText(". Người dùng vẫn giữ các vai trò học tập hiện tại.")}</p>
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setRejectModalItem(null)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
                 isLoading={isSubmittingReject}
                 onClick={handleRejectConfirm}
               >
-                Xác nhận từ chối
-              </Button>
+                {uiText("Xác nhận từ chối")}</Button>
             </div>
           </div>
         </Modal>

@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 /**
  * RFC 4180 compliant CSV parser for NPC LMS admin import
  * Supports: quotes, commas within quoted cells, CRLF/LF, UTF-8 BOM
@@ -106,13 +107,13 @@ export function parseCSV(content: string): CSVParseResult {
 
     if (!emailTrim || !emailRegex.test(emailTrim)) {
       isValid = false;
-      errorMessage = 'Email không đúng định dạng';
+      errorMessage = uiText("Email không đúng định dạng");
     } else if (!fullNameTrim) {
       isValid = false;
-      errorMessage = 'Họ và tên không được để trống';
+      errorMessage = uiText("Họ và tên không được để trống");
     } else if (!assignedRole) {
       isValid = false;
-      errorMessage = 'Vai trò phải là Sinh viên hoặc Giảng viên';
+      errorMessage = uiText("Vai trò phải là Sinh viên hoặc Giảng viên");
     }
 
     const parsed: ParsedCSVRow = {

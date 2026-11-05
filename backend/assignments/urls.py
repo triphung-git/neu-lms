@@ -1,5 +1,18 @@
 from django.urls import path
 
+from .grade_history_api import SubmissionGradeHistoryView
+from .grade_notifications_api import (
+    GradeNoticeReadAllView,
+    GradeNoticeReadView,
+    GradeNoticeView,
+    GradeUnreadView,
+)
+from .grading_api import SubmissionGradeView
+from .student_grades_api import StudentGradesView
+from .submission_api import SubmissionView
+from .submission_history_api import SubmissionHistoryView
+from .teacher_gradebook_api import TeacherGradebookView
+from .upcoming_api import UpcomingView
 from .views import (
     AssignmentDirectDetailView,
     CourseAssignmentAttachmentDownloadDirectView,
@@ -18,9 +31,52 @@ from .views import (
     TeacherAssignmentReopenView,
     TeacherAssignmentReopenWindowDetailView,
     TeacherAssignmentReopenWindowListView,
+    TeacherSubmissionListView,
 )
 
 urlpatterns = [
+    path(
+        "me/upcoming-assignments",
+        UpcomingView.as_view(),
+        name="student-upcoming-assignments",
+    ),
+    path(
+        "me/grade-notices/read-all",
+        GradeNoticeReadAllView.as_view(),
+        name="student-grade-notices-read-all",
+    ),
+    path("me/grade-notices/unread", GradeUnreadView.as_view()),
+    path("me/grade-notices/<int:id>/read", GradeNoticeReadView.as_view()),
+    path(
+        "me/grade-notices",
+        GradeNoticeView.as_view(),
+        name="student-grade-notices",
+    ),
+    path(
+        "courses/<uuid:course_id>/assignments/<uuid:id>/submission-history",
+        SubmissionHistoryView.as_view(),
+        name="submission-history",
+    ),
+    path(
+        "submissions/<int:id>/grade-history",
+        SubmissionGradeHistoryView.as_view(),
+        name="submission-grade-history",
+    ),
+    path(
+        "courses/<uuid:course_id>/gradebook",
+        TeacherGradebookView.as_view(),
+        name="teacher-gradebook",
+    ),
+    path(
+        "me/grades",
+        StudentGradesView.as_view(),
+        name="student-grades",
+    ),
+    path(
+        "submissions/<int:id>/grade",
+        SubmissionGradeView.as_view(),
+        name="submission-grade",
+    ),
     path(
         "courses/<uuid:course_id>/assignments",
         TeacherAssignmentListView.as_view(),
@@ -106,4 +162,9 @@ urlpatterns = [
         TeacherAssignmentReopenWindowDetailView.as_view(),
         name="teacher-assignment-reopen-window-detail",
     ),
+    path(
+        "courses/<uuid:course_id>/assignments/<uuid:id>/submissions",
+        SubmissionView.as_view(),
+    ),
+    path("assignments/<uuid:id>/submissions", TeacherSubmissionListView.as_view()),
 ]

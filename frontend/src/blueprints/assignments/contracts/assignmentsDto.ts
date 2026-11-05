@@ -210,6 +210,7 @@ export type SubmissionIneligibilityReason =
   | 'UNKNOWN';
 
 export interface StudentAssignmentEligibility {
+  isGroupAssignment?: boolean;
   canSubmit: boolean;
   isLate: boolean;
   isClosed: boolean;
@@ -268,10 +269,15 @@ export interface StudentAssignmentView {
 export interface SubmitAssignmentInput {
   assignmentId: string;
   studentId: string;
+  /** Course id is optional for legacy callers; the HTTP adapter can resolve it. */
+  courseId?: string;
+  /** Identifier returned by the secure upload flow. Required by the HTTP adapter. */
+  fileId?: string;
   file: {
     filename: string;
     size: number;
     url?: string;
+    id?: string;
   };
 }
 

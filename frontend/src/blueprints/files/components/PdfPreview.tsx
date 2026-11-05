@@ -1,8 +1,9 @@
+import {uiText} from "../../../shared/i18n/translate";
 import { useEffect, useRef, useState } from 'react';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 
 /** Render page pixels only: PDF scripts, links, forms and embedded HTML are not mounted. */
-export function PdfPreview({ url }: { url: string }) {
+export function PdfPreview({ url, initialPage = 1 }: { url: string; initialPage?: number }) {
   const pagesRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [truncated, setTruncated] = useState(false);
@@ -30,9 +31,10 @@ export function PdfPreview({ url }: { url: string }) {
       dispose = () => { void task.destroy(); };
       const document = await task.promise;
       if (cancelled) return;
-      const pageCount = Math.min(document.numPages, 20);
-      setTruncated(document.numPages > pageCount);
-      for (let number = 1; number <= pageCount; number++) {
+      const startPage = Math.max(1, Math.min(document.numPages, Math.floor(initialPage) || 1));
+      const pageCount = Math.min(document.numPages, startPage + 19);
+      setTruncated(startPage > 1 || document.numPages > pageCount);
+      for (let number = startPage; number <= pageCount; number++) {
         const page = await document.getPage(number);
         if (cancelled) return;
         const original = page.getViewport({ scale: 1 });
@@ -64,13 +66,13 @@ export function PdfPreview({ url }: { url: string }) {
       dispose();
       container?.replaceChildren();
     };
-  }, [url]);
+  }, [url, initialPage]);
 
   return (
     <div className="secure-pdf-preview" data-testid="secure-pdf-preview" data-state={state}>
-      {state === 'loading' && <p role="status">Đang hiển thị PDF…</p>}
-      {state === 'error' && <p role="alert">Không thể hiển thị PDF. Vui lòng tải tệp để xem.</p>}
-      {truncated && <p>Hiển thị 20 trang đầu. Tải tệp để đọc toàn bộ tài liệu.</p>}
+      {state === 'loading' && <p role="status">{uiText("Đang hiển thị PDF…")}</p>}
+      {state === 'error' && <p role="alert">{uiText("Không thể hiển thị PDF. Vui lòng tải tệp để xem.")}</p>}
+      {truncated && <p>{uiText("Hiển thị tối đa 20 trang từ trang được chọn. Tải tệp để đọc toàn bộ tài liệu.")}</p>}
       <div ref={pagesRef} className="secure-pdf-pages" />
     </div>
   );

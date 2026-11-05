@@ -1,3 +1,5 @@
+import {currentLocale} from '../../../shared/i18n/translate';
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
@@ -86,7 +88,7 @@ export const ProfilePage: React.FC = () => {
       setGrants(Array.isArray(grantsData) ? grantsData : []);
       setRoleRequests(Array.isArray(requestsData) ? requestsData : []);
     } catch (err: unknown) {
-      setRoleLoadError('Không thể tải trạng thái vai trò. Vui lòng thử lại.');
+      setRoleLoadError(uiText("Không thể tải trạng thái vai trò. Vui lòng thử lại."));
       if (err instanceof ApiError && err.status === 401) await refreshSession();
       // Do not present a failed response as an empty successful response.
       setGrants([]);
@@ -108,13 +110,13 @@ export const ProfilePage: React.FC = () => {
     try {
       await authService.getCsrf();
       await authService.resendVerification({ email: currentUser.emailNormalized });
-      notifySuccess('Đã tiếp nhận yêu cầu. Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút.');
+      notifySuccess(uiText("Đã tiếp nhận yêu cầu. Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút."));
       setEmailResendCooldown(60);
     } catch (err: unknown) {
       if (err instanceof ApiError && err.status === 429) {
-        notifyError('Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ giây lát.');
+        notifyError(uiText("Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ giây lát."));
       } else {
-        notifyError(err instanceof ApiError ? err.message : 'Lỗi khi gửi lại thư xác minh.');
+        notifyError(err instanceof ApiError ? err.message : uiText("Lỗi khi gửi lại thư xác minh."));
       }
     } finally {
       setIsResendingEmail(false);
@@ -131,11 +133,11 @@ export const ProfilePage: React.FC = () => {
       const request = await authService.createRoleRequest({ role: newRoleSelection });
 
       if (request.status === 'approved') {
-        notifySuccess('Yêu cầu vai trò Sinh viên đã được duyệt và cấp quyền thành công!');
+        notifySuccess(uiText("Yêu cầu vai trò Sinh viên đã được duyệt và cấp quyền thành công!"));
       } else if (newRoleSelection === 'teacher') {
-        notifySuccess('Yêu cầu vai trò Giảng viên đã được gửi và đang chờ Quản trị viên xét duyệt.');
+        notifySuccess(uiText("Yêu cầu vai trò Giảng viên đã được gửi và đang chờ Quản trị viên xét duyệt."));
       } else {
-        notifySuccess('Yêu cầu vai trò đã được ghi nhận. Vui lòng xác minh email để kích hoạt quyền.');
+        notifySuccess(uiText("Yêu cầu vai trò đã được ghi nhận. Vui lòng xác minh email để kích hoạt quyền."));
       }
 
       await loadRoleData();
@@ -143,14 +145,14 @@ export const ProfilePage: React.FC = () => {
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.code === 'role_already_granted') {
-          notifyError('Tài khoản của bạn đã được cấp vai trò này.');
+          notifyError(uiText("Tài khoản của bạn đã được cấp vai trò này."));
         } else if (err.code === 'one_pending_role_request') {
-          notifyError('Bạn đã có một yêu cầu đang chờ xử lý cho vai trò này.');
+          notifyError(uiText("Bạn đã có một yêu cầu đang chờ xử lý cho vai trò này."));
         } else {
-          notifyError(err.message || 'Không thể gửi yêu cầu vai trò.');
+          notifyError(err.message || uiText("Không thể gửi yêu cầu vai trò."));
         }
       } else {
-        notifyError('Lỗi kết nối máy chủ khi gửi yêu cầu vai trò.');
+        notifyError(uiText("Lỗi kết nối máy chủ khi gửi yêu cầu vai trò."));
       }
     } finally {
       setIsSubmittingRoleRequest(false);
@@ -164,11 +166,11 @@ export const ProfilePage: React.FC = () => {
     try {
       await authService.getCsrf();
       await authService.cancelRoleRequest(requestId);
-      notifySuccess('Đã hủy yêu cầu vai trò thành công.');
+      notifySuccess(uiText("Đã hủy yêu cầu vai trò thành công."));
       await loadRoleData();
       await refreshSession();
     } catch (err: unknown) {
-      notifyError(err instanceof ApiError ? err.message : 'Không thể hủy yêu cầu vai trò.');
+      notifyError(err instanceof ApiError ? err.message : uiText("Không thể hủy yêu cầu vai trò."));
     } finally {
       setCancellingRequestId(null);
     }
@@ -184,22 +186,22 @@ export const ProfilePage: React.FC = () => {
     setFormError('');
 
     if (!currentPassword) {
-      setCurrentPasswordError('Vui lòng nhập mật khẩu hiện tại.');
+      setCurrentPasswordError(uiText("Vui lòng nhập mật khẩu hiện tại."));
       return;
     }
 
     if (newPassword.length < 12) {
-      setNewPasswordError('Mật khẩu mới phải có ít nhất 12 ký tự.');
+      setNewPasswordError(uiText("Mật khẩu mới phải có ít nhất 12 ký tự."));
       return;
     }
 
     if (newPassword === currentPassword) {
-      setNewPasswordError('Mật khẩu mới không được trùng với mật khẩu hiện tại.');
+      setNewPasswordError(uiText("Mật khẩu mới không được trùng với mật khẩu hiện tại."));
       return;
     }
 
     if (newPassword !== confirmNewPassword) {
-      setConfirmPasswordError('Mật khẩu xác nhận không khớp.');
+      setConfirmPasswordError(uiText("Mật khẩu xác nhận không khớp."));
       return;
     }
 
@@ -216,18 +218,18 @@ export const ProfilePage: React.FC = () => {
       setConfirmNewPassword('');
 
       notifySuccess(
-        'Đổi mật khẩu thành công. Theo chính sách bảo mật, toàn bộ phiên đăng nhập đã được kết thúc. Vui lòng đăng nhập lại.'
+        uiText("Đổi mật khẩu thành công. Theo chính sách bảo mật, toàn bộ phiên đăng nhập đã được kết thúc. Vui lòng đăng nhập lại.")
       );
 
       await logout();
       navigate('/dang-nhap');
     } catch (err: unknown) {
       if (err instanceof ApiError) {
-        const message = err.message || 'Đổi mật khẩu thất bại.';
+        const message = err.message || uiText("Đổi mật khẩu thất bại.");
         setFormError(message);
         notifyError(message);
       } else {
-        const networkMsg = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.';
+        const networkMsg = uiText("Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.");
         setFormError(networkMsg);
         notifyError(networkMsg);
       }
@@ -242,10 +244,10 @@ export const ProfilePage: React.FC = () => {
 
     try {
       await logoutAll();
-      notifySuccess('Đã đăng xuất khỏi tất cả các thiết bị và phiên làm việc.');
+      notifySuccess(uiText("Đã đăng xuất khỏi tất cả các thiết bị và phiên làm việc."));
       navigate('/dang-nhap');
     } catch {
-      notifyError('Chưa thể xác nhận thu hồi các phiên. Vui lòng kiểm tra kết nối và thử lại.');
+      notifyError(uiText("Chưa thể xác nhận thu hồi các phiên. Vui lòng kiểm tra kết nối và thử lại."));
     } finally {
       setIsLoggingOutAll(false);
     }
@@ -255,24 +257,24 @@ export const ProfilePage: React.FC = () => {
 
   const roleLabel =
     currentUser.role === 'admin'
-      ? 'Quản trị viên'
+      ? uiText("Quản trị viên")
       : currentUser.role === 'teacher'
-      ? 'Giảng viên'
+      ? uiText("Giảng viên")
       : currentUser.role === 'student'
-      ? 'Sinh viên'
-      : 'Chưa có vai trò';
+      ? uiText("Sinh viên")
+      : uiText("Chưa có vai trò");
 
   const formatSource = (src: string): string => {
-    if (src === 'verified_student_email') return 'Tự động kích hoạt (Email SV đã xác minh)';
-    if (src === 'teacher_approval') return 'Quản trị viên phê duyệt';
-    if (src === 'admin_initial') return 'Khởi tạo hệ thống';
+    if (src === 'verified_student_email') return uiText("Tự động kích hoạt (Email SV đã xác minh)");
+    if (src === 'teacher_approval') return uiText("Quản trị viên phê duyệt");
+    if (src === 'admin_initial') return uiText("Khởi tạo hệ thống");
     return src;
   };
 
   const formatRoleName = (r: string): string => {
-    if (r === 'student') return 'Sinh viên';
-    if (r === 'teacher') return 'Giảng viên';
-    if (r === 'admin') return 'Quản trị viên';
+    if (r === 'student') return uiText("Sinh viên");
+    if (r === 'teacher') return uiText("Giảng viên");
+    if (r === 'admin') return uiText("Quản trị viên");
     return r;
   };
 
@@ -290,8 +292,7 @@ export const ProfilePage: React.FC = () => {
             onClick={() => navigate(getRoleDashboardPath(role))}
             icon={<ArrowLeft size={16} />}
           >
-            Quay lại không gian làm việc
-          </Button>
+            {uiText("Quay lại không gian làm việc")}</Button>
         ) : (
           <Button
             variant="secondary"
@@ -299,8 +300,7 @@ export const ProfilePage: React.FC = () => {
             onClick={() => navigate('/')}
             icon={<ArrowLeft size={16} />}
           >
-            Về Trang chủ
-          </Button>
+            {uiText("Về Trang chủ")}</Button>
         )}
       </div>
 
@@ -309,10 +309,9 @@ export const ProfilePage: React.FC = () => {
         <div className="profile-banner-alert warning" role="status">
           <Clock className="banner-icon" size={20} aria-hidden="true" />
           <div className="banner-text">
-            <strong>Yêu cầu vai trò Giảng viên đang chờ Quản trị viên xét duyệt</strong>
+            <strong>{uiText("Yêu cầu vai trò Giảng viên đang chờ Quản trị viên xét duyệt")}</strong>
             <p>
-              {currentUser.emailVerified ? 'Email đã được xác minh. ' : 'Bạn cần xác minh email trước. '}Quản trị viên sẽ kiểm tra và phê duyệt yêu cầu trước khi bạn có thể truy cập không gian Giảng dạy.
-            </p>
+              {currentUser.emailVerified ? uiText("Email đã được xác minh. ") : uiText("Bạn cần xác minh email trước. ")}{uiText("Quản trị viên sẽ kiểm tra và phê duyệt yêu cầu trước khi bạn có thể truy cập không gian Giảng dạy.")}</p>
           </div>
         </div>
       )}
@@ -321,10 +320,9 @@ export const ProfilePage: React.FC = () => {
         <div className="profile-banner-alert info" role="status">
           <AlertCircle className="banner-icon" size={20} aria-hidden="true" />
           <div className="banner-text">
-            <strong>Tài khoản chưa có vai trò không gian học tập</strong>
+            <strong>{uiText("Tài khoản chưa có vai trò không gian học tập")}</strong>
             <p>
-              Bạn chưa có vai trò Sinh viên hoặc Giảng viên đang hoạt động. Vui lòng gửi yêu cầu vai trò phù hợp ở mục &quot;Yêu cầu vai trò&quot; bên dưới.
-            </p>
+              {uiText("Bạn chưa có vai trò Sinh viên hoặc Giảng viên đang hoạt động. Vui lòng gửi yêu cầu vai trò phù hợp ở mục &quot;Yêu cầu vai trò&quot; bên dưới.")}</p>
           </div>
         </div>
       )}
@@ -336,33 +334,32 @@ export const ProfilePage: React.FC = () => {
           <section className="profile-card" aria-labelledby="account-info-title">
             <div className="profile-card-header">
               <User className="card-header-icon" aria-hidden="true" />
-              <h2 id="account-info-title">Thông tin tài khoản</h2>
+              <h2 id="account-info-title">{uiText("Thông tin tài khoản")}</h2>
             </div>
 
             <div className="profile-info-list">
               <div className="profile-info-item">
-                <span className="item-label">Họ và tên</span>
+                <span className="item-label">{uiText("Họ và tên")}</span>
                 <span className="item-value font-bold">{currentUser.fullName}</span>
               </div>
 
               <div className="profile-info-item vertical">
                 <div className="item-sub-row">
-                  <span className="item-label">Địa chỉ email (duy nhất)</span>
+                  <span className="item-label">{uiText("Địa chỉ email (duy nhất)")}</span>
                   <span className="item-value font-mono">{currentUser.emailNormalized}</span>
                 </div>
                 <span className="item-helper-note">
-                  Một tài khoản gắn với đúng một địa chỉ email đăng ký. Không hỗ trợ liên kết thêm email.
-                </span>
+                  {uiText("Một tài khoản gắn với đúng một địa chỉ email đăng ký. Không hỗ trợ liên kết thêm email.")}</span>
               </div>
 
               <div className="profile-info-item">
-                <span className="item-label">Xác minh email</span>
+                <span className="item-label">{uiText("Xác minh email")}</span>
                 <div className="item-value-inline">
                   {currentUser.emailVerified ? (
-                    <Badge variant="published" label="Đã xác minh" />
+                    <Badge variant="published" label={uiText("Đã xác minh")} />
                   ) : (
                     <>
-                      <Badge variant="pending" label="Chưa xác minh" />
+                      <Badge variant="pending" label={uiText("Chưa xác minh")} />
                       <button
                         type="button"
                         className="btn-profile-resend"
@@ -371,7 +368,7 @@ export const ProfilePage: React.FC = () => {
                       >
                         <RotateCw size={13} className={isResendingEmail ? 'spin' : ''} aria-hidden="true" />
                         <span>
-                          {emailResendCooldown > 0 ? `${emailResendCooldown}s` : 'Gửi lại thư xác minh'}
+                          {emailResendCooldown > 0 ? `${emailResendCooldown}s` : uiText("Gửi lại thư xác minh")}
                         </span>
                       </button>
                     </>
@@ -380,19 +377,19 @@ export const ProfilePage: React.FC = () => {
               </div>
 
               <div className="profile-info-item">
-                <span className="item-label">Mã định danh</span>
+                <span className="item-label">{uiText("Mã định danh")}</span>
                 <span className="item-value font-mono">{currentUser.code || currentUser.id.slice(0, 8)}</span>
               </div>
 
               <div className="profile-info-item">
-                <span className="item-label">Vai trò đang dùng</span>
+                <span className="item-label">{uiText("Vai trò đang dùng")}</span>
                 <span className="item-value">
                   <Badge variant={currentUser.role ? 'published' : 'archived'} label={roleLabel} />
                 </span>
               </div>
 
               <div className="profile-info-item">
-                <span className="item-label">Trạng thái tài khoản</span>
+                <span className="item-label">{uiText("Trạng thái tài khoản")}</span>
                 <span className="item-value">
                   <Badge variant={currentUser.status === 'active' ? 'active' : 'locked'} />
                 </span>
@@ -405,11 +402,10 @@ export const ProfilePage: React.FC = () => {
             <section className="profile-card" aria-labelledby="role-switcher-title">
               <div className="profile-card-header">
                 <UserCheck className="card-header-icon" aria-hidden="true" />
-                <h2 id="role-switcher-title">Chuyển đổi vai trò làm việc</h2>
+                <h2 id="role-switcher-title">{uiText("Chuyển đổi vai trò làm việc")}</h2>
               </div>
               <p className="session-card-description">
-                Tài khoản của bạn được cấp nhiều vai trò. Bạn có thể chọn vai trò muốn kích hoạt:
-              </p>
+                {uiText("Tài khoản của bạn được cấp nhiều vai trò. Bạn có thể chọn vai trò muốn kích hoạt:")}</p>
               <div className="profile-role-switcher-buttons">
                 {roles.includes('student') && (
                   <Button
@@ -418,7 +414,7 @@ export const ProfilePage: React.FC = () => {
                     onClick={() => switchRole('student')}
                     icon={<School size={16} />}
                   >
-                    Sinh viên {role === 'student' ? '(Đang kích hoạt)' : ''}
+                    {uiText("Sinh viên ")}{role === 'student' ? uiText("(Đang kích hoạt)") : ''}
                   </Button>
                 )}
                 {roles.includes('teacher') && (
@@ -428,7 +424,7 @@ export const ProfilePage: React.FC = () => {
                     onClick={() => switchRole('teacher')}
                     icon={<GraduationCap size={16} />}
                   >
-                    Giảng viên {role === 'teacher' ? '(Đang kích hoạt)' : ''}
+                    {uiText("Giảng viên ")}{role === 'teacher' ? uiText("(Đang kích hoạt)") : ''}
                   </Button>
                 )}
               </div>
@@ -439,24 +435,24 @@ export const ProfilePage: React.FC = () => {
           <section className="profile-card" aria-labelledby="role-management-title">
             <div className="profile-card-header">
               <ShieldCheck className="card-header-icon" aria-hidden="true" />
-              <h2 id="role-management-title">Vai trò & Phân quyền</h2>
+              <h2 id="role-management-title">{uiText("Vai trò & Phân quyền")}</h2>
             </div>
 
             {roleLoadError && (
               <div role="alert">
                 <p>{roleLoadError}</p>
-                <Button variant="secondary" onClick={() => void loadRoleData()}>Thử tải lại vai trò</Button>
+                <Button variant="secondary" onClick={() => void loadRoleData()}>{uiText("Thử tải lại vai trò")}</Button>
               </div>
             )}
             {/* Sub-section: Active Grants */}
             <div className="profile-sub-section">
-              <h3 className="sub-section-title">Vai trò đã được cấp</h3>
+              <h3 className="sub-section-title">{uiText("Vai trò đã được cấp")}</h3>
               {isLoadingRoles ? (
-                <p className="sub-section-loading">Đang tải danh sách vai trò...</p>
+                <p className="sub-section-loading">{uiText("Đang tải danh sách vai trò...")}</p>
               ) : roleLoadError ? null : grants.length === 0 ? (
-                <p className="sub-section-empty">Chưa có vai trò nào được cấp quyền.</p>
+                <p className="sub-section-empty">{uiText("Chưa có vai trò nào được cấp quyền.")}</p>
               ) : (
-                <ul className="grants-list" aria-label="Danh sách vai trò đã cấp">
+                <ul className="grants-list" aria-label={uiText("Danh sách vai trò đã cấp")}>
                   {grants.map((g) => (
                     <li key={g.id} className="grant-item">
                       <div className="grant-header">
@@ -465,11 +461,11 @@ export const ProfilePage: React.FC = () => {
                           {g.role === 'teacher' && <GraduationCap size={16} aria-hidden="true" />}
                           <strong>{formatRoleName(g.role)}</strong>
                         </span>
-                        <Badge variant="published" label="Đang hoạt động" />
+                        <Badge variant="published" label={uiText("Đang hoạt động")} />
                       </div>
                       <div className="grant-meta">
-                        <span>Nguồn cấp: {formatSource(g.grant_source)}</span>
-                        <span>Ngày cấp: {new Date(g.granted_at).toLocaleDateString('vi-VN')}</span>
+                        <span>{uiText("Nguồn cấp: ")}{formatSource(g.grant_source)}</span>
+                        <span>{uiText("Ngày cấp: ")}{new Date(g.granted_at).toLocaleDateString(currentLocale())}</span>
                       </div>
                     </li>
                   ))}
@@ -479,13 +475,13 @@ export const ProfilePage: React.FC = () => {
 
             {/* Sub-section: Role Requests */}
             <div className="profile-sub-section">
-              <h3 className="sub-section-title">Yêu cầu vai trò</h3>
+              <h3 className="sub-section-title">{uiText("Yêu cầu vai trò")}</h3>
               {isLoadingRoles ? (
-                <p className="sub-section-loading">Đang tải yêu cầu...</p>
+                <p className="sub-section-loading">{uiText("Đang tải yêu cầu...")}</p>
               ) : roleLoadError ? null : roleRequests.length === 0 ? (
-                <p className="sub-section-empty">Chưa có yêu cầu vai trò nào.</p>
+                <p className="sub-section-empty">{uiText("Chưa có yêu cầu vai trò nào.")}</p>
               ) : (
-                <ul className="requests-list" aria-label="Danh sách yêu cầu vai trò">
+                <ul className="requests-list" aria-label={uiText("Danh sách yêu cầu vai trò")}>
                   {roleRequests.map((req) => (
                     <li key={req.id} className="request-item">
                       <div className="request-header">
@@ -493,17 +489,17 @@ export const ProfilePage: React.FC = () => {
                           <strong>{formatRoleName(req.role)}</strong>
                         </span>
                         <div className="request-status-wrap">
-                          {req.status === 'pending' && <Badge variant="pending" label="Đang chờ duyệt" />}
-                          {req.status === 'approved' && <Badge variant="published" label="Đã phê duyệt" />}
-                          {req.status === 'rejected' && <Badge variant="locked" label="Bị từ chối" />}
-                          {req.status === 'cancelled' && <Badge variant="archived" label="Đã hủy" />}
+                          {req.status === 'pending' && <Badge variant="pending" label={uiText("Đang chờ duyệt")} />}
+                          {req.status === 'approved' && <Badge variant="published" label={uiText("Đã phê duyệt")} />}
+                          {req.status === 'rejected' && <Badge variant="locked" label={uiText("Bị từ chối")} />}
+                          {req.status === 'cancelled' && <Badge variant="archived" label={uiText("Đã hủy")} />}
                         </div>
                       </div>
 
                       <div className="request-meta">
-                        <span>Yêu cầu lúc: {new Date(req.requested_at).toLocaleString('vi-VN')}</span>
+                        <span>{uiText("Yêu cầu lúc: ")}{new Date(req.requested_at).toLocaleString(currentLocale())}</span>
                         {req.review_reason && (
-                          <span className="request-reason">Lý do/Nguồn: {req.review_reason}</span>
+                          <span className="request-reason">{uiText("Lý do/Nguồn: ")}{req.review_reason}</span>
                         )}
                       </div>
 
@@ -518,8 +514,7 @@ export const ProfilePage: React.FC = () => {
                             icon={<XCircle size={14} />}
                             className="btn-cancel-request"
                           >
-                            Hủy yêu cầu
-                          </Button>
+                            {uiText("Hủy yêu cầu")}</Button>
                         </div>
                       )}
                     </li>
@@ -530,12 +525,11 @@ export const ProfilePage: React.FC = () => {
 
             {/* Sub-section: Request New Role Form */}
             <div className="profile-sub-section new-request-box">
-              <h3 className="sub-section-title">Yêu cầu cấp thêm vai trò</h3>
+              <h3 className="sub-section-title">{uiText("Yêu cầu cấp thêm vai trò")}</h3>
               <form onSubmit={handleCreateRoleRequest} className="profile-new-request-form">
                 <div className="role-request-select-group">
                   <label htmlFor="new-role-select" className="field-label">
-                    Chọn vai trò muốn yêu cầu:
-                  </label>
+                    {uiText("Chọn vai trò muốn yêu cầu:")}</label>
                   <select
                     id="new-role-select"
                     className="field-input role-select-input"
@@ -543,8 +537,8 @@ export const ProfilePage: React.FC = () => {
                     onChange={(e) => setNewRoleSelection(e.target.value as 'student' | 'teacher')}
                     disabled={isSubmittingRoleRequest || isLoadingRoles || Boolean(roleLoadError)}
                   >
-                    <option value="student">Sinh viên (Yêu cầu email @st.neu.edu.vn)</option>
-                    <option value="teacher">Giảng viên (Chờ Quản trị viên phê duyệt)</option>
+                    <option value="student">{uiText("Sinh viên (Yêu cầu email @st.neu.edu.vn)")}</option>
+                    <option value="teacher">{uiText("Giảng viên (Chờ Quản trị viên phê duyệt)")}</option>
                   </select>
                 </div>
 
@@ -557,8 +551,7 @@ export const ProfilePage: React.FC = () => {
                   disabled={isSubmittingRoleRequest || isLoadingRoles || Boolean(roleLoadError)}
                   icon={<Send size={14} />}
                 >
-                  Gửi yêu cầu
-                </Button>
+                  {uiText("Gửi yêu cầu")}</Button>
               </form>
             </div>
           </section>
@@ -567,12 +560,10 @@ export const ProfilePage: React.FC = () => {
           <section className="profile-card session-card" aria-labelledby="session-management-title">
             <div className="profile-card-header">
               <LogOut className="card-header-icon danger-icon" aria-hidden="true" />
-              <h2 id="session-management-title">Quản lý phiên làm việc</h2>
+              <h2 id="session-management-title">{uiText("Quản lý phiên làm việc")}</h2>
             </div>
             <p className="session-card-description">
-              Nếu bạn nghi ngờ tài khoản bị truy cập trái phép hoặc đăng nhập trên thiết bị lạ, bạn có thể thu hồi
-              ngay lập tức toàn bộ các phiên làm việc trên mọi thiết bị.
-            </p>
+              {uiText("Nếu bạn nghi ngờ tài khoản bị truy cập trái phép hoặc đăng nhập trên thiết bị lạ, bạn có thể thu hồi ngay lập tức toàn bộ các phiên làm việc trên mọi thiết bị.")}</p>
             <Button
               id="logout-all-btn"
               type="button"
@@ -584,7 +575,7 @@ export const ProfilePage: React.FC = () => {
               icon={<LogOut size={16} />}
               className="logout-all-btn"
             >
-              {isLoggingOutAll ? 'Đang thu hồi tất cả phiên...' : 'Đăng xuất khỏi tất cả thiết bị'}
+              {isLoggingOutAll ? uiText("Đang thu hồi tất cả phiên...") : uiText("Đăng xuất khỏi tất cả thiết bị")}
             </Button>
           </section>
         </div>
@@ -594,7 +585,7 @@ export const ProfilePage: React.FC = () => {
           <section className="profile-card" aria-labelledby="password-change-title">
             <div className="profile-card-header">
               <KeyRound className="card-header-icon" aria-hidden="true" />
-              <h2 id="password-change-title">Đổi mật khẩu tài khoản</h2>
+              <h2 id="password-change-title">{uiText("Đổi mật khẩu tài khoản")}</h2>
             </div>
 
             {formError && (
@@ -607,7 +598,7 @@ export const ProfilePage: React.FC = () => {
             <form onSubmit={handlePasswordChange} className="profile-form" noValidate>
               <TextField
                 id="current-password"
-                label="Mật khẩu hiện tại"
+                label={uiText("Mật khẩu hiện tại")}
                 type="password"
                 autoComplete="current-password"
                 value={currentPassword}
@@ -616,7 +607,7 @@ export const ProfilePage: React.FC = () => {
                   if (currentPasswordError) setCurrentPasswordError('');
                   if (formError) setFormError('');
                 }}
-                placeholder="Nhập mật khẩu hiện tại"
+                placeholder={uiText("Nhập mật khẩu hiện tại")}
                 error={currentPasswordError}
                 required
                 disabled={isSubmittingPassword}
@@ -624,7 +615,7 @@ export const ProfilePage: React.FC = () => {
 
               <TextField
                 id="new-password"
-                label="Mật khẩu mới"
+                label={uiText("Mật khẩu mới")}
                 type="password"
                 autoComplete="new-password"
                 value={newPassword}
@@ -633,7 +624,7 @@ export const ProfilePage: React.FC = () => {
                   if (newPasswordError) setNewPasswordError('');
                   if (formError) setFormError('');
                 }}
-                placeholder="Tối thiểu 12 ký tự"
+                placeholder={uiText("Tối thiểu 12 ký tự")}
                 helperText="Mật khẩu phải có độ dài tối thiểu 12 ký tự, khuyến khích chứa chữ hoa, số và ký tự đặc biệt."
                 error={newPasswordError}
                 required
@@ -642,7 +633,7 @@ export const ProfilePage: React.FC = () => {
 
               <TextField
                 id="confirm-new-password"
-                label="Nhập lại mật khẩu mới"
+                label={uiText("Nhập lại mật khẩu mới")}
                 type="password"
                 autoComplete="new-password"
                 value={confirmNewPassword}
@@ -651,7 +642,7 @@ export const ProfilePage: React.FC = () => {
                   if (confirmPasswordError) setConfirmPasswordError('');
                   if (formError) setFormError('');
                 }}
-                placeholder="Xác nhận lại mật khẩu mới"
+                placeholder={uiText("Xác nhận lại mật khẩu mới")}
                 error={confirmPasswordError}
                 required
                 disabled={isSubmittingPassword}
@@ -660,9 +651,7 @@ export const ProfilePage: React.FC = () => {
               <div className="profile-password-notice">
                 <ShieldCheck size={16} aria-hidden="true" />
                 <span>
-                  Chính sách bảo mật: Khi đổi mật khẩu thành công, máy chủ xác thực sẽ ngay lập tức vô hiệu hóa tất cả
-                  các phiên làm việc hiện có để bảo vệ tài khoản. Bạn sẽ cần đăng nhập lại bằng mật khẩu mới.
-                </span>
+                  {uiText("Chính sách bảo mật: Khi đổi mật khẩu thành công, máy chủ xác thực sẽ ngay lập tức vô hiệu hóa tất cả các phiên làm việc hiện có để bảo vệ tài khoản. Bạn sẽ cần đăng nhập lại bằng mật khẩu mới.")}</span>
               </div>
 
               <Button
@@ -673,7 +662,7 @@ export const ProfilePage: React.FC = () => {
                 disabled={isSubmittingPassword}
                 icon={<Check size={16} />}
               >
-                {isSubmittingPassword ? 'Đang cập nhật mật khẩu...' : 'Lưu đổi mật khẩu'}
+                {isSubmittingPassword ? uiText("Đang cập nhật mật khẩu...") : uiText("Lưu đổi mật khẩu")}
               </Button>
             </form>
           </section>

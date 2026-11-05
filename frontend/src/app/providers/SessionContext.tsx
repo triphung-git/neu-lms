@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import type { UserRole } from '../../shared/kernel/types';
 import {
@@ -104,10 +105,10 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children, serv
   ): Promise<{ success: boolean; message?: string; role?: UserRole | null }> => {
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
-      return { success: false, message: 'Vui lòng nhập địa chỉ email.' };
+      return { success: false, message: uiText("Vui lòng nhập địa chỉ email.") };
     }
     if (!password) {
-      return { success: false, message: 'Vui lòng nhập mật khẩu.' };
+      return { success: false, message: uiText("Vui lòng nhập mật khẩu.") };
     }
 
     try {
@@ -130,11 +131,11 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children, serv
       return { success: true, role: user.role };
     } catch (err: unknown) {
       if (err instanceof ApiError) {
-        return { success: false, message: err.message || 'Đăng nhập không thành công.' };
+        return { success: false, message: err.message || uiText("Đăng nhập không thành công.") };
       }
       return {
         success: false,
-        message: 'Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại mạng.',
+        message: uiText("Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại mạng."),
       };
     }
   };
@@ -164,7 +165,7 @@ export const SessionProvider: React.FC<SessionProviderProps> = ({ children, serv
 
   const switchRole = (targetRole: UserRole): boolean => {
     if (!currentUser || !currentUser.roles.includes(targetRole)) {
-      console.warn(`[SessionContext] Không thể chuyển sang vai trò ${targetRole}: vai trò chưa được cấp.`);
+      console.warn(uiText("[SessionContext] Không thể chuyển sang vai trò {0}: vai trò chưa được cấp.",[targetRole]));
       return false;
     }
     setRole(targetRole);

@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useId, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -99,9 +100,9 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       if (sequence !== loadSequence.current) return;
       if (err instanceof ApiError && err.status === 404) {
         setAccount(null);
-        setErrorMessage('Tài khoản không tồn tại trên hệ thống.');
+        setErrorMessage(uiText("Tài khoản không tồn tại trên hệ thống."));
       } else {
-        const msg = err instanceof Error ? err.message : 'Không thể tải thông tin tài khoản.';
+        const msg = err instanceof Error ? err.message : uiText("Không thể tải thông tin tài khoản.");
         setErrorMessage(msg);
       }
     } finally {
@@ -119,19 +120,19 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       if (err.code === 'last_active_admin') {
         showNotification(
           'error',
-          'Thao tác bị từ chối: Đây là Quản trị viên hoạt động duy nhất còn lại của hệ thống.'
+          uiText("Thao tác bị từ chối: Đây là Quản trị viên hoạt động duy nhất còn lại của hệ thống.")
         );
         return;
       }
       if (err.code === 'reauth_required') {
         showNotification(
           'error',
-          'Yêu cầu xác thực: Vui lòng nhập mật khẩu hiện tại của bạn để thực hiện thao tác nhạy cảm này.'
+          uiText("Yêu cầu xác thực: Vui lòng nhập mật khẩu hiện tại của bạn để thực hiện thao tác nhạy cảm này.")
         );
         return;
       }
       if (err.code === 'invalid_credentials') {
-        showNotification('error', 'Mật khẩu xác thực hiện tại không chính xác.');
+        showNotification('error', uiText("Mật khẩu xác thực hiện tại không chính xác."));
         return;
       }
       showNotification('error', err.message || defaultMessage);
@@ -146,7 +147,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     if (!account) return;
 
     if (isSelf) {
-      showNotification('error', 'Không thể tự khóa tài khoản của chính mình.');
+      showNotification('error', uiText("Không thể tự khóa tài khoản của chính mình."));
       return;
     }
 
@@ -154,16 +155,16 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     try {
       if (account.is_active) {
         await service.setAccountState(account.id, false, lockPassword || undefined);
-        showNotification('success', `Đã khóa tài khoản ${account.display_name}. Các phiên làm việc cũ đã bị thu hồi.`);
+        showNotification('success', uiText("Đã khóa tài khoản {0}. Các phiên làm việc cũ đã bị thu hồi.",[account.display_name]));
       } else {
         await service.unlockAccount(account.id);
-        showNotification('success', `Đã mở khóa tài khoản ${account.display_name}.`);
+        showNotification('success', uiText("Đã mở khóa tài khoản {0}.",[account.display_name]));
       }
       setShowLockModal(false);
       setLockPassword('');
       await fetchAccount();
     } catch (err) {
-      handleApiError(err, 'Lỗi khi cập nhật trạng thái tài khoản.');
+      handleApiError(err, uiText("Lỗi khi cập nhật trạng thái tài khoản."));
     } finally {
       setIsSubmittingLock(false);
     }
@@ -175,19 +176,19 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     if (!account) return;
 
     if (!grantPassword) {
-      showNotification('error', 'Vui lòng nhập mật khẩu hiện tại của bạn để xác thực.');
+      showNotification('error', uiText("Vui lòng nhập mật khẩu hiện tại của bạn để xác thực."));
       return;
     }
 
     setIsSubmittingGrant(true);
     try {
       await service.grantAdminRole(account.id, grantPassword);
-      showNotification('success', `Đã cấp vai trò Quản trị viên cho tài khoản ${account.display_name}.`);
+      showNotification('success', uiText("Đã cấp vai trò Quản trị viên cho tài khoản {0}.",[account.display_name]));
       setShowGrantAdminModal(false);
       setGrantPassword('');
       await fetchAccount();
     } catch (err) {
-      handleApiError(err, 'Lỗi khi cấp vai trò quản trị viên.');
+      handleApiError(err, uiText("Lỗi khi cấp vai trò quản trị viên."));
     } finally {
       setIsSubmittingGrant(false);
     }
@@ -203,14 +204,14 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       await service.revokeRole(account.id, revokeTargetGrant.id, revokePassword || undefined);
       showNotification(
         'success',
-        `Đã thu hồi vai trò ${revokeTargetGrant.role} của tài khoản ${account.display_name}. Phiên cũ đã bị chấm dứt.`
+        uiText("Đã thu hồi vai trò {0} của tài khoản {1}. Phiên cũ đã bị chấm dứt.",[revokeTargetGrant.role,account.display_name])
       );
       setShowRevokeModal(false);
       setRevokeTargetGrant(null);
       setRevokePassword('');
       await fetchAccount();
     } catch (err) {
-      handleApiError(err, 'Lỗi khi thu hồi vai trò.');
+      handleApiError(err, uiText("Lỗi khi thu hồi vai trò."));
     } finally {
       setIsSubmittingRevoke(false);
     }
@@ -224,11 +225,11 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       const res = await service.requestPasswordReset(account.id);
       showNotification(
         'success',
-        res.message || 'Đã gửi liên kết đặt lại mật khẩu đến email chính thức của người dùng.'
+        res.message || uiText("Đã gửi liên kết đặt lại mật khẩu đến email chính thức của người dùng.")
       );
       setShowResetModal(false);
     } catch (err) {
-      handleApiError(err, 'Lỗi khi gửi yêu cầu đặt lại mật khẩu.');
+      handleApiError(err, uiText("Lỗi khi gửi yêu cầu đặt lại mật khẩu."));
     } finally {
       setIsSubmittingReset(false);
     }
@@ -240,12 +241,12 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     setIsSubmittingRequestAction(true);
     try {
       await service.approveTeacherRequest(selectedRequest.id);
-      showNotification('success', 'Đã phê duyệt yêu cầu giảng viên và cấp vai trò thành công.');
+      showNotification('success', uiText("Đã phê duyệt yêu cầu giảng viên và cấp vai trò thành công."));
       setShowApproveRequestModal(false);
       setSelectedRequest(null);
       await fetchAccount();
     } catch (err) {
-      handleApiError(err, 'Lỗi khi phê duyệt yêu cầu giảng viên.');
+      handleApiError(err, uiText("Lỗi khi phê duyệt yêu cầu giảng viên."));
     } finally {
       setIsSubmittingRequestAction(false);
     }
@@ -257,12 +258,12 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     setIsSubmittingRequestAction(true);
     try {
       await service.rejectTeacherRequest(selectedRequest.id);
-      showNotification('success', 'Đã từ chối yêu cầu vai trò giảng viên.');
+      showNotification('success', uiText("Đã từ chối yêu cầu vai trò giảng viên."));
       setShowRejectRequestModal(false);
       setSelectedRequest(null);
       await fetchAccount();
     } catch (err) {
-      handleApiError(err, 'Lỗi khi từ chối yêu cầu.');
+      handleApiError(err, uiText("Lỗi khi từ chối yêu cầu."));
     } finally {
       setIsSubmittingRequestAction(false);
     }
@@ -273,9 +274,9 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       <div className="admin-acc-detail-page">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Tài khoản người dùng', path: '/ad/tai-khoan' },
-            { label: 'Đang tải...' },
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Tài khoản người dùng"), path: '/ad/tai-khoan' },
+            { label: uiText("Đang tải...") },
           ]}
         />
         <div style={{ padding: 'var(--space-6)' }}>
@@ -289,9 +290,9 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
     return (
       <div className="admin-acc-detail-container">
         <EmptyState
-          title="Không tìm thấy tài khoản"
-          description={errorMessage || 'Tài khoản không tồn tại trên hệ thống máy chủ.'}
-          action={<Button onClick={() => navigate('/ad/tai-khoan')}>Về danh sách tài khoản</Button>}
+          title={uiText("Không tìm thấy tài khoản")}
+          description={errorMessage || uiText("Tài khoản không tồn tại trên hệ thống máy chủ.")}
+          action={<Button onClick={() => navigate('/ad/tai-khoan')}>{uiText("Về danh sách tài khoản")}</Button>}
         />
       </div>
     );
@@ -304,8 +305,8 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Tài khoản người dùng', path: '/ad/tai-khoan' },
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Tài khoản người dùng"), path: '/ad/tai-khoan' },
             { label: account.display_name },
           ]}
         />
@@ -314,17 +315,17 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
           <div style={{ display: 'flex', gap: '6px' }}>
             {activeGrants.map((g) => (
               <span key={g.id} className={`role-pill role-pill-${g.role}`}>
-                {g.role === 'admin' ? 'Quản trị viên' : g.role === 'teacher' ? 'Giảng viên' : 'Sinh viên'}
+                {g.role === 'admin' ? uiText("Quản trị viên") : g.role === 'teacher' ? uiText("Giảng viên") : uiText("Sinh viên")}
               </span>
             ))}
           </div>
           <Badge
             variant={account.is_active ? 'published' : 'archived'}
-            label={account.is_active ? 'Đang hoạt động' : 'Tài khoản bị khóa'}
+            label={account.is_active ? uiText("Đang hoạt động") : uiText("Tài khoản bị khóa")}
           />
           <Badge
             variant={account.email_verified ? 'published' : 'draft'}
-            label={account.email_verified ? 'Email đã xác minh' : 'Chưa xác minh email'}
+            label={account.email_verified ? uiText("Email đã xác minh") : uiText("Chưa xác minh email")}
           />
         </div>
       </div>
@@ -334,9 +335,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
         <div className="self-guard-notice" role="alert">
           <ShieldAlert size={20} />
           <span>
-            <strong>Tài khoản cá nhân:</strong> Bạn đang thao tác trên tài khoản của chính mình.
-            Tính năng khóa tài khoản và thu hồi vai trò quản trị bị vô hiệu hóa để bảo vệ quyền truy cập quản trị hệ thống.
-          </span>
+            <strong>{uiText("Tài khoản cá nhân:")}</strong> {uiText(" Bạn đang thao tác trên tài khoản của chính mình. Tính năng khóa tài khoản và thu hồi vai trò quản trị bị vô hiệu hóa để bảo vệ quyền truy cập quản trị hệ thống.")}</span>
         </div>
       )}
 
@@ -345,35 +344,34 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
         {/* Left Card: Account Info */}
         <section className="acc-info-card" aria-labelledby="sec-account-info">
           <h2 id="sec-account-info" className="card-section-title">
-            Thông tin tài khoản máy chủ
-          </h2>
+            {uiText("Thông tin tài khoản máy chủ")}</h2>
           <div className="info-meta-list">
             <div className="info-row">
-              <span className="info-lbl">Họ và tên:</span>
+              <span className="info-lbl">{uiText("Họ và tên:")}</span>
               <strong className="info-val">{account.display_name}</strong>
             </div>
             <div className="info-row">
-              <span className="info-lbl">Địa chỉ Email:</span>
+              <span className="info-lbl">{uiText("Địa chỉ Email:")}</span>
               <span className="info-val">{account.email}</span>
             </div>
             <div className="info-row">
-              <span className="info-lbl">Xác minh email:</span>
+              <span className="info-lbl">{uiText("Xác minh email:")}</span>
               <span className="info-val">
                 {account.email_verified
-                  ? `Đã xác minh ${account.verified_at ? `(${formatDateVN(account.verified_at)})` : ''}`
-                  : 'Chưa xác minh'}
+                  ? uiText("Đã xác minh {0}",[account.verified_at ? `(${formatDateVN(account.verified_at)})` : ''])
+                  : uiText("Chưa xác minh")}
               </span>
             </div>
             <div className="info-row">
-              <span className="info-lbl">Mã định danh (ID):</span>
+              <span className="info-lbl">{uiText("Mã định danh (ID):")}</span>
               <span className="info-val font-mono">{account.id}</span>
             </div>
             <div className="info-row">
-              <span className="info-lbl">Thời điểm khởi tạo:</span>
+              <span className="info-lbl">{uiText("Thời điểm khởi tạo:")}</span>
               <span className="info-val">{formatDateVN(account.created_at)}</span>
             </div>
             <div className="info-row">
-              <span className="info-lbl">Cập nhật gần nhất:</span>
+              <span className="info-lbl">{uiText("Cập nhật gần nhất:")}</span>
               <span className="info-val">{formatDateVN(account.updated_at)}</span>
             </div>
           </div>
@@ -382,11 +380,9 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
         {/* Right Card: Administrative Operations */}
         <section className="acc-info-card" aria-labelledby="sec-admin-ops">
           <h2 id="sec-admin-ops" className="card-section-title">
-            Thao tác quản trị & An ninh
-          </h2>
+            {uiText("Thao tác quản trị & An ninh")}</h2>
           <p className="text-sm text-muted">
-            Mọi thao tác quản trị được kiểm toán máy chủ và làm mất hiệu lực các phiên làm việc cũ khi có thay đổi quyền hạn.
-          </p>
+            {uiText("Mọi thao tác quản trị được kiểm toán máy chủ và làm mất hiệu lực các phiên làm việc cũ khi có thay đổi quyền hạn.")}</p>
 
           <div className="acc-ops-stack" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {/* Lock / Unlock button */}
@@ -400,7 +396,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                 }}
                 icon={account.is_active ? <Lock size={16} /> : <Unlock size={16} />}
               >
-                <span>{account.is_active ? 'Khóa tài khoản' : 'Mở khóa tài khoản'}</span>
+                <span>{account.is_active ? uiText("Khóa tài khoản") : uiText("Mở khóa tài khoản")}</span>
               </Button>
             )}
 
@@ -415,7 +411,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                 }}
                 icon={<ShieldCheck size={16} />}
               >
-                <span>Cấp quyền Quản trị viên (Admin)</span>
+                <span>{uiText("Cấp quyền Quản trị viên (Admin)")}</span>
               </Button>
             )}
 
@@ -426,7 +422,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
               onClick={() => setShowResetModal(true)}
               icon={<KeyRound size={16} />}
             >
-              <span>Gửi liên kết đặt lại mật khẩu</span>
+              <span>{uiText("Gửi liên kết đặt lại mật khẩu")}</span>
             </Button>
           </div>
         </section>
@@ -435,21 +431,20 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* Role Grants History Table */}
       <section className="acc-audit-section" aria-labelledby="sec-roles-history">
         <h2 id="sec-roles-history" className="section-title">
-          Lịch sử cấp & thu hồi vai trò ({account.roles.length} bản ghi)
-        </h2>
+          {uiText("Lịch sử cấp & thu hồi vai trò (")}{account.roles.length} {uiText(" bản ghi)")}</h2>
         {account.roles.length === 0 ? (
-          <p className="empty-notice-text">Tài khoản này chưa được cấp vai trò nào.</p>
+          <p className="empty-notice-text">{uiText("Tài khoản này chưa được cấp vai trò nào.")}</p>
         ) : (
           <div className="audit-table-wrap">
-            <table className="npc-table" aria-label="Danh sách vai trò">
+            <table className="npc-table" aria-label={uiText("Danh sách vai trò")}>
               <thead>
                 <tr>
-                  <th scope="col">Vai trò</th>
-                  <th scope="col">Nguồn cấp</th>
-                  <th scope="col">Ngày cấp</th>
-                  <th scope="col">Trạng thái</th>
-                  <th scope="col">Lý do thu hồi</th>
-                  <th scope="col">Thao tác</th>
+                  <th scope="col">{uiText("Vai trò")}</th>
+                  <th scope="col">{uiText("Nguồn cấp")}</th>
+                  <th scope="col">{uiText("Ngày cấp")}</th>
+                  <th scope="col">{uiText("Trạng thái")}</th>
+                  <th scope="col">{uiText("Lý do thu hồi")}</th>
+                  <th scope="col">{uiText("Thao tác")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -461,10 +456,10 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                       <td>
                         <strong className={`role-pill role-pill-${grant.role}`}>
                           {grant.role === 'admin'
-                            ? 'Quản trị viên'
+                            ? uiText("Quản trị viên")
                             : grant.role === 'teacher'
-                            ? 'Giảng viên'
-                            : 'Sinh viên'}
+                            ? uiText("Giảng viên")
+                            : uiText("Sinh viên")}
                         </strong>
                       </td>
                       <td>
@@ -474,13 +469,13 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                       <td>
                         <Badge
                           variant={isGrantActive ? 'published' : 'archived'}
-                          label={isGrantActive ? 'Đang hiệu lực' : 'Đã thu hồi'}
+                          label={isGrantActive ? uiText("Đang hiệu lực") : uiText("Đã thu hồi")}
                         />
                       </td>
                       <td>
                         {grant.revoked_at ? (
                           <span className="text-xs text-muted">
-                            {formatDateVN(grant.revoked_at)} ({grant.revoke_reason || 'Không rõ'})
+                            {formatDateVN(grant.revoked_at)} ({grant.revoke_reason || uiText("Không rõ")})
                           </span>
                         ) : (
                           <span className="text-muted text-xs">—</span>
@@ -498,13 +493,12 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                             }}
                             icon={<Trash2 size={14} />}
                           >
-                            <span>Thu hồi</span>
+                            <span>{uiText("Thu hồi")}</span>
                           </Button>
                         )}
                         {isGrantActive && isSelf && isRoleAdmin && (
-                          <span className="text-xs text-muted" title="Không thể tự thu hồi quyền admin của chính mình">
-                            (Bảo vệ tự thân)
-                          </span>
+                          <span className="text-xs text-muted" title={uiText("Không thể tự thu hồi quyền admin của chính mình")}>
+                            {uiText("(Bảo vệ tự thân)")}</span>
                         )}
                       </td>
                     </tr>
@@ -519,21 +513,20 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* Role Requests History Table */}
       <section className="acc-audit-section" aria-labelledby="sec-requests-history">
         <h2 id="sec-requests-history" className="section-title">
-          Hàng đợi & Lịch sử yêu cầu vai trò ({account.role_requests.length} yêu cầu)
-        </h2>
+          {uiText("Hàng đợi & Lịch sử yêu cầu vai trò (")}{account.role_requests.length} {uiText(" yêu cầu)")}</h2>
         {account.role_requests.length === 0 ? (
-          <p className="empty-notice-text">Tài khoản chưa từng gửi yêu cầu vai trò nào.</p>
+          <p className="empty-notice-text">{uiText("Tài khoản chưa từng gửi yêu cầu vai trò nào.")}</p>
         ) : (
           <div className="audit-table-wrap">
-            <table className="npc-table" aria-label="Danh sách yêu cầu vai trò">
+            <table className="npc-table" aria-label={uiText("Danh sách yêu cầu vai trò")}>
               <thead>
                 <tr>
-                  <th scope="col">Vai trò yêu cầu</th>
-                  <th scope="col">Ngày gửi</th>
-                  <th scope="col">Trạng thái</th>
-                  <th scope="col">Ngày xét duyệt</th>
-                  <th scope="col">Ghi chú duyệt</th>
-                  <th scope="col">Thao tác</th>
+                  <th scope="col">{uiText("Vai trò yêu cầu")}</th>
+                  <th scope="col">{uiText("Ngày gửi")}</th>
+                  <th scope="col">{uiText("Trạng thái")}</th>
+                  <th scope="col">{uiText("Ngày xét duyệt")}</th>
+                  <th scope="col">{uiText("Ghi chú duyệt")}</th>
+                  <th scope="col">{uiText("Thao tác")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -542,9 +535,9 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                     <td>
                       <strong>
                         {req.role === 'teacher'
-                          ? 'Giảng viên'
+                          ? uiText("Giảng viên")
                           : req.role === 'student'
-                          ? 'Sinh viên'
+                          ? uiText("Sinh viên")
                           : req.role}
                       </strong>
                     </td>
@@ -560,12 +553,12 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                         }
                         label={
                           req.status === 'approved'
-                            ? 'Đã duyệt'
+                            ? uiText("Đã duyệt")
                             : req.status === 'pending'
-                            ? 'Chờ duyệt'
+                            ? uiText("Chờ duyệt")
                             : req.status === 'rejected'
-                            ? 'Đã từ chối'
-                            : 'Đã hủy'
+                            ? uiText("Đã từ chối")
+                            : uiText("Đã hủy")
                         }
                       />
                     </td>
@@ -585,7 +578,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                             }}
                             icon={<CheckCircle size={14} />}
                           >
-                            <span>Duyệt</span>
+                            <span>{uiText("Duyệt")}</span>
                           </Button>
                           <Button
                             variant="secondary"
@@ -596,7 +589,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                             }}
                             icon={<XCircle size={14} />}
                           >
-                            <span>Từ chối</span>
+                            <span>{uiText("Từ chối")}</span>
                           </Button>
                         </div>
                       )}
@@ -612,13 +605,13 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 1: LOCK / UNLOCK */}
       {showLockModal && (
         <Modal
-          title={account.is_active ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa tài khoản'}
+          title={account.is_active ? uiText("Xác nhận khóa tài khoản") : uiText("Xác nhận mở khóa tài khoản")}
           isOpen={showLockModal}
           onClose={() => setShowLockModal(false)}
         >
           <form onSubmit={handleToggleLockSubmit} className="modal-content-stack">
             <p>
-              Bạn chuẩn bị {account.is_active ? 'khóa' : 'mở khóa'} tài khoản người dùng{' '}
+              {uiText("Bạn chuẩn bị ")}{account.is_active ? uiText("khóa") : uiText("mở khóa")} {uiText(" tài khoản người dùng")}{' '}
               <strong>{account.display_name}</strong> ({account.email}).
             </p>
 
@@ -626,8 +619,7 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
               <div className="alert-warning-card">
                 <AlertTriangle size={18} />
                 <span>
-                  <strong>Lưu ý:</strong> Khi tài khoản bị khóa, tất cả các phiên đăng nhập đang hoạt động của người dùng sẽ lập tức bị thu hồi trên máy chủ.
-                </span>
+                  <strong>{uiText("Lưu ý:")}</strong> {uiText(" Khi tài khoản bị khóa, tất cả các phiên đăng nhập đang hoạt động của người dùng sẽ lập tức bị thu hồi trên máy chủ.")}</span>
               </div>
             )}
 
@@ -635,34 +627,31 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
               <div className="alert-danger-card">
                 <ShieldAlert size={18} />
                 <span>
-                  <strong>Yêu cầu xác thực lại (D02):</strong> Tài khoản này có vai trò Quản trị viên.
-                  Khóa tài khoản admin yêu cầu xác thực bằng mật khẩu hiện tại của bạn.
-                </span>
+                  <strong>{uiText("Yêu cầu xác thực lại (D02):")}</strong> {uiText(" Tài khoản này có vai trò Quản trị viên. Khóa tài khoản admin yêu cầu xác thực bằng mật khẩu hiện tại của bạn.")}</span>
               </div>
             )}
 
             {account.is_active && hasActiveAdminRole && (
               <TextField
                 id={lockPasswordId}
-                label="Mật khẩu của bạn"
+                label={uiText("Mật khẩu của bạn")}
                 type="password"
                 required
                 value={lockPassword}
                 onChange={(e) => setLockPassword(e.target.value)}
-                placeholder="Nhập mật khẩu quản trị viên để xác thực..."
+                placeholder={uiText("Nhập mật khẩu quản trị viên để xác thực...")}
               />
             )}
 
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowLockModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="submit"
                 variant={account.is_active ? 'danger' : 'primary'}
                 isLoading={isSubmittingLock}
               >
-                {account.is_active ? 'Xác nhận khóa tài khoản' : 'Xác nhận mở khóa'}
+                {account.is_active ? uiText("Xác nhận khóa tài khoản") : uiText("Xác nhận mở khóa")}
               </Button>
             </div>
           </form>
@@ -672,40 +661,37 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 2: GRANT ADMIN ROLE */}
       {showGrantAdminModal && (
         <Modal
-          title="Cấp vai trò Quản trị viên"
+          title={uiText("Cấp vai trò Quản trị viên")}
           isOpen={showGrantAdminModal}
           onClose={() => setShowGrantAdminModal(false)}
         >
           <form onSubmit={handleGrantAdminSubmit} className="modal-content-stack">
             <p>
-              Bạn chuẩn bị cấp quyền <strong>Quản trị viên (Admin)</strong> cho tài khoản{' '}
+              {uiText("Bạn chuẩn bị cấp quyền ")}<strong>{uiText("Quản trị viên (Admin)")}</strong> {uiText(" cho tài khoản")}{' '}
               <strong>{account.display_name}</strong> ({account.email}).
             </p>
 
             <div className="alert-danger-card">
               <ShieldAlert size={18} />
               <span>
-                <strong>Cảnh báo an ninh:</strong> Quản trị viên có toàn quyền cấu hình hệ thống, quản lý tài khoản và duyệt vai trò. Thao tác này yêu cầu xác thực bằng mật khẩu của bạn theo chính sách an ninh D02.
-              </span>
+                <strong>{uiText("Cảnh báo an ninh:")}</strong> {uiText(" Quản trị viên có toàn quyền cấu hình hệ thống, quản lý tài khoản và duyệt vai trò. Thao tác này yêu cầu xác thực bằng mật khẩu của bạn theo chính sách an ninh D02.")}</span>
             </div>
 
             <TextField
               id={grantPasswordId}
-              label="Mật khẩu của bạn để xác thực"
+              label={uiText("Mật khẩu của bạn để xác thực")}
               type="password"
               required
               value={grantPassword}
               onChange={(e) => setGrantPassword(e.target.value)}
-              placeholder="Nhập mật khẩu hiện tại của bạn..."
+              placeholder={uiText("Nhập mật khẩu hiện tại của bạn...")}
             />
 
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowGrantAdminModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="primary" isLoading={isSubmittingGrant}>
-                Xác nhận cấp quyền Quản trị viên
-              </Button>
+                {uiText("Xác nhận cấp quyền Quản trị viên")}</Button>
             </div>
           </form>
         </Modal>
@@ -714,58 +700,54 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 3: REVOKE ROLE */}
       {showRevokeModal && revokeTargetGrant && (
         <Modal
-          title="Xác nhận thu hồi vai trò"
+          title={uiText("Xác nhận thu hồi vai trò")}
           isOpen={showRevokeModal}
           onClose={() => setShowRevokeModal(false)}
         >
           <form onSubmit={handleRevokeRoleSubmit} className="modal-content-stack">
             <p>
-              Bạn chuẩn bị thu hồi vai trò{' '}
+              {uiText("Bạn chuẩn bị thu hồi vai trò")}{' '}
               <strong>
                 {revokeTargetGrant.role === 'admin'
-                  ? 'Quản trị viên'
+                  ? uiText("Quản trị viên")
                   : revokeTargetGrant.role === 'teacher'
-                  ? 'Giảng viên'
-                  : 'Sinh viên'}
+                  ? uiText("Giảng viên")
+                  : uiText("Sinh viên")}
               </strong>{' '}
-              của tài khoản <strong>{account.display_name}</strong>.
+              {uiText("của tài khoản ")}<strong>{account.display_name}</strong>.
             </p>
 
             <div className="alert-warning-card">
               <AlertTriangle size={18} />
               <span>
-                <strong>Thu hồi phiên tức thì:</strong> Sau khi thu hồi vai trò, phiên làm việc của người dùng này sẽ lập tức mất hiệu lực để bảo đảm phân quyền mới.
-              </span>
+                <strong>{uiText("Thu hồi phiên tức thì:")}</strong> {uiText(" Sau khi thu hồi vai trò, phiên làm việc của người dùng này sẽ lập tức mất hiệu lực để bảo đảm phân quyền mới.")}</span>
             </div>
 
             {revokeTargetGrant.role === 'admin' && (
               <div className="alert-danger-card">
                 <ShieldAlert size={18} />
                 <span>
-                  <strong>Chính sách Admin cuối cùng:</strong> Không thể thu hồi Quản trị viên hoạt động duy nhất của hệ thống. Thao tác yêu cầu xác thực bằng mật khẩu của bạn.
-                </span>
+                  <strong>{uiText("Chính sách Admin cuối cùng:")}</strong> {uiText(" Không thể thu hồi Quản trị viên hoạt động duy nhất của hệ thống. Thao tác yêu cầu xác thực bằng mật khẩu của bạn.")}</span>
               </div>
             )}
 
             {revokeTargetGrant.role === 'admin' && (
               <TextField
                 id={revokePasswordId}
-                label="Mật khẩu của bạn"
+                label={uiText("Mật khẩu của bạn")}
                 type="password"
                 required
                 value={revokePassword}
                 onChange={(e) => setRevokePassword(e.target.value)}
-                placeholder="Nhập mật khẩu hiện tại của bạn..."
+                placeholder={uiText("Nhập mật khẩu hiện tại của bạn...")}
               />
             )}
 
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowRevokeModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="danger" isLoading={isSubmittingRevoke}>
-                Xác nhận thu hồi vai trò
-              </Button>
+                {uiText("Xác nhận thu hồi vai trò")}</Button>
             </div>
           </form>
         </Modal>
@@ -774,35 +756,31 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 4: ADMIN PASSWORD RESET */}
       {showResetModal && (
         <Modal
-          title="Khởi tạo đặt lại mật khẩu người dùng"
+          title={uiText("Khởi tạo đặt lại mật khẩu người dùng")}
           isOpen={showResetModal}
           onClose={() => setShowResetModal(false)}
         >
           <div className="modal-content-stack">
             <p>
-              Gửi yêu cầu đặt lại mật khẩu cho tài khoản <strong>{account.display_name}</strong> ({account.email}).
+              {uiText("Gửi yêu cầu đặt lại mật khẩu cho tài khoản ")}<strong>{account.display_name}</strong> ({account.email}).
             </p>
 
             <div className="alert-warning-card">
               <KeyRound size={18} />
               <span>
-                <strong>Bảo mật mật mã:</strong> Hệ thống sẽ tự động khởi tạo token một lần dùng và chuyển cho hàng đợi phân phát email.
-                Tuyệt đối không có mật khẩu tạm thời hoặc token nào được hiển thị hay lưu trữ trên giao diện quản trị.
-              </span>
+                <strong>{uiText("Bảo mật mật mã:")}</strong> {uiText(" Hệ thống sẽ tự động khởi tạo token một lần dùng và chuyển cho hàng đợi phân phát email. Tuyệt đối không có mật khẩu tạm thời hoặc token nào được hiển thị hay lưu trữ trên giao diện quản trị.")}</span>
             </div>
 
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setShowResetModal(false)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="primary"
                 isLoading={isSubmittingReset}
                 onClick={handleResetSubmit}
               >
-                Gửi liên kết qua Email
-              </Button>
+                {uiText("Gửi liên kết qua Email")}</Button>
             </div>
           </div>
         </Modal>
@@ -811,34 +789,30 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 5: APPROVE TEACHER REQUEST */}
       {showApproveRequestModal && selectedRequest && (
         <Modal
-          title="Phê duyệt vai trò Giảng viên"
+          title={uiText("Phê duyệt vai trò Giảng viên")}
           isOpen={showApproveRequestModal}
           onClose={() => setShowApproveRequestModal(false)}
         >
           <div className="modal-content-stack">
             <p>
-              Phê duyệt yêu cầu vai trò Giảng viên cho tài khoản <strong>{account.display_name}</strong> ({account.email}).
+              {uiText("Phê duyệt yêu cầu vai trò Giảng viên cho tài khoản ")}<strong>{account.display_name}</strong> ({account.email}).
             </p>
             <p className="text-sm text-muted">
-              Hệ thống sẽ cấp vai trò Giảng viên (`teacher`) và cập nhật yêu cầu thành `approved`.
-              Các phiên đăng nhập cũ sẽ được làm mới để nhận quyền giảng viên ngay lập tức.
-            </p>
+              {uiText("Hệ thống sẽ cấp vai trò Giảng viên (`teacher`) và cập nhật yêu cầu thành `approved`. Các phiên đăng nhập cũ sẽ được làm mới để nhận quyền giảng viên ngay lập tức.")}</p>
             <div className="modal-actions-bar">
               <Button
                 type="button"
                 variant="secondary"
                 onClick={() => setShowApproveRequestModal(false)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="primary"
                 isLoading={isSubmittingRequestAction}
                 onClick={handleApproveTeacherRequest}
               >
-                Xác nhận phê duyệt
-              </Button>
+                {uiText("Xác nhận phê duyệt")}</Button>
             </div>
           </div>
         </Modal>
@@ -847,13 +821,13 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
       {/* MODAL 6: REJECT TEACHER REQUEST */}
       {showRejectRequestModal && selectedRequest && (
         <Modal
-          title="Từ chối yêu cầu vai trò Giảng viên"
+          title={uiText("Từ chối yêu cầu vai trò Giảng viên")}
           isOpen={showRejectRequestModal}
           onClose={() => setShowRejectRequestModal(false)}
         >
           <div className="modal-content-stack">
             <p>
-              Từ chối yêu cầu vai trò Giảng viên của tài khoản <strong>{account.display_name}</strong> ({account.email}).
+              {uiText("Từ chối yêu cầu vai trò Giảng viên của tài khoản ")}<strong>{account.display_name}</strong> ({account.email}).
             </p>
             <div className="modal-actions-bar">
               <Button
@@ -861,16 +835,14 @@ export const AdminAccountDetailPage: React.FC<AdminAccountDetailPageProps> = ({
                 variant="secondary"
                 onClick={() => setShowRejectRequestModal(false)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
                 isLoading={isSubmittingRequestAction}
                 onClick={handleRejectTeacherRequest}
               >
-                Xác nhận từ chối
-              </Button>
+                {uiText("Xác nhận từ chối")}</Button>
             </div>
           </div>
         </Modal>

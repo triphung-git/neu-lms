@@ -1,4 +1,3 @@
-
 from types import SimpleNamespace
 
 import pytest
@@ -13,10 +12,7 @@ from ai_assistant.evaluation_metrics import (
 
 
 def make_results(pages):
-    return [
-        SimpleNamespace(page_number=page)
-        for page in pages
-    ]
+    return [SimpleNamespace(page_number=page) for page in pages]
 
 
 def test_precision_at_5():

@@ -89,7 +89,7 @@ services:
     volumes:
       - clamav-data:/var/lib/clamav
 
-  file-worker:
+  file-worker: &file-worker-config
     profiles: [files]
     build:
       context: ./backend
@@ -97,6 +97,8 @@ services:
     command: ["celery", "-A", "config", "worker", "--loglevel=INFO", "--concurrency=2"]
     env_file: .env
     environment: &file-environment
+      EMAIL_HOST: mailpit
+      EMAIL_PORT: "1025"
       DJANGO_SETTINGS_MODULE: config.settings.local
       PGHOST: postgres
       PGPORT: "5432"
@@ -116,6 +118,14 @@ services:
         condition: service_started
       clamav:
         condition: service_started
+
+  ai-worker:
+    <<: *file-worker-config
+    command: ["celery", "-A", "config", "worker", "--loglevel=INFO", "--concurrency=1", "--queues=ai"]
+
+  notification-worker:
+    <<: *file-worker-config
+    command: ["celery", "-A", "config", "worker", "--loglevel=INFO", "--concurrency=1", "--queues=notifications"]
 
   file-scheduler:
     profiles: [files]

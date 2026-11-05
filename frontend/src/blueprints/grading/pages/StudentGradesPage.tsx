@@ -1,221 +1,225 @@
-import React, { useState, useMemo } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
-import { getLatestPublishedGrade } from '../domain/gradingPolicies';
-import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
-import { Badge } from '../../../shared/ui/Badge';
-import { SelectField } from '../../../shared/ui/TextField';
-import { EmptyState } from '../../../shared/ui/EmptyState';
-import { formatDateVN, formatScoreVN } from '../../../shared/kernel/formatting';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import {currentLocale} from '../../../shared/i18n/translate';
+import {uiText} from "../../../shared/i18n/translate";
+import { useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { apiClient } from '../../../api/client';
 import './StudentGradesPage.css';
 
-export const StudentGradesPage: React.FC = () => {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const { assignments, submissions, gradeRevisions, courses, memberships } = useDatabase();
-  const { currentUser } = useSession();
+type Row = {
+  assignment_id: string;
+  title: string;
+  course_id: string;
+  course_name: string;
+  course_code: string;
+  revision_number: number | null;
+  total_score: string;
+  grade: {
+    score: string;
+    feedback: string;
+    created_at: string;
+  } | null;
+};
 
-  const selectedCourseId = searchParams.get('mon') || 'all';
-  const [expandedRubrics, setExpandedRubrics] = useState<Record<string, boolean>>({});
-
-  // Student's enrolled courses
-  const myCourseIds = useMemo(() => {
-    return new Set(
-      memberships
-        .filter(m => m.userId === currentUser?.id && m.status === 'active')
-        .map(m => m.courseId)
-    );
-  }, [memberships, currentUser]);
-
-  const enrolledCourses = useMemo(() => {
-    return courses.filter(c => myCourseIds.has(c.id));
-  }, [courses, myCourseIds]);
-
-  // Target courses to display
-  const targetCourseIds = useMemo(() => {
-    if (selectedCourseId !== 'all') {
-      return myCourseIds.has(selectedCourseId) ? [selectedCourseId] : [];
-    }
-    return Array.from(myCourseIds);
-  }, [selectedCourseId, myCourseIds]);
-
-  // Published assignments for target courses
-  const targetAssignments = useMemo(() => {
-    const set = new Set(targetCourseIds);
-    return assignments.filter(a => set.has(a.courseId) && a.status === 'published');
-  }, [assignments, targetCourseIds]);
-
-  const handleSelectCourse = (courseId: string) => {
-    const next = new URLSearchParams(searchParams);
-    if (courseId === 'all') next.delete('mon');
-    else next.set('mon', courseId);
-    setSearchParams(next);
+type Listing = {
+  items: Row[];
+  pagination: {
+    page: number;
+    total_pages: number;
+    total_items: number;
+    has_next: boolean;
+    has_previous: boolean;
   };
+};
 
-  const toggleExpand = (subId: string) => {
-    setExpandedRubrics(prev => ({
-      ...prev,
-      [subId]: !prev[subId]
-    }));
-  };
+export function StudentGradesPage() {
+  const [params, setParams] = useSearchParams();
+  const courseId = params.get('mon') || '';
+
+  return (
+    <Grades
+      key={courseId}
+      courseId={courseId}
+      clearFilter={() => {
+        const next = new URLSearchParams(params);
+        next.delete('mon');
+        setParams(next);
+      }}
+    />
+  );
+}
+
+function Grades({
+  courseId,
+  clearFilter,
+}: {
+  courseId: string;
+  clearFilter: () => void;
+}) {
+  const [page, setPage] = useState(1);
+  const [data, setData] = useState<Listing | null>(null);
+  const [error, setError] = useState('');
+  const [reload, setReload] = useState(0);
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setData(null);
+    setError('');
+
+    apiClient
+      .untypedRequest<Listing>('/api/v1/me/grades', {
+        params: {
+          page,
+          ...(courseId ? { course_id: courseId } : {}),
+        },
+        signal: controller.signal,
+      })
+      .then(result => {
+        if (!controller.signal.aborted) {
+          setData(result);
+        }
+      })
+      .catch(err => {
+        if (!controller.signal.aborted) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : uiText("Không tải được bảng điểm."),
+          );
+        }
+      });
+
+    return () => controller.abort();
+  }, [courseId, page, reload]);
 
   return (
     <div className="student-grades-page">
-      <div className="page-header">
-        <Breadcrumb
-          items={[
-            { label: 'Trang chủ', path: '/sv' },
-            { label: 'Bảng điểm của tôi' }
-          ]}
-        />
-        <h1 className="page-heading">Bảng điểm học tập của tôi</h1>
-        <p className="page-subheading">
-          Theo dõi kết quả đánh giá chi tiết và nhận xét từ giảng viên cho các bài tập đã nộp.
-        </p>
+      <h1>{uiText("Điểm của tôi")}</h1>
+
+      <p>
+        {uiText("Hiển thị kết quả đã công bố của lần nộp mới nhất ở mỗi bài tập.")}</p>
+
+      <div className="grades-toolbar">
+        <button
+          type="button"
+          onClick={() => setReload(value => value + 1)}
+        >
+          {uiText("Cập nhật bảng điểm")}</button>
+
+        {courseId && (
+          <button type="button" onClick={clearFilter}>
+            {uiText("Xem tất cả môn")}</button>
+        )}
       </div>
 
-      <div className="grades-rule-notice">
-        <Info size={18} />
-        <span>
-          <strong>Lưu ý:</strong> Bảng điểm chỉ hiển thị các bài tập đã được Giảng viên chấm và công bố chính thức. Điểm bài tập được hiển thị riêng biệt theo từng học phần.
-        </span>
-      </div>
+      {error && <p role="alert">{error}</p>}
 
-      {/* Filter by course */}
-      <div className="grades-filter-card">
-        <div className="filter-select-col">
-          <SelectField
-            label="Chọn môn học để xem điểm"
-            value={selectedCourseId}
-            onChange={e => handleSelectCourse(e.target.value)}
-            options={[
-              { value: 'all', label: 'Tất cả các môn đang học' },
-              ...enrolledCourses.map(c => ({ value: c.id, label: `${c.code} — ${c.name}` }))
-            ]}
-          />
-        </div>
-      </div>
+      {!data && !error && (
+        <p role="status">{uiText("Đang tải bảng điểm…")}</p>
+      )}
 
-      {targetAssignments.length === 0 ? (
-        <EmptyState
-          title="Chưa có dữ liệu bài tập"
-          description="Chưa có bài tập nào được công bố trong học phần đã chọn."
-        />
-      ) : (
-        <div className="grades-table-card">
-          <table className="npc-table">
-            <thead>
-              <tr>
-                <th>Môn học</th>
-                <th>Bài tập</th>
-                <th>Hạn nộp</th>
-                <th>Điểm công bố</th>
-                <th>Trạng thái</th>
-                <th>Chi tiết đánh giá</th>
-              </tr>
-            </thead>
-            <tbody>
-              {targetAssignments.map(ass => {
-                const c = courses.find(crs => crs.id === ass.courseId);
-                const sub = submissions.find(
-                  s => s.assignmentId === ass.id && s.studentId === currentUser?.id
-                );
-                const grade = sub ? getLatestPublishedGrade(gradeRevisions, sub.id) : null;
-                const isGraded = !!grade;
-                const isExpanded = sub ? !!expandedRubrics[sub.id] : false;
+      {data && (
+        data.items.length === 0 ? (
+          <p>
+            {uiText("Chưa có bài tập được công bố trong các môn đang tham gia.")}</p>
+        ) : (
+          <>
+            <p>{data.pagination.total_items} {uiText(" bài tập")}</p>
 
-                return (
-                  <React.Fragment key={ass.id}>
-                    <tr>
-                      <td>
-                        <span className="course-code-tag">{c?.code}</span>
-                      </td>
-                      <td>
-                        <Link to={`/sv/bai-tap/${ass.id}`} className="ass-title-link">
-                          <strong>{ass.title}</strong>
+            <div className="grades-table-card" role="region" aria-label={uiText("Bảng điểm")} tabIndex={0}>
+              <table
+                style={{
+                  width: '100%',
+                  borderCollapse: 'collapse',
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th>{uiText("Môn học")}</th>
+                    <th>{uiText("Bài tập")}</th>
+                    <th>{uiText("Lần nộp")}</th>
+                    <th>{uiText("Điểm")}</th>
+                    <th>{uiText("Nhận xét")}</th>
+                    <th>{uiText("Công bố lúc")}</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {data.items.map(row => (
+                    <tr key={row.assignment_id}>
+                      <td style={{ padding: 12 }}>
+                        <Link to={`/sv/diem?mon=${row.course_id}`}>
+                          {row.course_code} · {row.course_name}
                         </Link>
                       </td>
-                      <td>{formatDateVN(ass.dueAt)}</td>
-                      <td>
-                        {isGraded ? (
-                          <strong className="published-score-num">
-                            {formatScoreVN(grade.total)} / {ass.maxScore}
-                          </strong>
-                        ) : sub ? (
-                          <span className="text-muted">Đang chấm điểm</span>
-                        ) : (
-                          <span className="text-muted">—</span>
-                        )}
+
+                      <td style={{ padding: 12 }}>
+                        <Link
+                          to={
+                            `/sv/mon-hoc/${row.course_id}` +
+                            `/bai-tap/${row.assignment_id}`
+                          }
+                        >
+                          {row.title}
+                        </Link>
                       </td>
+
                       <td>
-                        {isGraded ? (
-                          <Badge variant="published" label="Đã công bố" />
-                        ) : sub ? (
-                          <Badge variant="submitted" label="Đã nộp bài" />
-                        ) : (
-                          <Badge variant="pending" label="Chưa nộp" />
-                        )}
+                        {row.revision_number ?? uiText("Chưa nộp")}
                       </td>
+
                       <td>
-                        {isGraded ? (
-                          <button
-                            type="button"
-                            className="expand-rubric-btn"
-                            onClick={() => sub && toggleExpand(sub.id)}
-                            aria-expanded={isExpanded}
-                          >
-                            <span>{isExpanded ? 'Thu gọn' : 'Xem tiêu chí & Nhận xét'}</span>
-                            {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                          </button>
-                        ) : (
-                          <Link to={`/sv/bai-tap/${ass.id}`} className="view-ass-link">
-                            Xem đề bài →
-                          </Link>
-                        )}
+                        {row.grade
+                          ? `${row.grade.score}/${row.total_score}`
+                          : row.revision_number === null
+                            ? '—'
+                            : uiText("Chưa công bố điểm")}
+                      </td>
+
+                      <td
+                        style={{
+                          padding: 12,
+                          whiteSpace: 'pre-wrap',
+                        }}
+                      >
+                        {row.grade?.feedback || '—'}
+                      </td>
+
+                      <td>
+                        {row.grade
+                          ? new Date(
+                              row.grade.created_at,
+                            ).toLocaleString(currentLocale())
+                          : '—'}
                       </td>
                     </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
-                    {/* Expandable Rubric Details Row */}
-                    {isGraded && isExpanded && (
-                      <tr className="expanded-rubric-row">
-                        <td colSpan={6}>
-                          <div className="rubric-breakdown-box">
-                            <h4 className="breakdown-title">Bảng điểm chi tiết theo tiêu chí Rubric:</h4>
-                            <div className="rubric-criteria-grid">
-                              {ass.rubricCriteria.map(cr => {
-                                const crScore = grade.criterionScores.find(cs => cs.criterionId === cr.id)?.score ?? 0;
-                                return (
-                                  <div key={cr.id} className="rubric-criteria-card">
-                                    <div className="crit-header">
-                                      <strong>{cr.title}</strong>
-                                      <span className="crit-points">
-                                        {formatScoreVN(crScore)} / {formatScoreVN(cr.maxScore)} đ
-                                      </span>
-                                    </div>
-                                    <p className="crit-desc">{cr.description}</p>
-                                  </div>
-                                );
-                              })}
-                            </div>
+            <nav aria-label={uiText("Phân trang bảng điểm")}>
+              <button
+                type="button"
+                disabled={!data.pagination.has_previous}
+                onClick={() => setPage(value => value - 1)}
+              >
+                {uiText("Trước")}</button>
 
-                            {grade.feedback && (
-                              <div className="teacher-feedback-block">
-                                <strong>Nhận xét từ Giảng viên:</strong>
-                                <p>{grade.feedback}</p>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </React.Fragment>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+              {' '}Trang {data.pagination.page}/
+              {data.pagination.total_pages}{' '}
+
+              <button
+                type="button"
+                disabled={!data.pagination.has_next}
+                onClick={() => setPage(value => value + 1)}
+              >
+                Sau
+              </button>
+            </nav>
+          </>
+        )
       )}
     </div>
   );
-};
+}

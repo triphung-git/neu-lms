@@ -1,3 +1,8 @@
+import { aiAssistantService } from '../api/aiAssistantService';
+vi.mock('../app/providers/SessionContext', async importOriginal => {
+  const actual = await importOriginal<typeof import('../app/providers/SessionContext')>();
+  return { ...actual, useSession: () => ({ currentUser: { id: 'student-material-test' } }) };
+});
 import React from 'react';
 import '@testing-library/jest-dom';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
@@ -174,6 +179,7 @@ const sampleSearchResults: PaginatedMaterialSearchResult = {
 
 describe('B09-06: Student Materials UI Integration Suite', () => {
   beforeEach(() => {
+    vi.spyOn(aiAssistantService, "history").mockResolvedValue([]);
     vi.restoreAllMocks();
   });
 
@@ -215,7 +221,15 @@ describe('B09-06: Student Materials UI Integration Suite', () => {
 
       // Verify honest B14 notice
       expect(screen.getByText('Trợ lý học tập AI')).toBeInTheDocument();
-      expect(screen.getByText('Phân hệ B14 đang phát triển')).toBeInTheDocument();
+      expect(
+        screen.getByText('Hỏi đáp từ học liệu đã công bố trong môn.'),
+      ).toBeInTheDocument();
+      expect(
+        screen.getByRole('textbox', {
+          name: 'Câu hỏi gửi tới trợ lý AI',
+        }),
+      ).toBeInTheDocument();
+
     });
 
     it('1.2 enforces preview policy: blocks preview when preview_url is null', async () => {
@@ -578,3 +592,4 @@ describe('B09-06: Student Materials UI Integration Suite', () => {
     });
   });
 });
+

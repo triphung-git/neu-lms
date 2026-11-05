@@ -537,3 +537,193 @@
   justify-content: flex-start;
   align-items: center;
 }
+
+.dash-recent-grades ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.dash-recent-grades li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 6px 12px;
+  padding: 12px 0;
+}
+
+.dash-recent-grades li + li {
+  border-top: 1px solid var(--border);
+}
+
+.dash-recent-grades li a {
+  color: var(--focus);
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+}
+
+.dash-recent-grades li strong {
+  color: var(--success);
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-recent-grades small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+.dash-recent-grades [role="alert"] {
+  color: var(--danger);
+}
+
+.dash-recent-grades button {
+  min-height: 44px;
+  padding: 8px 12px;
+}
+
+.dash-upcoming ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-upcoming li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.dash-upcoming li + li {
+  border-top: 1px solid var(--border);
+}
+
+.dash-upcoming li a {
+  color: var(--focus);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.dash-upcoming time { font-variant-numeric: tabular-nums; }
+.dash-upcoming [role="alert"] { color: var(--danger); }
+
+.teacher-pending-grades .metric-number {
+  font-variant-numeric: tabular-nums;
+}
+
+.teacher-grading-queue ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.teacher-grading-queue li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.teacher-grading-queue li + li {
+  border-top: 1px solid var(--border);
+}
+
+.teacher-grading-queue li a {
+  color: var(--focus);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.teacher-grading-queue small {
+  color: var(--muted);
+}
+
+.teacher-material-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: 10px;
+  margin: 12px 0 0;
+}
+
+.teacher-material-stats > div {
+  padding: 12px;
+  background: var(--surface-soft);
+  border-radius: 10px;
+}
+
+.teacher-material-stats dt {
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.teacher-material-stats dd {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.admin-overview-error {
+  grid-column: span 2;
+  color: var(--danger);
+}
+
+.admin-overview-error button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+@media (max-width: 640px) {
+  .admin-overview-error {
+    grid-column: 1 / -1;
+  }
+}
+
+.admin-recent-activity .audit-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-recent-activity table {
+  min-width: 36rem;
+}
+
+.admin-recent-activity button {
+  margin-inline-start: auto;
+  padding: 8px 12px;
+  min-height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.admin-recent-activity [role="alert"] {
+  color: var(--danger);
+}
+
+.admin-approval-card:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+.admin-file-limits dl {
+  display: grid;
+  gap: 8px;
+  margin: 12px 0;
+}
+
+.admin-file-limits dl > div {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  padding: 8px;
+  background: var(--surface-soft);
+}
+
+.admin-file-limits dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.admin-file-limits [role="alert"] {
+  color: var(--danger);
+}

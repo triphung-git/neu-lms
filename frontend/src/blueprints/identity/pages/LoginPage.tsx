@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
@@ -6,8 +7,10 @@ import { Button } from '../../../shared/ui/Button';
 import { Eye, EyeOff, LogIn, ShieldAlert, KeyRound } from 'lucide-react';
 import { getSafeReturnTo, getRoleDashboardPath } from '../../../shared/lib/safeNavigation';
 import './LoginPage.css';
+import { useLanguage } from '../../learning/i18n';
 
 export const LoginPage: React.FC = () => {
+  const { t } = useLanguage();
   const { login } = useSession();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -22,9 +25,9 @@ export const LoginPage: React.FC = () => {
   const [passwordError, setPasswordError] = useState('');
   const [errorMessage, setErrorMessage] = useState(
     errorParam === 'locked'
-      ? 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.'
+      ? uiText("Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.")
       : errorParam === 'expired'
-      ? 'Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.'
+      ? uiText("Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.")
       : ''
   );
 
@@ -36,11 +39,11 @@ export const LoginPage: React.FC = () => {
 
     const trimmedEmail = email.trim();
     if (!trimmedEmail) {
-      setEmailError('Vui lòng nhập địa chỉ email.');
+      setEmailError(t('Vui lòng nhập địa chỉ email.', 'Please enter your email address.'));
       return;
     }
     if (!password) {
-      setPasswordError('Vui lòng nhập mật khẩu.');
+      setPasswordError(t('Vui lòng nhập mật khẩu.', 'Please enter your password.'));
       return;
     }
 
@@ -64,19 +67,19 @@ export const LoginPage: React.FC = () => {
           navigate('/ho-so');
         }
       } else {
-        setErrorMessage(res.message || 'Đăng nhập không thành công.');
+        setErrorMessage(res.message || uiText("Đăng nhập không thành công."));
       }
     } catch {
       setIsLoading(false);
-      setErrorMessage('Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng.');
+      setErrorMessage(uiText("Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng."));
     }
   };
 
   return (
     <div className="login-page">
       <div className="login-header">
-        <h1 className="login-title">Đăng nhập tài khoản</h1>
-        <p className="login-subtitle">Hệ thống Quản lý Môn học & Học liệu số Đại học</p>
+        <h1 className="login-title">{t('Đăng nhập tài khoản', 'Sign in')}</h1>
+        <p className="login-subtitle">{t('Hệ thống Quản lý Môn học & Học liệu số Đại học', 'University learning management system')}</p>
       </div>
 
       {errorMessage && (
@@ -89,7 +92,7 @@ export const LoginPage: React.FC = () => {
       <form onSubmit={handleSubmit} className="login-form" noValidate>
         <TextField
           id="login-email"
-          label="Địa chỉ email trường cấp"
+          label={t('Địa chỉ email trường cấp', 'University email address')}
           type="email"
           name="email"
           autoComplete="email"
@@ -108,7 +111,7 @@ export const LoginPage: React.FC = () => {
         <div className="password-field-wrapper">
           <TextField
             id="login-password"
-            label="Mật khẩu"
+            label={t('Mật khẩu', 'Password')}
             type={showPassword ? 'text' : 'password'}
             name="password"
             autoComplete="current-password"
@@ -118,7 +121,7 @@ export const LoginPage: React.FC = () => {
               if (passwordError) setPasswordError('');
               if (errorMessage) setErrorMessage('');
             }}
-            placeholder="Nhập mật khẩu của bạn"
+            placeholder={t('Nhập mật khẩu của bạn', 'Enter your password')}
             error={passwordError}
             required
             disabled={isLoading}
@@ -127,7 +130,7 @@ export const LoginPage: React.FC = () => {
             type="button"
             className="toggle-password-btn"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-label={showPassword ? t('Ẩn mật khẩu', 'Hide password') : t('Hiện mật khẩu', 'Show password')}
             tabIndex={0}
           >
             {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
@@ -137,7 +140,7 @@ export const LoginPage: React.FC = () => {
         <div className="login-form-options">
           <Link to="/quen-mat-khau" className="forgot-password-link">
             <KeyRound size={14} aria-hidden="true" />
-            <span>Quên mật khẩu?</span>
+            <span>{t('Quên mật khẩu?', 'Forgot password?')}</span>
           </Link>
         </div>
 
@@ -151,14 +154,14 @@ export const LoginPage: React.FC = () => {
           icon={<LogIn size={18} />}
           className="login-submit-btn"
         >
-          {isLoading ? 'Đang xác thực...' : 'Đăng nhập'}
+          {isLoading ? t('Đang xác thực...', 'Signing in…') : t('Đăng nhập', 'Sign in')}
         </Button>
       </form>
 
       <div className="login-extra-links">
-        <span>Chưa có tài khoản?</span>{' '}
+        <span>{t('Chưa có tài khoản?', 'New here?')}</span>{' '}
         <Link to="/dang-ky" className="register-link">
-          Thông tin đăng ký tài khoản
+          {t('Thông tin đăng ký tài khoản', 'Account registration')}
         </Link>
       </div>
     </div>

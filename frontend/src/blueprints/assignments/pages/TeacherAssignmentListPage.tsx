@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useOutletContext, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -87,7 +88,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
     const timer = setTimeout(() => {
       void coursesService.getCourseMembers(monId, { search: studentSearch, status: 'active', page_size: 100 })
         .then(data => { if (!cancelled) { setWindowMembers(data.items); setMemberSearchError(''); } })
-        .catch(() => { if (!cancelled) setMemberSearchError('Không thể tải danh sách sinh viên. Hãy thử tìm lại.'); });
+        .catch(() => { if (!cancelled) setMemberSearchError(uiText("Không thể tải danh sách sinh viên. Hãy thử tìm lại.")); });
     }, 250);
     return () => { cancelled = true; clearTimeout(timer); };
   }, [monId, targetForReopen, windowTargetType, studentSearch]);
@@ -172,7 +173,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
       setTotalPages(res.pagination.total_pages);
     } catch (err) {
       if (seq !== loadSequence.current) return;
-      setFetchError(err instanceof Error ? err.message : 'Không thể tải danh sách bài tập.');
+      setFetchError(err instanceof Error ? err.message : uiText("Không thể tải danh sách bài tập."));
       setAssignments([]);
     } finally {
       if (seq === loadSequence.current) {
@@ -233,16 +234,16 @@ export const TeacherAssignmentListPage: React.FC = () => {
     try {
       await assignmentsService.closeAssignment(monId, targetToClose.id, {
         close_type: 'manual_close',
-        reason: closeReason.trim() || 'Giảng viên chủ động đóng nhận bài',
+        reason: closeReason.trim() || uiText("Giảng viên chủ động đóng nhận bài"),
         target_type: 'all',
         scope: 'all_actions',
       });
-      notifySuccess(`Đã đóng nhận bài cho bài tập "${targetToClose.title}".`);
+      notifySuccess(uiText("Đã đóng nhận bài cho bài tập \"{0}\".",[targetToClose.title]));
       setTargetToClose(null);
       setCloseReason('');
       void loadAssignments();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Lỗi khi đóng nhận bài tập.');
+      notifyError(err instanceof Error ? err.message : uiText("Lỗi khi đóng nhận bài tập."));
     } finally {
       setIsClosing(false);
     }
@@ -254,14 +255,14 @@ export const TeacherAssignmentListPage: React.FC = () => {
     try {
       await assignmentsService.reopenAssignment(monId, ass.id, {
         close_type: 'reopen',
-        reason: 'Giảng viên mở lại toàn thể',
+        reason: uiText("Giảng viên mở lại toàn thể"),
         target_type: 'all',
         scope: 'all_actions',
       });
-      notifySuccess(`Đã mở lại cổng nhận bài cho bài tập "${ass.title}".`);
+      notifySuccess(uiText("Đã mở lại cổng nhận bài cho bài tập \"{0}\".",[ass.title]));
       void loadAssignments();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Lỗi khi mở lại bài tập.');
+      notifyError(err instanceof Error ? err.message : uiText("Lỗi khi mở lại bài tập."));
     }
   };
 
@@ -285,7 +286,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
       const windows = await assignmentsService.listReopenWindows(monId, ass.id);
       setReopenWindows(windows);
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Không thể tải danh sách cửa sổ mở lại.');
+      notifyError(err instanceof Error ? err.message : uiText("Không thể tải danh sách cửa sổ mở lại."));
       setReopenWindows([]);
     } finally {
       setReopenWindowsLoading(false);
@@ -298,12 +299,12 @@ export const TeacherAssignmentListPage: React.FC = () => {
     if (!monId || !targetForReopen) return;
 
     if (!windowEndDate) {
-      notifyError('Vui lòng chọn ngày kết thúc cửa sổ mở lại.');
+      notifyError(uiText("Vui lòng chọn ngày kết thúc cửa sổ mở lại."));
       return;
     }
 
     if (windowTargetType === 'student' && !windowStudentId.trim()) {
-      notifyError('Vui lòng nhập mã sinh viên được cấp quyền nộp lại.');
+      notifyError(uiText("Vui lòng nhập mã sinh viên được cấp quyền nộp lại."));
       return;
     }
 
@@ -315,17 +316,17 @@ export const TeacherAssignmentListPage: React.FC = () => {
         student_id: windowTargetType === 'student' ? windowStudentId.trim() : null,
         scope: windowScope,
         end_at: endAtIso,
-        reason: windowReason.trim() || 'Giảng viên cấp cửa sổ nộp bài ngoại lệ',
+        reason: windowReason.trim() || uiText("Giảng viên cấp cửa sổ nộp bài ngoại lệ"),
       });
 
-      notifySuccess('Đã tạo cửa sổ mở lại thành công.');
+      notifySuccess(uiText("Đã tạo cửa sổ mở lại thành công."));
       // Refresh windows list
       const updated = await assignmentsService.listReopenWindows(monId, targetForReopen.id);
       setReopenWindows(updated);
       setWindowReason('');
       void loadAssignments();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Lỗi tạo cửa sổ mở lại.');
+      notifyError(err instanceof Error ? err.message : uiText("Lỗi tạo cửa sổ mở lại."));
     } finally {
       setIsCreatingWindow(false);
     }
@@ -336,12 +337,12 @@ export const TeacherAssignmentListPage: React.FC = () => {
     if (!monId || !targetForReopen) return;
     try {
       await assignmentsService.revokeReopenWindow(monId, targetForReopen.id, windowId);
-      notifySuccess('Đã hủy bỏ cửa sổ mở lại.');
+      notifySuccess(uiText("Đã hủy bỏ cửa sổ mở lại."));
       const updated = await assignmentsService.listReopenWindows(monId, targetForReopen.id);
       setReopenWindows(updated);
       void loadAssignments();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Lỗi hủy cửa sổ mở lại.');
+      notifyError(err instanceof Error ? err.message : uiText("Lỗi hủy cửa sổ mở lại."));
     }
   };
 
@@ -357,12 +358,11 @@ export const TeacherAssignmentListPage: React.FC = () => {
     return (
       <div className="teacher-ass-container">
         <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại trên hệ thống hoặc bạn không có quyền truy cập."
+          title={uiText("Không tìm thấy môn học")}
+          description={uiText("Môn học không tồn tại trên hệ thống hoặc bạn không có quyền truy cập.")}
           action={
             <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
+              {uiText("Về danh sách môn học")}</Button>
           }
         />
       </div>
@@ -375,15 +375,15 @@ export const TeacherAssignmentListPage: React.FC = () => {
         <div>
           <Breadcrumb
             items={[
-              { label: 'Bàn làm việc', path: '/gv' },
+              { label: uiText("Bàn làm việc"), path: '/gv' },
               { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-              { label: 'Quản lý bài tập' },
+              { label: uiText("Quản lý bài tập") },
             ]}
           />
-          <h1 className="page-main-heading">Bài tập & Đề thi học phần</h1>
+          <h1 className="page-main-heading">{uiText("Bài tập & Đề thi học phần")}</h1>
+<Link to={`/gv/hoc-tap?course=${monId}&tab=downloads`}>{uiText("Log tải tài liệu / Download log")}</Link>
           <p className="page-subtitle">
-            Thiết lập đề bài, tiêu chí rubric chấm điểm và quản lý tiến độ nộp bài của sinh viên.
-          </p>
+            {uiText("Thiết lập đề bài, tiêu chí rubric chấm điểm và quản lý tiến độ nộp bài của sinh viên.")}</p>
         </div>
 
         {!isArchived && (
@@ -393,7 +393,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
             data-testid="btn-create-assignment"
           >
             <Plus size={18} />
-            <span>Soạn bài tập mới</span>
+            <span>{uiText("Soạn bài tập mới")}</span>
           </Link>
         )}
       </div>
@@ -402,8 +402,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
         <div className="archived-warning-alert" role="alert">
           <AlertTriangle size={20} />
           <span>
-            Môn học đã lưu trữ: Toàn bộ bài tập ở trạng thái chỉ đọc. Không thể soạn bài mới hoặc điều chỉnh tiêu chí.
-          </span>
+            {uiText("Môn học đã lưu trữ: Toàn bộ bài tập ở trạng thái chỉ đọc. Không thể soạn bài mới hoặc điều chỉnh tiêu chí.")}</span>
         </div>
       )}
 
@@ -415,10 +414,10 @@ export const TeacherAssignmentListPage: React.FC = () => {
             <input
               type="text"
               className="search-input"
-              placeholder="Tìm kiếm theo tiêu đề bài tập..."
+              placeholder={uiText("Tìm kiếm theo tiêu đề bài tập...")}
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              aria-label="Tìm kiếm bài tập"
+              aria-label={uiText("Tìm kiếm bài tập")}
             />
             {searchInput && (
               <button
@@ -431,27 +430,24 @@ export const TeacherAssignmentListPage: React.FC = () => {
                   setSearchParams(next);
                 }}
               >
-                ×
-              </button>
+                {uiText("×")}</button>
             )}
           </div>
           <Button type="submit" variant="secondary" className="search-btn">
-            Tìm
-          </Button>
+            {uiText("Tìm")}</Button>
         </form>
 
         {chapters.length > 0 && (
           <div className="chapter-filter-wrap">
             <label htmlFor="chapter-select" className="filter-label">
-              Chương:
-            </label>
+              {uiText("Chương:")}</label>
             <select
               id="chapter-select"
               className="chapter-select"
               value={chapterParam}
               onChange={(e) => handleSelectChapter(e.target.value)}
             >
-              <option value="all">Tất cả các chương</option>
+              <option value="all">{uiText("Tất cả các chương")}</option>
               {chapters.map((ch) => (
                 <option key={ch.id} value={ch.id}>
                   {ch.title}
@@ -471,7 +467,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'all'}
         >
-          <span>Tất cả</span>
+          <span>{uiText("Tất cả")}</span>
           {activeTab === 'all' && <span className="count-chip">{totalCount}</span>}
         </button>
         <button
@@ -481,7 +477,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'published'}
         >
-          <span>Đang mở</span>
+          <span>{uiText("Đang mở")}</span>
           {activeTab === 'published' && <span className="count-chip">{totalCount}</span>}
         </button>
         <button
@@ -491,7 +487,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'draft'}
         >
-          <span>Bản nháp</span>
+          <span>{uiText("Bản nháp")}</span>
           {activeTab === 'draft' && <span className="count-chip">{totalCount}</span>}
         </button>
         <button
@@ -501,7 +497,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
           role="tab"
           aria-selected={activeTab === 'closed'}
         >
-          <span>Đã đóng nộp</span>
+          <span>{uiText("Đã đóng nộp")}</span>
           {activeTab === 'closed' && <span className="count-chip">{totalCount}</span>}
         </button>
       </div>
@@ -520,17 +516,17 @@ export const TeacherAssignmentListPage: React.FC = () => {
         </div>
       ) : assignments.length === 0 ? (
         <EmptyState
-          title="Chưa có bài tập"
+          title={uiText("Chưa có bài tập")}
           description={
             searchQueryParam
-              ? `Không tìm thấy bài tập nào phù hợp với từ khóa "${searchQueryParam}".`
+              ? uiText("Không tìm thấy bài tập nào phù hợp với từ khóa \"{0}\".",[searchQueryParam])
               : activeTab === 'draft'
-                ? 'Không có bài tập nào ở trạng thái bản nháp.'
+                ? uiText("Không có bài tập nào ở trạng thái bản nháp.")
                 : activeTab === 'published'
-                  ? 'Chưa có bài tập nào đang mở thu nhận bài.'
+                  ? uiText("Chưa có bài tập nào đang mở thu nhận bài.")
                   : activeTab === 'closed'
-                    ? 'Chưa có bài tập nào bị đóng cổng nhận bài.'
-                    : 'Môn học này hiện chưa có bài tập nào được tạo.'
+                    ? uiText("Chưa có bài tập nào bị đóng cổng nhận bài.")
+                    : uiText("Môn học này hiện chưa có bài tập nào được tạo.")
           }
           action={
             !isArchived ? (
@@ -538,8 +534,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                 variant="primary"
                 onClick={() => navigate(`/gv/mon-hoc/${course.id}/bai-tap/soan`)}
               >
-                Soạn bài tập đầu tiên
-              </Button>
+                {uiText("Soạn bài tập đầu tiên")}</Button>
             ) : undefined
           }
         />
@@ -548,13 +543,13 @@ export const TeacherAssignmentListPage: React.FC = () => {
           <table className="npc-table" data-testid="teacher-assignments-table">
             <thead>
               <tr>
-                <th>Tiêu đề bài tập</th>
-                <th>Hạn nộp</th>
-                <th>Nộp muộn</th>
-                <th>Đã nộp</th>
-                <th>Chờ chấm</th>
-                <th>Trạng thái</th>
-                <th>Thao tác</th>
+                <th>{uiText("Tiêu đề bài tập")}</th>
+                <th>{uiText("Hạn nộp")}</th>
+                <th>{uiText("Nộp muộn")}</th>
+                <th>{uiText("Đã nộp")}</th>
+                <th>{uiText("Tiến độ công bố điểm")}</th>
+                <th>{uiText("Trạng thái")}</th>
+                <th>{uiText("Thao tác")}</th>
               </tr>
             </thead>
             <tbody>
@@ -578,29 +573,41 @@ export const TeacherAssignmentListPage: React.FC = () => {
                         <strong>{ass.title}</strong>
                       </Link>
                       <div className="ass-subtext">
-                        Thang điểm: {ass.total_score} đ ({ass.rubric_count} tiêu chí
-                        {ass.attachment_count > 0 ? ` • ${ass.attachment_count} tệp đính kèm` : ''})
+                        {uiText("Thang điểm: ")}{ass.total_score} {uiText(" đ (")}{ass.rubric_count} {uiText(" tiêu chí")}{ass.attachment_count > 0 ? uiText(" • {0} tệp đính kèm",[ass.attachment_count]) : ''})
                       </div>
                     </td>
                     <td>{formatDateVN(ass.due_at)}</td>
                     <td>
                       {ass.allow_late ? (
-                        <span className="badge-allow-late">Cho phép</span>
+                        <span className="badge-allow-late">{uiText("Cho phép")}</span>
                       ) : (
-                        <span className="text-muted">Khóa</span>
+                        <span className="text-muted">{uiText("Khóa")}</span>
                       )}
                     </td>
                     <td>
-                      <span className="metric-count">{ass.submission_count} bài</span>
+                      <span className="metric-count">{ass.submission_count} {uiText(" bài")}</span>
                     </td>
                     <td>
-                      {ass.submission_count - ass.graded_count > 0 ? (
-                        <strong className="pending-alert-text">
-                          {ass.submission_count - ass.graded_count} bài chờ chấm
-                        </strong>
-                      ) : (
-                        <span className="text-muted">0</span>
-                      )}
+                      {ass.submission_count > 0 ? (
+                        <div className="assignment-grade-progress">
+                          <span>
+                            {ass.graded_count}/{ass.submission_count} {uiText(" đã công bố")}</span>
+                          
+                          <progress
+                          aria-label={uiText("Tiến độ công bố điểm: {0}",[ass.title])}
+                          value={ass.graded_count}
+                          max={ass.submission_count}
+                          />
+                          
+                          <small>
+                            {ass.graded_count === ass.submission_count
+                            ? uiText("Đã công bố đủ")
+                            : uiText("{0} chờ công bố",[ass.submission_count - ass.graded_count])}
+                            </small>
+                            </div>
+                            ) : (
+                            <span className="text-muted">{uiText("Chưa có bài nộp")}</span>
+                            )}
                     </td>
                     <td>
                       <Badge
@@ -615,12 +622,12 @@ export const TeacherAssignmentListPage: React.FC = () => {
                         }
                         label={
                           isPublished
-                            ? 'Đang mở'
+                            ? uiText("Đang mở")
                             : isClosed
-                              ? 'Đã đóng nộp'
+                              ? uiText("Đã đóng nộp")
                               : isItemArchived
-                                ? 'Đã lưu trữ'
-                                : 'Bản nháp'
+                                ? uiText("Đã lưu trữ")
+                                : uiText("Bản nháp")
                         }
                       />
                     </td>
@@ -632,8 +639,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                             className="npc-btn npc-btn-secondary npc-btn-sm"
                             data-testid={`btn-edit-${ass.id}`}
                           >
-                            Tiếp tục soạn
-                          </Link>
+                            {uiText("Tiếp tục soạn")}</Link>
                         )}
 
                         {isPublished && (
@@ -642,7 +648,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                               to={`/gv/bai-tap/${ass.id}/bai-nop`}
                               className="npc-btn npc-btn-primary npc-btn-sm"
                             >
-                              <span>Bài nộp ({ass.submission_count})</span>
+                              <span>{uiText("Bài nộp (")}{ass.submission_count})</span>
                               <ArrowRight size={14} />
                             </Link>
 
@@ -651,7 +657,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                                 <Link
                                   to={`/gv/mon-hoc/${course.id}/bai-tap/soan?baiTap=${ass.id}`}
                                   className="npc-btn npc-btn-secondary npc-btn-sm"
-                                  title="Chỉnh sửa hạn nộp & thiết lập"
+                                  title={uiText("Chỉnh sửa hạn nộp & thiết lập")}
                                 >
                                   <Settings size={14} />
                                 </Link>
@@ -660,21 +666,21 @@ export const TeacherAssignmentListPage: React.FC = () => {
                                   type="button"
                                   className="npc-btn npc-btn-ghost npc-btn-sm text-warning"
                                   onClick={() => setTargetToClose(ass)}
-                                  title="Đóng cổng nhận bài nộp"
+                                  title={uiText("Đóng cổng nhận bài nộp")}
                                   data-testid={`btn-close-${ass.id}`}
                                 >
                                   <Lock size={14} />
-                                  <span>Đóng nộp</span>
+                                  <span>{uiText("Đóng nộp")}</span>
                                 </button>
                                 <button
                                   type="button"
                                   className="npc-btn npc-btn-ghost npc-btn-sm"
                                   onClick={() => handleOpenReopenWindows(ass)}
-                                  title="Quản lý cửa sổ mở lại ngoại lệ"
+                                  title={uiText("Quản lý cửa sổ mở lại ngoại lệ")}
                                   data-testid={`btn-reopen-windows-${ass.id}`}
                                 >
                                   <History size={14} />
-                                  <span>Cửa sổ nộp lại</span>
+                                  <span>{uiText("Cửa sổ nộp lại")}</span>
                                 </button>
                               </>
                             )}
@@ -687,8 +693,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                               to={`/gv/bai-tap/${ass.id}/bai-nop`}
                               className="npc-btn npc-btn-secondary npc-btn-sm"
                             >
-                              Xem bài nộp
-                            </Link>
+                              {uiText("Xem bài nộp")}</Link>
 
                             {!isArchived && (
                               <>
@@ -696,22 +701,22 @@ export const TeacherAssignmentListPage: React.FC = () => {
                                   type="button"
                                   className="npc-btn npc-btn-ghost npc-btn-sm"
                                   onClick={() => handleQuickReopen(ass)}
-                                  title="Mở lại cổng nhận bài cho cả lớp"
+                                  title={uiText("Mở lại cổng nhận bài cho cả lớp")}
                                   data-testid={`btn-quick-reopen-${ass.id}`}
                                 >
                                   <Unlock size={14} />
-                                  <span>Mở lại</span>
+                                  <span>{uiText("Mở lại")}</span>
                                 </button>
 
                                 <button
                                   type="button"
                                   className="npc-btn npc-btn-ghost npc-btn-sm"
                                   onClick={() => handleOpenReopenWindows(ass)}
-                                  title="Quản lý cửa sổ mở lại ngoại lệ"
+                                  title={uiText("Quản lý cửa sổ mở lại ngoại lệ")}
                                   data-testid={`btn-reopen-windows-${ass.id}`}
                                 >
                                   <History size={14} />
-                                  <span>Cửa sổ nộp lại</span>
+                                  <span>{uiText("Cửa sổ nộp lại")}</span>
                                 </button>
                               </>
                             )}
@@ -723,8 +728,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                             to={`/gv/bai-tap/${ass.id}/bai-nop`}
                             className="npc-btn npc-btn-secondary npc-btn-sm"
                           >
-                            Xem bài nộp
-                          </Link>
+                            {uiText("Xem bài nộp")}</Link>
                         )}
                       </div>
                     </td>
@@ -738,23 +742,20 @@ export const TeacherAssignmentListPage: React.FC = () => {
           {totalPages > 1 && (
             <div className="pagination-controls-bar">
               <span className="pagination-meta">
-                Trang {currentPage} / {totalPages} (Tổng số {totalCount} bài tập)
-              </span>
+                Trang {currentPage} / {totalPages} {uiText(" (Tổng số ")}{totalCount} {uiText(" bài tập)")}</span>
               <div className="pagination-buttons">
                 <Button
                   variant="secondary"
                   disabled={currentPage <= 1}
                   onClick={() => handlePageChange(currentPage - 1)}
                 >
-                  Trang trước
-                </Button>
+                  {uiText("Trang trước")}</Button>
                 <Button
                   variant="secondary"
                   disabled={currentPage >= totalPages}
                   onClick={() => handlePageChange(currentPage + 1)}
                 >
-                  Trang kế
-                </Button>
+                  {uiText("Trang kế")}</Button>
               </div>
             </div>
           )}
@@ -764,31 +765,29 @@ export const TeacherAssignmentListPage: React.FC = () => {
       {/* Modal: Confirm Manual Close */}
       {targetToClose && (
         <Modal
-          title="Xác nhận đóng cổng nhận bài nộp"
+          title={uiText("Xác nhận đóng cổng nhận bài nộp")}
           isOpen={!!targetToClose}
           onClose={() => setTargetToClose(null)}
         >
           <div className="modal-content-stack">
             <p>
-              Bạn có chắc chắn muốn đóng cổng nộp bài cho bài tập{' '}
+              {uiText("Bạn có chắc chắn muốn đóng cổng nộp bài cho bài tập")}{' '}
               <strong>"{targetToClose.title}"</strong>?
             </p>
             <TextField
-              label="Lý do đóng nhận bài (Ghi nhận nhật ký kiểm toán)"
-              placeholder="Ví dụ: Hết thời gian làm bài kiểm tra trên lớp..."
+              label={uiText("Lý do đóng nhận bài (Ghi nhận nhật ký kiểm toán)")}
+              placeholder={uiText("Ví dụ: Hết thời gian làm bài kiểm tra trên lớp...")}
               value={closeReason}
               onChange={(e) => setCloseReason(e.target.value)}
             />
             <div className="alert-notice-box">
               <AlertTriangle size={18} />
               <span>
-                Sau khi đóng, sinh viên không thể nộp bài. Giảng viên cần mở lại bài tập trước khi áp dụng cửa sổ ngoại lệ.
-              </span>
+                {uiText("Sau khi đóng, sinh viên không thể nộp bài. Giảng viên cần mở lại bài tập trước khi áp dụng cửa sổ ngoại lệ.")}</span>
             </div>
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setTargetToClose(null)}>
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
@@ -796,8 +795,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                 onClick={handleConfirmClose}
                 data-testid="confirm-close-btn"
               >
-                Xác nhận đóng nộp bài
-              </Button>
+                {uiText("Xác nhận đóng nộp bài")}</Button>
             </div>
           </div>
         </Modal>
@@ -806,37 +804,37 @@ export const TeacherAssignmentListPage: React.FC = () => {
       {/* Modal: Reopen Windows Management */}
       {targetForReopen && (
         <Modal
-          title={`Quản lý cửa sổ mở lại: "${targetForReopen.title}"`}
+          title={uiText("Quản lý cửa sổ mở lại: \"{0}\"",[targetForReopen.title])}
           isOpen={!!targetForReopen}
           onClose={() => setTargetForReopen(null)}
         >
           <div className="modal-content-stack">
             <section className="reopen-form-section">
-              <h3 className="sub-modal-title">Cấp cửa sổ mở lại mới</h3>
+              <h3 className="sub-modal-title">{uiText("Cấp cửa sổ mở lại mới")}</h3>
               <form onSubmit={handleCreateReopenWindow} className="reopen-form">
                 <div className="form-row-compact">
                   <div className="form-group-item">
-                    <label className="field-label" htmlFor="reopen-target">Đối tượng:</label>
+                    <label className="field-label" htmlFor="reopen-target">{uiText("Đối tượng:")}</label>
                     <select
                       id="reopen-target"
                       className="field-select"
                       value={windowTargetType}
                       onChange={(e) => setWindowTargetType(e.target.value as 'all' | 'student')}
                     >
-                      <option value="all">Toàn bộ sinh viên lớp học phần</option>
-                      <option value="student">Chỉ định sinh viên cụ thể</option>
+                      <option value="all">{uiText("Toàn bộ sinh viên lớp học phần")}</option>
+                      <option value="student">{uiText("Chỉ định sinh viên cụ thể")}</option>
                     </select>
                   </div>
 
                   {windowTargetType === 'student' && (
                     <div className="form-group-item">
-                        <TextField label="Tìm sinh viên theo tên hoặc email" value={studentSearch} onChange={e => { setStudentSearch(e.target.value); setWindowStudentId(''); }} />
-                        <label htmlFor="reopen-student">Sinh viên được mở lại</label>
+                        <TextField label={uiText("Tìm sinh viên theo tên hoặc email")} value={studentSearch} onChange={e => { setStudentSearch(e.target.value); setWindowStudentId(''); }} />
+                        <label htmlFor="reopen-student">{uiText("Sinh viên được mở lại")}</label>
                         <select id="reopen-student" className="field-select" required value={windowStudentId} onChange={e => setWindowStudentId(e.target.value)}>
-                          <option value="">Chọn sinh viên đang ghi danh</option>
+                          <option value="">{uiText("Chọn sinh viên đang ghi danh")}</option>
                           {windowMembers.map(member => <option key={member.student_id} value={member.student_id}>{member.student_name} — {member.student_email}</option>)}
                         </select>
-                        <small>Hiển thị tối đa 100 kết quả. Tìm theo email để thu hẹp danh sách.</small>
+                        <small>{uiText("Hiển thị tối đa 100 kết quả. Tìm theo email để thu hẹp danh sách.")}</small>
                         {memberSearchError && <p role="alert">{memberSearchError}</p>}
                     </div>
                   )}
@@ -844,20 +842,20 @@ export const TeacherAssignmentListPage: React.FC = () => {
 
                 <div className="form-row-compact">
                   <div className="form-group-item">
-                    <label className="field-label">Phạm vi thao tác:</label>
+                    <label className="field-label">{uiText("Phạm vi thao tác:")}</label>
                     <select
                       className="field-select"
                       value={windowScope}
                       onChange={(e) => setWindowScope(e.target.value as 'all_actions' | 'first_only')}
                     >
-                      <option value="all_actions">Nộp mới và nộp thay thế bài cũ</option>
-                      <option value="first_only">Chỉ cho phép nộp lần đầu</option>
+                      <option value="all_actions">{uiText("Nộp mới và nộp thay thế bài cũ")}</option>
+                      <option value="first_only">{uiText("Chỉ cho phép nộp lần đầu")}</option>
                     </select>
                   </div>
 
                   <div className="form-group-item">
                     <TextField
-                      label="Thời hạn kết thúc cửa sổ (Ngày)"
+                      label={uiText("Thời hạn kết thúc cửa sổ (Ngày)")}
                       type="date"
                       required
                       value={windowEndDate}
@@ -867,7 +865,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
 
                   <div className="form-group-item">
                     <TextField
-                      label="Giờ kết thúc"
+                      label={uiText("Giờ kết thúc")}
                       type="time"
                       required
                       value={windowEndTime}
@@ -877,8 +875,8 @@ export const TeacherAssignmentListPage: React.FC = () => {
                 </div>
 
                 <TextField
-                  label="Lý do mở lại (Audit log)"
-                  placeholder="Ví dụ: Sinh viên có lý do y tế có đơn phê duyệt..."
+                  label={uiText("Lý do mở lại (Audit log)")}
+                  placeholder={uiText("Ví dụ: Sinh viên có lý do y tế có đơn phê duyệt...")}
                   value={windowReason}
                   onChange={(e) => setWindowReason(e.target.value)}
                 />
@@ -890,8 +888,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
                     isLoading={isCreatingWindow}
                     data-testid="btn-submit-reopen-window"
                   >
-                    Tạo cửa sổ mở lại
-                  </Button>
+                    {uiText("Tạo cửa sổ mở lại")}</Button>
                 </div>
               </form>
             </section>
@@ -899,34 +896,34 @@ export const TeacherAssignmentListPage: React.FC = () => {
             <hr className="divider-soft" />
 
             <section className="reopen-list-section">
-              <h3 className="sub-modal-title">Danh sách cửa sổ đã cấp</h3>
+              <h3 className="sub-modal-title">{uiText("Danh sách cửa sổ đã cấp")}</h3>
               {reopenWindowsLoading ? (
                 <LoadingSkeleton />
               ) : reopenWindows.length === 0 ? (
-                <p className="text-muted">Chưa có cửa sổ mở lại nào được ghi nhận cho bài tập này.</p>
+                <p className="text-muted">{uiText("Chưa có cửa sổ mở lại nào được ghi nhận cho bài tập này.")}</p>
               ) : (
                 <div className="reopen-table-wrap">
                   <table className="npc-table compact-table">
                     <thead>
                       <tr>
-                        <th>Đối tượng</th>
-                        <th>Phạm vi</th>
-                        <th>Hết hạn</th>
-                        <th>Trạng thái</th>
-                        <th>Thao tác</th>
+                        <th>{uiText("Đối tượng")}</th>
+                        <th>{uiText("Phạm vi")}</th>
+                        <th>{uiText("Hết hạn")}</th>
+                        <th>{uiText("Trạng thái")}</th>
+                        <th>{uiText("Thao tác")}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {reopenWindows.map((win) => (
                         <tr key={win.id}>
-                          <td>{win.target_type === 'all' ? 'Cả lớp' : `SV: ${win.student_id?.slice(0, 8)}...`}</td>
-                          <td>{win.scope === 'all_actions' ? 'Mọi thao tác' : 'Chỉ nộp đầu'}</td>
+                          <td>{win.target_type === 'all' ? uiText("Cả lớp") : `SV: ${win.student_id?.slice(0, 8)}...`}</td>
+                          <td>{win.scope === 'all_actions' ? uiText("Mọi thao tác") : uiText("Chỉ nộp đầu")}</td>
                           <td>{formatDateVN(win.end_at)}</td>
                           <td>
                             {win.is_active ? (
-                              <span className="badge-active-window">Đang mở</span>
+                              <span className="badge-active-window">{uiText("Đang mở")}</span>
                             ) : (
-                              <span className="text-muted">Đã đóng/hủy</span>
+                              <span className="text-muted">{uiText("Đã đóng/hủy")}</span>
                             )}
                           </td>
                           <td>
@@ -935,10 +932,10 @@ export const TeacherAssignmentListPage: React.FC = () => {
                                 type="button"
                                 className="npc-btn npc-btn-ghost npc-btn-sm text-danger"
                                 onClick={() => handleRevokeWindow(win.id)}
-                                title="Hủy bỏ cửa sổ này"
+                                title={uiText("Hủy bỏ cửa sổ này")}
                               >
                                 <Trash2 size={14} />
-                                <span>Hủy</span>
+                                <span>{uiText("Hủy")}</span>
                               </button>
                             )}
                           </td>
@@ -952,8 +949,7 @@ export const TeacherAssignmentListPage: React.FC = () => {
 
             <div className="modal-actions-bar">
               <Button type="button" variant="secondary" onClick={() => setTargetForReopen(null)}>
-                Đóng
-              </Button>
+                {uiText("Đóng")}</Button>
             </div>
           </div>
         </Modal>

@@ -1,3 +1,4 @@
+import {uiText} from "../shared/i18n/translate";
 import { apiClient, getCsrfToken, type ApiClient } from './client';
 import type { components } from './schema';
 
@@ -218,7 +219,7 @@ export class MaterialsService {
       },
     );
     if (!res.ok) {
-      throw new Error(`Tải tệp thất bại (HTTP ${res.status})`);
+      throw new Error(uiText("Tải tệp thất bại (HTTP {0})",[res.status]));
     }
     return res.blob();
   }
@@ -238,7 +239,7 @@ export class MaterialsService {
       },
     );
     if (!res.ok) {
-      throw new Error(`Xem trước tệp thất bại (HTTP ${res.status})`);
+      throw new Error(uiText("Xem trước tệp thất bại (HTTP {0})",[res.status]));
     }
     return res.blob();
   }

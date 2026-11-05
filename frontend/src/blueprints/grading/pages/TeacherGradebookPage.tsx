@@ -1,227 +1,289 @@
-import React, { useState, useMemo } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useSession } from '../../../app/providers/SessionContext';
-import {
-  getLatestPublishedGrade,
-  getLatestDraftGrade,
-  canTeacherAccessCourse
-} from '../domain/gradingPolicies';
-import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
-import { TextField } from '../../../shared/ui/TextField';
-import { Button } from '../../../shared/ui/Button';
-import { EmptyState } from '../../../shared/ui/EmptyState';
-import { formatScoreVN } from '../../../shared/kernel/formatting';
-import { removeVietnameseAccents } from '../../../shared/lib/search';
-import {
-  AlertTriangle,
-  Info
-} from 'lucide-react';
+import {uiText} from "../../../shared/i18n/translate";
+import { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { apiClient } from '../../../api/client';
 import './TeacherGradebookPage.css';
 
-export const TeacherGradebookPage: React.FC = () => {
-  const { monId } = useParams<{ monId: string }>();
-  const { courses, assignments, submissions, gradeRevisions, memberships, users } = useDatabase();
-  const { currentUser } = useSession();
-  const navigate = useNavigate();
+type Grade = {
+  score: string;
+  status: 'draft' | 'published';
+};
 
-  const course = courses.find(c => c.id === monId);
-  const isAuthorized = canTeacherAccessCourse(course, currentUser);
-  const isArchived = course?.status === 'archived';
-  const [searchQuery, setSearchQuery] = useState('');
+type Result = {
+  course_name: string;
+  assignments: { id: string; title: string }[];
+  assignment_id: string | null;
+  total_score: string | null;
+  items: {
+    student_id: string;
+    name: string;
+    email: string;
+    revision_number: number | null;
+    latest_grade: Grade | null;
+    published_grade: Grade | null;
+  }[];
+  pagination: {
+    page: number;
+    total_pages: number;
+    total_items: number;
+    has_next: boolean;
+    has_previous: boolean;
+  };
+};
 
-  // Published assignments for this course
-  const publishedAssignments = useMemo(() => {
-    return assignments.filter(a => a.courseId === monId && a.status === 'published');
-  }, [assignments, monId]);
+export function TeacherGradebookPage() {
+  const { monId } = useParams();
 
-  // Enriched members with userName and userEmail
-  const courseMembers = useMemo(() => {
-    return memberships
-      .filter(m => m.courseId === monId)
-      .map(m => {
-        const u = users.find(usr => usr.id === m.userId);
-        return {
-          ...m,
-          userName: u?.fullName || m.emailNormalized,
-          userEmail: m.emailNormalized
-        };
+  if (!monId) {
+    return <p role="alert">{uiText("Thiếu mã môn học.")}</p>;
+  }
+
+  return <Gradebook key={monId} courseId={monId} />;
+}
+
+function Gradebook({ courseId }: { courseId: string }) {
+  const [assignmentId, setAssignmentId] = useState('');
+  const [searchInput, setSearchInput] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [reload, setReload] = useState(0);
+  const [data, setData] = useState<Result | null>(null);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const controller = new AbortController();
+
+    setData(null);
+    setError('');
+
+    apiClient
+      .untypedRequest<Result>(
+        `/api/v1/courses/${courseId}/gradebook`,
+        {
+          params: {
+            page,
+            ...(assignmentId ? { assignment_id: assignmentId } : {}),
+            ...(search ? { search } : {}),
+          },
+          signal: controller.signal,
+        },
+      )
+      .then(result => {
+        if (controller.signal.aborted) return;
+
+        setData(result);
+
+        if (!assignmentId && result.assignment_id) {
+          setAssignmentId(result.assignment_id);
+        }
+      })
+      .catch(err => {
+        if (!controller.signal.aborted) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : uiText("Không tải được bảng điểm."),
+          );
+        }
       });
-  }, [memberships, users, monId]);
 
-  // Filtered members by search
-  const filteredMembers = useMemo(() => {
-    if (!searchQuery.trim()) return courseMembers;
-    const qNorm = removeVietnameseAccents(searchQuery.toLowerCase().trim());
-    return courseMembers.filter(m => {
-      const nameNorm = removeVietnameseAccents(m.userName.toLowerCase());
-      const emailNorm = m.userEmail.toLowerCase();
-      return nameNorm.includes(qNorm) || emailNorm.includes(qNorm);
-    });
-  }, [courseMembers, searchQuery]);
+    return () => controller.abort();
+  }, [courseId, assignmentId, page, reload, search]);
 
-  if (!course || !isAuthorized) {
-    return (
-      <div className="teacher-gradebook-container">
-        <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại hoặc bạn không có quyền truy cập."
-          action={
-            <Button variant="primary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
-          }
-        />
-      </div>
-    );
+  const exportParams = new URLSearchParams({ download: 'csv' });
+
+  if (data?.assignment_id) {
+    exportParams.set('assignment_id', data.assignment_id);
+  }
+
+  if (search) {
+    exportParams.set('search', search);
   }
 
   return (
-    <div className="teacher-gradebook-page">
-      <div className="page-header">
-        <Breadcrumb
-          items={[
-            { label: 'Bàn làm việc', path: '/gv' },
-            { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-            { label: 'Bảng điểm tổng hợp' }
-          ]}
-        />
-        <h1 className="page-main-heading">Bảng điểm học phần: {course.name}</h1>
-        <p className="page-subtitle">
-          Ma trận theo dõi điểm số toàn bộ sinh viên qua các bài tập đã công bố.
-        </p>
-      </div>
+    <section className="live-gradebook">
+      <h1>{uiText("Bảng điểm môn học")}</h1>
+      <p>{data?.course_name}</p>
+      <p>
+        {uiText("Danh sách sinh viên đang tham gia; kết quả theo lần nộp mới nhất.")}</p>
 
-      <div className="gradebook-notice-box">
-        <Info size={18} />
-        <span>
-          <strong>Lưu ý nghiệp vụ:</strong> Bảng điểm chỉ thể hiện các cột bài tập đã công bố chính thức. Không tự ý hiển thị cột điểm tổng kết hoặc thứ hạng khi chưa có công thức trọng số phê duyệt.
-        </span>
-      </div>
+      <button
+        type="button"
+        onClick={() => setReload(value => value + 1)}
+      >
+        {uiText("Cập nhật bảng điểm")}</button>
 
-      {isArchived && (
-        <div className="archived-warning-alert" role="alert">
-          <AlertTriangle size={20} />
-          <span>Môn học đã lưu trữ: Bảng điểm ở chế độ chỉ đọc.</span>
-        </div>
+      <form
+        className="gradebook-search"
+        role="search"
+        onSubmit={event => {
+          event.preventDefault();
+          setPage(1);
+          setSearch(searchInput.trim());
+        }}
+      >
+        <label>
+          {uiText("Tìm sinh viên theo tên hoặc email")}<input
+            type="search"
+            value={searchInput}
+            maxLength={120}
+            placeholder={uiText("Ví dụ: Quang hoặc một phần email")}
+            onChange={event => setSearchInput(event.target.value)}
+          />
+        </label>
+        
+        <button type="submit">{uiText("Tìm")}</button>
+        
+        <button
+          type="button"
+          disabled={!search && !searchInput}
+          onClick={() => {
+            setSearchInput('');
+            setSearch('');
+            setPage(1);
+          }}
+        >
+          {uiText("Xóa bộ lọc")}</button>
+      </form>
+
+      {error && <p role="alert">{error}</p>}
+
+      {!data && !error && (
+        <p role="status">{uiText("Đang tải bảng điểm…")}</p>
       )}
 
-      {/* Search Bar */}
-      <div className="gradebook-search-card">
-        <TextField
-          label="Tìm kiếm sinh viên trong bảng điểm"
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
-          placeholder="Nhập tên hoặc email sinh viên..."
-        />
-      </div>
-
-      {publishedAssignments.length === 0 ? (
-        <EmptyState
-          title="Chưa có bài tập nào được công bố"
-          description="Bảng điểm sẽ hiển thị ma trận điểm khi giảng viên công bố bài tập đầu tiên cho học phần."
-          action={
-            <Button variant="primary" onClick={() => navigate(`/gv/mon-hoc/${course.id}/bai-tap`)}>
-              Vào quản lý bài tập
-            </Button>
-          }
-        />
-      ) : (
-        <div className="gradebook-matrix-card">
-          <div className="matrix-scroll-wrapper">
-            <table className="gradebook-matrix-table">
-              <thead>
-                <tr>
-                  <th className="sticky-col header-col">Sinh viên</th>
-                  <th className="sub-header-col">Email</th>
-                  {publishedAssignments.map(ass => (
-                    <th key={ass.id} className="ass-col-header">
-                      <div className="ass-header-title">{ass.title}</div>
-                      <span className="ass-header-pts">({ass.maxScore} đ)</span>
-                    </th>
+      {data && (
+        data.assignments.length === 0 ? (
+          <p>{uiText("Chưa có bài tập được công bố.")}</p>
+        ) : (
+          <>
+            <div className="live-gradebook-toolbar">
+              <label>
+                {uiText("Bài tập")}<select
+                  value={data.assignment_id ?? ''}
+                  onChange={event => {
+                    setAssignmentId(event.target.value);
+                    setPage(1);
+                  }}
+                >
+                  {data.assignments.map(item => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
                   ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filteredMembers.map(m => {
-                  const isWithdrawn = m.status === 'withdrawn';
-                  return (
-                    <tr key={m.id} className={isWithdrawn ? 'withdrawn-row' : ''}>
-                      <td className="sticky-col data-col">
-                        <strong>{m.userName}</strong>
-                        {isWithdrawn && <span className="withdrawn-tag">Đã rút</span>}
+                </select>
+              </label>
+
+              <Link
+                to={`/gv/bai-tap/${data.assignment_id}/bai-nop`}
+              >
+                {uiText("Mở bài nộp để chấm")}</Link>
+              {data.assignment_id && data.pagination.total_items > 0 && (
+                <a
+                  className="gradebook-export"
+                  href={`/api/v1/courses/${courseId}/gradebook?${exportParams.toString()}`}
+                  download
+                >
+                  {uiText("Xuất CSV (")}{data.pagination.total_items} {uiText(" sinh viên)")}</a>
+              )}
+            </div>
+
+            <p>
+              {data.pagination.total_items} {uiText(" sinh viên")}{' '}{uiText("· Thang điểm: ")}{data.total_score}
+            </p>
+
+            <div
+              className="live-gradebook-table"
+              tabIndex={0}
+              role="region"
+              aria-label={uiText("Bảng điểm sinh viên")}
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>{uiText("Sinh viên")}</th>
+                    <th>{uiText("Lần nộp")}</th>
+                    <th>{uiText("Bản chấm mới nhất")}</th>
+                    <th>{uiText("Điểm sinh viên đang thấy")}</th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {data.items.map(row => (
+                    <tr key={row.student_id}>
+                      <td>
+                        <strong>{row.name}</strong>
+                        <small>{row.email}</small>
                       </td>
 
-                      <td className="email-data-col">{m.userEmail}</td>
+                      <td>
+                        {row.revision_number ?? uiText("Chưa nộp")}
+                      </td>
 
-                      {publishedAssignments.map(ass => {
-                        const sub = submissions.find(
-                          s => s.assignmentId === ass.id && s.studentId === m.userId
-                        );
+                      <td>
+                        {row.latest_grade ? (
+                          <span
+                            className={
+                              `grade-state ` +
+                              `grade-state-${row.latest_grade.status}`
+                            }
+                          >
+                            {row.latest_grade.score}/{data.total_score}
+                            {' '}·{' '}
+                            {row.latest_grade.status === 'draft'
+                              ? uiText("Nháp")
+                              : uiText("Đã công bố")}
+                          </span>
+                        ) : (
+                          row.revision_number === null
+                            ? '—'
+                            : uiText("Chưa chấm")
+                        )}
+                      </td>
 
-                        if (!sub) {
-                          return (
-                            <td key={ass.id} className="matrix-cell empty-cell">
-                              <span className="text-muted" title="Chưa nộp bài">—</span>
-                            </td>
-                          );
-                        }
-
-                        const pubGrade = getLatestPublishedGrade(gradeRevisions, sub.id);
-                        const draftGrade = getLatestDraftGrade(gradeRevisions, sub.id);
-
-                        if (pubGrade) {
-                          return (
-                            <td key={ass.id} className="matrix-cell published-cell">
-                              <Link
-                                to={`/gv/bai-nop/${sub.id}/cham`}
-                                className="cell-score-link"
-                                title="Xem lại phiếu chấm"
-                              >
-                                <strong className="published-score-text">
-                                  {formatScoreVN(pubGrade.total)}
-                                </strong>
-                              </Link>
-                            </td>
-                          );
-                        }
-
-                        if (draftGrade) {
-                          return (
-                            <td key={ass.id} className="matrix-cell draft-cell">
-                              <Link
-                                to={`/gv/bai-nop/${sub.id}/cham`}
-                                className="cell-score-link"
-                                title="Bản nháp điểm — Nhấn để công bố"
-                              >
-                                <span className="draft-score-tag">
-                                  Nháp: {formatScoreVN(draftGrade.total)}
-                                </span>
-                              </Link>
-                            </td>
-                          );
-                        }
-
-                        return (
-                          <td key={ass.id} className="matrix-cell pending-cell">
-                            <Link
-                              to={`/gv/bai-nop/${sub.id}/cham`}
-                              className="cell-grade-action-btn"
-                              title="Đã nộp — Nhấn để chấm"
-                            >
-                              Chấm bài
-                            </Link>
-                          </td>
-                        );
-                      })}
+                      <td>
+                        {row.published_grade
+                          ? `${row.published_grade.score}/${data.total_score}`
+                          : uiText("Chưa có")}
+                      </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {data.items.length === 0 && (
+              <p role="status">
+                {search
+                ? uiText("Không có sinh viên khớp với “{0}”.",[search])
+                : uiText("Môn học chưa có sinh viên đang tham gia.")}
+              </p>
+            )}
+
+            <nav aria-label={uiText("Phân trang bảng điểm")}>
+              <button
+                type="button"
+                disabled={!data.pagination.has_previous}
+                onClick={() => setPage(value => value - 1)}
+              >
+                {uiText("Trước")}</button>
+
+              <span>
+                Trang {data.pagination.page}/
+                {data.pagination.total_pages}
+              </span>
+
+              <button
+                type="button"
+                disabled={!data.pagination.has_next}
+                onClick={() => setPage(value => value + 1)}
+              >
+                Sau
+              </button>
+            </nav>
+          </>
+        )
       )}
-    </div>
+    </section>
   );
-};
+}

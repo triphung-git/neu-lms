@@ -52,20 +52,25 @@ docker pull $API_IMAGE
 ### Bước 3: Kiểm tra cấu hình và chạy Migration độc lập
 ```bash
 # Chạy migration job riêng biệt
-docker compose -f compose.staging.yaml run --rm migrator
+docker compose --env-file .env.staging -f compose.staging.yaml run --rm migrator
 
 # Xác nhận trạng thái migration
-docker compose -f compose.staging.yaml run --rm api python manage.py migrate --check
+docker compose --env-file .env.staging -f compose.staging.yaml run --rm api python manage.py migrate --check
 ```
 
-### Bước 4: Khởi động hoặc cập nhật dịch vụ API và Dispatcher Worker
+### Bước 4: Khởi động toàn bộ dịch vụ runtime
 ```bash
-# Khởi động dịch vụ API và Auth Email Dispatcher ở chế độ detached
-docker compose -f compose.staging.yaml up -d api auth-dispatcher
+# API, auth email dispatcher, worker quét file và scheduler trích xuất học liệu
+docker compose --env-file .env.staging -f compose.staging.yaml up -d api auth-dispatcher file-worker file-scheduler
 
 # Kiểm tra trạng thái container và healthcheck
-docker compose -f compose.staging.yaml ps
+docker compose --env-file .env.staging -f compose.staging.yaml ps
 ```
+
+`file-worker` và duy nhất một replica `file-scheduler` là bắt buộc cho pipeline B08–B09.
+Không scale `file-scheduler` theo số replica API; Celery beat chỉ nên chạy một instance trong mỗi môi trường.
+Worker cần cùng PostgreSQL, Redis broker, S3 endpoint/credentials và ClamAV mà API sử dụng. Nếu thiếu
+worker hoặc scheduler, upload có thể ở trạng thái chờ quét và học liệu không được trích xuất để lập chỉ mục.
 
 ### Bước 5: Kiểm tra sức khỏe (Smoke Test)
 ```bash
@@ -77,8 +82,9 @@ curl -I http://127.0.0.1:8000/api/v1/health/live
 curl -I http://127.0.0.1:8000/api/v1/health/ready
 # Kỳ vọng: HTTP/1.1 200 OK {"status": "ok", "checks": {"database": "ok"}}
 
-# Kiểm tra log của auth-dispatcher
-docker compose -f compose.staging.yaml logs --tail=50 auth-dispatcher
+# Kiểm tra log của auth-dispatcher và pipeline file
+docker compose --env-file .env.staging -f compose.staging.yaml logs --tail=50 auth-dispatcher
+docker compose --env-file .env.staging -f compose.staging.yaml logs --tail=100 file-worker file-scheduler
 ```
 
 ---
@@ -132,7 +138,7 @@ Trong trường hợp bản phát hành mới gặp lỗi nghiêm trọng sau kh
    - Cập nhật biến môi trường: `export API_IMAGE="ghcr.io/neu-lms/api@sha256:<digest-truoc>"`.
 2. **Khởi động lại API container với image cũ**:
    ```bash
-   docker compose -f compose.staging.yaml up -d --no-deps api
+   docker compose --env-file .env.staging -f compose.staging.yaml up -d --no-deps api auth-dispatcher file-worker file-scheduler
    ```
 3. **Lưu ý về Database Rollback**:
    - Tuyệt đối không tự động reverse migrations trên cơ sở dữ liệu chứa dữ liệu thật.
@@ -140,12 +146,17 @@ Trong trường hợp bản phát hành mới gặp lỗi nghiêm trọng sau kh
 
 ---
 
-## 5. Các thành phần chưa triển khai (Planned Components)
+## 5. Phạm vi worker và phần tích hợp còn cần hoàn tất
 
-Các thành phần sau tiếp tục được hoàn thiện theo lộ trình:
-- **Asynchronous Worker**: Đã có `auth-dispatcher` daemon phục vụ email xác thực và đặt lại mật khẩu (T02). Celery/Redis worker cho outbox sự kiện nền tảng sẽ bổ sung ở B13.
-- **File Upload & Scanner**: Dịch vụ quét mã độc và pipeline trích xuất học liệu (B08–B09).
-- **Transactional Email Provider**: Cấu hình SendGrid / AWS SES thực tế (B13).
+Các tiến trình đã có trong source và compose staging:
+- **File pipeline (B08–B09)**: `file-worker` chạy các Celery tasks quét ClamAV và trích xuất học liệu; `file-scheduler` dispatch các tác vụ pending theo lịch. Hai service phải được khởi động cùng API.
+- **Auth email dispatcher (B03)**: `auth-dispatcher` gửi email xác thực và đặt lại mật khẩu ngoài HTTP request.
+- **In-app notifications (B13)**: Thông báo lớp học và thông báo điểm được lưu/đọc qua API trong ứng dụng.
+
+Các phần chưa được coi là hoàn tất:
+- **Transactional email provider**: SMTP/SendGrid/AWS SES thật phải được cấu hình và kiểm tra bằng credentials của môi trường; không dùng Mailpit trên staging.
+- **Generic platform outbox consumer**: `OutboxEvent` đang ghi audit/outbox cho các domain event, nhưng chưa có dispatcher tổng quát để chuyển tất cả event này thành email/push. Không được nhầm `auth-dispatcher` với generic outbox worker.
+- **Worker monitoring**: Cần alert cho queue backlog, task retry/failure, worker heartbeat và kiểm tra định kỳ rằng ClamAV/S3/Redis reachable.
 
 ## CA và proxy bắt buộc
 

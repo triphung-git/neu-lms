@@ -1,10 +1,12 @@
+import { LearningHub, CourseAttendance } from './blueprints/learning/LearningHub';
+import { LibraryPage } from './blueprints/learning/LibraryPage';
+import { EnrollmentPage } from './blueprints/learning/EnrollmentPage';
+import { ReportsPage } from './blueprints/learning/ReportsPage';
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 
 // Providers
-import { DatabaseProvider } from './app/providers/DatabaseContext';
 import { SessionProvider } from './app/providers/SessionContext';
-import { ClockProvider } from './app/providers/ClockContext';
 import { NotificationProvider } from './app/providers/NotificationContext';
 import { RouteGuard } from './app/router/RouteGuard';
 
@@ -80,7 +82,7 @@ import { TeacherAIDraftsPage } from './blueprints/ai';
 
 // Blueprints - Administration (A02, A03, A04, A07, A08)
 import {
-  AdminEligibleEmailsPage,
+  AdminTeacherApprovalPage,
   AdminAccountsPage,
   AdminAccountDetailPage,
   AdminAuditLogsPage,
@@ -90,120 +92,125 @@ import {
 export const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <ClockProvider>
-        <DatabaseProvider>
-          <SessionProvider>
-            <NotificationProvider>
-              <Routes>
-                {/* Public Shell Routes */}
-                <Route path="/" element={<PublicLayout />}>
-                  <Route index element={<HomePage />} />
-                  <Route path="tinh-nang" element={<FeaturesPage />} />
-                  <Route path="huong-dan" element={<GuidePage />} />
-                  <Route path="404" element={<NotFoundPage />} />
-                  <Route
-                    path="ho-so"
-                    element={
-                      <RouteGuard>
-                        <ProfilePage />
-                      </RouteGuard>
-                    }
-                  />
-                </Route>
-
-                {/* Authentication Shell Routes */}
-                <Route element={<AuthLayout />}>
-                  <Route path="dang-nhap" element={<LoginPage />} />
-                  <Route path="dang-ky" element={<RegisterPage />} />
-                  <Route path="quen-mat-khau" element={<ForgotPasswordPage />} />
-                  <Route path="reset-password" element={<ResetPasswordPage />} />
-                  <Route path="dat-lai-mat-khau" element={<ResetPasswordPage />} />
-                  <Route path="verify-email" element={<VerifyEmailPage />} />
-                  <Route path="xac-minh-email" element={<VerifyEmailPage />} />
-                </Route>
-
-                {/* Student Workspace (S01 - S08) */}
+      <SessionProvider>
+        <NotificationProvider>
+            <Routes>
+              {/* Public Shell Routes */}
+              <Route path="/" element={<PublicLayout />}>
+                <Route index element={<HomePage />} />
+                <Route path="tinh-nang" element={<FeaturesPage />} />
+                <Route path="huong-dan" element={<GuidePage />} />
+                <Route path="404" element={<NotFoundPage />} />
                 <Route
-                  path="sv"
+                  path="ho-so"
                   element={
-                    <RouteGuard allowedRoles={['student']}>
-                      <StudentLayout />
+                    <RouteGuard>
+                      <ProfilePage />
                     </RouteGuard>
                   }
-                >
-                  <Route index element={<StudentDashboardPage />} />
-                  <Route path="mon-hoc" element={<StudentCoursesPage />} />
-                  <Route path="mon-hoc/:monId" element={<StudentCourseDetailPage />} />
-                  <Route path="mon-hoc/:monId/hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
-                  <Route path="hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
-                  <Route path="tim-kiem" element={<StudentMaterialSearchPage />} />
-                  <Route path="bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
-                  <Route path="mon-hoc/:monId/bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
-                  <Route path="diem" element={<StudentGradesPage />} />
-                  <Route path="thong-bao" element={<StudentAnnouncementsPage />} />
-                </Route>
+                />
+              </Route>
 
-                {/* Teacher Workspace (T01 - T16) */}
-                <Route
-                  path="gv"
-                  element={
-                    <RouteGuard allowedRoles={['teacher']}>
-                      <TeacherLayout />
-                    </RouteGuard>
-                  }
-                >
-                  <Route index element={<TeacherDashboardPage />} />
-                  <Route path="mon-hoc" element={<TeacherCoursesPage />} />
-                  <Route path="mon-hoc/tao" element={<CreateCoursePage />} />
+              {/* Authentication Shell Routes */}
+              <Route element={<AuthLayout />}>
+                <Route path="dang-nhap" element={<LoginPage />} />
+                <Route path="dang-ky" element={<RegisterPage />} />
+                <Route path="quen-mat-khau" element={<ForgotPasswordPage />} />
+                <Route path="reset-password" element={<ResetPasswordPage />} />
+                <Route path="dat-lai-mat-khau" element={<ResetPasswordPage />} />
+                <Route path="verify-email" element={<VerifyEmailPage />} />
+                <Route path="xac-minh-email" element={<VerifyEmailPage />} />
+              </Route>
+
+              {/* Student Workspace (S01 - S08) */}
+              <Route
+                path="sv"
+                element={
+                  <RouteGuard allowedRoles={['student']}>
+                    <StudentLayout />
+                  </RouteGuard>
+                }
+              >
+                <Route index element={<StudentDashboardPage />} />
+<Route path="ghi-danh" element={<EnrollmentPage />} />
+<Route path="hoc-tap" element={<LearningHub />} />
+<Route path="thu-vien" element={<LibraryPage />} />
+                <Route path="mon-hoc" element={<StudentCoursesPage />} />
+                <Route path="mon-hoc/:monId" element={<StudentCourseDetailPage />} />
+                <Route path="mon-hoc/:monId/hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
+                <Route path="hoc-lieu/:hocLieuId" element={<StudentMaterialDetailPage />} />
+                <Route path="tim-kiem" element={<StudentMaterialSearchPage />} />
+                <Route path="bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
+                <Route path="mon-hoc/:monId/bai-tap/:baiTapId" element={<StudentAssignmentDetailPage />} />
+                <Route path="diem" element={<StudentGradesPage />} />
+                <Route path="thong-bao" element={<StudentAnnouncementsPage />} />
+              </Route>
+
+              {/* Teacher Workspace (T01 - T16) */}
+              <Route
+                path="gv"
+                element={
+                  <RouteGuard allowedRoles={['teacher']}>
+                    <TeacherLayout />
+                  </RouteGuard>
+                }
+              >
+                <Route index element={<TeacherDashboardPage />} />
+<Route path="hoc-tap" element={<LearningHub />} />
+<Route path="thu-vien" element={<LibraryPage />} />
+                <Route path="mon-hoc" element={<TeacherCoursesPage />} />
+                <Route path="mon-hoc/tao" element={<CreateCoursePage />} />
+                <Route path="hoc-lieu/:hocLieuId" element={<TeacherMaterialDetailPage />} />
+                <Route path="bai-tap/:baiTapId/bai-nop" element={<TeacherSubmissionsPage />} />
+                <Route path="bai-nop/:baiNopId/cham" element={<TeacherGradingPage />} />
+                <Route path="thong-bao" element={<TeacherAnnouncementsPage />} />
+                <Route path="ban-nhap-ai" element={<TeacherAIDraftsPage />} />
+
+                {/* Course Context for Teacher (T04, T05, T06, T07, T08, T10, T11, T14) */}
+                <Route path="mon-hoc/:monId" element={<CourseTeacherLayout />}>
+<Route path="diem-danh" element={<CourseAttendance/>}/>
+<Route path="ban-nhap-ai" element={<TeacherAIDraftsPage/>}/>
+                  <Route index element={<TeacherCourseOverviewPage />} />
+                  <Route path="cau-truc" element={<CourseStructurePage />} />
+                  <Route path="thanh-vien" element={<CourseMembersPage />} />
+                  <Route path="hoc-lieu" element={<TeacherMaterialListPage />} />
+                  <Route path="tep-tin" element={<CourseFilePolicyPage initialTab="files" />} />
+                  <Route path="chinh-sach-tep" element={<CourseFilePolicyPage initialTab="policy" />} />
+                  <Route path="hoc-lieu/tai-len" element={<UploadMaterialPage />} />
                   <Route path="hoc-lieu/:hocLieuId" element={<TeacherMaterialDetailPage />} />
-                  <Route path="bai-tap/:baiTapId/bai-nop" element={<TeacherSubmissionsPage />} />
-                  <Route path="bai-nop/:baiNopId/cham" element={<TeacherGradingPage />} />
-                  <Route path="thong-bao" element={<TeacherAnnouncementsPage />} />
-                  <Route path="ban-nhap-ai" element={<TeacherAIDraftsPage />} />
-
-                  {/* Course Context for Teacher (T04, T05, T06, T07, T08, T10, T11, T14) */}
-                  <Route path="mon-hoc/:monId" element={<CourseTeacherLayout />}>
-                    <Route index element={<TeacherCourseOverviewPage />} />
-                    <Route path="cau-truc" element={<CourseStructurePage />} />
-                    <Route path="thanh-vien" element={<CourseMembersPage />} />
-                    <Route path="hoc-lieu" element={<TeacherMaterialListPage />} />
-                    <Route path="tep-tin" element={<CourseFilePolicyPage initialTab="files" />} />
-                    <Route path="chinh-sach-tep" element={<CourseFilePolicyPage initialTab="policy" />} />
-                    <Route path="hoc-lieu/tai-len" element={<UploadMaterialPage />} />
-                    <Route path="hoc-lieu/:hocLieuId" element={<TeacherMaterialDetailPage />} />
-                    <Route path="bai-tap" element={<TeacherAssignmentListPage />} />
-                    <Route path="bai-tap/soan" element={<TeacherAssignmentEditPage />} />
-                    <Route path="diem" element={<TeacherGradebookPage />} />
-                  </Route>
+                  <Route path="bai-tap" element={<TeacherAssignmentListPage />} />
+                  <Route path="bai-tap/soan" element={<TeacherAssignmentEditPage />} />
+                  <Route path="diem" element={<TeacherGradebookPage />} />
                 </Route>
+              </Route>
 
-                {/* Admin Workspace (A01 - A08) */}
-                <Route
-                  path="ad"
-                  element={
-                    <RouteGuard allowedRoles={['admin']}>
-                      <AdminLayout />
-                    </RouteGuard>
-                  }
-                >
-                  <Route index element={<AdminDashboardPage />} />
-                  <Route path="email-hop-le" element={<AdminEligibleEmailsPage />} />
-                  <Route path="duyet-giang-vien" element={<AdminEligibleEmailsPage />} />
-                  <Route path="tai-khoan" element={<AdminAccountsPage />} />
-                  <Route path="tai-khoan/:taiKhoanId" element={<AdminAccountDetailPage />} />
-                  <Route path="mon-hoc" element={<AdminCoursesPage />} />
-                  <Route path="mon-hoc/:monId" element={<AdminCourseDetailPage />} />
-                  <Route path="nhat-ky" element={<AdminAuditLogsPage />} />
-                  <Route path="cau-hinh" element={<AdminSettingsPage />} />
-                </Route>
+              {/* Admin Workspace (A01 - A08) */}
+              <Route
+                path="ad"
+                element={
+                  <RouteGuard allowedRoles={['admin']}>
+                    <AdminLayout />
+                  </RouteGuard>
+                }
+              >
+                <Route index element={<AdminDashboardPage />} />
+<Route path="bao-cao" element={<ReportsPage />} />
+<Route path="thu-vien" element={<LibraryPage />} />
+                <Route path="email-hop-le" element={<Navigate to="/ad/duyet-giang-vien" replace />} />
+                <Route path="duyet-giang-vien" element={<AdminTeacherApprovalPage />} />
+                <Route path="tai-khoan" element={<AdminAccountsPage />} />
+                <Route path="tai-khoan/:taiKhoanId" element={<AdminAccountDetailPage />} />
+                <Route path="mon-hoc" element={<AdminCoursesPage />} />
+                <Route path="mon-hoc/:monId" element={<AdminCourseDetailPage />} />
+                <Route path="nhat-ky" element={<AdminAuditLogsPage />} />
+                <Route path="cau-hinh" element={<AdminSettingsPage />} />
+              </Route>
 
-                {/* Catch-all Wildcard -> 404 */}
-                <Route path="*" element={<Navigate to="/404" replace />} />
-              </Routes>
-            </NotificationProvider>
-          </SessionProvider>
-        </DatabaseProvider>
-      </ClockProvider>
+              {/* Catch-all Wildcard -> 404 */}
+              <Route path="*" element={<Navigate to="/404" replace />} />
+            </Routes>
+        </NotificationProvider>
+      </SessionProvider>
     </BrowserRouter>
   );
 };

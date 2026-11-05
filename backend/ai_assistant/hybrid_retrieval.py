@@ -1,16 +1,8 @@
-
 from __future__ import annotations
 
 import hashlib
 import logging
 import re
-
-from .retrieval import (
-    RetrievedChunk,
-    retrieve_course_chunks,
-    normalize_text,
-)
-
 from dataclasses import replace
 
 from django.conf import settings
@@ -21,21 +13,18 @@ from ai_assistant.embeddings import (
     cosine_similarity,
     embed_text,
 )
-
 from ai_assistant.models import MaterialChunkEmbedding
-
 from files.models import FilePurpose, FileStatus
 from materials.statuses import ExtractionStatus
 
 from .retrieval import (
     DEFAULT_TOP_K,
     RetrievedChunk,
+    normalize_text,
     retrieve_course_chunks,
 )
 
-SITUATION_PATTERN = re.compile(
-    r"\btinh\s+huong\s*(iv|iii|ii|i|v|[1-5])\b"
-)
+SITUATION_PATTERN = re.compile(r"\btinh\s+huong\s*(iv|iii|ii|i|v|[1-5])\b")
 
 ROMAN_TO_NUMBER = {
     "i": "1",
@@ -91,6 +80,7 @@ def filter_situation_mismatches(query: str, chunks: list):
 
     return filtered
 
+
 logger = logging.getLogger(__name__)
 
 RRF_K = 60
@@ -108,7 +98,6 @@ def _chunk_identity(chunk: RetrievedChunk) -> tuple:
         chunk.page_number,
         chunk.text,
     )
-
 
 
 def reciprocal_rank_fusion(
@@ -139,17 +128,13 @@ def reciprocal_rank_fusion(
     ]
 
     for source, ranked_results in result_lists:
-
         for rank, chunk in enumerate(
             ranked_results,
             start=1,
         ):
             key = _chunk_identity(chunk)
 
-            fused_scores[key] = (
-                fused_scores.get(key, 0.0)
-                + 1.0 / (RRF_K + rank)
-            )
+            fused_scores[key] = fused_scores.get(key, 0.0) + 1.0 / (RRF_K + rank)
 
             chunk_lookup.setdefault(key, chunk)
 
@@ -196,7 +181,6 @@ def reciprocal_rank_fusion(
     return results
 
 
-
 def _expected_content_hash(
     course_code: str,
     material_title: str,
@@ -208,9 +192,7 @@ def _expected_content_hash(
 
     document_title = f"{course_code} - {material_title}"
 
-    return hashlib.sha256(
-        f"{document_title}\0{text}".encode("utf-8")
-    ).hexdigest()
+    return hashlib.sha256(f"{document_title}\0{text}".encode()).hexdigest()
 
 
 def _get_semantic_results(
@@ -231,55 +213,32 @@ def _get_semantic_results(
     max_candidates = settings.AI_RAG_MAX_VECTOR_CANDIDATES
 
     if not 0.0 <= threshold <= 1.0:
-        raise ValueError(
-            "AI_RAG_MIN_COSINE_SIMILARITY "
-            "must be between 0 and 1."
-        )
+        raise ValueError("AI_RAG_MIN_COSINE_SIMILARITY must be between 0 and 1.")
 
     if max_candidates <= 0:
-        raise ValueError(
-            "AI_RAG_MAX_VECTOR_CANDIDATES must be positive."
-        )
+        raise ValueError("AI_RAG_MAX_VECTOR_CANDIDATES must be positive.")
 
     eligible = (
-    MaterialChunkEmbedding.objects.filter(
-        embedding_model=model,
-        dimensions=dimensions,
-
-        extraction__status=ExtractionStatus.SUCCESS,
-
-        extraction__stored_file__status=FileStatus.CLEAN,
-        extraction__stored_file__purpose=FilePurpose.COURSE_MATERIAL,
-        extraction__stored_file__course=course,
-
-        extraction__material_version__is_published=True,
-        extraction__material_version__material__course=course,
-        extraction__material_version__material__is_hidden=False,
-
-        extraction__material_version__material__published_version_id=F(
-            "extraction__material_version_id"
-        ),
-
-        extraction__material_file__material_version_id=F(
-            "extraction__material_version_id"
-        ),
-
-        extraction__material_file__file_id=F(
-            "extraction__stored_file_id"
-        ),
-    )
-    .filter(
-        extraction__file_hash=F(
-            "extraction__material_file__sha256_hash"
+        MaterialChunkEmbedding.objects.filter(
+            embedding_model=model,
+            dimensions=dimensions,
+            extraction__status=ExtractionStatus.SUCCESS,
+            extraction__stored_file__status=FileStatus.CLEAN,
+            extraction__stored_file__purpose=FilePurpose.COURSE_MATERIAL,
+            extraction__stored_file__course=course,
+            extraction__material_version__is_published=True,
+            extraction__material_version__material__course=course,
+            extraction__material_version__material__is_hidden=False,
+            extraction__material_version__material__published_version_id=F(
+                "extraction__material_version_id"
+            ),
+            extraction__material_file__material_version_id=F("extraction__material_version_id"),
+            extraction__material_file__file_id=F("extraction__stored_file_id"),
         )
+        .filter(extraction__file_hash=F("extraction__material_file__sha256_hash"))
+        .filter(extraction__file_hash=F("extraction__stored_file__sha256_hash"))
+        .exclude(extraction__file_hash="")
     )
-    .filter(
-        extraction__file_hash=F(
-            "extraction__stored_file__sha256_hash"
-        )
-    )
-    .exclude(extraction__file_hash="")
-)
 
     # Avoid embedding API calls if no index exists.
     if not eligible.exists():
@@ -291,26 +250,23 @@ def _get_semantic_results(
     )
 
     rows = list(
-        eligible
-        .values(
+        eligible.values(
             "embedding",
             "dimensions",
             "content_hash",
             "page_number",
             "text",
-
             "extraction__id",
-
+            "extraction__material_version_id",
+            "extraction__stored_file_id",
+            "extraction__file_hash",
             "extraction__material_version__material__id",
             "extraction__material_version__material__title",
-
             "extraction__material_version__material__course__code",
             "extraction__material_version__material__course__name",
-
             "extraction__material_file__file_name",
             "extraction__stored_file__file_name",
-        )
-        .order_by(
+        ).order_by(
             "extraction__material_version__material__title",
             "extraction__material_file__position",
             "chunk_index",
@@ -329,19 +285,14 @@ def _get_semantic_results(
     ranked = []
 
     for row in rows:
-
         text = row["text"]
 
         if not isinstance(text, str) or not text.strip():
             continue
 
-        course_code = row[
-            "extraction__material_version__material__course__code"
-        ]
+        course_code = row["extraction__material_version__material__course__code"]
 
-        material_title = row[
-            "extraction__material_version__material__title"
-        ]
+        material_title = row["extraction__material_version__material__title"]
 
         # Ignore stale vectors whose source text or title changed.
         expected_hash = _expected_content_hash(
@@ -373,22 +324,18 @@ def _get_semantic_results(
             continue
 
         file_name = (
-            row["extraction__material_file__file_name"]
-            or row["extraction__stored_file__file_name"]
+            row["extraction__material_file__file_name"] or row["extraction__stored_file__file_name"]
         )
 
         chunk = RetrievedChunk(
+            version_id=str(row["extraction__material_version_id"]),
+            file_id=str(row["extraction__stored_file_id"]),
+            file_hash=row["extraction__file_hash"],
             citation_id="",
-            material_id=str(
-                row[
-                    "extraction__material_version__material__id"
-                ]
-            ),
+            material_id=str(row["extraction__material_version__material__id"]),
             material_title=material_title,
             course_code=course_code,
-            course_name=row[
-                "extraction__material_version__material__course__name"
-            ],
+            course_name=row["extraction__material_version__material__course__name"],
             file_name=file_name,
             page_number=row["page_number"],
             text=text,
@@ -402,8 +349,7 @@ def _get_semantic_results(
         reverse=True,
     )
 
-    return ranked[:min(MAX_RANKED_CANDIDATES, max(1, top_k * 5))]
-
+    return ranked[: min(MAX_RANKED_CANDIDATES, max(1, top_k * 5))]
 
 
 def retrieve_course_chunks_hybrid(
@@ -447,8 +393,7 @@ def retrieve_course_chunks_hybrid(
 
     except (ValueError, TypeError):
         logger.warning(
-            "Invalid semantic retrieval configuration or vector data. "
-            "Falling back to BM25.",
+            "Invalid semantic retrieval configuration or vector data. Falling back to BM25.",
             exc_info=True,
         )
 

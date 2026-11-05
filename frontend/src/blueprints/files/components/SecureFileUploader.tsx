@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import {
   UploadCloud,
@@ -17,7 +18,8 @@ import './SecureFileUploader.css';
 
 export interface SecureFileUploaderProps {
   courseId: string;
-  policy?: CourseFilePolicy | null;
+  assignmentId?: string;
+  policy?: Partial<CourseFilePolicy> | null;
   purpose?: 'course_material' | 'assignment_attachment' | 'assignment_submission' | 'general';
   isArchived?: boolean;
   onUploadSuccess?: (file: StoredFile) => void;
@@ -37,6 +39,7 @@ export type UploadStep =
 
 export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
   courseId,
+  assignmentId,
   policy,
   purpose = 'course_material',
   isArchived = false,
@@ -80,22 +83,22 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
   // Client-side validation function
   const validateFile = (file: File): string | null => {
     if (isArchived) {
-      return 'Môn học đã lưu trữ, không thể tải lên tệp tin mới.';
+      return uiText("Môn học đã lưu trữ, không thể tải lên tệp tin mới.");
     }
 
     const nameParts = file.name.split('.');
     const ext = nameParts.length > 1 ? (nameParts.pop()?.toLowerCase() || '') : '';
 
     if (!ext || !allowedExtensions.includes(ext)) {
-      return `Định dạng tệp ".${ext || 'không xác định'}" không được phép. Các định dạng được chấp nhận: ${allowedExtensions.map((e) => `.${e}`).join(', ')}`;
+      return uiText("Định dạng tệp \".{0}\" không được phép. Các định dạng được chấp nhận: {1}",[ext || 'không xác định',allowedExtensions.map((e) => `.${e}`).join(', ')]);
     }
 
     if (file.size <= 0) {
-      return 'Tệp tin rỗng (0 bytes). Vui lòng chọn tệp tin hợp lệ.';
+      return uiText("Tệp tin rỗng (0 bytes). Vui lòng chọn tệp tin hợp lệ.");
     }
 
     if (file.size > maxFileSizeBytes) {
-      return `Kích thước tệp (${formatFileSize(file.size)}) vượt quá giới hạn cho phép của môn học (${formatFileSize(maxFileSizeBytes)}).`;
+      return uiText("Kích thước tệp ({0}) vượt quá giới hạn cho phép của môn học ({1}).",[formatFileSize(file.size),formatFileSize(maxFileSizeBytes)]);
     }
 
     // Quota availability check
@@ -105,7 +108,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
       const totalQuota = policy.course_quota_bytes ?? 1073741824;
 
       if (currentUsed + currentReserved + file.size > totalQuota) {
-        return `Dung lượng còn lại của môn học không đủ để tải lên tệp này (${formatFileSize(file.size)}).`;
+        return uiText("Dung lượng còn lại của môn học không đủ để tải lên tệp này ({0}).",[formatFileSize(file.size)]);
       }
     }
 
@@ -135,7 +138,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
         if (file.status === 'clean') {
           setUploadStep('clean');
           setUploadedStoredFile(file);
-          setStatusMessage('Tệp tin đã được quét an toàn và sẵn sàng sử dụng.');
+          setStatusMessage(uiText("Tệp tin đã được quét an toàn và sẵn sàng sử dụng."));
           onUploadSuccess?.(file);
           return;
         }
@@ -143,7 +146,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
         if (file.status === 'infected') {
           setUploadStep('infected');
           const err =
-            'CẢNH BÁO AN NINH: Tệp tin bị phát hiện chứa mã độc hoặc vi phạm an ninh hệ thống và đã bị hủy!';
+            uiText("CẢNH BÁO AN NINH: Tệp tin bị phát hiện chứa mã độc hoặc vi phạm an ninh hệ thống và đã bị hủy!");
           setErrorMessage(err);
           onUploadError?.(err);
           return;
@@ -158,12 +161,12 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
           // Timeout
           setUploadStep('error');
           setUploadedStoredFile(file);
-          setStatusMessage('Tệp đang tiếp tục được quét trong chế độ nền.');
-          setErrorMessage('Quét chưa hoàn tất. Kiểm tra lại trong kho tệp.');
+          setStatusMessage(uiText("Tệp đang tiếp tục được quét trong chế độ nền."));
+          setErrorMessage(uiText("Quét chưa hoàn tất. Kiểm tra lại trong kho tệp."));
         }
       } catch (err) {
         setUploadStep('error');
-        const msg = err instanceof Error ? err.message : 'Không thể kiểm tra trạng thái quét mã độc.';
+        const msg = err instanceof Error ? err.message : uiText("Không thể kiểm tra trạng thái quét mã độc.");
         setErrorMessage(msg);
         onUploadError?.(msg);
       }
@@ -176,7 +179,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
     if (uploadStep === 'uploading' || uploadStep === 'scanning') return;
     setErrorMessage(null);
     setUploadStep('validating');
-    setStatusMessage('Đang kiểm tra tính hợp lệ của tệp...');
+    setStatusMessage(uiText("Đang kiểm tra tính hợp lệ của tệp..."));
 
     const validationError = validateFile(fileToUpload);
     if (validationError) {
@@ -189,18 +192,19 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
     try {
       // Step 1: Create Upload Intent
       setUploadStep('uploading');
-      setStatusMessage('Đang khởi tạo phiên tải lên và giữ chỗ hạn ngạch...');
+      setStatusMessage(uiText("Đang khởi tạo phiên tải lên và giữ chỗ hạn ngạch..."));
       setUploadProgress(15);
 
       const intent = await filesService.createUploadIntent(courseId, {
         file_name: fileToUpload.name,
         file_size: fileToUpload.size,
         purpose,
+        ...(assignmentId ? { assignment_id: assignmentId } : {}),
       });
 
       setCurrentFileId(intent.file_id);
       setUploadProgress(50);
-      setStatusMessage('Đang tải nội dung tệp lên máy chủ lưu trữ an toàn...');
+      setStatusMessage(uiText("Đang tải nội dung tệp lên máy chủ lưu trữ an toàn..."));
 
       await filesService.uploadContent(courseId, intent.file_id, fileToUpload);
 
@@ -210,7 +214,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
       setUploadProgress(85);
 
       // Step 2: Commit Upload
-      setStatusMessage('Đang đối soát checksum và chuyển sang khu vực cách ly (Quarantine)...');
+      setStatusMessage(uiText("Đang đối soát checksum và chuyển sang khu vực cách ly (Quarantine)..."));
       await filesService.commitUpload(courseId, intent.file_id, {
         client_checksum: sha256,
       });
@@ -218,14 +222,14 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
 
       // Step 3: Scanning Phase
       setUploadStep('scanning');
-      setStatusMessage('Đang kiểm tra an toàn (Quét mã độc & xác thực cấu trúc MIME)...');
+      setStatusMessage(uiText("Đang kiểm tra an toàn (Quét mã độc & xác thực cấu trúc MIME)..."));
       pollCountRef.current = 0;
 
       // Start polling for scan completion
       await pollScanStatus(intent.file_id);
     } catch (err) {
       setUploadStep('error');
-      const msg = err instanceof Error ? err.message : 'Quá trình tải lên tệp tin thất bại.';
+      const msg = err instanceof Error ? err.message : uiText("Quá trình tải lên tệp tin thất bại.");
       setErrorMessage(msg);
       onUploadError?.(msg);
     }
@@ -306,7 +310,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
         disabled={isArchived || uploadStep === 'uploading' || uploadStep === 'scanning'}
         className="sr-only"
         data-testid="secure-file-input"
-        aria-label="Chọn tệp tin tải lên"
+        aria-label={uiText("Chọn tệp tin tải lên")}
       />
 
       {/* 1. IDLE / SELECT STEP */}
@@ -332,11 +336,11 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
           <div className="dropzone-text-block">
             <h3 className="dropzone-title">
               {isArchived
-                ? 'Môn học đã lưu trữ — Không thể tải lên tệp'
-                : 'Kéo thả tệp vào đây hoặc nhấn để duyệt'}
+                ? uiText("Môn học đã lưu trữ — Không thể tải lên tệp")
+                : uiText("Kéo thả tệp vào đây hoặc nhấn để duyệt")}
             </h3>
             <p className="dropzone-desc">
-              Hỗ trợ: {allowedExtensions.map((ext) => `.${ext.toUpperCase()}`).join(', ')} • Tối đa:{' '}
+              {uiText("Hỗ trợ: ")}{allowedExtensions.map((ext) => `.${ext.toUpperCase()}`).join(', ')} {uiText(" • Tối đa:")}{' '}
               {formatFileSize(maxFileSizeBytes)}
             </p>
           </div>
@@ -351,8 +355,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
                 fileInputRef.current?.click();
               }}
             >
-              Chọn tệp từ máy
-            </Button>
+              {uiText("Chọn tệp từ máy")}</Button>
           )}
         </div>
       )}
@@ -377,14 +380,14 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
               </div>
               <div className="file-info-text">
                 <span className="file-name" title={selectedFile?.name}>
-                  {selectedFile?.name || 'Tệp tải lên'}
+                  {selectedFile?.name || uiText("Tệp tải lên")}
                 </span>
                 <span className="file-size-status">
                   {selectedFile ? formatFileSize(selectedFile.size) : ''}
-                  {uploadStep === 'uploading' && ` • Đang tải lên ${uploadProgress}%`}
-                  {uploadStep === 'scanning' && ' • Khu vực cách ly an toàn'}
-                  {uploadStep === 'clean' && ' • Đã qua kiểm duyệt mã độc'}
-                  {uploadStep === 'infected' && ' • Tệp nguy hại đã bị hủy'}
+                  {uploadStep === 'uploading' && uiText(" • Đang tải lên {0}%",[uploadProgress])}
+                  {uploadStep === 'scanning' && uiText(" • Khu vực cách ly an toàn")}
+                  {uploadStep === 'clean' && uiText(" • Đã qua kiểm duyệt mã độc")}
+                  {uploadStep === 'infected' && uiText(" • Tệp nguy hại đã bị hủy")}
                 </span>
               </div>
             </div>
@@ -394,8 +397,12 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
               type="button"
               className="status-close-btn"
               onClick={() => void handleReset()}
-              aria-label="Đóng hoặc hủy tải lên"
+              aria-label={uiText("Đóng hoặc hủy tải lên")}
               data-testid="uploader-reset-btn"
+              disabled={
+                purpose === 'assignment_submission' &&
+                (uploadStep === 'uploading' || uploadStep === 'scanning')
+              }
             >
               <X size={18} />
             </button>
@@ -416,11 +423,10 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
             <div className="scanning-quarantine-box" data-testid="scanning-quarantine-box">
               <div className="scanner-badge-row">
                 <Loader2 size={18} className="spinner text-warning" />
-                <span className="scanning-label">Đang kiểm tra an toàn (Quét mã độc)...</span>
+                <span className="scanning-label">{uiText("Đang kiểm tra an toàn (Quét mã độc)...")}</span>
               </div>
               <p className="scanning-details">
-                Hệ thống đang kiểm tra chữ ký virus EICAR, phát hiện ngụy trang nhị phân PE/ELF và đối soát định dạng MIME thực tế qua magic bytes.
-              </p>
+                {uiText("Hệ thống đang kiểm tra chữ ký virus EICAR, phát hiện ngụy trang nhị phân PE/ELF và đối soát định dạng MIME thực tế qua magic bytes.")}</p>
             </div>
           )}
 
@@ -429,11 +435,10 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
             <div className="clean-success-box" data-testid="clean-success-box">
               <div className="success-badge-row">
                 <CheckCircle2 size={18} className="text-success" />
-                <span className="success-label">Tải lên & Quét an toàn thành công!</span>
+                <span className="success-label">{uiText("Tải lên & Quét an toàn thành công!")}</span>
               </div>
               <p className="success-details">
-                Mã định danh tệp: <code>{uploadedStoredFile.id}</code> • Đã chuyển vào kho lưu trữ môn học an toàn.
-              </p>
+                {uiText("Mã định danh tệp: ")}<code>{uploadedStoredFile.id}</code> {uiText(" • Đã chuyển vào kho lưu trữ môn học an toàn.")}</p>
             </div>
           )}
 
@@ -442,11 +447,11 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
             <div className="infected-alert-box" role="alert" data-testid="infected-alert-box">
               <div className="infected-badge-row">
                 <ShieldAlert size={20} className="text-danger" />
-                <strong className="infected-title">PHÁT HIỆN MÃ ĐỘC NGUY HẠI!</strong>
+                <strong className="infected-title">{uiText("PHÁT HIỆN MÃ ĐỘC NGUY HẠI!")}</strong>
               </div>
               <p className="infected-details">
                 {errorMessage ||
-                  'Tệp tin đã bị hệ thống phát hiện chứa mã độc hoặc vi phạm an ninh. Tệp đã bị hủy vĩnh viễn và dung lượng đã được hoàn trả lại môn học.'}
+                  uiText("Tệp tin đã bị hệ thống phát hiện chứa mã độc hoặc vi phạm an ninh. Tệp đã bị hủy vĩnh viễn và dung lượng đã được hoàn trả lại môn học.")}
               </p>
               <Button
                 type="button"
@@ -456,8 +461,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
                 className="mt-2"
                 data-testid="dismiss-infected-btn"
               >
-                Chọn tệp khác an toàn
-              </Button>
+                {uiText("Chọn tệp khác an toàn")}</Button>
             </div>
           )}
 
@@ -466,7 +470,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
             <div className="error-alert-box" role="alert" data-testid="error-alert-box">
               <div className="error-badge-row">
                 <AlertTriangle size={18} className="text-danger" />
-                <span className="error-title">Không thể tải tệp lên</span>
+                <span className="error-title">{uiText("Không thể tải tệp lên")}</span>
               </div>
               <p className="error-details">{errorMessage}</p>
               <Button
@@ -477,8 +481,7 @@ export const SecureFileUploader: React.FC<SecureFileUploaderProps> = ({
                 className="mt-2"
                 data-testid="retry-upload-btn"
               >
-                Thử lại với tệp khác
-              </Button>
+                {uiText("Thử lại với tệp khác")}</Button>
             </div>
           )}
         </div>

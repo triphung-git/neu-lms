@@ -1,3 +1,5 @@
+import {currentLocale} from '../../../shared/i18n/translate';
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useOutletContext, useNavigate, Link } from 'react-router-dom';
 import {
@@ -90,7 +92,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
       })
       .catch((err) => {
         if (mounted) {
-          setMaterialsError(err instanceof Error ? err.message : 'Không thể tải thông tin môn học.');
+          setMaterialsError(err instanceof Error ? err.message : uiText("Không thể tải thông tin môn học."));
           setCourseLoading(false);
         }
       });
@@ -130,7 +132,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
       setTotalItems(res.pagination?.total_items || 0);
     } catch (err) {
       if (seq !== reqSeq.current) return;
-      setMaterialsError(err instanceof Error ? err.message : 'Lỗi khi tải danh sách học liệu.');
+      setMaterialsError(err instanceof Error ? err.message : uiText("Lỗi khi tải danh sách học liệu."));
     } finally {
       if (seq === reqSeq.current) {
         setMaterialsLoading(false);
@@ -154,15 +156,15 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
       const versions = await materialsService.listVersions(monId, mat.id);
       const targetVersion = versions.find((v) => v.lifecycle_status === 'finalized') || versions[0];
       if (!targetVersion) {
-        throw new Error('Chưa có phiên bản nào sẵn sàng để công bố.');
+        throw new Error(uiText("Chưa có phiên bản nào sẵn sàng để công bố."));
       }
       await materialsService.publishMaterial(monId, mat.id, {
         version_id: targetVersion.id,
       });
-      notifySuccess(`Đã công bố học liệu "${mat.title}" (phiên bản v${targetVersion.version_number}).`);
+      notifySuccess(uiText("Đã công bố học liệu \"{0}\" (phiên bản v{1}).",[mat.title,targetVersion.version_number]));
       await loadMaterials();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Công bố học liệu thất bại.');
+      notifyError(err instanceof Error ? err.message : uiText("Công bố học liệu thất bại."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [mat.id]: false }));
     }
@@ -177,14 +179,14 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
     try {
       if (mat.is_hidden) {
         await materialsService.unhideMaterial(monId, mat.id);
-        notifySuccess(`Đã hiện học liệu "${mat.title}" cho sinh viên.`);
+        notifySuccess(uiText("Đã hiện học liệu \"{0}\" cho sinh viên.",[mat.title]));
       } else {
         await materialsService.hideMaterial(monId, mat.id);
-        notifySuccess(`Đã ẩn học liệu "${mat.title}" khỏi sinh viên.`);
+        notifySuccess(uiText("Đã ẩn học liệu \"{0}\" khỏi sinh viên.",[mat.title]));
       }
       await loadMaterials();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Thao tác ẩn/hiện thất bại.');
+      notifyError(err instanceof Error ? err.message : uiText("Thao tác ẩn/hiện thất bại."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [mat.id]: false }));
     }
@@ -196,11 +198,11 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
     setIsDeleting(true);
     try {
       await materialsService.deleteMaterial(monId, pendingDeleteMaterial.id);
-      notifySuccess(`Đã xóa học liệu "${pendingDeleteMaterial.title}".`);
+      notifySuccess(uiText("Đã xóa học liệu \"{0}\".",[pendingDeleteMaterial.title]));
       setPendingDeleteMaterial(null);
       await loadMaterials();
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Xóa học liệu thất bại.');
+      notifyError(err instanceof Error ? err.message : uiText("Xóa học liệu thất bại."));
     } finally {
       setIsDeleting(false);
     }
@@ -216,22 +218,19 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
             className="teacher-materials-tab-btn"
             onClick={() => setActiveTab('materials')}
           >
-            <BookOpen size={16} /> Danh sách học liệu
-          </button>
+            <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
           <button
             type="button"
             className="teacher-materials-tab-btn active"
             onClick={() => setActiveTab('files')}
           >
-            <FolderOpen size={16} /> Kho tệp tin
-          </button>
+            <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
           <button
             type="button"
             className="teacher-materials-tab-btn"
             onClick={() => setActiveTab('policy')}
           >
-            <Settings size={16} /> Chính sách tệp tin
-          </button>
+            <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
         </div>
         <CourseFilePolicyPage initialTab="files" />
       </div>
@@ -247,22 +246,19 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
             className="teacher-materials-tab-btn"
             onClick={() => setActiveTab('materials')}
           >
-            <BookOpen size={16} /> Danh sách học liệu
-          </button>
+            <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
           <button
             type="button"
             className="teacher-materials-tab-btn"
             onClick={() => setActiveTab('files')}
           >
-            <FolderOpen size={16} /> Kho tệp tin
-          </button>
+            <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
           <button
             type="button"
             className="teacher-materials-tab-btn active"
             onClick={() => setActiveTab('policy')}
           >
-            <Settings size={16} /> Chính sách tệp tin
-          </button>
+            <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
         </div>
         <CourseFilePolicyPage initialTab="policy" />
       </div>
@@ -279,29 +275,26 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
           className="teacher-materials-tab-btn active"
           onClick={() => setActiveTab('materials')}
         >
-          <BookOpen size={16} /> Danh sách học liệu
-        </button>
+          <BookOpen size={16} /> {uiText(" Danh sách học liệu")}</button>
         <button
           type="button"
           className="teacher-materials-tab-btn"
           onClick={() => setActiveTab('files')}
         >
-          <FolderOpen size={16} /> Kho tệp tin
-        </button>
+          <FolderOpen size={16} /> {uiText(" Kho tệp tin")}</button>
         <button
           type="button"
           className="teacher-materials-tab-btn"
           onClick={() => setActiveTab('policy')}
         >
-          <Settings size={16} /> Chính sách tệp tin
-        </button>
+          <Settings size={16} /> {uiText(" Chính sách tệp tin")}</button>
       </div>
 
       {/* Header */}
       <div className="teacher-materials-header">
         <div>
-          <h2>Quản lý học liệu môn học</h2>
-          <p>Quản lý tài liệu theo phiên bản, trích xuất nội dung văn bản và kiểm soát xuất bản.</p>
+          <h2>{uiText("Quản lý học liệu môn học")}</h2>
+          <p>{uiText("Quản lý tài liệu theo phiên bản, trích xuất nội dung văn bản và kiểm soát xuất bản.")}</p>
         </div>
         {!isArchived && (
           <Button
@@ -309,15 +302,14 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
             icon={<UploadCloud size={16} />}
             onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/tai-len`)}
           >
-            Tải lên học liệu mới
-          </Button>
+            {uiText("Tải lên học liệu mới")}</Button>
         )}
       </div>
 
       {/* Filter Bar */}
       <div className="teacher-materials-filter-bar">
         <div className="teacher-materials-filter-group">
-          <label htmlFor="chapter-filter">Chương học:</label>
+          <label htmlFor="chapter-filter">{uiText("Chương học:")}</label>
           <select
             id="chapter-filter"
             value={selectedChapterId}
@@ -326,7 +318,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
               setPage(1);
             }}
           >
-            <option value="all">Tất cả chương</option>
+            <option value="all">{uiText("Tất cả chương")}</option>
             {chapters.map((ch) => (
               <option key={ch.id} value={ch.id}>
                 {ch.title}
@@ -336,11 +328,11 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
         </div>
 
         <div className="teacher-materials-filter-group">
-          <label htmlFor="tag-filter">Thẻ (Tag):</label>
+          <label htmlFor="tag-filter">{uiText("Thẻ (Tag):")}</label>
           <input
             id="tag-filter"
             type="text"
-            placeholder="Lọc theo thẻ..."
+            placeholder={uiText("Lọc theo thẻ...")}
             value={tagFilter}
             onChange={(e) => {
               setTagFilter(e.target.value);
@@ -355,14 +347,14 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
         <LoadingSkeleton lines={6} />
       ) : materialsError ? (
         <ErrorBanner
-          title="Không thể tải danh sách học liệu"
+          title={uiText("Không thể tải danh sách học liệu")}
           message={materialsError}
           onRetry={() => void loadMaterials()}
         />
       ) : materials.length === 0 ? (
         <EmptyState
-          title="Chưa có học liệu nào"
-          description="Môn học chưa có tài liệu học tập nào được tải lên."
+          title={uiText("Chưa có học liệu nào")}
+          description={uiText("Môn học chưa có tài liệu học tập nào được tải lên.")}
           action={
             !isArchived ? (
               <Button
@@ -370,8 +362,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                 icon={<UploadCloud size={16} />}
                 onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/tai-len`)}
               >
-                Tải lên học liệu đầu tiên
-              </Button>
+                {uiText("Tải lên học liệu đầu tiên")}</Button>
             ) : undefined
           }
         />
@@ -402,12 +393,12 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                       {hasPublished ? (
                         <Badge
                           variant="published"
-                          label={`Đã công bố (v${mat.published_version_number})`}
+                          label={uiText("Đã công bố (v{0})",[mat.published_version_number])}
                         />
                       ) : (
-                        <Badge variant="draft" label="Bản nháp" />
+                        <Badge variant="draft" label={uiText("Bản nháp")} />
                       )}
-                      {mat.is_hidden && <Badge variant="locked" label="Đang ẩn" />}
+                      {mat.is_hidden && <Badge variant="locked" label={uiText("Đang ẩn")} />}
                       {tagList.map((t) => (
                         <Badge key={t} variant="info" label={`#${t}`} />
                       ))}
@@ -421,8 +412,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                       icon={<ExternalLink size={14} />}
                       onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
                     >
-                      Chi tiết & Phiên bản
-                    </Button>
+                      {uiText("Chi tiết & Phiên bản")}</Button>
 
                     {canPublish && (
                       <Button
@@ -432,7 +422,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                         icon={<CheckCircle2 size={14} />}
                         onClick={() => void handlePublish(mat)}
                       >
-                        {actionLoading[mat.id] ? 'Đang xử lý...' : `Công bố v${mat.latest_version_number}`}
+                        {actionLoading[mat.id] ? uiText("Đang xử lý...") : uiText("Công bố v{0}",[mat.latest_version_number])}
                       </Button>
                     )}
 
@@ -444,7 +434,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                         icon={mat.is_hidden ? <Eye size={14} /> : <EyeOff size={14} />}
                         onClick={() => void handleToggleHide(mat)}
                       >
-                        {mat.is_hidden ? 'Hiện' : 'Ẩn'}
+                        {mat.is_hidden ? uiText("Hiện") : uiText("Ẩn")}
                       </Button>
                     )}
 
@@ -455,8 +445,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                         icon={<Trash2 size={14} />}
                         onClick={() => setPendingDeleteMaterial(mat)}
                       >
-                        Xóa
-                      </Button>
+                        {uiText("Xóa")}</Button>
                     )}
                   </div>
                 </div>
@@ -464,13 +453,13 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                 <div className="teacher-material-card-meta">
                   <span>
                     <Layers size={14} style={{ display: 'inline', marginRight: 4 }} />
-                    Phiên bản mới nhất: v{mat.latest_version_number}
+                    {uiText("Phiên bản mới nhất: v")}{mat.latest_version_number}
                   </span>
                   <span>
                     <FileText size={14} style={{ display: 'inline', marginRight: 4 }} />
-                    {mat.file_count} tệp tin ({formatFileSize(mat.total_size_bytes)})
+                    {mat.file_count} {uiText(" tệp tin (")}{formatFileSize(mat.total_size_bytes)})
                   </span>
-                  <span>Tạo ngày: {new Date(mat.created_at).toLocaleDateString('vi-VN')}</span>
+                  <span>{uiText("Tạo ngày: ")}{new Date(mat.created_at).toLocaleDateString(currentLocale())}</span>
                 </div>
               </div>
             );
@@ -480,8 +469,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
           {totalPages > 1 && (
             <div className="pagination-controls">
               <span>
-                Trang {page} / {totalPages} (Tổng số {totalItems} học liệu)
-              </span>
+                Trang {page} / {totalPages} {uiText(" (Tổng số ")}{totalItems} {uiText(" học liệu)")}</span>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <Button
                   variant="secondary"
@@ -489,8 +477,7 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                 >
-                  Trang trước
-                </Button>
+                  {uiText("Trang trước")}</Button>
                 <Button
                   variant="secondary"
                   size="sm"
@@ -509,26 +496,23 @@ export const TeacherMaterialListPage: React.FC<TeacherMaterialListPageProps> = (
       <Modal
         isOpen={Boolean(pendingDeleteMaterial)}
         onClose={() => setPendingDeleteMaterial(null)}
-        title="Xác nhận xóa bản nháp học liệu"
+        title={uiText("Xác nhận xóa bản nháp học liệu")}
       >
         <p>
-          Bạn có chắc chắn muốn xóa học liệu <strong>{pendingDeleteMaterial?.title}</strong>? Thao
-          tác này sẽ xóa bản nháp và không thể khôi phục.
-        </p>
+          {uiText("Bạn có chắc chắn muốn xóa học liệu ")}<strong>{pendingDeleteMaterial?.title}</strong>{uiText("? Thao tác này sẽ xóa bản nháp và không thể khôi phục.")}</p>
         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
           <Button
             variant="secondary"
             onClick={() => setPendingDeleteMaterial(null)}
             disabled={isDeleting}
           >
-            Hủy
-          </Button>
+            {uiText("Hủy")}</Button>
           <Button
             variant="danger"
             onClick={() => void handleConfirmDelete()}
             disabled={isDeleting}
           >
-            {isDeleting ? 'Đang xóa...' : 'Xóa học liệu'}
+            {isDeleting ? uiText("Đang xóa...") : uiText("Xóa học liệu")}
           </Button>
         </div>
       </Modal>

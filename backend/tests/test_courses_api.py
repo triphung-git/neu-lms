@@ -637,14 +637,13 @@ class TestCourseSummaryApi:
         assert data["distinct_students"] == 2
 
         # Unavailable metrics represented as null, not fake zero
-        assert data["pending_submissions"] is None
+        assert data["pending_submissions"] == 0
         assert data["upcoming_deadlines"] is None
-        assert data["problem_materials"] is None
+        assert data["problem_materials"] == 0
+        assert data["scanning_materials"] == 0
         assert data["pending_ai_drafts"] is None
         assert set(data["unavailable_metrics"]) == {
-            "pending_submissions",
             "upcoming_deadlines",
-            "problem_materials",
             "pending_ai_drafts",
         }
 

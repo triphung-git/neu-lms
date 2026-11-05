@@ -17,6 +17,62 @@ export type AssignmentReopenWindow = components['schemas']['AssignmentReopenWind
 export type CreateAssignmentReopenWindowRequest =
   components['schemas']['CreateAssignmentReopenWindowRequest'];
 
+export interface SubmissionReceipt {
+  id: number;
+  file_id: string;
+  number: number;
+  submitted_at: string;
+  is_late: boolean;
+}
+
+
+export interface TeacherSubmissionRow {
+  id: number;
+  number: number;
+  file_name: string;
+  file_size: number;
+  submitted_at: string;
+  is_late: boolean;
+  student_id: string;
+  student_name: string;
+  student_email: string;
+  file_id: string;
+}
+
+export interface PaginationMeta {
+  page: number;
+  page_size: number;
+  total_items: number;
+  total_pages: number;
+  has_next: boolean;
+  has_previous: boolean;
+}
+
+export interface TeacherSubmissionList {
+  title: string;
+  course_id: string;
+  items: TeacherSubmissionRow[];
+  pagination: PaginationMeta;
+}
+
+export interface GradebookRow {
+  student_id: string;
+  name: string;
+  email: string;
+  revision_number: number | null;
+  latest_grade: { score: string; status: 'draft' | 'published' } | null;
+  published_grade: { score: string; status: 'draft' | 'published' } | null;
+}
+
+export interface TeacherGradebook {
+  course_name: string;
+  assignments: { id: string; title: string }[];
+  assignment_id: string | null;
+  total_score: string | null;
+  items: GradebookRow[];
+  pagination: PaginationMeta;
+}
+
 export interface ListAssignmentsParams {
   status?: string;
   chapter_id?: string;
@@ -249,6 +305,47 @@ export class AssignmentsService {
         method: 'GET',
         signal: options?.signal,
       }
+    );
+  }
+
+
+  async listTeacherSubmissions(
+    assignmentId: string,
+    params?: { page?: number; page_size?: number },
+    options?: { signal?: AbortSignal },
+  ): Promise<TeacherSubmissionList> {
+    return this.client.untypedRequest<TeacherSubmissionList>(
+      `/api/v1/assignments/${encodeURIComponent(assignmentId)}/submissions`,
+      { method: 'GET', params, signal: options?.signal },
+    );
+  }
+
+  async getTeacherGradebook(
+    courseId: string,
+    assignmentId: string,
+    params?: { page?: number; page_size?: number; search?: string },
+    options?: { signal?: AbortSignal },
+  ): Promise<TeacherGradebook> {
+    return this.client.untypedRequest<TeacherGradebook>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/gradebook`,
+      { method: 'GET', params: { ...params, assignment_id: assignmentId }, signal: options?.signal },
+    );
+  }
+
+  async submitAssignment(
+    courseId: string,
+    assignmentId: string,
+    fileId: string,
+    options?: { signal?: AbortSignal; idempotencyKey?: string },
+  ): Promise<SubmissionReceipt> {
+    return this.client.untypedRequest<SubmissionReceipt>(
+      `/api/v1/courses/${encodeURIComponent(courseId)}/assignments/${encodeURIComponent(assignmentId)}/submissions`,
+      {
+        method: 'POST',
+        body: { file_id: fileId },
+        headers: this.withHeaders(options?.idempotencyKey),
+        signal: options?.signal,
+      },
     );
   }
 

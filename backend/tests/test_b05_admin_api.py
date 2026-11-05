@@ -716,3 +716,49 @@ class TestAcceptanceRegressions:
         assert client.get("/api/v1/admin/teacher-requests").json()["items"] == []
         items = client.get("/api/v1/admin/teacher-requests?status=all").json()["items"]
         assert [item["id"] for item in items] == [str(req.id)]
+
+
+@pytest.mark.django_db
+class TestAdminRuntimeSettings:
+    def test_admin_can_read_non_secret_runtime_flags(self, auth_client, make_user, monkeypatch):
+        from django.test import override_settings
+
+        monkeypatch.setenv("AWS_ACCESS_KEY_ID", "example-access-key")
+        monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "example-secret-key")
+        monkeypatch.setenv("REDIS_URL", "rediss://redis.example.invalid:6379/0")
+        admin = make_user(role=Role.ADMIN)
+        client = auth_client(admin)
+
+        with override_settings(
+            AI_API_KEY="test-ai-secret",
+            AI_CHAT_MODEL="gemini-chat-test",
+            AI_EMBEDDING_MODEL="gemini-embedding-2",
+            FILES_STORAGE_BACKEND="s3",
+            FILES_S3_BUCKET="neu-lms-test",
+            FILES_S3_ENDPOINT="https://s3.example.invalid",
+            EMAIL_BACKEND="django.core.mail.backends.smtp.EmailBackend",
+            EMAIL_HOST="smtp.example.invalid",
+            EMAIL_HOST_USER="smtp-user",
+            EMAIL_HOST_PASSWORD="smtp-secret",
+            DEFAULT_FROM_EMAIL="noreply@example.invalid",
+            CLAMAV_HOST="clamav.example.invalid",
+            CLAMAV_PORT=3310,
+        ):
+            response = client.get("/api/v1/admin/runtime-settings")
+
+        assert response.status_code == status.HTTP_200_OK
+        data = response.json()
+        assert data["ai_chat_configured"] is True
+        assert data["ai_embedding_configured"] is True
+        assert data["s3_storage_configured"] is True
+        assert data["email_auth_configured"] is True
+        assert data["celery_broker_configured"] is True
+        serialized = json.dumps(data)
+        assert "test-ai-secret" not in serialized
+        assert "smtp-secret" not in serialized
+        assert "example-secret-key" not in serialized
+
+    def test_non_admin_cannot_read_runtime_settings(self, auth_client, make_user):
+        student = make_user(role=Role.STUDENT)
+        response = auth_client(student).get("/api/v1/admin/runtime-settings")
+        assert response.status_code == status.HTTP_403_FORBIDDEN

@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import {
@@ -107,7 +108,7 @@ export const CourseMembersPage: React.FC = () => {
         } else if (err.status === 404) {
           setCourse(null);
         } else {
-          setCourseError(err.message || 'Không thể tải thông tin môn học.');
+          setCourseError(err.message || uiText("Không thể tải thông tin môn học."));
         }
       }
     } finally {
@@ -139,7 +140,7 @@ export const CourseMembersPage: React.FC = () => {
       }
     } catch (err: any) {
       if (seq === membersSeqRef.current) {
-        setMembersError(err.message || 'Không thể tải danh sách thành viên.');
+        setMembersError(err.message || uiText("Không thể tải danh sách thành viên."));
       }
     } finally {
       if (seq === membersSeqRef.current) {
@@ -165,7 +166,7 @@ export const CourseMembersPage: React.FC = () => {
       }
     } catch (err: any) {
       if (seq === requestsSeqRef.current) {
-        setRequestsError(err.message || 'Không thể tải hàng đợi ghi danh.');
+        setRequestsError(err.message || uiText("Không thể tải hàng đợi ghi danh."));
       }
     } finally {
       if (seq === requestsSeqRef.current) {
@@ -198,11 +199,11 @@ export const CourseMembersPage: React.FC = () => {
       setCourse(updated);
       notifySuccess(
         updated.enrollment_open
-          ? 'Đã mở nhận ghi danh học phần.'
-          : 'Đã đóng nhận ghi danh học phần.'
+          ? uiText("Đã mở nhận ghi danh học phần.")
+          : uiText("Đã đóng nhận ghi danh học phần.")
       );
     } catch (err: any) {
-      notifyError(err.data?.detail || err.message || 'Không thể cập nhật trạng thái nhận ghi danh.');
+      notifyError(err.data?.detail || err.message || uiText("Không thể cập nhật trạng thái nhận ghi danh."));
     } finally {
       setToggleLoading(false);
     }
@@ -214,14 +215,14 @@ export const CourseMembersPage: React.FC = () => {
     if (!course || isArchived || addLoading) return;
     const emailTrimmed = addEmail.trim().toLowerCase();
     if (!emailTrimmed) {
-      notifyError('Vui lòng nhập địa chỉ email sinh viên.');
+      notifyError(uiText("Vui lòng nhập địa chỉ email sinh viên."));
       return;
     }
 
     setAddLoading(true);
     try {
       const newMember = await coursesService.addCourseMember(course.id, emailTrimmed);
-      notifySuccess(`Đã ghi danh thành công sinh viên ${newMember.student_name || newMember.student_email} vào lớp.`);
+      notifySuccess(uiText("Đã ghi danh thành công sinh viên {0} vào lớp.",[newMember.student_name || newMember.student_email]));
       setShowAddModal(false);
       setAddEmail('');
       fetchMembers();
@@ -231,7 +232,7 @@ export const CourseMembersPage: React.FC = () => {
         err.data?.detail ||
         err.data?.message ||
         err.message ||
-        'Không thể thêm sinh viên vào lớp.';
+        uiText("Không thể thêm sinh viên vào lớp.");
       notifyError(errMsg);
     } finally {
       setAddLoading(false);
@@ -244,11 +245,11 @@ export const CourseMembersPage: React.FC = () => {
     setWithdrawLoading(true);
     try {
       await coursesService.withdrawMember(course.id, withdrawTarget.student_id);
-      notifySuccess(`Đã chuyển sinh viên ${withdrawTarget.student_name || withdrawTarget.student_email} sang trạng thái Đã rút.`);
+      notifySuccess(uiText("Đã chuyển sinh viên {0} sang trạng thái Đã rút.",[withdrawTarget.student_name || withdrawTarget.student_email]));
       setWithdrawTarget(null);
       fetchMembers();
     } catch (err: any) {
-      notifyError(err.data?.detail || err.message || 'Không thể rút sinh viên khỏi lớp.');
+      notifyError(err.data?.detail || err.message || uiText("Không thể rút sinh viên khỏi lớp."));
     } finally {
       setWithdrawLoading(false);
     }
@@ -260,10 +261,10 @@ export const CourseMembersPage: React.FC = () => {
     setActionLoading((prev) => ({ ...prev, [member.id]: true }));
     try {
       await coursesService.reEnrollMember(course.id, member.student_id);
-      notifySuccess(`Đã khôi phục trạng thái Đang học cho ${member.student_name || member.student_email}.`);
+      notifySuccess(uiText("Đã khôi phục trạng thái Đang học cho {0}.",[member.student_name || member.student_email]));
       fetchMembers();
     } catch (err: any) {
-      notifyError(err.data?.detail || err.message || 'Không thể khôi phục sinh viên.');
+      notifyError(err.data?.detail || err.message || uiText("Không thể khôi phục sinh viên."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [member.id]: false }));
     }
@@ -275,10 +276,10 @@ export const CourseMembersPage: React.FC = () => {
     setActionLoading((prev) => ({ ...prev, [req.id]: true }));
     try {
       await coursesService.approveEnrollmentRequest(req.id);
-      notifySuccess(`Đã duyệt yêu cầu ghi danh của ${req.student_name || req.student_email}.`);
+      notifySuccess(uiText("Đã duyệt yêu cầu ghi danh của {0}.",[req.student_name || req.student_email]));
       fetchRequests();
     } catch (err: any) {
-      notifyError(err.data?.detail || err.message || 'Không thể duyệt yêu cầu ghi danh.');
+      notifyError(err.data?.detail || err.message || uiText("Không thể duyệt yêu cầu ghi danh."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [req.id]: false }));
     }
@@ -290,12 +291,12 @@ export const CourseMembersPage: React.FC = () => {
     setRejectLoading(true);
     try {
       await coursesService.rejectEnrollmentRequest(rejectTarget.id, rejectReason.trim());
-      notifySuccess(`Đã từ chối yêu cầu của ${rejectTarget.student_name || rejectTarget.student_email}.`);
+      notifySuccess(uiText("Đã từ chối yêu cầu của {0}.",[rejectTarget.student_name || rejectTarget.student_email]));
       setRejectTarget(null);
       setRejectReason('');
       fetchRequests();
     } catch (err: any) {
-      notifyError(err.data?.detail || err.message || 'Không thể từ chối yêu cầu.');
+      notifyError(err.data?.detail || err.message || uiText("Không thể từ chối yêu cầu."));
     } finally {
       setRejectLoading(false);
     }
@@ -309,7 +310,7 @@ export const CourseMembersPage: React.FC = () => {
   if (courseLoading) {
     return (
       <div className="course-members-container" aria-busy="true">
-        <p className="text-muted">Đang tải thông tin học phần và thành viên...</p>
+        <p className="text-muted">{uiText("Đang tải thông tin học phần và thành viên...")}</p>
       </div>
     );
   }
@@ -320,12 +321,11 @@ export const CourseMembersPage: React.FC = () => {
       <div className="course-members-container">
         <EmptyState
           icon={<ShieldAlert size={48} className="icon-danger" />}
-          title="Không có quyền truy cập"
-          description="Bạn không có quyền quản lý thành viên của môn học này. Chỉ giảng viên phụ trách môn học mới có quyền truy cập."
+          title={uiText("Không có quyền truy cập")}
+          description={uiText("Bạn không có quyền quản lý thành viên của môn học này. Chỉ giảng viên phụ trách môn học mới có quyền truy cập.")}
           action={
             <Button variant="secondary" onClick={() => navigate('/gv')}>
-              Quay lại Bàn làm việc
-            </Button>
+              {uiText("Quay lại Bàn làm việc")}</Button>
           }
         />
       </div>
@@ -339,12 +339,11 @@ export const CourseMembersPage: React.FC = () => {
     return (
       <div className="course-members-container">
         <EmptyState
-          title="Không tìm thấy môn học"
-          description={courseError || 'Môn học không tồn tại trên hệ thống.'}
+          title={uiText("Không tìm thấy môn học")}
+          description={courseError || uiText("Môn học không tồn tại trên hệ thống.")}
           action={
             <Button variant="secondary" onClick={() => navigate('/gv/mon-hoc')}>
-              Về danh sách môn học
-            </Button>
+              {uiText("Về danh sách môn học")}</Button>
           }
         />
       </div>
@@ -357,14 +356,14 @@ export const CourseMembersPage: React.FC = () => {
         <div>
           <Breadcrumb
             items={[
-              { label: 'Bàn làm việc', path: '/gv' },
+              { label: uiText("Bàn làm việc"), path: '/gv' },
               { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-              { label: 'Thành viên lớp học' },
+              { label: uiText("Thành viên lớp học") },
             ]}
           />
-          <h1 className="page-main-heading">Quản lý thành viên & Ghi danh</h1>
+          <h1 className="page-main-heading">{uiText("Quản lý thành viên & Ghi danh")}</h1>
           <p className="page-subtitle">
-            Học phần: <strong>{course.name} ({course.code})</strong> — Học kỳ: {course.term}
+            {uiText("Học phần: ")}<strong>{course.name} ({course.code})</strong> {uiText(" — Học kỳ: ")}{course.term}
           </p>
         </div>
 
@@ -376,7 +375,7 @@ export const CourseMembersPage: React.FC = () => {
               onClick={() => setShowAddModal(true)}
             >
               <UserPlus size={16} />
-              <span>Thêm sinh viên</span>
+              <span>{uiText("Thêm sinh viên")}</span>
             </Button>
           </div>
         )}
@@ -387,8 +386,7 @@ export const CourseMembersPage: React.FC = () => {
         <div className="archived-warning-alert" role="alert">
           <AlertTriangle size={20} />
           <span>
-            Môn học đã lưu trữ: Toàn bộ danh sách thành viên và hàng đợi ghi danh ở chế độ chỉ đọc. Không thể thêm mới, duyệt yêu cầu hoặc rút sinh viên.
-          </span>
+            {uiText("Môn học đã lưu trữ: Toàn bộ danh sách thành viên và hàng đợi ghi danh ở chế độ chỉ đọc. Không thể thêm mới, duyệt yêu cầu hoặc rút sinh viên.")}</span>
         </div>
       )}
 
@@ -400,16 +398,16 @@ export const CourseMembersPage: React.FC = () => {
           </div>
           <div>
             <h2 className="admission-title">
-              Cổng nhận ghi danh:{' '}
+              {uiText("Cổng nhận ghi danh:")}{' '}
               <Badge
                 variant={course.enrollment_open ? 'published' : 'archived'}
-                label={course.enrollment_open ? 'Đang mở nhận ghi danh' : 'Đang đóng'}
+                label={course.enrollment_open ? uiText("Đang mở nhận ghi danh") : uiText("Đang đóng")}
               />
             </h2>
             <p className="admission-desc">
               {course.enrollment_open
-                ? 'Sinh viên trong trường có thể tìm thấy học phần trên danh mục và gửi yêu cầu ghi danh.'
-                : 'Học phần đang đóng cổng ghi danh mới. Sinh viên không thể gửi thêm yêu cầu tham gia.'}
+                ? uiText("Sinh viên trong trường có thể tìm thấy học phần trên danh mục và gửi yêu cầu ghi danh.")
+                : uiText("Học phần đang đóng cổng ghi danh mới. Sinh viên không thể gửi thêm yêu cầu tham gia.")}
             </p>
           </div>
         </div>
@@ -422,16 +420,16 @@ export const CourseMembersPage: React.FC = () => {
             onClick={handleToggleAdmission}
           >
             {toggleLoading ? (
-              'Đang xử lý...'
+              uiText("Đang xử lý...")
             ) : course.enrollment_open ? (
               <>
                 <Lock size={16} />
-                <span>Đóng nhận ghi danh</span>
+                <span>{uiText("Đóng nhận ghi danh")}</span>
               </>
             ) : (
               <>
                 <Unlock size={16} />
-                <span>Mở nhận ghi danh</span>
+                <span>{uiText("Mở nhận ghi danh")}</span>
               </>
             )}
           </Button>
@@ -439,7 +437,7 @@ export const CourseMembersPage: React.FC = () => {
       </div>
 
       {/* Tabs Navigation */}
-      <div className="tabs-nav" role="tablist" aria-label="Chuyển chế độ quản lý">
+      <div className="tabs-nav" role="tablist" aria-label={uiText("Chuyển chế độ quản lý")}>
         <button
           type="button"
           role="tab"
@@ -450,7 +448,7 @@ export const CourseMembersPage: React.FC = () => {
           onClick={() => setActiveTab('members')}
         >
           <Users size={16} />
-          <span>Danh sách thành viên</span>
+          <span>{uiText("Danh sách thành viên")}</span>
           <span className="tab-count-badge">{membersTotalItems}</span>
         </button>
 
@@ -464,7 +462,7 @@ export const CourseMembersPage: React.FC = () => {
           onClick={() => setActiveTab('requests')}
         >
           <Clock size={16} />
-          <span>Hàng đợi ghi danh</span>
+          <span>{uiText("Hàng đợi ghi danh")}</span>
           <span className="tab-count-badge">
             {requestsTotalItems}
           </span>
@@ -478,21 +476,21 @@ export const CourseMembersPage: React.FC = () => {
           <div className="filter-search-card">
             <div className="search-field-wrap">
               <TextField
-                label="Tìm kiếm thành viên"
+                label={uiText("Tìm kiếm thành viên")}
                 value={membersSearch}
                 onChange={(e) => { setMembersSearch(e.target.value); setMembersPage(1); } }
-                placeholder="Tìm theo họ tên hoặc email sinh viên..."
+                placeholder={uiText("Tìm theo họ tên hoặc email sinh viên...")}
               />
             </div>
             <div className="filter-field-wrap">
               <SelectField
-                label="Trạng thái"
+                label={uiText("Trạng thái")}
                 value={membersFilter}
                 onChange={(e) => { setMembersFilter(e.target.value as any); setMembersPage(1); } }
                 options={[
-                  { value: 'all', label: 'Tất cả' },
-                  { value: 'active', label: 'Đang học' },
-                  { value: 'withdrawn', label: 'Đã rút' },
+                  { value: 'all', label: uiText("Tất cả") },
+                  { value: 'active', label: uiText("Đang học") },
+                  { value: 'withdrawn', label: uiText("Đã rút") },
                 ]}
               />
             </div>
@@ -500,29 +498,27 @@ export const CourseMembersPage: React.FC = () => {
 
           {membersLoading ? (
             <div className="course-members-container" aria-busy="true">
-              <p className="text-muted">Đang tải danh sách thành viên...</p>
+              <p className="text-muted">{uiText("Đang tải danh sách thành viên...")}</p>
             </div>
           ) : membersError ? (
             <div className="alert-notice-box" role="alert">
               <AlertTriangle size={18} />
               <span>{membersError}</span>
               <Button variant="secondary" onClick={fetchMembers}>
-                Thử lại
-              </Button>
+                {uiText("Thử lại")}</Button>
             </div>
           ) : filteredMembers.length === 0 ? (
             <EmptyState
-              title="Không tìm thấy sinh viên"
+              title={uiText("Không tìm thấy sinh viên")}
               description={
                 membersSearch || membersFilter !== 'all'
-                  ? 'Không có sinh viên nào khớp với điều kiện tìm kiếm hoặc lọc trạng thái.'
-                  : 'Lớp học phần hiện chưa có thành viên nào tham gia.'
+                  ? uiText("Không có sinh viên nào khớp với điều kiện tìm kiếm hoặc lọc trạng thái.")
+                  : uiText("Lớp học phần hiện chưa có thành viên nào tham gia.")
               }
               action={
                 !isArchived ? (
                   <Button variant="primary" onClick={() => setShowAddModal(true)}>
-                    Thêm sinh viên vào lớp
-                  </Button>
+                    {uiText("Thêm sinh viên vào lớp")}</Button>
                 ) : undefined
               }
             />
@@ -531,11 +527,11 @@ export const CourseMembersPage: React.FC = () => {
               <table className="npc-table">
                 <thead>
                   <tr>
-                    <th>Họ và tên</th>
-                    <th>Email sinh viên</th>
-                    <th>Trạng thái</th>
-                    <th>Ngày ghi danh</th>
-                    {!isArchived && <th>Thao tác</th>}
+                    <th>{uiText("Họ và tên")}</th>
+                    <th>{uiText("Email sinh viên")}</th>
+                    <th>{uiText("Trạng thái")}</th>
+                    <th>{uiText("Ngày ghi danh")}</th>
+                    {!isArchived && <th>{uiText("Thao tác")}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -548,7 +544,7 @@ export const CourseMembersPage: React.FC = () => {
                       <td>
                         <Badge
                           variant={m.status === 'active' ? 'published' : 'archived'}
-                          label={m.status === 'active' ? 'Đang học' : 'Đã rút'}
+                          label={m.status === 'active' ? uiText("Đang học") : uiText("Đã rút")}
                         />
                       </td>
                       <td>{formatDateVN(m.added_at)}</td>
@@ -559,24 +555,24 @@ export const CourseMembersPage: React.FC = () => {
                               type="button"
                               className="action-icon-btn danger"
                               onClick={() => setWithdrawTarget(m)}
-                              title="Đánh dấu rút học phần"
-                              aria-label={`Rút sinh viên ${m.student_name || m.student_email}`}
+                              title={uiText("Đánh dấu rút học phần")}
+                              aria-label={uiText("Rút sinh viên {0}",[m.student_name || m.student_email])}
                               disabled={actionLoading[m.id]}
                             >
                               <UserMinus size={16} />
-                              <span>Rút môn</span>
+                              <span>{uiText("Rút môn")}</span>
                             </button>
                           ) : m.status === 'withdrawn' ? (
                             <button
                               type="button"
                               className="action-icon-btn primary"
                               onClick={() => handleRestoreMember(m)}
-                              title="Khôi phục trạng thái đang học"
-                              aria-label={`Khôi phục sinh viên ${m.student_name || m.student_email}`}
+                              title={uiText("Khôi phục trạng thái đang học")}
+                              aria-label={uiText("Khôi phục sinh viên {0}",[m.student_name || m.student_email])}
                               disabled={actionLoading[m.id]}
                             >
                               <RotateCcw size={16} />
-                              <span>{actionLoading[m.id] ? 'Đang xử lý...' : 'Khôi phục'}</span>
+                              <span>{actionLoading[m.id] ? uiText("Đang xử lý...") : uiText("Khôi phục")}</span>
                             </button>
                           ) : (
                             <span className="text-muted text-sm">—</span>
@@ -590,9 +586,9 @@ export const CourseMembersPage: React.FC = () => {
             </div>
           )}
           {!membersLoading && !membersError && membersTotalPages > 1 && (
-            <div className="course-pagination" aria-label="Phân trang thành viên">
-              <Button variant="secondary" disabled={membersPage <= 1} onClick={() => setMembersPage(p => p - 1)}>Trang trước</Button>
-              <span>Trang {membersPage} / {membersTotalPages} · {membersTotalItems} kết quả</span>
+            <div className="course-pagination" aria-label={uiText("Phân trang thành viên")}>
+              <Button variant="secondary" disabled={membersPage <= 1} onClick={() => setMembersPage(p => p - 1)}>{uiText("Trang trước")}</Button>
+              <span>Trang {membersPage} / {membersTotalPages} · {membersTotalItems} {uiText(" kết quả")}</span>
               <Button variant="secondary" disabled={membersPage >= membersTotalPages} onClick={() => setMembersPage(p => p + 1)}>Trang sau</Button>
             </div>
           )}
@@ -605,23 +601,23 @@ export const CourseMembersPage: React.FC = () => {
           <div className="filter-search-card">
             <div className="search-field-wrap">
               <TextField
-                label="Tìm kiếm yêu cầu"
+                label={uiText("Tìm kiếm yêu cầu")}
                 value={requestsSearch}
                 onChange={(e) => { setRequestsSearch(e.target.value); setRequestsPage(1); } }
-                placeholder="Tìm theo họ tên hoặc email sinh viên..."
+                placeholder={uiText("Tìm theo họ tên hoặc email sinh viên...")}
               />
             </div>
             <div className="filter-field-wrap">
               <SelectField
-                label="Trạng thái yêu cầu"
+                label={uiText("Trạng thái yêu cầu")}
                 value={requestsFilter}
                 onChange={(e) => { setRequestsFilter(e.target.value as any); setRequestsPage(1); } }
                 options={[
-                  { value: 'all', label: 'Tất cả' },
-                  { value: 'pending', label: 'Chờ duyệt' },
-                  { value: 'approved', label: 'Đã duyệt' },
-                  { value: 'rejected', label: 'Đã từ chối' },
-                  { value: 'cancelled', label: 'Đã hủy' },
+                  { value: 'all', label: uiText("Tất cả") },
+                  { value: 'pending', label: uiText("Chờ duyệt") },
+                  { value: 'approved', label: uiText("Đã duyệt") },
+                  { value: 'rejected', label: uiText("Đã từ chối") },
+                  { value: 'cancelled', label: uiText("Đã hủy") },
                 ]}
               />
             </div>
@@ -629,23 +625,22 @@ export const CourseMembersPage: React.FC = () => {
 
           {requestsLoading ? (
             <div className="course-members-container" aria-busy="true">
-              <p className="text-muted">Đang tải danh sách yêu cầu ghi danh...</p>
+              <p className="text-muted">{uiText("Đang tải danh sách yêu cầu ghi danh...")}</p>
             </div>
           ) : requestsError ? (
             <div className="alert-notice-box" role="alert">
               <AlertTriangle size={18} />
               <span>{requestsError}</span>
               <Button variant="secondary" onClick={fetchRequests}>
-                Thử lại
-              </Button>
+                {uiText("Thử lại")}</Button>
             </div>
           ) : filteredRequests.length === 0 ? (
             <EmptyState
-              title="Không có yêu cầu ghi danh"
+              title={uiText("Không có yêu cầu ghi danh")}
               description={
                 requestsSearch || requestsFilter !== 'all'
-                  ? 'Không có yêu cầu nào khớp với bộ lọc hiện tại.'
-                  : 'Hiện không có sinh viên nào gửi yêu cầu ghi danh vào học phần này.'
+                  ? uiText("Không có yêu cầu nào khớp với bộ lọc hiện tại.")
+                  : uiText("Hiện không có sinh viên nào gửi yêu cầu ghi danh vào học phần này.")
               }
             />
           ) : (
@@ -653,13 +648,13 @@ export const CourseMembersPage: React.FC = () => {
               <table className="npc-table">
                 <thead>
                   <tr>
-                    <th>Họ và tên</th>
-                    <th>Email sinh viên</th>
-                    <th>Trạng thái</th>
-                    <th>Thời gian gửi</th>
-                    <th>Người & Thời gian duyệt</th>
-                    <th>Lý do từ chối</th>
-                    {!isArchived && <th>Thao tác</th>}
+                    <th>{uiText("Họ và tên")}</th>
+                    <th>{uiText("Email sinh viên")}</th>
+                    <th>{uiText("Trạng thái")}</th>
+                    <th>{uiText("Thời gian gửi")}</th>
+                    <th>{uiText("Người & Thời gian duyệt")}</th>
+                    <th>{uiText("Lý do từ chối")}</th>
+                    {!isArchived && <th>{uiText("Thao tác")}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -682,12 +677,12 @@ export const CourseMembersPage: React.FC = () => {
                           }
                           label={
                             r.status === 'approved'
-                              ? 'Đã duyệt'
+                              ? uiText("Đã duyệt")
                               : r.status === 'rejected'
-                              ? 'Đã từ chối'
+                              ? uiText("Đã từ chối")
                               : r.status === 'cancelled'
-                              ? 'Đã hủy'
-                              : 'Chờ duyệt'
+                              ? uiText("Đã hủy")
+                              : uiText("Chờ duyệt")
                           }
                         />
                       </td>
@@ -718,12 +713,12 @@ export const CourseMembersPage: React.FC = () => {
                                 type="button"
                                 className="action-icon-btn success"
                                 onClick={() => handleApproveRequest(r)}
-                                title="Duyệt yêu cầu ghi danh"
-                                aria-label={`Duyệt yêu cầu ${r.student_name || r.student_email}`}
+                                title={uiText("Duyệt yêu cầu ghi danh")}
+                                aria-label={uiText("Duyệt yêu cầu {0}",[r.student_name || r.student_email])}
                                 disabled={actionLoading[r.id]}
                               >
                                 <CheckCircle2 size={16} />
-                                <span>{actionLoading[r.id] ? 'Đang duyệt...' : 'Duyệt'}</span>
+                                <span>{actionLoading[r.id] ? uiText("Đang duyệt...") : uiText("Duyệt")}</span>
                               </button>
                               <button
                                 type="button"
@@ -732,12 +727,12 @@ export const CourseMembersPage: React.FC = () => {
                                   setRejectTarget(r);
                                   setRejectReason('');
                                 }}
-                                title="Từ chối yêu cầu ghi danh"
-                                aria-label={`Từ chối yêu cầu ${r.student_name || r.student_email}`}
+                                title={uiText("Từ chối yêu cầu ghi danh")}
+                                aria-label={uiText("Từ chối yêu cầu {0}",[r.student_name || r.student_email])}
                                 disabled={actionLoading[r.id]}
                               >
                                 <XCircle size={16} />
-                                <span>Từ chối</span>
+                                <span>{uiText("Từ chối")}</span>
                               </button>
                             </div>
                           ) : (
@@ -752,9 +747,9 @@ export const CourseMembersPage: React.FC = () => {
             </div>
           )}
           {!requestsLoading && !requestsError && requestsTotalPages > 1 && (
-            <div className="course-pagination" aria-label="Phân trang yêu cầu">
-              <Button variant="secondary" disabled={requestsPage <= 1} onClick={() => setRequestsPage(p => p - 1)}>Trang trước</Button>
-              <span>Trang {requestsPage} / {requestsTotalPages} · {requestsTotalItems} kết quả</span>
+            <div className="course-pagination" aria-label={uiText("Phân trang yêu cầu")}>
+              <Button variant="secondary" disabled={requestsPage <= 1} onClick={() => setRequestsPage(p => p - 1)}>{uiText("Trang trước")}</Button>
+              <span>Trang {requestsPage} / {requestsTotalPages} · {requestsTotalItems} {uiText(" kết quả")}</span>
               <Button variant="secondary" disabled={requestsPage >= requestsTotalPages} onClick={() => setRequestsPage(p => p + 1)}>Trang sau</Button>
             </div>
           )}
@@ -764,20 +759,20 @@ export const CourseMembersPage: React.FC = () => {
       {/* MODAL 1: Thêm sinh viên bằng email */}
       {showAddModal && (
         <Modal
-          title="Thêm sinh viên vào lớp học phần"
+          title={uiText("Thêm sinh viên vào lớp học phần")}
           isOpen={showAddModal}
           onClose={() => setShowAddModal(false)}
         >
           <form onSubmit={handleAddMember} className="single-add-form">
             <p className="modal-lead-text">
-              Nhập email tài khoản sinh viên đã có trong hệ thống trường để ghi danh trực tiếp vào học phần <strong>{course.name} ({course.code})</strong>.
+              {uiText("Nhập email tài khoản sinh viên đã có trong hệ thống trường để ghi danh trực tiếp vào học phần ")}<strong>{course.name} ({course.code})</strong>.
             </p>
             <TextField
-              label="Địa chỉ email sinh viên"
+              label={uiText("Địa chỉ email sinh viên")}
               type="email"
               value={addEmail}
               onChange={(e) => setAddEmail(e.target.value)}
-              placeholder="ví dụ: sinhvien@neu.edu.vn"
+              placeholder={uiText("ví dụ: sinhvien@neu.edu.vn")}
               required
               autoFocus
             />
@@ -788,10 +783,9 @@ export const CourseMembersPage: React.FC = () => {
                 disabled={addLoading}
                 onClick={() => setShowAddModal(false)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="primary" disabled={addLoading || !addEmail.trim()}>
-                {addLoading ? 'Đang ghi danh...' : 'Ghi danh sinh viên'}
+                {addLoading ? uiText("Đang ghi danh...") : uiText("Ghi danh sinh viên")}
               </Button>
             </div>
           </form>
@@ -801,20 +795,18 @@ export const CourseMembersPage: React.FC = () => {
       {/* MODAL 2: Xác nhận rút học phần */}
       {withdrawTarget && (
         <Modal
-          title="Xác nhận rút học phần"
+          title={uiText("Xác nhận rút học phần")}
           isOpen={Boolean(withdrawTarget)}
           onClose={() => setWithdrawTarget(null)}
         >
           <div className="withdraw-modal-content">
             <p>
-              Bạn có chắc chắn muốn chuyển sinh viên{' '}
-              <strong>{withdrawTarget.student_name || withdrawTarget.student_email}</strong> sang trạng thái <strong>Đã rút</strong> khỏi học phần?
-            </p>
+              {uiText("Bạn có chắc chắn muốn chuyển sinh viên")}{' '}
+              <strong>{withdrawTarget.student_name || withdrawTarget.student_email}</strong> {uiText(" sang trạng thái ")}<strong>{uiText("Đã rút")}</strong> {uiText(" khỏi học phần?")}</p>
             <div className="alert-notice-box">
               <AlertTriangle size={18} />
               <span>
-                Sinh viên sau khi rút sẽ không thể truy cập nội dung bài học hoặc nộp bài tập. Lịch sử ghi danh và các dữ liệu liên quan vẫn được hệ thống lưu trữ đầy đủ.
-              </span>
+                {uiText("Sinh viên sau khi rút sẽ không thể truy cập nội dung bài học hoặc nộp bài tập. Lịch sử ghi danh và các dữ liệu liên quan vẫn được hệ thống lưu trữ đầy đủ.")}</span>
             </div>
             <div className="modal-actions-bar">
               <Button
@@ -823,15 +815,14 @@ export const CourseMembersPage: React.FC = () => {
                 disabled={withdrawLoading}
                 onClick={() => setWithdrawTarget(null)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
                 disabled={withdrawLoading}
                 onClick={handleConfirmWithdraw}
               >
-                {withdrawLoading ? 'Đang xử lý...' : 'Xác nhận rút'}
+                {withdrawLoading ? uiText("Đang xử lý...") : uiText("Xác nhận rút")}
               </Button>
             </div>
           </div>
@@ -841,20 +832,19 @@ export const CourseMembersPage: React.FC = () => {
       {/* MODAL 3: Từ chối yêu cầu ghi danh */}
       {rejectTarget && (
         <Modal
-          title="Từ chối yêu cầu ghi danh"
+          title={uiText("Từ chối yêu cầu ghi danh")}
           isOpen={Boolean(rejectTarget)}
           onClose={() => setRejectTarget(null)}
         >
           <div className="reject-modal-content">
             <p className="modal-lead-text">
-              Bạn đang từ chối yêu cầu ghi danh của sinh viên{' '}
-              <strong>{rejectTarget.student_name || rejectTarget.student_email}</strong>. Bạn có thể cung cấp lý do từ chối để sinh viên được rõ.
-            </p>
+              {uiText("Bạn đang từ chối yêu cầu ghi danh của sinh viên")}{' '}
+              <strong>{rejectTarget.student_name || rejectTarget.student_email}</strong>{uiText(". Bạn có thể cung cấp lý do từ chối để sinh viên được rõ.")}</p>
             <TextAreaField
-              label="Lý do từ chối (tùy chọn)"
+              label={uiText("Lý do từ chối (tùy chọn)")}
               value={rejectReason}
               onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="ví dụ: Đã đủ sĩ số lớp học phần, hoặc chưa đạt điều kiện tiên quyết..."
+              placeholder={uiText("ví dụ: Đã đủ sĩ số lớp học phần, hoặc chưa đạt điều kiện tiên quyết...")}
               rows={3}
             />
             <div className="modal-actions-bar">
@@ -864,15 +854,14 @@ export const CourseMembersPage: React.FC = () => {
                 disabled={rejectLoading}
                 onClick={() => setRejectTarget(null)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
                 disabled={rejectLoading}
                 onClick={handleConfirmReject}
               >
-                {rejectLoading ? 'Đang xử lý...' : 'Xác nhận từ chối'}
+                {rejectLoading ? uiText("Đang xử lý...") : uiText("Xác nhận từ chối")}
               </Button>
             </div>
           </div>

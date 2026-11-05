@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { coursesService, type Course } from '../../../api/coursesService';
@@ -22,7 +23,7 @@ export const TeacherCourseOverviewPage: React.FC = () => {
 
   const loadCourse = useCallback(async () => {
     if (!monId) {
-      setError('Thiếu mã môn học.');
+      setError(uiText("Thiếu mã môn học."));
       setIsLoading(false);
       return;
     }
@@ -44,7 +45,7 @@ export const TeacherCourseOverviewPage: React.FC = () => {
       setLessonCount(lessonLists.reduce((total, lessons) => total + lessons.length, 0));
     } catch (cause) {
       if (sequence !== loadSequence.current) return;
-      setError(cause instanceof Error ? cause.message : 'Không thể tải thông tin môn học.');
+      setError(cause instanceof Error ? cause.message : uiText("Không thể tải thông tin môn học."));
     } finally {
       if (sequence === loadSequence.current) setIsLoading(false);
     }
@@ -59,7 +60,7 @@ export const TeacherCourseOverviewPage: React.FC = () => {
   if (error) {
     return (
       <ErrorBanner
-        title="Không thể tải tổng quan môn học"
+        title={uiText("Không thể tải tổng quan môn học")}
         message={error}
         onRetry={() => void loadCourse()}
       />
@@ -67,7 +68,7 @@ export const TeacherCourseOverviewPage: React.FC = () => {
   }
   if (!course) {
     return (
-      <EmptyState title="Không tìm thấy môn học" description="Môn học không tồn tại hoặc bạn không có quyền truy cập." />
+      <EmptyState title={uiText("Không tìm thấy môn học")} description={uiText("Môn học không tồn tại hoặc bạn không có quyền truy cập.")} />
     );
   }
 
@@ -77,8 +78,8 @@ export const TeacherCourseOverviewPage: React.FC = () => {
         <div>
           <Breadcrumb
             items={[
-              { label: 'Bàn làm việc', path: '/gv' },
-              { label: 'Môn học', path: '/gv/mon-hoc' },
+              { label: uiText("Bàn làm việc"), path: '/gv' },
+              { label: uiText("Môn học"), path: '/gv/mon-hoc' },
               { label: `${course.code} — ${course.name}` },
             ]}
           />
@@ -87,20 +88,20 @@ export const TeacherCourseOverviewPage: React.FC = () => {
             <h1 className="course-main-title">{course.name}</h1>
             <Badge
               variant={course.status === 'open' ? 'published' : 'archived'}
-              label={course.status === 'open' ? 'Đang mở' : 'Đã lưu trữ'}
+              label={course.status === 'open' ? uiText("Đang mở") : uiText("Đã lưu trữ")}
             />
           </div>
           <p className="course-meta-text">
-            <span>Học kỳ: <strong>{course.term}</strong></span>
+            <span>{uiText("Học kỳ: ")}<strong>{course.term}</strong></span>
             <span className="dot">•</span>
-            <span>Giảng viên: <strong>{course.teacher_name || 'Giảng viên phụ trách'}</strong></span>
+            <span>{uiText("Giảng viên: ")}<strong>{course.teacher_name || uiText("Giảng viên phụ trách")}</strong></span>
           </p>
         </div>
       </div>
 
       {course.status === 'archived' && (
         <div className="archived-warning-alert" role="alert">
-          <strong>Môn học đã được lưu trữ — chế độ chỉ đọc.</strong>
+          <strong>{uiText("Môn học đã được lưu trữ — chế độ chỉ đọc.")}</strong>
         </div>
       )}
 
@@ -109,41 +110,40 @@ export const TeacherCourseOverviewPage: React.FC = () => {
           <div className="metric-icon blue"><Users size={20} /></div>
           <div className="metric-data">
             <span className="metric-val">{course.active_member_count}</span>
-            <span className="metric-lbl">Sinh viên đang tham gia</span>
+            <span className="metric-lbl">{uiText("Sinh viên đang tham gia")}</span>
           </div>
         </div>
         <div className="metric-box">
           <div className="metric-icon cyan"><FolderTree size={20} /></div>
           <div className="metric-data">
             <span className="metric-val">{chapterCount} / {lessonCount}</span>
-            <span className="metric-lbl">Chương / bài học</span>
+            <span className="metric-lbl">{uiText("Chương / bài học")}</span>
           </div>
         </div>
       </div>
 
       <section className="hub-section">
-        <h2 className="section-title">Quản lý môn học</h2>
+        <h2 className="section-title">{uiText("Quản lý môn học")}</h2>
         <div className="hub-cards-grid">
           <Link to={`/gv/mon-hoc/${course.id}/cau-truc`} className="hub-nav-card">
             <div className="hub-card-icon"><FolderTree size={24} /></div>
             <div className="hub-card-body">
-              <h3 className="hub-card-title">Cấu trúc môn học</h3>
-              <p className="hub-card-desc">Quản lý chương, bài học và thứ tự nội dung.</p>
+              <h3 className="hub-card-title">{uiText("Cấu trúc môn học")}</h3>
+              <p className="hub-card-desc">{uiText("Quản lý chương, bài học và thứ tự nội dung.")}</p>
             </div>
-            <span className="hub-card-arrow">Truy cập →</span>
+            <span className="hub-card-arrow">{uiText("Truy cập →")}</span>
           </Link>
         </div>
       </section>
 
       <section className="info-section-card">
-        <h2 className="section-title">Mô tả học phần</h2>
-        <p className="desc-text">{course.description || 'Chưa có mô tả môn học.'}</p>
+        <h2 className="section-title">{uiText("Mô tả học phần")}</h2>
+        <p className="desc-text">{course.description || uiText("Chưa có mô tả môn học.")}</p>
       </section>
 
       {course.status === 'archived' && (
         <Button variant="secondary" onClick={() => void loadCourse()}>
-          Làm mới trạng thái
-        </Button>
+          {uiText("Làm mới trạng thái")}</Button>
       )}
     </div>
   );

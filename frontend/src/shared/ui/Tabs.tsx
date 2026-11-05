@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React, { useRef } from 'react';
 import './Tabs.css';
 
@@ -18,7 +19,7 @@ export const Tabs: React.FC<TabsProps> = ({
   tabs,
   activeTab,
   onChange,
-  ariaLabel = 'Các mục chuyển trang',
+  ariaLabel = uiText("Các mục chuyển trang"),
 }) => {
   const tabListRef = useRef<HTMLDivElement>(null);
 
@@ -65,7 +66,7 @@ export const Tabs: React.FC<TabsProps> = ({
           >
             <span>{tab.label}</span>
             {tab.badge !== undefined && (
-              <span className="tab-badge" aria-label={`${tab.badge} mục`}>
+              <span className="tab-badge" aria-label={uiText("{0} mục",[tab.badge])}>
                 {tab.badge}
               </span>
             )}

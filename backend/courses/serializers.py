@@ -133,7 +133,16 @@ class CourseSummaryItemSerializer(serializers.Serializer):
     updated_at = serializers.DateTimeField()
 
 
+class PendingAssignmentSerializer(serializers.Serializer):
+    assignment_id = serializers.UUIDField()
+    title = serializers.CharField()
+    course_name = serializers.CharField()
+    waiting = serializers.IntegerField(min_value=1)
+    oldest = serializers.DateTimeField()
+
+
 class CourseSummaryResponseSerializer(serializers.Serializer):
+    pending_assignments = PendingAssignmentSerializer(many=True, required=False)
     role = serializers.ChoiceField(choices=["teacher", "student"])
 
     # Teacher metrics (optional / nullable when role=student)
@@ -146,6 +155,7 @@ class CourseSummaryResponseSerializer(serializers.Serializer):
     total_memberships = serializers.IntegerField(required=False, allow_null=True, default=None)
     distinct_students = serializers.IntegerField(required=False, allow_null=True, default=None)
     pending_submissions = serializers.IntegerField(required=False, allow_null=True, default=None)
+    scanning_materials = serializers.IntegerField(required=False, min_value=0)
     problem_materials = serializers.IntegerField(required=False, allow_null=True, default=None)
     pending_ai_drafts = serializers.IntegerField(required=False, allow_null=True, default=None)
 

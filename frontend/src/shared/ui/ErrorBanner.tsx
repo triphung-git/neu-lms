@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React from 'react';
 import { AlertCircle, RotateCcw } from 'lucide-react';
 import { Button } from './Button';
@@ -11,7 +12,7 @@ interface ErrorBannerProps {
 }
 
 export const ErrorBanner: React.FC<ErrorBannerProps> = ({
-  title = 'Đã có lỗi xảy ra',
+  title = uiText("Đã có lỗi xảy ra"),
   message,
   onRetry,
   className = '',
@@ -33,8 +34,7 @@ export const ErrorBanner: React.FC<ErrorBannerProps> = ({
             onClick={onRetry}
             icon={<RotateCcw size={14} />}
           >
-            Thử lại
-          </Button>
+            {uiText("Thử lại")}</Button>
         </div>
       )}
     </div>

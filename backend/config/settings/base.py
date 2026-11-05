@@ -16,6 +16,7 @@ ASGI_APPLICATION = "config.asgi.application"
 
 AUTH_USER_MODEL = "identity.User"
 INSTALLED_APPS = [
+    "learning",
     "django.contrib.contenttypes",
     "django.contrib.auth",
     "django.contrib.sessions",
@@ -47,6 +48,7 @@ AUTH_PASSWORD_VALIDATORS = [
 MIDDLEWARE = [
     "platform_core.middleware.CorrelationIdMiddleware",
     "django.middleware.security.SecurityMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -81,6 +83,7 @@ SPECTACULAR_SETTINGS = {
         "StoredFileStatusEnum": "files.models.StoredFile.Status",
         "StoredFilePurposeEnum": "files.models.StoredFile.Purpose",
         "AssignmentStatusEnum": "assignments.models.AssignmentStatus",
+        "SubmissionGradeStatusEnum": "assignments.models.SubmissionGradeEntry.Status",
     },
     "APPEND_COMPONENTS": {
         "securitySchemes": {
@@ -167,32 +170,17 @@ DATABASES = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # AI Assistant Configuration
 
-AI_API_KEY = os.environ.get(
-    "AI_API_KEY", ""
-).strip()
+AI_API_KEY = os.environ.get("AI_API_KEY", "").strip()
 
 AI_API_BASE_URL = os.environ.get(
-    "AI_API_BASE_URL",
-    "https://api.openai.com/v1"
+    "AI_API_BASE_URL", "https://generativelanguage.googleapis.com/v1beta/openai"
 ).rstrip("/")
 
-AI_CHAT_MODEL = os.environ.get(
-    "AI_CHAT_MODEL", ""
-).strip()
+AI_CHAT_MODEL = os.environ.get("AI_CHAT_MODEL", "").strip()
 
-AI_REQUEST_TIMEOUT_SECONDS = int(
-    os.environ.get(
-        "AI_REQUEST_TIMEOUT_SECONDS",
-        "45"
-    )
-)
+AI_REQUEST_TIMEOUT_SECONDS = int(os.environ.get("AI_REQUEST_TIMEOUT_SECONDS", "45"))
 
-AI_RAG_TOP_K = int(
-    os.environ.get(
-        "AI_RAG_TOP_K",
-        "5"
-    )
-)
+AI_RAG_TOP_K = int(os.environ.get("AI_RAG_TOP_K", "5"))
 LANGUAGE_CODE = "vi"
 TIME_ZONE = "Asia/Ho_Chi_Minh"
 USE_I18N = True
@@ -292,35 +280,55 @@ CELERY_BEAT_SCHEDULE = {
 CELERY_TASK_DEFAULT_QUEUE = os.environ.get("CELERY_TASK_DEFAULT_QUEUE", "files")
 
 # Gemini Embeddings
-AI_EMBEDDING_MODEL = os.environ.get(
-    "AI_EMBEDDING_MODEL",
-    "gemini-embedding-2"
-).strip()
+AI_EMBEDDING_MODEL = os.environ.get("AI_EMBEDDING_MODEL", "gemini-embedding-2").strip()
 
-AI_EMBEDDING_DIMENSIONS = int(
-    os.environ.get(
-        "AI_EMBEDDING_DIMENSIONS",
-        "768"
-    )
+AI_EMBEDDING_DIMENSIONS = int(os.environ.get("AI_EMBEDDING_DIMENSIONS", "768"))
+
+AI_EMBEDDING_TIMEOUT_SECONDS = int(os.environ.get("AI_EMBEDDING_TIMEOUT_SECONDS", "45"))
+
+AI_RAG_MIN_COSINE_SIMILARITY = float(os.environ.get("AI_RAG_MIN_COSINE_SIMILARITY", "0.66"))
+
+AI_RAG_MAX_VECTOR_CANDIDATES = int(os.environ.get("AI_RAG_MAX_VECTOR_CANDIDATES", "2000"))
+
+
+AI_AUTO_INDEX_ENABLED = os.environ.get("AI_AUTO_INDEX_ENABLED", "true").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+NOTIFICATION_EMAIL_ENABLED = os.environ.get("NOTIFICATION_EMAIL_ENABLED", "false").lower() in (
+    "true",
+    "1",
+    "yes",
+)
+# Explicit cutoff prevents bulk mailing historical notifications when first enabled.
+NOTIFICATION_EMAIL_START_AT = os.environ.get("NOTIFICATION_EMAIL_START_AT", "")
+CELERY_BEAT_SCHEDULE.update(
+    {
+        "ai-index-reconcile": {
+            "task": "ai_assistant.tasks.process_embedding_index",
+            "schedule": 60.0,
+        },
+        "notification-email": {
+            "task": "platform_core.tasks.process_notification_emails",
+            "schedule": 30.0,
+        },
+    }
 )
 
-AI_EMBEDDING_TIMEOUT_SECONDS = int(
-    os.environ.get(
-        "AI_EMBEDDING_TIMEOUT_SECONDS",
-        "45"
-    )
-)
+# Long provider requests must not block malware scanning/extraction.
+CELERY_TASK_ROUTES = {
+    "ai_assistant.tasks.*": {"queue": "ai"},
+    "platform_core.tasks.process_notification_emails": {"queue": "notifications"},
+}
+CELERY_WORKER_PREFETCH_MULTIPLIER = 1
+if NOTIFICATION_EMAIL_ENABLED:
+    from django.utils.dateparse import parse_datetime
+    from django.utils.timezone import is_naive
 
-AI_RAG_MIN_COSINE_SIMILARITY = float(
-    os.environ.get(
-        "AI_RAG_MIN_COSINE_SIMILARITY",
-        "0.66"
-    )
-)
-
-AI_RAG_MAX_VECTOR_CANDIDATES = int(
-    os.environ.get(
-        "AI_RAG_MAX_VECTOR_CANDIDATES",
-        "2000"
-    )
-)
+    _notice_start = parse_datetime(NOTIFICATION_EMAIL_START_AT)
+    if _notice_start is None or is_naive(_notice_start):
+        raise ImproperlyConfigured(
+            "NOTIFICATION_EMAIL_START_AT must be an ISO timestamp with timezone "
+            "when email is enabled."
+        )

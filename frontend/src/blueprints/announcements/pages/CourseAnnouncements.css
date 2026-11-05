@@ -1,0 +1,66 @@
+.course-feed {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+  margin-block: 20px;
+}
+
+.course-feed article,
+.course-feed form {
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.course-feed h2 { font-size: 1.15rem; }
+
+.course-feed fieldset {
+  display: grid;
+  gap: 12px;
+  border: 0;
+  min-width: 0;
+}
+
+.course-feed label { display: grid; gap: 6px; }
+
+.course-feed :is(button, select, textarea, input:not([type=checkbox])) {
+  max-width: 100%;
+  min-height: 44px;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: inherit;
+  font: inherit;
+}
+
+.course-feed button { justify-self: start; cursor: pointer; }
+.course-feed button:disabled { opacity: .55; cursor: not-allowed; }
+.course-feed form button { background: var(--ink); color: var(--on-dark); }
+
+.course-feed-tools,
+.course-feed nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.course-feed-tools label:has(input[type=checkbox]) {
+  display: flex;
+  align-items: center;
+}
+
+.course-feed-body { white-space: pre-wrap; padding-block: 8px; }
+.course-feed [role=alert] { color: var(--danger); }
+
+@media (max-width: 640px) {
+  .course-feed-tools {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

@@ -21,6 +21,7 @@ COPY --chown=app:app files ./files
 COPY --chown=app:app materials ./materials
 COPY --chown=app:app assignments ./assignments
 COPY --chown=app:app ai_assistant ./ai_assistant
+COPY --chown=app:app learning ./learning
 COPY --chown=app:app manage.py ./
 USER app
 EXPOSE 8000

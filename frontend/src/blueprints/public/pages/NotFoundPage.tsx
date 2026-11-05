@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
@@ -26,18 +27,16 @@ export const NotFoundPage: React.FC = () => {
           <HelpCircle size={48} />
         </div>
         <h1 className="notfound-code">404</h1>
-        <h2 className="notfound-title">Không tìm thấy trang yêu cầu</h2>
+        <h2 className="notfound-title">{uiText("Không tìm thấy trang yêu cầu")}</h2>
         <p className="notfound-desc">
-          Trang bạn đang truy cập không tồn tại, đã được di chuyển hoặc bạn không có quyền truy cập vào đường dẫn này.
-        </p>
+          {uiText("Trang bạn đang truy cập không tồn tại, đã được di chuyển hoặc bạn không có quyền truy cập vào đường dẫn này.")}</p>
         <div className="notfound-actions">
           <Button
             variant="primary"
             onClick={handleReturnHome}
             icon={<ArrowLeft size={16} />}
           >
-            Về không gian chính
-          </Button>
+            {uiText("Về không gian chính")}</Button>
         </div>
       </div>
     </div>

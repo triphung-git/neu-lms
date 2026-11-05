@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { coursesService, type Chapter, type Course, type Lesson } from '../../../api/coursesService';
@@ -46,7 +47,7 @@ export const CourseStructurePage: React.FC = () => {
 
   const loadStructure = useCallback(async (): Promise<boolean> => {
     if (!monId) {
-      setError('Thiếu mã môn học.');
+      setError(uiText("Thiếu mã môn học."));
       setIsLoading(false);
       return false;
     }
@@ -72,7 +73,7 @@ export const CourseStructurePage: React.FC = () => {
       return true;
     } catch (cause) {
       if (sequence !== loadSequence.current) return false;
-      setError(cause instanceof Error ? cause.message : 'Không thể tải cấu trúc môn học.');
+      setError(cause instanceof Error ? cause.message : uiText("Không thể tải cấu trúc môn học."));
       return false;
     } finally {
       if (sequence === loadSequence.current) setIsLoading(false);
@@ -98,7 +99,7 @@ export const CourseStructurePage: React.FC = () => {
       showNotification('success', successMessage);
       return true;
     } catch (cause) {
-      showNotification('error', cause instanceof Error ? cause.message : 'Không thể lưu thay đổi.');
+      showNotification('error', cause instanceof Error ? cause.message : uiText("Không thể lưu thay đổi."));
       return false;
     } finally {
       setIsSaving(false);
@@ -125,21 +126,21 @@ export const CourseStructurePage: React.FC = () => {
     const saved = editingChapter
       ? await runMutation(
           () => coursesService.updateChapter(course.id, editingChapter.id, { title }),
-          'Đã cập nhật chương.',
+          uiText("Đã cập nhật chương."),
         )
       : await runMutation(
           () => coursesService.createChapter(course.id, { title }),
-          'Đã thêm chương mới.',
+          uiText("Đã thêm chương mới."),
         );
 
     if (saved) setShowChapterModal(false);
   };
 
   const handleDeleteChapter = async (chapter: Chapter) => {
-    if (!course || !window.confirm('Bạn có chắc chắn muốn xóa chương này?')) return;
+    if (!course || !window.confirm(uiText("Bạn có chắc chắn muốn xóa chương này?"))) return;
     await runMutation(
       () => coursesService.deleteChapter(course.id, chapter.id),
-      'Đã xóa chương.',
+      uiText("Đã xóa chương."),
     );
   };
 
@@ -151,7 +152,7 @@ export const CourseStructurePage: React.FC = () => {
     [next[index], next[target]] = [next[target], next[index]];
     await runMutation(
       () => coursesService.reorderChapters(course.id, next.map((chapter) => chapter.id)),
-      'Đã thay đổi thứ tự chương.',
+      uiText("Đã thay đổi thứ tự chương."),
     );
   };
 
@@ -185,21 +186,21 @@ export const CourseStructurePage: React.FC = () => {
               editingLesson.id,
               content,
             ),
-          'Đã cập nhật bài học.',
+          uiText("Đã cập nhật bài học."),
         )
       : await runMutation(
           () => coursesService.createLesson(course.id, targetChapterId, content),
-          'Đã thêm bài học mới.',
+          uiText("Đã thêm bài học mới."),
         );
 
     if (saved) setShowLessonModal(false);
   };
 
   const handleDeleteLesson = async (chapterId: string, lesson: Lesson) => {
-    if (!course || !window.confirm('Bạn có chắc chắn muốn xóa bài học này?')) return;
+    if (!course || !window.confirm(uiText("Bạn có chắc chắn muốn xóa bài học này?"))) return;
     await runMutation(
       () => coursesService.deleteLesson(course.id, chapterId, lesson.id),
-      'Đã xóa bài học.',
+      uiText("Đã xóa bài học."),
     );
   };
 
@@ -216,7 +217,7 @@ export const CourseStructurePage: React.FC = () => {
     [next[index], next[target]] = [next[target], next[index]];
     await runMutation(
       () => coursesService.reorderLessons(course.id, chapterId, next.map((lesson) => lesson.id)),
-      'Đã thay đổi thứ tự bài học.',
+      uiText("Đã thay đổi thứ tự bài học."),
     );
   };
 
@@ -224,7 +225,7 @@ export const CourseStructurePage: React.FC = () => {
   if (error) {
     return (
       <ErrorBanner
-        title="Không thể tải cấu trúc môn học"
+        title={uiText("Không thể tải cấu trúc môn học")}
         message={error}
         onRetry={() => void loadStructure()}
       />
@@ -233,9 +234,9 @@ export const CourseStructurePage: React.FC = () => {
   if (!course) {
     return (
       <EmptyState
-        title="Không tìm thấy môn học"
-        description="Môn học không tồn tại hoặc bạn không có quyền truy cập."
-        action={<Button onClick={() => navigate('/gv/mon-hoc')}>Về danh sách môn học</Button>}
+        title={uiText("Không tìm thấy môn học")}
+        description={uiText("Môn học không tồn tại hoặc bạn không có quyền truy cập.")}
+        action={<Button onClick={() => navigate('/gv/mon-hoc')}>{uiText("Về danh sách môn học")}</Button>}
       />
     );
   }
@@ -246,43 +247,41 @@ export const CourseStructurePage: React.FC = () => {
         <div>
           <Breadcrumb
             items={[
-              { label: 'Bàn làm việc', path: '/gv' },
+              { label: uiText("Bàn làm việc"), path: '/gv' },
               { label: `${course.code} — ${course.name}`, path: `/gv/mon-hoc/${course.id}` },
-              { label: 'Cấu trúc môn học' },
+              { label: uiText("Cấu trúc môn học") },
             ]}
           />
-          <h1 className="page-main-heading">Cấu trúc môn học</h1>
+          <h1 className="page-main-heading">{uiText("Cấu trúc môn học")}</h1>
           <p className="page-subtitle">
-            Thiết lập chương, bài học và thứ tự nội dung của học phần.
-          </p>
+            {uiText("Thiết lập chương, bài học và thứ tự nội dung của học phần.")}</p>
         </div>
         {!isArchived && (
           <Button type="button" variant="primary" onClick={openAddChapter} disabled={isSaving}>
             <Plus size={18} />
-            <span>Thêm chương mới</span>
+            <span>{uiText("Thêm chương mới")}</span>
           </Button>
         )}
       </div>
 
       {error && (
-        <ErrorBanner title="Không thể cập nhật cấu trúc" message={error} onRetry={() => void loadStructure()} />
+        <ErrorBanner title={uiText("Không thể cập nhật cấu trúc")} message={error} onRetry={() => void loadStructure()} />
       )}
 
       {isArchived && (
         <div className="archived-warning-alert" role="alert">
           <AlertTriangle size={20} />
-          <span>Môn học đã lưu trữ: chế độ chỉ đọc, không thể thay đổi cấu trúc.</span>
+          <span>{uiText("Môn học đã lưu trữ: chế độ chỉ đọc, không thể thay đổi cấu trúc.")}</span>
         </div>
       )}
 
       {orderedChapters.length === 0 ? (
         <EmptyState
-          title="Chưa có chương học nào"
-          description="Thêm chương đầu tiên để bắt đầu xây dựng đề cương."
+          title={uiText("Chưa có chương học nào")}
+          description={uiText("Thêm chương đầu tiên để bắt đầu xây dựng đề cương.")}
           action={!isArchived ? (
             <Button variant="primary" onClick={openAddChapter} disabled={isSaving}>
-              Thêm chương đầu tiên
-            </Button>
+              {uiText("Thêm chương đầu tiên")}</Button>
           ) : undefined}
         />
       ) : (
@@ -296,7 +295,7 @@ export const CourseStructurePage: React.FC = () => {
               <section key={chapter.id} className="chapter-card">
                 <header className="chapter-card-header">
                   <div className="chapter-title-group">
-                    <span className="chapter-order-badge">Chương {chapterIndex + 1}</span>
+                    <span className="chapter-order-badge">{uiText("Chương ")}{chapterIndex + 1}</span>
                     <h2 className="chapter-title-text">{chapter.title}</h2>
                   </div>
                   {!isArchived && (
@@ -306,7 +305,7 @@ export const CourseStructurePage: React.FC = () => {
                         className="icon-action-btn"
                         onClick={() => void moveChapter(chapterIndex, 'up')}
                         disabled={chapterIndex === 0 || isSaving}
-                        aria-label="Di chuyển chương lên trên"
+                        aria-label={uiText("Di chuyển chương lên trên")}
                       >
                         <ArrowUp size={16} />
                       </button>
@@ -315,7 +314,7 @@ export const CourseStructurePage: React.FC = () => {
                         className="icon-action-btn"
                         onClick={() => void moveChapter(chapterIndex, 'down')}
                         disabled={chapterIndex === orderedChapters.length - 1 || isSaving}
-                        aria-label="Di chuyển chương xuống dưới"
+                        aria-label={uiText("Di chuyển chương xuống dưới")}
                       >
                         <ArrowDown size={16} />
                       </button>
@@ -324,7 +323,7 @@ export const CourseStructurePage: React.FC = () => {
                         className="icon-action-btn"
                         onClick={() => openEditChapter(chapter)}
                         disabled={isSaving}
-                        aria-label="Đổi tên chương"
+                        aria-label={uiText("Đổi tên chương")}
                       >
                         <Edit2 size={16} />
                       </button>
@@ -333,7 +332,7 @@ export const CourseStructurePage: React.FC = () => {
                         className="icon-action-btn danger"
                         onClick={() => void handleDeleteChapter(chapter)}
                         disabled={isSaving}
-                        aria-label="Xóa chương"
+                        aria-label={uiText("Xóa chương")}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -343,7 +342,7 @@ export const CourseStructurePage: React.FC = () => {
 
                 <div className="chapter-body">
                   {lessons.length === 0 ? (
-                    <p className="no-lessons-text">Chưa có bài học nào trong chương này.</p>
+                    <p className="no-lessons-text">{uiText("Chưa có bài học nào trong chương này.")}</p>
                   ) : (
                     <ul className="lessons-sublist">
                       {lessons.map((lesson, lessonIndex) => (
@@ -352,7 +351,7 @@ export const CourseStructurePage: React.FC = () => {
                             <BookOpen size={18} className="lesson-icon" />
                             <div className="lesson-info">
                               <strong className="lesson-item-title">
-                                Bài {lessonIndex + 1}: {lesson.title}
+                                {uiText("Bài ")}{lessonIndex + 1}: {lesson.title}
                               </strong>
                               {lesson.description && (
                                 <p className="lesson-item-desc">{lesson.description}</p>
@@ -366,7 +365,7 @@ export const CourseStructurePage: React.FC = () => {
                                 className="icon-action-btn"
                                 onClick={() => void moveLesson(chapter.id, lessons, lessonIndex, 'up')}
                                 disabled={lessonIndex === 0 || isSaving}
-                                aria-label="Di chuyển bài lên trên"
+                                aria-label={uiText("Di chuyển bài lên trên")}
                               >
                                 <ArrowUp size={15} />
                               </button>
@@ -375,7 +374,7 @@ export const CourseStructurePage: React.FC = () => {
                                 className="icon-action-btn"
                                 onClick={() => void moveLesson(chapter.id, lessons, lessonIndex, 'down')}
                                 disabled={lessonIndex === lessons.length - 1 || isSaving}
-                                aria-label="Di chuyển bài xuống dưới"
+                                aria-label={uiText("Di chuyển bài xuống dưới")}
                               >
                                 <ArrowDown size={15} />
                               </button>
@@ -384,7 +383,7 @@ export const CourseStructurePage: React.FC = () => {
                                 className="icon-action-btn"
                                 onClick={() => openEditLesson(lesson)}
                                 disabled={isSaving}
-                                aria-label="Chỉnh sửa bài học"
+                                aria-label={uiText("Chỉnh sửa bài học")}
                               >
                                 <Edit2 size={15} />
                               </button>
@@ -393,7 +392,7 @@ export const CourseStructurePage: React.FC = () => {
                                 className="icon-action-btn danger"
                                 onClick={() => void handleDeleteLesson(chapter.id, lesson)}
                                 disabled={isSaving}
-                                aria-label="Xóa bài học"
+                                aria-label={uiText("Xóa bài học")}
                               >
                                 <Trash2 size={15} />
                               </button>
@@ -412,7 +411,7 @@ export const CourseStructurePage: React.FC = () => {
                         disabled={isSaving}
                       >
                         <Plus size={16} />
-                        <span>Thêm bài học vào chương này</span>
+                        <span>{uiText("Thêm bài học vào chương này")}</span>
                       </Button>
                     </div>
                   )}
@@ -425,17 +424,17 @@ export const CourseStructurePage: React.FC = () => {
 
       {showChapterModal && (
         <Modal
-          title={editingChapter ? 'Sửa tên chương' : 'Thêm chương mới'}
+          title={editingChapter ? uiText("Sửa tên chương") : uiText("Thêm chương mới")}
           isOpen={showChapterModal}
           onClose={() => setShowChapterModal(false)}
         >
           <form onSubmit={(event) => void handleSaveChapter(event)} className="modal-form-body">
             <TextField
-              label="Tiêu đề chương"
+              label={uiText("Tiêu đề chương")}
               required
               value={chapterTitle}
               onChange={(event) => setChapterTitle(event.target.value)}
-              placeholder="Ví dụ: Chương 1: Tổng quan"
+              placeholder={uiText("Ví dụ: Chương 1: Tổng quan")}
             />
             <div className="modal-actions-bar">
               <Button
@@ -444,10 +443,9 @@ export const CourseStructurePage: React.FC = () => {
                 onClick={() => setShowChapterModal(false)}
                 disabled={isSaving}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="primary" isLoading={isSaving}>
-                {editingChapter ? 'Lưu thay đổi' : 'Thêm chương'}
+                {editingChapter ? uiText("Lưu thay đổi") : uiText("Thêm chương")}
               </Button>
             </div>
           </form>
@@ -456,23 +454,23 @@ export const CourseStructurePage: React.FC = () => {
 
       {showLessonModal && (
         <Modal
-          title={editingLesson ? 'Sửa bài học' : 'Thêm bài học mới'}
+          title={editingLesson ? uiText("Sửa bài học") : uiText("Thêm bài học mới")}
           isOpen={showLessonModal}
           onClose={() => setShowLessonModal(false)}
         >
           <form onSubmit={(event) => void handleSaveLesson(event)} className="modal-form-body">
             <TextField
-              label="Tiêu đề bài học"
+              label={uiText("Tiêu đề bài học")}
               required
               value={lessonTitle}
               onChange={(event) => setLessonTitle(event.target.value)}
-              placeholder="Ví dụ: Bài 1: Khái niệm cơ bản"
+              placeholder={uiText("Ví dụ: Bài 1: Khái niệm cơ bản")}
             />
             <TextAreaField
-              label="Mô tả bài học"
+              label={uiText("Mô tả bài học")}
               value={lessonDescription}
               onChange={(event) => setLessonDescription(event.target.value)}
-              placeholder="Tóm tắt nội dung chính hoặc yêu cầu chuẩn bị..."
+              placeholder={uiText("Tóm tắt nội dung chính hoặc yêu cầu chuẩn bị...")}
               rows={3}
             />
             <div className="modal-actions-bar">
@@ -482,10 +480,9 @@ export const CourseStructurePage: React.FC = () => {
                 onClick={() => setShowLessonModal(false)}
                 disabled={isSaving}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button type="submit" variant="primary" isLoading={isSaving}>
-                {editingLesson ? 'Lưu thay đổi' : 'Thêm bài học'}
+                {editingLesson ? uiText("Lưu thay đổi") : uiText("Thêm bài học")}
               </Button>
             </div>
           </form>

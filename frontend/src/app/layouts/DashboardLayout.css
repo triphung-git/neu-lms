@@ -231,11 +231,6 @@
   background-color: var(--surface-soft);
 }
 
-.sidebar-demo-badge {
-  font-size: var(--text-caption);
-  color: var(--muted);
-  padding: var(--space-1) var(--space-3);
-}
 
 /* Content Area */
 .dash-content {
@@ -274,4 +269,18 @@
   .dash-sidebar.open {
     transform: translateX(0);
   }
+}
+
+/* Keep the language selector and session controls usable on narrow screens. */
+@media (max-width: 600px) {
+  .dash-topbar-inner { padding-inline: 12px; gap: 8px; }
+  .dash-topbar-left, .dash-topbar-right { gap: 8px; min-width: 0; }
+  .dash-brand-sub, .dash-user-chip .user-name { display: none; }
+  .dash-brand-icon { flex-shrink: 0; }
+  .dash-user-chip { padding: 6px; gap: 4px; }
+  .language-switch select { max-width: 110px; }
+}
+@media (max-width: 420px) {
+  .dash-brand-name { display: none; }
+  .dash-logout-btn { padding-inline: 4px; }
 }

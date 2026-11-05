@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React from 'react';
 import { formatFileSize } from '../kernel/formatting';
 import './QuotaGaugeBar.css';
@@ -36,7 +37,7 @@ export const QuotaGaugeBar: React.FC<QuotaGaugeBarProps> = ({
     <div className={`quota-gauge-container ${statusClass} ${className}`.trim()} data-testid="quota-gauge-bar">
       <div className="quota-gauge-header">
         <div className="quota-gauge-title-group">
-          <span className="quota-gauge-title">Dung lượng môn học</span>
+          <span className="quota-gauge-title">{uiText("Dung lượng môn học")}</span>
           <span className={`quota-gauge-badge ${badgeVariant}`}>
             {usedPercent}%
           </span>
@@ -54,7 +55,7 @@ export const QuotaGaugeBar: React.FC<QuotaGaugeBarProps> = ({
         aria-valuenow={usedPercent}
         aria-valuemin={0}
         aria-valuemax={100}
-        aria-label="Thanh đo dung lượng môn học"
+        aria-label={uiText("Thanh đo dung lượng môn học")}
       >
         <div
           className="quota-progress-fill used"
@@ -65,17 +66,17 @@ export const QuotaGaugeBar: React.FC<QuotaGaugeBarProps> = ({
           <div
             className="quota-progress-fill reserved"
             style={{ width: `${reservedPercent}%` }}
-            title={`Đang giữ chỗ: ${formatFileSize(reservedBytes)}`}
+            title={uiText("Đang giữ chỗ: {0}",[formatFileSize(reservedBytes)])}
             data-testid="quota-progress-reserved"
           />
         )}
       </div>
 
       <div className="quota-gauge-footer">
-        <span className="quota-note">Trần hệ thống tối đa 5,0 GB cho mỗi môn học</span>
+        <span className="quota-note">{uiText("Trần hệ thống tối đa 5,0 GB cho mỗi môn học")}</span>
         {reservedBytes > 0 && (
           <span className="quota-reserved-note">
-            Đang giữ chỗ: {formatFileSize(reservedBytes)}
+            {uiText("Đang giữ chỗ: ")}{formatFileSize(reservedBytes)}
           </span>
         )}
       </div>

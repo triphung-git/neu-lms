@@ -1,13 +1,11 @@
-
-from ai_assistant.hybrid_retrieval import reciprocal_rank_fusion
-from ai_assistant.retrieval import RetrievedChunk
-
 import pytest
 
 from ai_assistant.hybrid_retrieval import (
-    reciprocal_rank_fusion,
     extract_situation_number,
+    reciprocal_rank_fusion,
 )
+from ai_assistant.retrieval import RetrievedChunk
+
 
 def make_chunk(
     material_id,
@@ -108,6 +106,7 @@ def test_rrf_rewards_chunks_found_by_both_methods():
 
     assert results[0].text == "Python Regex"
     assert results[0].score > results[1].score
+
 
 @pytest.mark.parametrize(
     ("text", "expected"),

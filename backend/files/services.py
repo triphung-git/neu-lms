@@ -42,20 +42,54 @@ def current_actor(actor):
     return fresh
 
 
-def require_file_upload_permission(actor, course, purpose):
+def require_file_upload_permission(
+    actor, course, purpose, *, assignment_id=None, file_size=0, file_name=""
+):
     if not actor.is_active:
         raise DomainError("ACCOUNT_INACTIVE")
+
     require_verified(actor)
+
     if course.status == Course.Status.ARCHIVED:
         raise DomainError("COURSE_ARCHIVED")
+
+    if purpose == FilePurpose.ASSIGNMENT_SUBMISSION and assignment_id:
+        from assignments.models import Assignment
+        from assignments.services import check_student_eligibility
+
+        assignment = Assignment.objects.filter(
+            pk=assignment_id,
+            course=course,
+        ).first()
+
+        if assignment is None or assignment.published_at is None:
+            raise DomainError("FORBIDDEN")
+
+        eligibility = check_student_eligibility(
+            assignment=assignment,
+            student=actor,
+        )
+        if not eligibility["can_submit"]:
+            raise DomainError("FORBIDDEN")
+
+        policy = eligibility["applicable_file_policy"]
+
+        if file_size > policy["max_file_size_bytes"]:
+            raise DomainError("FILE_SIZE_EXCEEDS_LIMIT")
+
+        if get_file_extension(file_name) not in policy["allowed_extensions"]:
+            raise DomainError("FILE_EXTENSION_NOT_ALLOWED")
+
+        return
+
     if not manager(actor, course):
         raise DomainError("FORBIDDEN")
+
     if purpose not in (
         FilePurpose.COURSE_MATERIAL,
         FilePurpose.GENERAL,
         FilePurpose.ASSIGNMENT_ATTACHMENT,
     ):
-        # Assignment submissions arrive with B11.
         raise DomainError("INVALID_FILE_PURPOSE")
 
 
@@ -99,10 +133,19 @@ def create_upload_intent(
         course = Course.objects.select_for_update().get(pk=course_id)
     except Course.DoesNotExist as error:
         raise DomainError("COURSE_NOT_FOUND") from error
-    require_file_upload_permission(actor, course, purpose)
-    policy, _ = CourseFilePolicy.objects.select_for_update().get_or_create(course=course)
     if type(file_size) is not int or file_size <= 0:
         raise DomainError("INVALID_FILE_SIZE")
+
+    require_file_upload_permission(
+        actor,
+        course,
+        purpose,
+        assignment_id=assignment_id,
+        file_size=file_size,
+        file_name=file_name,
+    )
+
+    policy, _ = CourseFilePolicy.objects.select_for_update().get_or_create(course=course)
     if file_size > min(policy.max_file_size_bytes, SYSTEM_MAX_FILE_SIZE_BYTES):
         raise DomainError("FILE_SIZE_EXCEEDS_LIMIT")
     if get_file_extension(file_name) not in policy.allowed_extensions:
@@ -113,21 +156,26 @@ def create_upload_intent(
     ):
         raise DomainError("QUOTA_EXCEEDED")
 
-    if assignment_id is not None and purpose != FilePurpose.ASSIGNMENT_ATTACHMENT:
+    if assignment_id is not None and purpose not in (
+        FilePurpose.ASSIGNMENT_ATTACHMENT,
+        FilePurpose.ASSIGNMENT_SUBMISSION,
+    ):
         raise DomainError("INVALID_FILE_PURPOSE")
+
     if (
         require_assignment_scope
         and purpose == FilePurpose.ASSIGNMENT_ATTACHMENT
         and assignment_id is None
     ):
         raise DomainError("ASSIGNMENT_REQUIRED")
-    target_assignment = None
-    if assignment_id is not None:
+
+    if assignment_id is not None and purpose == FilePurpose.ASSIGNMENT_ATTACHMENT:
         from assignments.models import Assignment, AssignmentStatus
 
         try:
             target_assignment = Assignment.objects.select_for_update().get(
-                pk=assignment_id, course=course
+                pk=assignment_id,
+                course=course,
             )
         except Assignment.DoesNotExist as err:
             raise DomainError("ASSIGNMENT_NOT_FOUND") from err
@@ -148,8 +196,8 @@ def create_upload_intent(
         "max_file_size_bytes": policy.max_file_size_bytes,
         "max_files_per_assignment": policy.max_files_per_assignment,
     }
-    if target_assignment:
-        snapshot["assignment_id"] = str(target_assignment.id)
+    if assignment_id is not None:
+        snapshot["assignment_id"] = str(assignment_id)
 
     item = StoredFile.objects.create(
         id=file_id,
@@ -175,13 +223,25 @@ def create_upload_intent(
     }
 
 
+def require_owned_upload(actor, item):
+    if item.uploader_id != actor.id:
+        raise DomainError("FORBIDDEN")
+
+    require_file_upload_permission(
+        actor,
+        item.course,
+        item.purpose,
+        assignment_id=item.policy_snapshot.get("assignment_id"),
+        file_size=item.file_size,
+        file_name=item.file_name,
+    )
+
+
 @transaction.atomic
 def receive_upload(*, actor, file_id, content):
     actor = current_actor(actor)
     item, _ = locked_file(file_id)
-    require_file_upload_permission(actor, item.course, item.purpose)
-    if item.uploader_id != actor.id:
-        raise DomainError("FORBIDDEN")
+    require_owned_upload(actor, item)
     if item.status != FileStatus.QUARANTINE_PENDING or item.expires_at <= timezone.now():
         raise DomainError("INVALID_FILE_STATE")
     if len(content) != item.file_size:
@@ -194,9 +254,7 @@ def receive_upload(*, actor, file_id, content):
 def commit_upload(*, actor, file_id, client_checksum=None, actual_size=None):
     actor = current_actor(actor)
     item, policy = locked_file(file_id)
-    require_file_upload_permission(actor, item.course, item.purpose)
-    if item.uploader_id != actor.id:
-        raise DomainError("FORBIDDEN")
+    require_owned_upload(actor, item)
     if item.status in (FileStatus.SCANNING, FileStatus.CLEAN):
         if client_checksum and item.sha256_hash != client_checksum:
             raise DomainError("INVALID_FILE_STATE")
@@ -234,6 +292,13 @@ def abort_upload_intent(*, file_id, actor=None, system_actor=""):
         require_file_upload_permission(actor, item.course, item.purpose)
     if item.status == FileStatus.DELETED:
         return item
+    from learning.models import GroupSubmission, LibraryDocument
+    from assignments.models import SubmissionRevision
+
+    if (LibraryDocument.objects.filter(file=item).exists()
+            or GroupSubmission.objects.filter(file=item).exists()
+            or SubmissionRevision.objects.filter(file=item).exists()):
+        raise DomainError("INVALID_FILE_STATE")
     if item.material_links.exists():
         raise DomainError("INVALID_FILE_STATE")
     if item.assignment_attachments.exists():
