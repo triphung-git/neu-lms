@@ -9111,9 +9111,8 @@
                     },
                     "max_files_per_submission": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
+                        "maximum": 2147483647,
                         "minimum": 0,
-                        "format": "int64",
                         "description": "Số lượng tệp tối đa trong một lần nộp (1 đến 10)"
                     },
                     "max_file_size_bytes": {
@@ -9271,9 +9270,8 @@
                     },
                     "position": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
+                        "maximum": 2147483647,
                         "minimum": 0,
-                        "format": "int64",
                         "description": "Thứ tự hiển thị tiêu chí"
                     }
                 },
@@ -9985,9 +9983,8 @@
                     },
                     "max_files_per_assignment": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": -9223372036854775808,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
                     },
                     "course_quota_bytes": {
                         "type": "integer",
@@ -10043,9 +10040,8 @@
                     },
                     "max_files_per_assignment": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": -9223372036854775808,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
                     },
                     "course_quota_bytes": {
                         "type": "integer",
@@ -10743,9 +10739,8 @@
                 "properties": {
                     "version": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": 0
                     },
                     "score": {
                         "type": "string",
@@ -12578,9 +12573,8 @@
                     },
                     "max_files_per_assignment": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": -9223372036854775808,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": -2147483648
                     },
                     "course_quota_bytes": {
                         "type": "integer",
@@ -13494,9 +13488,8 @@
                     },
                     "number": {
                         "type": "integer",
-                        "maximum": 9223372036854775807,
-                        "minimum": 0,
-                        "format": "int64"
+                        "maximum": 2147483647,
+                        "minimum": 0
                     },
                     "submitted_at": {
                         "type": "string",
