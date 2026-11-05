@@ -39,6 +39,7 @@ from .models import (
     AssignmentStatus,
     ReopenWindowScope,
     ReopenWindowTarget,
+    SubmissionRevision,
 )
 
 
@@ -778,7 +779,7 @@ def check_student_eligibility(
     assignment: Assignment,
     student: Any,
     current_time: Any = None,
-    has_existing_submission: bool = False,
+    has_existing_submission: bool | None = None,
     existing_submission_info: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Kiểm tra tính hợp lệ nộp bài của sinh viên theo Thẩm quyền Máy chủ (Server Authority).
@@ -790,6 +791,11 @@ def check_student_eligibility(
     - Đóng thủ công chặn nộp; archive luôn chặn ghi.
     """
     assignment = Assignment.objects.select_related("course").get(pk=assignment.pk)
+    if has_existing_submission is None:
+        has_existing_submission = SubmissionRevision.objects.filter(
+            assignment=assignment,
+            student_id=getattr(student, "pk", None),
+        ).exists()
     now = current_time or timezone.now()
     now_iso = now.isoformat() if hasattr(now, "isoformat") else str(now)
     deadline_iso = (
@@ -1058,7 +1064,7 @@ def validate_submission_commit_eligibility(
     student: Any,
     files_info: list[dict[str, Any]],
     commit_time: Any = None,
-    has_existing_submission: bool = False,
+    has_existing_submission: bool | None = None,
 ) -> dict[str, Any]:
     """Hợp đồng thẩm định tại thời điểm commit revision sau khi scan clean (chuẩn bị cho B11).
 

@@ -1,0 +1,50 @@
+.grade-panel .rubric-editor {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+
+.grade-panel .rubric-editor legend {
+  padding: 0 6px;
+  font-weight: 600;
+}
+
+.grade-panel .rubric-mode {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--surface);
+  font: inherit;
+}
+
+.rubric-marks {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+}
+
+.rubric-marks > div {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 6px;
+  background: var(--surface-soft);
+}
+
+.rubric-marks dt {
+  overflow-wrap: anywhere;
+}
+
+.rubric-marks dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

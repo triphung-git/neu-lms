@@ -1,5 +1,5 @@
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, F, Min, Q
 from django.utils import timezone
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
@@ -151,6 +151,70 @@ def get_courses_summary(user, role_param=None):
             )
 
     if target_role == "teacher":
+        from datetime import timedelta
+
+        from django.utils import timezone
+
+        from ai_assistant.models import MaterialSummaryDraft
+        from assignments.models import Assignment, AssignmentStatus
+
+        now = timezone.now()
+        upcoming_deadlines = Assignment.objects.filter(
+            course__teacher=user,
+            course__status=Course.Status.OPEN,
+            status=AssignmentStatus.PUBLISHED,
+            published_at__isnull=False,
+            due_at__gte=now,
+            due_at__lte=now + timedelta(days=7),
+            manually_closed_at__isnull=True,
+        ).count()
+        pending_ai_drafts = MaterialSummaryDraft.objects.filter(
+            course__teacher=user,
+            course__status=Course.Status.OPEN,
+            status=MaterialSummaryDraft.Status.PENDING,
+            material__is_hidden=False,
+        ).count()
+        from assignments.grade_progress import latest_revisions_with_publication
+        from files.models import FilePurpose, FileStatus, StoredFile
+
+        pending = latest_revisions_with_publication().filter(
+            assignment__course__teacher=user,
+            assignment__course__status=Course.Status.OPEN,
+            has_publication=False,
+        )
+
+        pending_submissions = pending.count()
+
+        pending_assignments = list(
+            pending.order_by()
+            .values(
+                "assignment_id",
+                title=F("assignment__title"),
+                course_name=F("assignment__course__name"),
+            )
+            .annotate(
+                waiting=Count("pk"),
+                oldest=Min("submitted_at"),
+            )
+            .order_by("oldest", "assignment_id")[:5]
+        )
+
+        material_stats = StoredFile.objects.filter(
+            course__teacher=user,
+            course__status=Course.Status.OPEN,
+            purpose=FilePurpose.COURSE_MATERIAL,
+            status__in=[FileStatus.SCANNING, FileStatus.INFECTED],
+        ).aggregate(
+            scanning_materials=Count(
+                "pk",
+                filter=Q(status=FileStatus.SCANNING),
+            ),
+            problem_materials=Count(
+                "pk",
+                filter=Q(status=FileStatus.INFECTED),
+            ),
+        )
+
         teacher_courses = Course.objects.filter(teacher=user)
         counts = teacher_courses.aggregate(
             total_courses=Count("id", distinct=True),
@@ -219,16 +283,12 @@ def get_courses_summary(user, role_param=None):
             "total_memberships": mem_counts["total_memberships"] or 0,
             "distinct_students": mem_counts["distinct_students"] or 0,
             "recent_courses": recent_courses,
-            "pending_submissions": None,
-            "upcoming_deadlines": None,
-            "problem_materials": None,
-            "pending_ai_drafts": None,
-            "unavailable_metrics": [
-                "pending_submissions",
-                "upcoming_deadlines",
-                "problem_materials",
-                "pending_ai_drafts",
-            ],
+            "pending_submissions": pending_submissions,
+            "pending_assignments": pending_assignments,
+            "upcoming_deadlines": upcoming_deadlines,
+            **material_stats,
+            "pending_ai_drafts": pending_ai_drafts,
+            "unavailable_metrics": [],
         }
 
     else:

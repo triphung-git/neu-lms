@@ -4,12 +4,43 @@ from drf_spectacular.views import SpectacularJSONAPIView
 from health.views import LivenessView, ReadinessView
 from identity import admin_views
 from identity import views as auth_views
+from identity.admin_activity import AdminAuditListView, AdminRecentActivityView
+from identity.admin_file_limits import AdminFileLimitsView
+from identity.admin_overview import AdminOverviewView
+from identity.admin_runtime import AdminRuntimeSettingsView
 
 urlpatterns = [
+    path("api/v1/learning/", include("learning.urls")),
+    path(
+        "api/v1/admin/runtime-settings",
+        AdminRuntimeSettingsView.as_view(),
+        name="admin-runtime-settings",
+    ),
+    path(
+        "api/v1/admin/file-limits",
+        AdminFileLimitsView.as_view(),
+        name="admin-file-limits",
+    ),
+    path(
+        "api/v1/admin/recent-activity",
+        AdminRecentActivityView.as_view(),
+        name="admin-recent-activity",
+    ),
+    path(
+        "api/v1/admin/audit-log",
+        AdminAuditListView.as_view(),
+        name="admin-audit-log",
+    ),
+    path(
+        "api/v1/admin/overview",
+        AdminOverviewView.as_view(),
+        name="admin-overview",
+    ),
     path("api/v1/", include("assignments.urls")),
     path("api/v1/", include("courses.urls")),
     path("api/v1/", include("files.urls")),
     path("api/v1/", include("materials.urls")),
+    path("api/v1/", include("ai_assistant.urls")),
     path("api/v1/auth/csrf", auth_views.CsrfView.as_view()),
     path("api/v1/auth/register", auth_views.RegisterView.as_view()),
     path("api/v1/auth/verify-email", auth_views.VerifyEmailView.as_view()),

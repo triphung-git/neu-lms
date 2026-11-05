@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useEffect } from 'react';
 import {
   X,
@@ -92,8 +93,7 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
                 <span className="viewer-meta-divider">•</span>
                 {isClean ? (
                   <span className="viewer-badge-clean">
-                    <ShieldCheck size={14} /> An toàn
-                  </span>
+                    <ShieldCheck size={14} /> {uiText(" An toàn")}</span>
                 ) : (
                   <span className="viewer-badge-warning">
                     <AlertCircle size={14} /> {file.status}
@@ -110,17 +110,17 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
                 download={file.file_name}
                 className="viewer-download-link"
                 data-testid="viewer-download-btn"
-                title="Tải về tệp an toàn"
+                title={uiText("Tải về tệp an toàn")}
               >
                 <Download size={16} />
-                <span>Tải về</span>
+                <span>{uiText("Tải về")}</span>
               </a>
             )}
             <button
               type="button"
               className="viewer-close-btn"
               onClick={onClose}
-              aria-label="Đóng cửa sổ xem trước"
+              aria-label={uiText("Đóng cửa sổ xem trước")}
               data-testid="viewer-close-btn"
             >
               <X size={20} />
@@ -136,11 +136,9 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
               <div className="blocked-icon-wrapper danger">
                 <AlertCircle size={48} />
               </div>
-              <h3 className="blocked-title">Không thể xem trước tệp</h3>
+              <h3 className="blocked-title">{uiText("Không thể xem trước tệp")}</h3>
               <p className="blocked-desc">
-                Tệp tin này chưa vượt qua kiểm định an toàn hoặc đang ở trạng thái cách ly (
-                <code>{file.status}</code>). Để bảo vệ người dùng, hệ thống vô hiệu hóa toàn bộ quyền xem trước và tải về.
-              </p>
+                {uiText("Tệp tin này chưa vượt qua kiểm định an toàn hoặc đang ở trạng thái cách ly (")}<code>{file.status}</code>{uiText("). Để bảo vệ người dùng, hệ thống vô hiệu hóa toàn bộ quyền xem trước và tải về.")}</p>
             </div>
           )}
 
@@ -150,10 +148,9 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
               <div className="blocked-icon-wrapper warning">
                 <Lock size={48} />
               </div>
-              <h3 className="blocked-title">Xem trước bị vô hiệu hóa</h3>
+              <h3 className="blocked-title">{uiText("Xem trước bị vô hiệu hóa")}</h3>
               <p className="blocked-desc">
-                Tệp này không hỗ trợ xem trước theo quy định của môn học. Vui lòng tải về để xem nội dung tệp tin trên máy tính của bạn.
-              </p>
+                {uiText("Tệp này không hỗ trợ xem trước theo quy định của môn học. Vui lòng tải về để xem nội dung tệp tin trên máy tính của bạn.")}</p>
               <div className="blocked-action-row">
                 <a
                   href={downloadUrl}
@@ -162,7 +159,7 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
                   data-testid="download-fallback-btn"
                 >
                   <Download size={16} />
-                  <span>Tải về tệp tin</span>
+                  <span>{uiText("Tải về tệp tin")}</span>
                 </a>
               </div>
             </div>
@@ -193,10 +190,9 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
               <div className="blocked-icon-wrapper info">
                 <ExternalLink size={48} />
               </div>
-              <h3 className="blocked-title">Không hỗ trợ xem trực tiếp</h3>
+              <h3 className="blocked-title">{uiText("Không hỗ trợ xem trực tiếp")}</h3>
               <p className="blocked-desc">
-                Định dạng <code>.{ext.toUpperCase()}</code> không hỗ trợ hiển thị trực tiếp trên trình duyệt web. Vui lòng tải về máy tính để mở bằng phần mềm chuyên dụng.
-              </p>
+                {uiText("Định dạng ")}<code>.{ext.toUpperCase()}</code> {uiText(" không hỗ trợ hiển thị trực tiếp trên trình duyệt web. Vui lòng tải về máy tính để mở bằng phần mềm chuyên dụng.")}</p>
               <div className="blocked-action-row">
                 <a
                   href={downloadUrl}
@@ -205,7 +201,7 @@ export const SecureFileViewer: React.FC<SecureFileViewerProps> = ({
                   data-testid="download-unsupported-btn"
                 >
                   <Download size={16} />
-                  <span>Tải về để xem</span>
+                  <span>{uiText("Tải về để xem")}</span>
                 </a>
               </div>
             </div>

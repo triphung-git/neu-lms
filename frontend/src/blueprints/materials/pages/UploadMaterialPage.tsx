@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate, useOutletContext } from 'react-router-dom';
 import { materialsService, type MaterialListItem } from '../../../api/materialsService';
@@ -61,7 +62,7 @@ export const UploadMaterialPage: React.FC = () => {
   const createCommandKey = useRef<string | null>(null);
   const [materialType, setMaterialType] = useState<string>('document');
   const [tags, setTags] = useState('');
-  const [changelog, setChangelog] = useState('Khởi tạo tài liệu v1');
+  const [changelog, setChangelog] = useState(uiText("Khởi tạo tài liệu v1"));
 
   // Options
   const [autoFinalize, setAutoFinalize] = useState(true);
@@ -167,17 +168,17 @@ export const UploadMaterialPage: React.FC = () => {
     if (!monId) return;
 
     if (uploadMode === 'new_material' && !title.trim()) {
-      notifyError('Vui lòng nhập tên học liệu.');
+      notifyError(uiText("Vui lòng nhập tên học liệu."));
       return;
     }
 
     if (uploadMode === 'new_version' && !targetMaterialId) {
-      notifyError('Vui lòng chọn học liệu cần thêm phiên bản mới.');
+      notifyError(uiText("Vui lòng chọn học liệu cần thêm phiên bản mới."));
       return;
     }
 
     if (queue.length === 0) {
-      notifyError('Vui lòng chọn ít nhất một tệp tin tài liệu.');
+      notifyError(uiText("Vui lòng chọn ít nhất một tệp tin tài liệu."));
       return;
     }
 
@@ -185,7 +186,7 @@ export const UploadMaterialPage: React.FC = () => {
     if (policy && (queue.length > (policy.max_files_per_assignment ?? 1) || queue.some(item =>
       item.size > (policy.max_file_size_bytes ?? 26214400) || item.size <= 0 ||
       !(Array.isArray(policy.allowed_extensions) ? policy.allowed_extensions : ['pdf', 'docx']).includes(item.name.split('.').pop()?.toLowerCase() || '')))) {
-      notifyError('Các tệp vượt giới hạn số lượng, loại hoặc dung lượng theo chính sách.');
+      notifyError(uiText("Các tệp vượt giới hạn số lượng, loại hoặc dung lượng theo chính sách."));
       return;
     }
     if (!createCommandKey.current) createCommandKey.current = crypto.randomUUID();
@@ -243,23 +244,23 @@ export const UploadMaterialPage: React.FC = () => {
         let fileRecord = await filesService.getFile(monId, intent.file_id);
         for (let attempt = 0; fileRecord.status === 'scanning' || fileRecord.status === 'quarantine_pending'; attempt++) {
           setQueue(prev => prev.map((q, idx) => idx === i ? { ...q, storedFileId: intent.file_id, status: 'scanning' } : q));
-          if (attempt >= 60) throw new Error('Quét chưa hoàn tất. Kiểm tra lại trong kho tệp.');
+          if (attempt >= 60) throw new Error(uiText("Quét chưa hoàn tất. Kiểm tra lại trong kho tệp."));
           await new Promise(resolve => setTimeout(resolve, 1500));
           requireMounted();
           fileRecord = await filesService.getFile(monId, intent.file_id);
         }
         if (fileRecord.status !== 'clean' && fileRecord.status !== 'infected') {
-          throw new Error('Tệp chưa ở trạng thái sạch; không thể tạo manifest.');
+          throw new Error(uiText("Tệp chưa ở trạng thái sạch; không thể tạo manifest."));
         }
         if (fileRecord.status === 'infected') {
           setQueue((prev) =>
             prev.map((q, idx) =>
               idx === i
-                ? { ...q, status: 'error', error: 'Tệp tin bị nhiễm mã độc, hệ thống đã loại bỏ.' }
+                ? { ...q, status: 'error', error: uiText("Tệp tin bị nhiễm mã độc, hệ thống đã loại bỏ.") }
                 : q,
             ),
           );
-          throw new Error(`Tệp tin "${item.name}" không an toàn và đã bị loại bỏ.`);
+          throw new Error(uiText("Tệp tin \"{0}\" không an toàn và đã bị loại bỏ.",[item.name]));
         }
 
         setQueue((prev) =>
@@ -292,7 +293,7 @@ export const UploadMaterialPage: React.FC = () => {
           initial_file_ids: cleanStoredFileIds,
         }, createCommandKey.current);
 
-        notifySuccess(`Đã tạo học liệu "${newMat.title}" thành công.`);
+        notifySuccess(uiText("Đã tạo học liệu \"{0}\" thành công.",[newMat.title]));
 
         // Finalize if requested
         if (autoFinalize) {
@@ -309,7 +310,7 @@ export const UploadMaterialPage: React.FC = () => {
               newMat.id,
               targetVerId,
             );
-            notifySuccess(`Đã đóng băng manifest phiên bản v${finVer.version_number}.`);
+            notifySuccess(uiText("Đã đóng băng manifest phiên bản v{0}.",[finVer.version_number]));
 
             // Publish if requested
             if (autoPublish) {
@@ -317,7 +318,7 @@ export const UploadMaterialPage: React.FC = () => {
               await materialsService.publishMaterial(monId, newMat.id, {
                 version_id: finVer.id,
               });
-              notifySuccess(`Đã công bố học liệu v${finVer.version_number} cho sinh viên.`);
+              notifySuccess(uiText("Đã công bố học liệu v{0} cho sinh viên.",[finVer.version_number]));
             }
           }
         }
@@ -326,7 +327,7 @@ export const UploadMaterialPage: React.FC = () => {
       } else {
         // Mode 2: Create revision for existing material
         const newVer = revisionId.current ? { id: revisionId.current, version_number: '?' } : await materialsService.createRevision(monId, targetMaterialId, {
-          changelog: changelog.trim() || 'Cập nhật phiên bản mới',
+          changelog: changelog.trim() || uiText("Cập nhật phiên bản mới"),
         }, createCommandKey.current || undefined);
 
         revisionId.current = newVer.id;
@@ -343,20 +344,20 @@ export const UploadMaterialPage: React.FC = () => {
           revisionFiles.current.add(cleanStoredFileIds[idx]);
         }
 
-        notifySuccess(`Đã tạo phiên bản v${newVer.version_number} thành công.`);
+        notifySuccess(uiText("Đã tạo phiên bản v{0} thành công.",[newVer.version_number]));
 
         // Finalize if requested
         if (autoFinalize) {
           requireMounted();
           await materialsService.finalizeVersion(monId, targetMaterialId, newVer.id);
-          notifySuccess(`Đã đóng băng manifest v${newVer.version_number}.`);
+          notifySuccess(uiText("Đã đóng băng manifest v{0}.",[newVer.version_number]));
 
           if (autoPublish) {
               requireMounted();
             await materialsService.publishMaterial(monId, targetMaterialId, {
               version_id: newVer.id,
             });
-            notifySuccess(`Đã công bố phiên bản v${newVer.version_number} cho sinh viên.`);
+            notifySuccess(uiText("Đã công bố phiên bản v{0} cho sinh viên.",[newVer.version_number]));
           }
         }
 
@@ -364,7 +365,7 @@ export const UploadMaterialPage: React.FC = () => {
       }
     } catch (err) {
       if (!mounted.current) return;
-      const message = err instanceof Error ? err.message : 'Tải lên học liệu thất bại.';
+      const message = err instanceof Error ? err.message : uiText("Tải lên học liệu thất bại.");
       setQueue(prev => prev.map(q => ['uploading', 'committing', 'scanning'].includes(q.status) ? { ...q, status: 'error', error: message } : q));
       notifyError(message);
     } finally {
@@ -373,19 +374,18 @@ export const UploadMaterialPage: React.FC = () => {
   };
 
   if (courseLoading) {
-    return <div className="upload-page-container">Đang tải thông tin môn học...</div>;
+    return <div className="upload-page-container">{uiText("Đang tải thông tin môn học...")}</div>;
   }
 
   if (isArchived) {
     return (
       <div className="upload-page-container">
         <EmptyState
-          title="Môn học đã lưu trữ"
-          description="Không thể tải thêm tài liệu vào môn học đã kết thúc và lưu trữ."
+          title={uiText("Môn học đã lưu trữ")}
+          description={uiText("Không thể tải thêm tài liệu vào môn học đã kết thúc và lưu trữ.")}
           action={
             <Button variant="secondary" onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu`)}>
-              Quay lại danh sách học liệu
-            </Button>
+              {uiText("Quay lại danh sách học liệu")}</Button>
           }
         />
       </div>
@@ -396,49 +396,47 @@ export const UploadMaterialPage: React.FC = () => {
     <div className="upload-material-page">
       <Breadcrumb
         items={[
-          { label: 'Môn học', path: '/gv/mon-hoc' },
-          { label: course?.name || 'Chi tiết môn', path: `/gv/mon-hoc/${monId}` },
-          { label: 'Học liệu', path: `/gv/mon-hoc/${monId}/hoc-lieu` },
-          { label: 'Tải lên học liệu' },
+          { label: uiText("Môn học"), path: '/gv/mon-hoc' },
+          { label: course?.name || uiText("Chi tiết môn"), path: `/gv/mon-hoc/${monId}` },
+          { label: uiText("Học liệu"), path: `/gv/mon-hoc/${monId}/hoc-lieu` },
+          { label: uiText("Tải lên học liệu") },
         ]}
       />
 
       <div className="upload-header">
-        <h2>Tải lên học liệu mới</h2>
-        <p>Tải lên tài liệu giảng dạy, quản lý manifest phiên bản và kích hoạt trích xuất văn bản.</p>
+        <h2>{uiText("Tải lên học liệu mới")}</h2>
+        <p>{uiText("Tải lên tài liệu giảng dạy, quản lý manifest phiên bản và kích hoạt trích xuất văn bản.")}</p>
       </div>
 
       <form onSubmit={(e) => void handleSubmit(e)} className="upload-form-stack">
         {/* Mode Selector */}
         <div className="upload-mode-card">
-          <label style={{ fontWeight: 600 }}>Chế độ tải lên:</label>
+          <label style={{ fontWeight: 600 }}>{uiText("Chế độ tải lên:")}</label>
           <div className="mode-toggle-group">
             <button
               type="button"
               className={`mode-btn ${uploadMode === 'new_material' ? 'active' : ''}`}
               onClick={() => setUploadMode('new_material')}
             >
-              <Plus size={16} /> Tạo học liệu mới
-            </button>
+              <Plus size={16} /> {uiText(" Tạo học liệu mới")}</button>
             <button
               type="button"
               className={`mode-btn ${uploadMode === 'new_version' ? 'active' : ''}`}
               onClick={() => setUploadMode('new_version')}
             >
-              <Layers size={16} /> Cập nhật phiên bản mới cho học liệu có sẵn
-            </button>
+              <Layers size={16} /> {uiText(" Cập nhật phiên bản mới cho học liệu có sẵn")}</button>
           </div>
 
           {uploadMode === 'new_version' && (
             <div className="existing-material-picker">
-              <label htmlFor="target-mat">Chọn học liệu đích:</label>
+              <label htmlFor="target-mat">{uiText("Chọn học liệu đích:")}</label>
               <select
                 id="target-mat"
                 value={targetMaterialId}
                 onChange={(e) => setTargetMaterialId(e.target.value)}
                 required
               >
-                <option value="">-- Chọn học liệu --</option>
+                <option value="">{uiText("-- Chọn học liệu --")}</option>
                 {existingMaterials.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.title} (v{m.latest_version_number || 1})
@@ -452,10 +450,10 @@ export const UploadMaterialPage: React.FC = () => {
         {/* Metadata Fields (for new material) */}
         {uploadMode === 'new_material' && (
           <div className="upload-section-card">
-            <h3>Thông tin học liệu</h3>
+            <h3>{uiText("Thông tin học liệu")}</h3>
             <TextField
-              label="Tên học liệu *"
-              placeholder="VD: Giáo trình Chương 1 - Nhập môn Kiến trúc phần mềm"
+              label={uiText("Tên học liệu *")}
+              placeholder={uiText("VD: Giáo trình Chương 1 - Nhập môn Kiến trúc phần mềm")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
@@ -463,13 +461,12 @@ export const UploadMaterialPage: React.FC = () => {
 
             <div style={{ marginTop: '1rem' }}>
               <label htmlFor="mat-desc" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                Mô tả học liệu
-              </label>
+                {uiText("Mô tả học liệu")}</label>
               <textarea
                 id="mat-desc"
                 rows={3}
                 style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
-                placeholder="Tóm tắt nội dung học liệu..."
+                placeholder={uiText("Tóm tắt nội dung học liệu...")}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
               />
@@ -478,33 +475,31 @@ export const UploadMaterialPage: React.FC = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
               <div>
                 <label htmlFor="mat-type" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                  Loại học liệu
-                </label>
+                  {uiText("Loại học liệu")}</label>
                 <select
                   id="mat-type"
                   style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
                   value={materialType}
                   onChange={(e) => setMaterialType(e.target.value)}
                 >
-                  <option value="document">Bài giảng</option>
-                  <option value="slide">Slide trình chiếu</option>
-                  <option value="reference">Tài liệu tham khảo</option>
-                  <option value="syllabus">Đề cương / Ôn tập</option>
-                  <option value="other">Khác</option>
+                  <option value="document">{uiText("Bài giảng")}</option>
+                  <option value="slide">{uiText("Slide trình chiếu")}</option>
+                  <option value="reference">{uiText("Tài liệu tham khảo")}</option>
+                  <option value="syllabus">{uiText("Đề cương / Ôn tập")}</option>
+                  <option value="other">{uiText("Khác")}</option>
                 </select>
               </div>
 
               <div>
                 <label htmlFor="mat-chapter" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                  Chương học (Tùy chọn)
-                </label>
+                  {uiText("Chương học (Tùy chọn)")}</label>
                 <select
                   id="mat-chapter"
                   style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
                   value={selectedChapterId}
                   onChange={(e) => setSelectedChapterId(e.target.value)}
                 >
-                  <option value="">-- Không gắn chương --</option>
+                  <option value="">{uiText("-- Không gắn chương --")}</option>
                   {chapters.map((ch) => (
                     <option key={ch.id} value={ch.id}>
                       {ch.title}
@@ -516,15 +511,14 @@ export const UploadMaterialPage: React.FC = () => {
               {lessons.length > 0 && (
                 <div>
                   <label htmlFor="mat-lesson" style={{ display: 'block', fontSize: '0.875rem', fontWeight: 600, marginBottom: '0.25rem' }}>
-                    Bài học cụ thể
-                  </label>
+                    {uiText("Bài học cụ thể")}</label>
                   <select
                     id="mat-lesson"
                     style={{ width: '100%', padding: '0.5rem', borderRadius: '0.375rem', border: '1px solid #cbd5e1' }}
                     value={selectedLessonId}
                     onChange={(e) => setSelectedLessonId(e.target.value)}
                   >
-                    <option value="">-- Không gắn bài học --</option>
+                    <option value="">{uiText("-- Không gắn bài học --")}</option>
                     {lessons.map((les) => (
                       <option key={les.id} value={les.id}>
                         {les.title}
@@ -537,8 +531,8 @@ export const UploadMaterialPage: React.FC = () => {
 
             <div style={{ marginTop: '1rem' }}>
               <TextField
-                label="Thẻ phân loại (Tags)"
-                placeholder="VD: kien-truc, chuong-1, microservices (phân cách bằng dấu phẩy)"
+                label={uiText("Thẻ phân loại (Tags)")}
+                placeholder={uiText("VD: kien-truc, chuong-1, microservices (phân cách bằng dấu phẩy)")}
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
               />
@@ -548,10 +542,10 @@ export const UploadMaterialPage: React.FC = () => {
 
         {uploadMode === 'new_version' && (
           <div className="upload-section-card">
-            <h3>Ghi chú phiên bản (Changelog)</h3>
+            <h3>{uiText("Ghi chú phiên bản (Changelog)")}</h3>
             <TextField
-              label="Mô tả cập nhật của phiên bản mới *"
-              placeholder="VD: Cập nhật sơ đồ hệ thống và bổ sung bài tập mẫu"
+              label={uiText("Mô tả cập nhật của phiên bản mới *")}
+              placeholder={uiText("VD: Cập nhật sơ đồ hệ thống và bổ sung bài tập mẫu")}
               value={changelog}
               onChange={(e) => setChangelog(e.target.value)}
               required
@@ -561,11 +555,9 @@ export const UploadMaterialPage: React.FC = () => {
 
         {/* File Dropzone & Queue */}
         <div className="upload-section-card">
-          <h3>Tệp tin tài liệu</h3>
+          <h3>{uiText("Tệp tin tài liệu")}</h3>
           <p style={{ fontSize: '0.875rem', color: '#64748b', margin: '0.25rem 0 1rem' }}>
-            Hỗ trợ PDF, DOCX, TXT (tự động trích xuất nội dung văn bản) và các định dạng tệp tin cho
-            phép theo chính sách môn học (tối đa {policy?.max_file_size_bytes ? formatFileSize(policy.max_file_size_bytes) : '50MB'}/tệp).
-          </p>
+            {uiText("Hỗ trợ PDF, DOCX, TXT (tự động trích xuất nội dung văn bản) và các định dạng tệp tin cho phép theo chính sách môn học (tối đa ")}{policy?.max_file_size_bytes ? formatFileSize(policy.max_file_size_bytes) : '50MB'}{uiText("/tệp).")}</p>
 
           <div
             className="dropzone-card"
@@ -574,11 +566,9 @@ export const UploadMaterialPage: React.FC = () => {
           >
             <UploadCloud size={40} style={{ color: '#0284c7', margin: '0 auto' }} />
             <p style={{ fontWeight: 600, marginTop: '0.5rem' }}>
-              Nhấn để chọn tệp tin từ máy tính hoặc kéo thả vào đây
-            </p>
+              {uiText("Nhấn để chọn tệp tin từ máy tính hoặc kéo thả vào đây")}</p>
             <p style={{ fontSize: '0.8rem', color: '#64748b' }}>
-              Mọi tệp tin đều được quét mã độc an toàn và tính hash SHA-256 bất biến.
-            </p>
+              {uiText("Mọi tệp tin đều được quét mã độc an toàn và tính hash SHA-256 bất biến.")}</p>
             <input
               type="file"
               ref={fileInputRef}
@@ -610,18 +600,18 @@ export const UploadMaterialPage: React.FC = () => {
                       <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{item.name}</div>
                       <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
                         {formatFileSize(item.size)}
-                        {item.status === 'uploading' && ` · Đang tải lên ${item.progress}%...`}
-                        {item.status === 'committing' && ' · Đang xác thực hash SHA-256...'}
-                        {item.status === 'scanning' && ' · Đang quét an toàn...'}
-                        {item.status === 'clean' && ' · Đã quét sạch an toàn'}
-                        {item.status === 'error' && ` · Lỗi: ${item.error}`}
+                        {item.status === 'uploading' && uiText(" · Đang tải lên {0}%...",[item.progress])}
+                        {item.status === 'committing' && uiText(" · Đang xác thực hash SHA-256...")}
+                        {item.status === 'scanning' && uiText(" · Đang quét an toàn...")}
+                        {item.status === 'clean' && uiText(" · Đã quét sạch an toàn")}
+                        {item.status === 'error' && uiText(" · Lỗi: {0}",[item.error])}
                       </div>
                     </div>
                   </div>
 
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                    {item.status === 'clean' && <Badge variant="success">Sạch</Badge>}
-                    {item.status === 'error' && <Badge variant="danger">Lỗi</Badge>}
+                    {item.status === 'clean' && <Badge variant="success">{uiText("Sạch")}</Badge>}
+                    {item.status === 'error' && <Badge variant="danger">{uiText("Lỗi")}</Badge>}
                     <Button
                       variant="secondary"
                       size="sm"
@@ -629,8 +619,7 @@ export const UploadMaterialPage: React.FC = () => {
                       onClick={() => handleRemoveQueueItem(item.id)}
                       disabled={isSubmitting}
                     >
-                      Bỏ
-                    </Button>
+                      {uiText("Bỏ")}</Button>
                   </div>
                 </div>
               ))}
@@ -640,7 +629,7 @@ export const UploadMaterialPage: React.FC = () => {
 
         {/* Workflow & Options Card */}
         <div className="upload-section-card" style={{ background: '#f8fafc' }}>
-          <h3>Tùy chọn quy trình xuất bản</h3>
+          <h3>{uiText("Tùy chọn quy trình xuất bản")}</h3>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '0.5rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
               <input
@@ -649,8 +638,7 @@ export const UploadMaterialPage: React.FC = () => {
                 onChange={(e) => setAutoFinalize(e.target.checked)}
               />
               <span style={{ fontSize: '0.9rem', fontWeight: 600 }}>
-                Đóng băng manifest ngay sau khi tải lên (Kích hoạt trích xuất văn bản)
-              </span>
+                {uiText("Đóng băng manifest ngay sau khi tải lên (Kích hoạt trích xuất văn bản)")}</span>
             </label>
 
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
@@ -661,8 +649,7 @@ export const UploadMaterialPage: React.FC = () => {
                 onChange={(e) => setAutoPublish(e.target.checked)}
               />
               <span style={{ fontSize: '0.9rem', fontWeight: 600, color: autoFinalize ? '#0f172a' : '#94a3b8' }}>
-                Công bố ngay cho sinh viên sau khi đóng băng
-              </span>
+                {uiText("Công bố ngay cho sinh viên sau khi đóng băng")}</span>
             </label>
           </div>
         </div>
@@ -674,15 +661,14 @@ export const UploadMaterialPage: React.FC = () => {
             onClick={() => navigate(`/gv/mon-hoc/${monId}/hoc-lieu`)}
             disabled={isSubmitting}
           >
-            Hủy
-          </Button>
+            {uiText("Hủy")}</Button>
           <Button
             variant="primary"
             type="submit"
             icon={isSubmitting ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle2 size={16} />}
             disabled={isSubmitting}
           >
-            {isSubmitting ? 'Đang tải lên & xử lý...' : uploadMode === 'new_material' ? 'Tạo học liệu' : 'Lưu phiên bản mới'}
+            {isSubmitting ? uiText("Đang tải lên & xử lý...") : uploadMode === 'new_material' ? uiText("Tạo học liệu") : uiText("Lưu phiên bản mới")}
           </Button>
         </div>
       </form>

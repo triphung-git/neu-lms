@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React from 'react';
 import './Badge.css';
 
@@ -32,27 +33,27 @@ interface BadgeProps {
 }
 
 const defaultLabels: Record<BadgeVariant, string> = {
-  draft: 'Bản nháp',
-  published: 'Đã công bố',
-  closed: 'Đã đóng nộp',
-  archived: 'Đã lưu trữ',
-  processing: 'Đang xử lý',
-  ready: 'Sẵn sàng AI',
-  error: 'Lỗi xử lý',
-  'no-text': 'Không có văn bản',
-  submitted: 'Đã nộp',
-  late: 'Nộp muộn',
-  'in-progress': 'Đang chấm',
-  graded: 'Đã chấm',
-  active: 'Hoạt động',
-  locked: 'Đã khóa',
-  pending: 'Chờ kích hoạt',
-  withdrawn: 'Đã rút',
-  success: 'Thành công',
-  warning: 'Cảnh báo',
-  danger: 'Lỗi',
-  info: 'Thông tin',
-  neutral: 'Mặc định',
+  draft: uiText("Bản nháp"),
+  published: uiText("Đã công bố"),
+  closed: uiText("Đã đóng nộp"),
+  archived: uiText("Đã lưu trữ"),
+  processing: uiText("Đang xử lý"),
+  ready: uiText("Sẵn sàng AI"),
+  error: uiText("Lỗi xử lý"),
+  'no-text': uiText("Không có văn bản"),
+  submitted: uiText("Đã nộp"),
+  late: uiText("Nộp muộn"),
+  'in-progress': uiText("Đang chấm"),
+  graded: uiText("Đã chấm"),
+  active: uiText("Hoạt động"),
+  locked: uiText("Đã khóa"),
+  pending: uiText("Chờ kích hoạt"),
+  withdrawn: uiText("Đã rút"),
+  success: uiText("Thành công"),
+  warning: uiText("Cảnh báo"),
+  danger: uiText("Lỗi"),
+  info: uiText("Thông tin"),
+  neutral: uiText("Mặc định"),
 };
 
 export const Badge: React.FC<BadgeProps> = ({ variant, label, className = '', children }) => {

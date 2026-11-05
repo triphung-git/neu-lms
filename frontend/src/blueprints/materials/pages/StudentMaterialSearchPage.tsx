@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
@@ -132,7 +133,7 @@ export const StudentMaterialSearchPage: React.FC = () => {
     } catch (err: unknown) {
       if (currentSeq !== reqSeq.current) return;
       const apiErr = err as { message?: string };
-      setSearchError(apiErr.message || 'Lỗi tra cứu máy chủ. Vui lòng thử lại.');
+      setSearchError(apiErr.message || uiText("Lỗi tra cứu máy chủ. Vui lòng thử lại."));
     } finally {
       if (currentSeq === reqSeq.current) {
         setIsLoading(false);
@@ -222,14 +223,13 @@ export const StudentMaterialSearchPage: React.FC = () => {
       <div className="search-header-row">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/sv' },
-            { label: 'Tìm kiếm học liệu' },
+            { label: uiText("Bàn làm việc"), path: '/sv' },
+            { label: uiText("Tìm kiếm học liệu") },
           ]}
         />
-        <h1 className="search-main-heading">Tra cứu học liệu học tập</h1>
+        <h1 className="search-main-heading">{uiText("Tra cứu học liệu học tập")}</h1>
         <p className="search-subheading">
-          Tìm kiếm toàn văn giáo trình, bài giảng và tài liệu đính kèm trong các môn học được phân quyền.
-        </p>
+          {uiText("Tìm kiếm toàn văn giáo trình, bài giảng và tài liệu đính kèm trong các môn học được phân quyền.")}</p>
       </div>
 
       {/* Main Search Input Form */}
@@ -242,11 +242,11 @@ export const StudentMaterialSearchPage: React.FC = () => {
               className="main-search-input"
               value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Nhập từ khóa tìm kiếm (tiêu đề, nội dung tệp, mã chương)..."
+              placeholder={uiText("Nhập từ khóa tìm kiếm (tiêu đề, nội dung tệp, mã chương)...")}
             />
           </div>
           <Button type="submit" variant="primary">
-            <span>Tìm kiếm</span>
+            <span>{uiText("Tìm kiếm")}</span>
           </Button>
         </div>
       </form>
@@ -256,12 +256,12 @@ export const StudentMaterialSearchPage: React.FC = () => {
         <div className="filter-dropdowns-row">
           <div className="dropdown-col">
             <SelectField
-              label="Môn học của tôi"
+              label={uiText("Môn học của tôi")}
               value={filterCourse}
               disabled={isCoursesLoading}
               onChange={(e) => handleCourseFilter(e.target.value)}
               options={[
-                { value: 'all', label: 'Tất cả môn học đã ghi danh' },
+                { value: 'all', label: uiText("Tất cả môn học đã ghi danh") },
                 ...studentCourses.map((c) => ({
                   value: c.id,
                   label: `${c.code} — ${c.name}`,
@@ -272,28 +272,28 @@ export const StudentMaterialSearchPage: React.FC = () => {
 
           <div className="dropdown-col">
             <SelectField
-              label="Định dạng tệp"
+              label={uiText("Định dạng tệp")}
               value={filterType}
               onChange={(e) => handleTypeFilter(e.target.value)}
               options={[
-                { value: 'all', label: 'Tất cả định dạng' },
-                { value: 'pdf', label: 'Tài liệu PDF (.pdf)' },
-                { value: 'docx', label: 'Tài liệu Word (.docx)' },
-                { value: 'txt', label: 'Văn bản thuần (.txt)' },
+                { value: 'all', label: uiText("Tất cả định dạng") },
+                { value: 'pdf', label: uiText("Tài liệu PDF (.pdf)") },
+                { value: 'docx', label: uiText("Tài liệu Word (.docx)") },
+                { value: 'txt', label: uiText("Văn bản thuần (.txt)") },
               ]}
             />
           </div>
 
           <div className="dropdown-col">
             <SelectField
-              label="Sắp xếp kết quả"
+              label={uiText("Sắp xếp kết quả")}
               value={sortBy}
               onChange={(e) => handleSortChange(e.target.value)}
               options={[
-                { value: 'relevance', label: 'Mức độ phù hợp nhất' },
-                { value: 'newest', label: 'Mới cập nhật nhất' },
-                { value: 'title_asc', label: 'Tiêu đề A-Z' },
-                { value: 'title_desc', label: 'Tiêu đề Z-A' },
+                { value: 'relevance', label: uiText("Mức độ phù hợp nhất") },
+                { value: 'newest', label: uiText("Mới cập nhật nhất") },
+                { value: 'title_asc', label: uiText("Tiêu đề A-Z") },
+                { value: 'title_desc', label: uiText("Tiêu đề Z-A") },
               ]}
             />
           </div>
@@ -302,14 +302,13 @@ export const StudentMaterialSearchPage: React.FC = () => {
         {/* Selected Tag Indicator */}
         {selectedTag && (
           <div className="active-tag-banner">
-            <span>Đang lọc theo thẻ: <strong>#{selectedTag}</strong></span>
+            <span>{uiText("Đang lọc theo thẻ: ")}<strong>#{selectedTag}</strong></span>
             <button
               type="button"
               className="clear-tag-btn"
               onClick={() => handleSelectTag(selectedTag)}
             >
-              Bỏ lọc thẻ
-            </button>
+              {uiText("Bỏ lọc thẻ")}</button>
           </div>
         )}
       </div>
@@ -318,38 +317,36 @@ export const StudentMaterialSearchPage: React.FC = () => {
       <div className="search-results-section">
         {isLoading ? (
           <div className="search-loading-card">
-            <p>Đang tìm kiếm học liệu từ máy chủ...</p>
+            <p>{uiText("Đang tìm kiếm học liệu từ máy chủ...")}</p>
           </div>
         ) : searchError ? (
           <EmptyState
-            title="Lỗi tra cứu"
+            title={uiText("Lỗi tra cứu")}
             description={searchError}
             action={
               <Button variant="secondary" onClick={executeSearch} icon={<RefreshCw size={16} />}>
-                Thử lại
-              </Button>
+                {uiText("Thử lại")}</Button>
             }
           />
         ) : !hasSearchCriteria ? (
           <EmptyState
-            title="Sẵn sàng tra cứu học liệu"
-            description="Nhập từ khóa tìm kiếm hoặc chọn môn học ở bộ lọc phía trên để hiển thị các tài liệu phù hợp."
+            title={uiText("Sẵn sàng tra cứu học liệu")}
+            description={uiText("Nhập từ khóa tìm kiếm hoặc chọn môn học ở bộ lọc phía trên để hiển thị các tài liệu phù hợp.")}
           />
         ) : results.length === 0 ? (
           <EmptyState
-            title="Không tìm thấy kết quả phù hợp"
-            description="Không tìm thấy học liệu nào phù hợp với điều kiện tra cứu hiện tại. Hãy thử từ khóa ngắn hơn hoặc kiểm tra môn học đã chọn."
+            title={uiText("Không tìm thấy kết quả phù hợp")}
+            description={uiText("Không tìm thấy học liệu nào phù hợp với điều kiện tra cứu hiện tại. Hãy thử từ khóa ngắn hơn hoặc kiểm tra môn học đã chọn.")}
             action={
               <Button variant="secondary" onClick={handleClearFilters}>
-                Xóa toàn bộ bộ lọc
-              </Button>
+                {uiText("Xóa toàn bộ bộ lọc")}</Button>
             }
           />
         ) : (
           <div className="results-list-wrap">
             <div className="results-count-banner">
               <span>
-                Tìm thấy <strong>{totalCount}</strong> học liệu phù hợp (Trang {currentPage} /{' '}
+                {uiText("Tìm thấy ")}<strong>{totalCount}</strong> {uiText(" học liệu phù hợp (Trang ")}{currentPage} /{' '}
                 {totalPages})
               </span>
             </div>
@@ -369,10 +366,10 @@ export const StudentMaterialSearchPage: React.FC = () => {
                         <span className="res-course-code">{mat.course_code}</span>
                         <span className="res-course-name">{mat.course_name}</span>
                         {mat.chapter_title && (
-                          <span className="res-chapter-name">• Chương: {mat.chapter_title}</span>
+                          <span className="res-chapter-name">{uiText("• Chương: ")}{mat.chapter_title}</span>
                         )}
                         {mat.lesson_title && (
-                          <span className="res-lesson-name">• Bài: {mat.lesson_title}</span>
+                          <span className="res-lesson-name">{uiText("• Bài: ")}{mat.lesson_title}</span>
                         )}
                       </div>
 
@@ -388,8 +385,8 @@ export const StudentMaterialSearchPage: React.FC = () => {
 
                       <div className="res-meta-line">
                         <span className="res-type-pill">{mat.material_type.toUpperCase()}</span>
-                        <span className="res-version">Phiên bản v{mat.version_number}</span>
-                        <span className="res-date">Cập nhật {formatDateVN(mat.updated_at)}</span>
+                        <span className="res-version">{uiText("Phiên bản v")}{mat.version_number}</span>
+                        <span className="res-date">{uiText("Cập nhật ")}{formatDateVN(mat.updated_at)}</span>
                       </div>
 
                       {mat.tags && mat.tags.length > 0 && (
@@ -400,7 +397,7 @@ export const StudentMaterialSearchPage: React.FC = () => {
                               type="button"
                               className={`res-tag-btn ${selectedTag === t ? 'active' : ''}`}
                               onClick={() => handleSelectTag(t)}
-                              title={`Lọc theo thẻ #${t}`}
+                              title={uiText("Lọc theo thẻ #{0}",[t])}
                             >
                               #{t}
                             </button>
@@ -413,7 +410,7 @@ export const StudentMaterialSearchPage: React.FC = () => {
                         <div className="res-matches-section">
                           <div className="matches-heading">
                             <Sparkles size={14} style={{ color: 'var(--accent)' }} />
-                            <span>Điểm khớp trong nội dung tệp đã quét:</span>
+                            <span>{uiText("Điểm khớp trong nội dung tệp đã quét:")}</span>
                           </div>
                           {mat.matches.map((m, mIdx) => (
                             <div key={mIdx} className="match-snippet-box">
@@ -428,7 +425,7 @@ export const StudentMaterialSearchPage: React.FC = () => {
                     </div>
 
                     <div className="res-arrow-wrap">
-                      <Link to={targetLink} className="view-detail-btn" title="Xem chi tiết học liệu">
+                      <Link to={targetLink} className="view-detail-btn" title={uiText("Xem chi tiết học liệu")}>
                         <ArrowRight size={20} />
                       </Link>
                     </div>
@@ -439,15 +436,14 @@ export const StudentMaterialSearchPage: React.FC = () => {
 
             {/* Pagination Controls */}
             {totalPages > 1 && (
-              <div className="pagination-bar" role="navigation" aria-label="Phân trang tìm kiếm">
+              <div className="pagination-bar" role="navigation" aria-label={uiText("Phân trang tìm kiếm")}>
                 <Button
                   variant="secondary"
                   disabled={currentPage <= 1}
                   onClick={() => handlePageChange(currentPage - 1)}
                   icon={<ChevronLeft size={16} />}
                 >
-                  Trang trước
-                </Button>
+                  {uiText("Trang trước")}</Button>
                 <span className="pagination-indicator">
                   Trang {currentPage} / {totalPages}
                 </span>

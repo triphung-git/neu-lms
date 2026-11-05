@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useParams, useOutletContext } from 'react-router-dom';
 import {
@@ -38,10 +39,10 @@ const AVAILABLE_EXTENSIONS = [
   { ext: 'docx', label: 'Word (.docx)' },
   { ext: 'xlsx', label: 'Excel (.xlsx)' },
   { ext: 'pptx', label: 'PowerPoint (.pptx)' },
-  { ext: 'zip', label: 'Nén (.zip)' },
-  { ext: 'png', label: 'Hình ảnh PNG (.png)' },
-  { ext: 'jpg', label: 'Hình ảnh JPG (.jpg)' },
-  { ext: 'jpeg', label: 'Hình ảnh JPEG (.jpeg)' },
+  { ext: 'zip', label: uiText("Nén (.zip)") },
+  { ext: 'png', label: uiText("Hình ảnh PNG (.png)") },
+  { ext: 'jpg', label: uiText("Hình ảnh JPG (.jpg)") },
+  { ext: 'jpeg', label: uiText("Hình ảnh JPEG (.jpeg)") },
 ];
 
 export interface CourseFilePolicyPageProps {
@@ -120,7 +121,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       })
       .catch((err) => {
         if (isMounted) {
-          notifyError(err instanceof Error ? err.message : 'Không thể tải môn học.');
+          notifyError(err instanceof Error ? err.message : uiText("Không thể tải môn học."));
         }
       })
       .finally(() => {
@@ -157,7 +158,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       setPreviewAllowed(p.preview_allowed ?? true);
     } catch (err) {
       if (seq !== loadSeq.current) return;
-      setPolicyError(err instanceof Error ? err.message : 'Không thể tải chính sách tệp.');
+      setPolicyError(err instanceof Error ? err.message : uiText("Không thể tải chính sách tệp."));
     } finally {
       if (seq === loadSeq.current) setPolicyLoading(false);
     }
@@ -176,7 +177,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       setFiles(response.items);
       setTotalPages(Number(response.pagination.total_pages));
     } catch (err) {
-      if (seq === filesSeq.current) setFilesError(err instanceof Error ? err.message : 'Không thể tải danh sách tệp tin.');
+      if (seq === filesSeq.current) setFilesError(err instanceof Error ? err.message : uiText("Không thể tải danh sách tệp tin."));
     } finally {
       if (seq === filesSeq.current) setFilesLoading(false);
     }
@@ -195,23 +196,23 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
     const errors: Record<string, string> = {};
 
     if (allowedExtensions.length === 0) {
-      errors.allowedExtensions = 'Phải chọn ít nhất một định dạng tệp cho phép.';
+      errors.allowedExtensions = uiText("Phải chọn ít nhất một định dạng tệp cho phép.");
     }
 
     if (maxFileSizeMB <= 0) {
-      errors.maxFileSizeMB = 'Kích thước tệp tối đa phải lớn hơn 0 MB.';
+      errors.maxFileSizeMB = uiText("Kích thước tệp tối đa phải lớn hơn 0 MB.");
     } else if (maxFileSizeMB > 50) {
-      errors.maxFileSizeMB = 'Kích thước tối đa không được vượt quá trần hệ thống 50MB.';
+      errors.maxFileSizeMB = uiText("Kích thước tối đa không được vượt quá trần hệ thống 50MB.");
     }
 
     if (courseQuotaMB <= 0) {
-      errors.courseQuotaMB = 'Dung lượng môn học tối đa phải lớn hơn 0 MB.';
+      errors.courseQuotaMB = uiText("Dung lượng môn học tối đa phải lớn hơn 0 MB.");
     } else if (courseQuotaMB > 5120) {
-      errors.courseQuotaMB = 'Dung lượng môn học không được vượt quá trần hệ thống 5,0 GB (5120 MB).';
+      errors.courseQuotaMB = uiText("Dung lượng môn học không được vượt quá trần hệ thống 5,0 GB (5120 MB).");
     }
 
     if (maxFilesPerAssignment < 1 || maxFilesPerAssignment > 10) {
-      errors.maxFilesPerAssignment = 'Số tệp tối đa cho một lần nộp phải từ 1 đến 10.';
+      errors.maxFilesPerAssignment = uiText("Số tệp tối đa cho một lần nộp phải từ 1 đến 10.");
     }
 
     setFormErrors(errors);
@@ -222,7 +223,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
   const handleSavePolicy = async (event: React.FormEvent) => {
     event.preventDefault();
     if (isArchived) {
-      notifyError('Môn học đã lưu trữ, không thể chỉnh sửa chính sách.');
+      notifyError(uiText("Môn học đã lưu trữ, không thể chỉnh sửa chính sách."));
       return;
     }
 
@@ -238,9 +239,9 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
         preview_allowed: previewAllowed,
       });
       setPolicy(updated);
-      notifySuccess('Đã cập nhật chính sách tệp môn học thành công.');
+      notifySuccess(uiText("Đã cập nhật chính sách tệp môn học thành công."));
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Không thể cập nhật chính sách.');
+      notifyError(err instanceof Error ? err.message : uiText("Không thể cập nhật chính sách."));
     } finally {
       setIsSavingPolicy(false);
     }
@@ -257,7 +258,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
   // Toggle publish
   const handleTogglePublish = async (file: StoredFile) => {
     if (isArchived) {
-      notifyError('Môn học đã lưu trữ, không thể thay đổi trạng thái công bố.');
+      notifyError(uiText("Môn học đã lưu trữ, không thể thay đổi trạng thái công bố."));
       return;
     }
 
@@ -268,11 +269,11 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       setFiles((prev) => prev.map((f) => (f.id === file.id ? updated : f)));
       notifySuccess(
         newStatus
-          ? `Đã công bố học liệu "${file.file_name}" cho sinh viên.`
-          : `Đã chuyển học liệu "${file.file_name}" về bản nháp.`,
+          ? uiText("Đã công bố học liệu \"{0}\" cho sinh viên.",[file.file_name])
+          : uiText("Đã chuyển học liệu \"{0}\" về bản nháp.",[file.file_name]),
       );
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Không thể cập nhật công bố.');
+      notifyError(err instanceof Error ? err.message : uiText("Không thể cập nhật công bố."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [file.id]: false }));
     }
@@ -282,19 +283,19 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
   const handleConfirmDelete = async () => {
     if (!pendingDeleteFile) return;
     if (isArchived) {
-      notifyError('Môn học đã lưu trữ, không thể xóa tệp.');
+      notifyError(uiText("Môn học đã lưu trữ, không thể xóa tệp."));
       return;
     }
 
     setIsDeleting(true);
     try {
       await filesService.deleteFile(courseId, pendingDeleteFile.id);
-      notifySuccess(`Đã xóa tệp "${pendingDeleteFile.file_name}" và hoàn trả dung lượng.`);
+      notifySuccess(uiText("Đã xóa tệp \"{0}\" và hoàn trả dung lượng.",[pendingDeleteFile.file_name]));
       setPendingDeleteFile(null);
       void loadFiles();
       void loadPolicy(); // cập nhật lại used_quota trên thanh đo
     } catch (err) {
-      notifyError(err instanceof Error ? err.message : 'Không thể xóa tệp tin.');
+      notifyError(err instanceof Error ? err.message : uiText("Không thể xóa tệp tin."));
     } finally {
       setIsDeleting(false);
     }
@@ -314,17 +315,16 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       <div className="files-header-card">
         <div className="files-header-info">
           <div className="files-header-badge-row">
-            <Badge variant="published" label="Học liệu & Kho Tệp" />
+            <Badge variant="published" label={uiText("Học liệu & Kho Tệp")} />
             {isArchived ? (
-              <Badge variant="archived" label="Môn học đã lưu trữ" />
+              <Badge variant="archived" label={uiText("Môn học đã lưu trữ")} />
             ) : (
-              <Badge variant="active" label="Đang hoạt động" />
+              <Badge variant="active" label={uiText("Đang hoạt động")} />
             )}
           </div>
-          <h1 className="files-header-title">Quản lý Kho Tệp & Chính Sách Môn Học</h1>
+          <h1 className="files-header-title">{uiText("Quản lý Kho Tệp & Chính Sách Môn Học")}</h1>
           <p className="files-header-subtitle">
-            Cấu hình hạn ngạch dung lượng, định dạng tải lên cho phép và quản lý toàn bộ tệp tin, học liệu của môn học.
-          </p>
+            {uiText("Cấu hình hạn ngạch dung lượng, định dạng tải lên cho phép và quản lý toàn bộ tệp tin, học liệu của môn học.")}</p>
         </div>
 
         {/* Quota Gauge Summary */}
@@ -344,9 +344,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
         <div className="course-archived-banner" role="alert" data-testid="archived-warning-banner">
           <Archive size={18} />
           <span>
-            <strong>Chế độ chỉ đọc:</strong> Môn học này đã được lưu trữ. Mọi cài đặt chính sách,
-            thao tác công bố và xóa tệp đã bị khóa an toàn nhằm bảo toàn dữ liệu lịch sử.
-          </span>
+            <strong>{uiText("Chế độ chỉ đọc:")}</strong> {uiText(" Môn học này đã được lưu trữ. Mọi cài đặt chính sách, thao tác công bố và xóa tệp đã bị khóa an toàn nhằm bảo toàn dữ liệu lịch sử.")}</span>
         </div>
       )}
 
@@ -361,7 +359,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
           data-testid="tab-files"
         >
           <Layers size={16} />
-          Kho tệp môn học ({files.length})
+          {uiText("Kho tệp môn học (")}{files.length})
         </button>
         <button
           type="button"
@@ -372,8 +370,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
           data-testid="tab-policy"
         >
           <Settings size={16} />
-          Cấu hình chính sách
-        </button>
+          {uiText("Cấu hình chính sách")}</button>
       </div>
 
       {/* 4. Tab Content: Policy */}
@@ -381,7 +378,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
         <div className="policy-tab-content" data-testid="policy-form-section">
           {policyError && (
             <ErrorBanner
-              title="Lỗi tải chính sách"
+              title={uiText("Lỗi tải chính sách")}
               message={policyError}
               onRetry={() => void loadPolicy()}
             />
@@ -392,16 +389,15 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
           ) : (
             <form onSubmit={(e) => void handleSavePolicy(e)} className="policy-form-card" noValidate>
               <div className="policy-section-header">
-                <h2 className="policy-section-title">Chính sách tệp tin môn học</h2>
+                <h2 className="policy-section-title">{uiText("Chính sách tệp tin môn học")}</h2>
                 <p className="policy-section-desc">
-                  Thiết lập quy định về định dạng, dung lượng và quyền xem trước đối với sinh viên khi nộp bài hoặc xem tài liệu.
-                </p>
+                  {uiText("Thiết lập quy định về định dạng, dung lượng và quyền xem trước đối với sinh viên khi nộp bài hoặc xem tài liệu.")}</p>
               </div>
 
               {/* Allowlist Checkboxes */}
               <div className="form-group">
                 <label className="form-label" id="allowlist-label">
-                  Định dạng tệp cho phép tải lên <span className="text-danger">*</span>
+                  {uiText("Định dạng tệp cho phép tải lên ")}<span className="text-danger">*</span>
                 </label>
                 <div
                   className="extension-checkbox-grid"
@@ -442,7 +438,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
               <div className="form-row-grid">
                 <div className="form-group">
                   <label htmlFor="maxFileSizeInput" className="form-label">
-                    Kích thước tối đa 1 tệp (MB) <span className="text-danger">*</span>
+                    {uiText("Kích thước tối đa 1 tệp (MB) ")}<span className="text-danger">*</span>
                   </label>
                   <input
                     id="maxFileSizeInput"
@@ -459,7 +455,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                     aria-describedby="maxFileSizeHint"
                   />
                   <span id="maxFileSizeHint" className="form-hint">
-                    Trần tối đa toàn hệ thống: <strong>50 MB</strong>.
+                    {uiText("Trần tối đa toàn hệ thống: ")}<strong>50 MB</strong>.
                   </span>
                   {formErrors.maxFileSizeMB && (
                     <span className="field-error" role="alert" data-testid="error-max-file-size">
@@ -470,7 +466,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
 
                 <div className="form-group">
                   <label htmlFor="courseQuotaInput" className="form-label">
-                    Dung lượng tối đa môn học (MB) <span className="text-danger">*</span>
+                    {uiText("Dung lượng tối đa môn học (MB) ")}<span className="text-danger">*</span>
                   </label>
                   <input
                     id="courseQuotaInput"
@@ -487,7 +483,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                     aria-describedby="courseQuotaHint"
                   />
                   <span id="courseQuotaHint" className="form-hint">
-                    Trần tối đa toàn hệ thống: <strong>5.120 MB (5,0 GB)</strong>.
+                    {uiText("Trần tối đa toàn hệ thống: ")}<strong>5.120 MB (5,0 GB)</strong>.
                   </span>
                   {formErrors.courseQuotaMB && (
                     <span className="field-error" role="alert" data-testid="error-course-quota">
@@ -498,7 +494,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
 
                 <div className="form-group">
                   <label htmlFor="maxFilesInput" className="form-label">
-                    Số tệp tối đa mỗi lần nộp <span className="text-danger">*</span>
+                    {uiText("Số tệp tối đa mỗi lần nộp ")}<span className="text-danger">*</span>
                   </label>
                   <input
                     id="maxFilesInput"
@@ -515,8 +511,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                     aria-describedby="maxFilesHint"
                   />
                   <span id="maxFilesHint" className="form-hint">
-                    Giới hạn từ <strong>1 đến 10</strong> tệp.
-                  </span>
+                    {uiText("Giới hạn từ ")}<strong>{uiText("1 đến 10")}</strong> {uiText(" tệp.")}</span>
                   {formErrors.maxFilesPerAssignment && (
                     <span className="field-error" role="alert">
                       {formErrors.maxFilesPerAssignment}
@@ -528,10 +523,9 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
               {/* Preview Switch */}
               <div className="form-group preview-toggle-group">
                 <div className="toggle-text-block">
-                  <span className="toggle-label-title">Bật xem trước tệp an toàn (Safe Preview)</span>
+                  <span className="toggle-label-title">{uiText("Bật xem trước tệp an toàn (Safe Preview)")}</span>
                   <span className="toggle-label-desc">
-                    Cho phép sinh viên xem trực tiếp tệp PDF và hình ảnh sạch mã độc trên trình duyệt mà không cần tải về máy.
-                  </span>
+                    {uiText("Cho phép sinh viên xem trực tiếp tệp PDF và hình ảnh sạch mã độc trên trình duyệt mà không cần tải về máy.")}</span>
                 </div>
                 <label className="toggle-switch-label">
                   <input
@@ -539,7 +533,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                     checked={previewAllowed}
                     disabled={isArchived}
                     onChange={(e) => setPreviewAllowed(e.target.checked)}
-                    aria-label="Bật xem trước tệp an toàn"
+                    aria-label={uiText("Bật xem trước tệp an toàn")}
                     data-testid="preview-allowed-toggle"
                   />
                   <span className="toggle-slider" />
@@ -555,12 +549,11 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                   data-testid="save-policy-btn"
                 >
                   <Save size={16} />
-                  {isSavingPolicy ? 'Đang lưu...' : 'Lưu thay đổi chính sách'}
+                  {isSavingPolicy ? uiText("Đang lưu...") : uiText("Lưu thay đổi chính sách")}
                 </Button>
                 {isArchived && (
                   <span className="archived-lock-note">
-                    <Archive size={14} /> Môn học đã lưu trữ — Không thể lưu thay đổi
-                  </span>
+                    <Archive size={14} /> {uiText(" Môn học đã lưu trữ — Không thể lưu thay đổi")}</span>
                 )}
               </div>
             </form>
@@ -575,7 +568,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
           <div className="files-filter-bar">
             <div className="filter-group">
               <Filter size={16} className="filter-icon" />
-              <label htmlFor="purposeSelect" className="filter-label">Mục đích:</label>
+              <label htmlFor="purposeSelect" className="filter-label">{uiText("Mục đích:")}</label>
               <select
                 id="purposeSelect"
                 className="filter-select"
@@ -583,11 +576,11 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                 onChange={(e) => { setPurposeFilter(e.target.value); setPage(1); }}
                 data-testid="purpose-filter"
               >
-                <option value="all">Tất cả mục đích</option>
-                <option value="course_material">Học liệu môn học</option>
-                <option value="assignment_attachment">Đính kèm bài tập</option>
-                <option value="assignment_submission">Bài nộp sinh viên</option>
-                <option value="general">Tệp chung</option>
+                <option value="all">{uiText("Tất cả mục đích")}</option>
+                <option value="course_material">{uiText("Học liệu môn học")}</option>
+                <option value="assignment_attachment">{uiText("Đính kèm bài tập")}</option>
+                <option value="assignment_submission">{uiText("Bài nộp sinh viên")}</option>
+                <option value="general">{uiText("Tệp chung")}</option>
               </select>
             </div>
             <div className="filter-actions-group">
@@ -597,8 +590,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                 onClick={() => void loadFiles()}
                 disabled={filesLoading}
               >
-                Làm mới
-              </Button>
+                {uiText("Làm mới")}</Button>
               {!isArchived && (
                 <Button
                   variant="primary"
@@ -607,7 +599,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                   data-testid="toggle-uploader-btn"
                 >
                   <UploadCloud size={16} />
-                  {showUploader ? 'Đóng tải tệp' : 'Tải tệp lên'}
+                  {showUploader ? uiText("Đóng tải tệp") : uiText("Tải tệp lên")}
                 </Button>
               )}
             </div>
@@ -622,7 +614,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                 purpose={purposeFilter !== 'all' ? (purposeFilter as any) : 'course_material'}
                 isArchived={isArchived}
                 onUploadSuccess={(_file) => {
-                  notifySuccess('Tải lên và quét an toàn tệp tin thành công!');
+                  notifySuccess(uiText("Tải lên và quét an toàn tệp tin thành công!"));
                   void loadFiles();
                   void loadPolicy();
                 }}
@@ -633,7 +625,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
 
           {filesError && (
             <ErrorBanner
-              title="Lỗi tải tệp tin"
+              title={uiText("Lỗi tải tệp tin")}
               message={filesError}
               onRetry={() => void loadFiles()}
             />
@@ -643,11 +635,11 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
             <LoadingSkeleton />
           ) : files.length === 0 ? (
             <EmptyState
-              title="Kho tệp trống"
+              title={uiText("Kho tệp trống")}
               description={
                 purposeFilter === 'all'
-                  ? 'Chưa có tệp tin hoặc học liệu nào được tải lên trong môn học này.'
-                  : 'Không có tệp nào phù hợp với bộ lọc mục đích đã chọn.'
+                  ? uiText("Chưa có tệp tin hoặc học liệu nào được tải lên trong môn học này.")
+                  : uiText("Không có tệp nào phù hợp với bộ lọc mục đích đã chọn.")
               }
             />
           ) : (
@@ -655,14 +647,14 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
               <table className="files-table" data-testid="files-table">
                 <thead>
                   <tr>
-                    <th>Tên tệp</th>
-                    <th>Kích thước</th>
-                    <th>Mục đích</th>
-                    <th>Người tải</th>
-                    <th>Ngày tải</th>
-                    <th>Kiểm tra mã độc</th>
-                    <th>Công bố học liệu</th>
-                    <th className="text-right">Thao tác</th>
+                    <th>{uiText("Tên tệp")}</th>
+                    <th>{uiText("Kích thước")}</th>
+                    <th>{uiText("Mục đích")}</th>
+                    <th>{uiText("Người tải")}</th>
+                    <th>{uiText("Ngày tải")}</th>
+                    <th>{uiText("Kiểm tra mã độc")}</th>
+                    <th>{uiText("Công bố học liệu")}</th>
+                    <th className="text-right">{uiText("Thao tác")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -684,35 +676,35 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                         <td className="cell-size">{formatFileSize(file.file_size)}</td>
                         <td className="cell-purpose">
                           {file.purpose === 'course_material' && (
-                            <Badge variant="published" label="Học liệu" />
+                            <Badge variant="published" label={uiText("Học liệu")} />
                           )}
                           {file.purpose === 'assignment_attachment' && (
-                            <Badge variant="draft" label="Đính kèm bài tập" />
+                            <Badge variant="draft" label={uiText("Đính kèm bài tập")} />
                           )}
                           {file.purpose === 'assignment_submission' && (
-                            <Badge variant="submitted" label="Bài nộp sinh viên" />
+                            <Badge variant="submitted" label={uiText("Bài nộp sinh viên")} />
                           )}
                           {file.purpose === 'general' && (
-                            <Badge variant="draft" label="Tệp chung" />
+                            <Badge variant="draft" label={uiText("Tệp chung")} />
                           )}
                         </td>
-                        <td className="cell-uploader">{file.uploader_name || 'Hệ thống'}</td>
+                        <td className="cell-uploader">{file.uploader_name || uiText("Hệ thống")}</td>
                         <td className="cell-date">{formatDateVN(file.created_at)}</td>
                         <td className="cell-status">
                           {file.status === 'clean' && (
-                            <Badge variant="ready" label="An toàn" />
+                            <Badge variant="ready" label={uiText("An toàn")} />
                           )}
                           {file.status === 'scanning' && (
-                            <Badge variant="processing" label="Đang quét" />
+                            <Badge variant="processing" label={uiText("Đang quét")} />
                           )}
                           {file.status === 'quarantine_pending' && (
-                            <Badge variant="pending" label="Chờ cách ly" />
+                            <Badge variant="pending" label={uiText("Chờ cách ly")} />
                           )}
                           {file.status === 'infected' && (
-                            <Badge variant="error" label="Nhiễm mã độc" />
+                            <Badge variant="error" label={uiText("Nhiễm mã độc")} />
                           )}
                           {file.status === 'deleted' && (
-                            <Badge variant="locked" label="Đã xóa" />
+                            <Badge variant="locked" label={uiText("Đã xóa")} />
                           )}
                         </td>
                         <td className="cell-publish">
@@ -725,16 +717,16 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                                 onClick={() => void handleTogglePublish(file)}
                                 title={
                                   !isClean
-                                    ? 'Chỉ tệp an toàn mới có thể công bố'
+                                    ? uiText("Chỉ tệp an toàn mới có thể công bố")
                                     : isArchived
-                                      ? 'Môn học đã lưu trữ'
+                                      ? uiText("Môn học đã lưu trữ")
                                       : file.is_published
-                                        ? 'Nhấn để hủy công bố'
-                                        : 'Nhấn để công bố'
+                                        ? uiText("Nhấn để hủy công bố")
+                                        : uiText("Nhấn để công bố")
                                 }
                                 data-testid={`publish-btn-${file.id}`}
                               >
-                                {file.is_published ? 'Đã công bố' : 'Bản nháp'}
+                                {file.is_published ? uiText("Đã công bố") : uiText("Bản nháp")}
                               </button>
                             </div>
                           ) : (
@@ -749,7 +741,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                                 href={filesService.getDownloadUrl(courseId, file.id)}
                                 download={file.file_name}
                                 className="btn-action-icon"
-                                title="Tải về tệp tin"
+                                title={uiText("Tải về tệp tin")}
                                 data-testid={`download-btn-${file.id}`}
                               >
                                 <Download size={15} />
@@ -759,7 +751,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                                 type="button"
                                 className="btn-action-icon disabled"
                                 disabled
-                                title="Tệp chưa quét sạch, không thể tải"
+                                title={uiText("Tệp chưa quét sạch, không thể tải")}
                               >
                                 <Download size={15} />
                               </button>
@@ -771,7 +763,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                                 type="button"
                                 className="btn-action-icon"
                                 onClick={() => setSelectedPreviewFile(file)}
-                                title="Xem trước tệp tin an toàn"
+                                title={uiText("Xem trước tệp tin an toàn")}
                                 data-testid={`preview-btn-${file.id}`}
                               >
                                 <Eye size={15} />
@@ -784,7 +776,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
                               className="btn-action-icon delete"
                               disabled={isArchived}
                               onClick={() => setPendingDeleteFile(file)}
-                              title={isArchived ? 'Môn học đã lưu trữ' : 'Xóa tệp tin'}
+                              title={isArchived ? uiText("Môn học đã lưu trữ") : uiText("Xóa tệp tin")}
                               data-testid={`delete-btn-${file.id}`}
                             >
                               <Trash2 size={15} />
@@ -803,8 +795,8 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
 
       {/* 6. Modal Confirm Delete File */}
         {activeTab === 'files' && !filesLoading && !filesError && totalPages > 1 && (
-        <div className="course-pagination" aria-label="Phân trang kho tệp">
-          <Button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>Trang trước</Button>
+        <div className="course-pagination" aria-label={uiText("Phân trang kho tệp")}>
+          <Button disabled={page <= 1} onClick={() => setPage(p => p - 1)}>{uiText("Trang trước")}</Button>
           <span>Trang {page} / {totalPages}</span>
           <Button disabled={page >= totalPages} onClick={() => setPage(p => p + 1)}>Trang sau</Button>
         </div>
@@ -812,7 +804,7 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
       {pendingDeleteFile && (
       <Modal
           isOpen={true}
-          title="Xác nhận xóa tệp tin"
+          title={uiText("Xác nhận xóa tệp tin")}
           onClose={() => !isDeleting && setPendingDeleteFile(null)}
         >
           <div className="delete-modal-content">
@@ -820,27 +812,25 @@ export const CourseFilePolicyPage: React.FC<CourseFilePolicyPageProps> = ({
               <AlertCircle size={32} color="#dc2626" />
             </div>
             <p>
-              Bạn có chắc chắn muốn xóa tệp tin{' '}
+              {uiText("Bạn có chắc chắn muốn xóa tệp tin")}{' '}
               <strong>"{pendingDeleteFile.file_name}"</strong>?
             </p>
             <p className="delete-note">
-              Dung lượng <strong>{formatFileSize(pendingDeleteFile.file_size)}</strong> sẽ được hoàn trả lại cho hạn mức môn học. Thao tác này không thể hoàn tác.
-            </p>
+              {uiText("Dung lượng ")}<strong>{formatFileSize(pendingDeleteFile.file_size)}</strong> {uiText(" sẽ được hoàn trả lại cho hạn mức môn học. Thao tác này không thể hoàn tác.")}</p>
             <div className="modal-actions-row">
               <Button
                 variant="secondary"
                 disabled={isDeleting}
                 onClick={() => setPendingDeleteFile(null)}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 variant="danger"
                 disabled={isDeleting}
                 onClick={() => void handleConfirmDelete()}
                 data-testid="confirm-delete-btn"
               >
-                {isDeleting ? 'Đang xóa...' : 'Xác nhận xóa tệp'}
+                {isDeleting ? uiText("Đang xóa...") : uiText("Xác nhận xóa tệp")}
               </Button>
             </div>
           </div>

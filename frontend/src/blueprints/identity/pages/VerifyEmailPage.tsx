@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useSearchParams, useLocation, useNavigate } from 'react-router-dom';
 import { authService, type VerifyEmailResponse } from '../../../api/authService';
@@ -82,15 +83,15 @@ export const VerifyEmailPage: React.FC = () => {
       if (err instanceof ApiError) {
         setErrorCode(err.code || 'verification_failed');
         if (err.code === 'token_invalid_or_expired') {
-          setErrorMessage('Liên kết xác minh không hợp lệ, đã hết hạn (sau 24 giờ), hoặc đã được sử dụng trước đó.');
+          setErrorMessage(uiText("Liên kết xác minh không hợp lệ, đã hết hạn (sau 24 giờ), hoặc đã được sử dụng trước đó."));
         } else if (err.code === 'account_inactive') {
-          setErrorMessage('Tài khoản này đã bị khóa hoặc vô hiệu hóa. Vui lòng liên hệ Quản trị viên để được hỗ trợ.');
+          setErrorMessage(uiText("Tài khoản này đã bị khóa hoặc vô hiệu hóa. Vui lòng liên hệ Quản trị viên để được hỗ trợ."));
         } else {
-          setErrorMessage(err.message || 'Xác minh email không thành công.');
+          setErrorMessage(err.message || uiText("Xác minh email không thành công."));
         }
       } else {
         setErrorCode('network_error');
-        setErrorMessage('Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng của bạn.');
+        setErrorMessage(uiText("Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng của bạn."));
       }
     }
   }, []);
@@ -111,11 +112,11 @@ export const VerifyEmailPage: React.FC = () => {
 
     const trimmed = resendEmail.trim().toLowerCase();
     if (!trimmed) {
-      setResendEmailError('Vui lòng nhập địa chỉ email của bạn.');
+      setResendEmailError(uiText("Vui lòng nhập địa chỉ email của bạn."));
       return;
     }
     if (!trimmed.includes('@') || !trimmed.includes('.')) {
-      setResendEmailError('Địa chỉ email không đúng định dạng.');
+      setResendEmailError(uiText("Địa chỉ email không đúng định dạng."));
       return;
     }
 
@@ -129,12 +130,12 @@ export const VerifyEmailPage: React.FC = () => {
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.status === 429) {
-          setResendError('Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ giây lát trước khi gửi lại.');
+          setResendError(uiText("Bạn đã gửi quá nhiều yêu cầu. Vui lòng chờ giây lát trước khi gửi lại."));
         } else {
-          setResendError(err.message || 'Không thể gửi lại thư xác minh.');
+          setResendError(err.message || uiText("Không thể gửi lại thư xác minh."));
         }
       } else {
-        setResendError('Lỗi kết nối mạng khi gửi lại thư xác minh.');
+        setResendError(uiText("Lỗi kết nối mạng khi gửi lại thư xác minh."));
       }
     } finally {
       setIsResending(false);
@@ -148,11 +149,9 @@ export const VerifyEmailPage: React.FC = () => {
         <div className="verify-card verify-loading-card" role="status" aria-live="polite">
           <Loader2 size={44} className="verify-spinner" aria-hidden="true" />
           <h1 id="verify-page-title" className="verify-title">
-            Đang xác minh địa chỉ email...
-          </h1>
+            {uiText("Đang xác minh địa chỉ email...")}</h1>
           <p className="verify-subtitle">
-            Hệ thống đang tiến hành kiểm tra tính hợp lệ của mã xác minh an toàn. Quá trình này sẽ hoàn tất trong giây lát.
-          </p>
+            {uiText("Hệ thống đang tiến hành kiểm tra tính hợp lệ của mã xác minh an toàn. Quá trình này sẽ hoàn tất trong giây lát.")}</p>
         </div>
       )}
 
@@ -161,8 +160,7 @@ export const VerifyEmailPage: React.FC = () => {
         <div className="verify-card verify-success-card" role="status" aria-live="polite">
           <CheckCircle2 size={48} className="verify-icon-success" aria-hidden="true" />
           <h1 id="verify-page-title" className="verify-title">
-            Xác minh email thành công!
-          </h1>
+            {uiText("Xác minh email thành công!")}</h1>
           <div className="verify-email-badge">
             <MailCheck size={18} aria-hidden="true" />
             <span>{verifiedResult.email}</span>
@@ -172,27 +170,25 @@ export const VerifyEmailPage: React.FC = () => {
             <div className="verify-status-box student-granted">
               <div className="status-box-header">
                 <School size={20} className="status-box-icon" aria-hidden="true" />
-                <strong>Đã kích hoạt quyền Sinh viên</strong>
+                <strong>{uiText("Đã kích hoạt quyền Sinh viên")}</strong>
               </div>
               <p className="status-box-desc">
-                Chúc mừng bạn! Tài khoản đã được kích hoạt thành công. Bạn có thể đăng nhập ngay để truy cập môn học, bài tập và học liệu số.
-              </p>
+                {uiText("Chúc mừng bạn! Tài khoản đã được kích hoạt thành công. Bạn có thể đăng nhập ngay để truy cập môn học, bài tập và học liệu số.")}</p>
             </div>
           ) : (
             <div className="verify-status-box teacher-pending">
               <div className="status-box-header">
                 <GraduationCap size={20} className="status-box-icon" aria-hidden="true" />
-                <strong>Email đã xác minh; quyền truy cập theo trạng thái tài khoản</strong>
+                <strong>{uiText("Email đã xác minh; quyền truy cập theo trạng thái tài khoản")}</strong>
               </div>
               <p className="status-box-desc">
-                Đăng nhập để xem trạng thái yêu cầu và vai trò đã được cấp. Nếu bạn đã yêu cầu vai trò Giảng viên, cần chờ Quản trị viên phê duyệt trước khi truy cập không gian Giảng dạy.
-              </p>
+                {uiText("Đăng nhập để xem trạng thái yêu cầu và vai trò đã được cấp. Nếu bạn đã yêu cầu vai trò Giảng viên, cần chờ Quản trị viên phê duyệt trước khi truy cập không gian Giảng dạy.")}</p>
             </div>
           )}
 
           <div className="verify-actions">
             <Link to="/dang-nhap" className="btn btn-primary verify-cta-btn">
-              <span>Đăng nhập vào hệ thống</span>
+              <span>{uiText("Đăng nhập vào hệ thống")}</span>
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
           </div>
@@ -204,7 +200,7 @@ export const VerifyEmailPage: React.FC = () => {
         <div className="verify-card verify-error-card" role="alert" aria-live="assertive">
           <ShieldAlert size={48} className="verify-icon-error" aria-hidden="true" />
           <h1 id="verify-page-title" className="verify-title">
-            {errorCode === 'network_error' ? 'Lỗi kết nối mạng' : 'Xác minh email không thành công'}
+            {errorCode === 'network_error' ? uiText("Lỗi kết nối mạng") : uiText("Xác minh email không thành công")}
           </h1>
           <p className="verify-error-text">{errorMessage}</p>
 
@@ -215,20 +211,17 @@ export const VerifyEmailPage: React.FC = () => {
                 onClick={() => verifyToken(token)}
                 icon={<RotateCw size={16} />}
               >
-                Thử lại xác minh
-              </Button>
+                {uiText("Thử lại xác minh")}</Button>
             </div>
           ) : (
             <div className="verify-resend-section">
-              <h2 className="verify-resend-heading">Yêu cầu gửi lại liên kết xác minh mới</h2>
+              <h2 className="verify-resend-heading">{uiText("Yêu cầu gửi lại liên kết xác minh mới")}</h2>
               <p className="verify-resend-sub">
-                Nhập địa chỉ email tài khoản đã đăng ký để nhận thư xác minh mới có hiệu lực trong 24 giờ.
-              </p>
+                {uiText("Nhập địa chỉ email tài khoản đã đăng ký để nhận thư xác minh mới có hiệu lực trong 24 giờ.")}</p>
 
               {resendSuccess && (
                 <div className="verify-resend-alert success" role="status">
-                  Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút. Vui lòng kiểm tra hộp thư.
-                </div>
+                  {uiText("Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút. Vui lòng kiểm tra hộp thư.")}</div>
               )}
 
               {resendError && (
@@ -240,7 +233,7 @@ export const VerifyEmailPage: React.FC = () => {
               <form onSubmit={handleResend} className="verify-resend-form" noValidate>
                 <TextField
                   id="resend-email-input"
-                  label="Địa chỉ email đã đăng ký"
+                  label={uiText("Địa chỉ email đã đăng ký")}
                   type="email"
                   name="email"
                   autoComplete="email"
@@ -265,10 +258,10 @@ export const VerifyEmailPage: React.FC = () => {
                   icon={<RotateCw size={16} />}
                 >
                   {resendCooldown > 0
-                    ? `Gửi lại sau ${resendCooldown}s`
+                    ? uiText("Gửi lại sau {0}s",[resendCooldown])
                     : isResending
-                    ? 'Đang gửi...'
-                    : 'Gửi lại thư xác minh'}
+                    ? uiText("Đang gửi...")
+                    : uiText("Gửi lại thư xác minh")}
                 </Button>
               </form>
             </div>
@@ -276,12 +269,10 @@ export const VerifyEmailPage: React.FC = () => {
 
           <div className="verify-footer-links">
             <Link to="/dang-nhap" className="verify-secondary-link">
-              Quay lại trang Đăng nhập
-            </Link>
+              {uiText("Quay lại trang Đăng nhập")}</Link>
             <span aria-hidden="true">•</span>
             <Link to="/dang-ky" className="verify-secondary-link">
-              Tạo tài khoản mới
-            </Link>
+              {uiText("Tạo tài khoản mới")}</Link>
           </div>
         </div>
       )}
@@ -291,43 +282,36 @@ export const VerifyEmailPage: React.FC = () => {
         <div className="verify-card verify-guidance-card">
           <Mail size={44} className="verify-icon-mail" aria-hidden="true" />
           <h1 id="verify-page-title" className="verify-title">
-            Kích hoạt tài khoản NEU LMS
-          </h1>
+            {uiText("Kích hoạt tài khoản NEU LMS")}</h1>
           <p className="verify-subtitle">
-            Hệ thống yêu cầu xác minh địa chỉ email chính chủ trước khi kích hoạt quyền truy cập các không gian học tập.
-          </p>
+            {uiText("Hệ thống yêu cầu xác minh địa chỉ email chính chủ trước khi kích hoạt quyền truy cập các không gian học tập.")}</p>
 
           <div className="verify-steps-box">
             <div className="verify-step-item">
               <span className="step-num">1</span>
               <div>
-                <strong>Kiểm tra hòm thư điện tử:</strong> Mở hộp thư đến (hoặc thư mục Spam/Rác) của địa chỉ email bạn đã dùng để đăng ký.
-              </div>
+                <strong>{uiText("Kiểm tra hòm thư điện tử:")}</strong> {uiText(" Mở hộp thư đến (hoặc thư mục Spam/Rác) của địa chỉ email bạn đã dùng để đăng ký.")}</div>
             </div>
             <div className="verify-step-item">
               <span className="step-num">2</span>
               <div>
-                <strong>Bấm vào liên kết kích hoạt:</strong> Thư từ NEU LMS chứa liên kết xác minh an toàn có hiệu lực trong vòng 24 giờ.
-              </div>
+                <strong>{uiText("Bấm vào liên kết kích hoạt:")}</strong> {uiText(" Thư từ NEU LMS chứa liên kết xác minh an toàn có hiệu lực trong vòng 24 giờ.")}</div>
             </div>
             <div className="verify-step-item">
               <span className="step-num">3</span>
               <div>
-                <strong>Bắt đầu sử dụng:</strong> Sau khi xác minh, tài khoản Sinh viên sẽ sẵn sàng đăng nhập ngay; tài khoản Giảng viên sẽ chờ Quản trị viên phê duyệt.
-              </div>
+                <strong>{uiText("Bắt đầu sử dụng:")}</strong> {uiText(" Sau khi xác minh, tài khoản Sinh viên sẽ sẵn sàng đăng nhập ngay; tài khoản Giảng viên sẽ chờ Quản trị viên phê duyệt.")}</div>
             </div>
           </div>
 
           <div className="verify-resend-section">
-            <h2 className="verify-resend-heading">Chưa nhận được thư hoặc liên kết đã hết hạn?</h2>
+            <h2 className="verify-resend-heading">{uiText("Chưa nhận được thư hoặc liên kết đã hết hạn?")}</h2>
             <p className="verify-resend-sub">
-              Nhập địa chỉ email đăng ký để nhận lại thư kích hoạt mới:
-            </p>
+              {uiText("Nhập địa chỉ email đăng ký để nhận lại thư kích hoạt mới:")}</p>
 
             {resendSuccess && (
               <div className="verify-resend-alert success" role="status">
-                Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút. Vui lòng kiểm tra hộp thư.
-              </div>
+                {uiText("Nếu tài khoản đủ điều kiện, thư xác minh sẽ được gửi trong ít phút. Vui lòng kiểm tra hộp thư.")}</div>
             )}
 
             {resendError && (
@@ -339,7 +323,7 @@ export const VerifyEmailPage: React.FC = () => {
             <form onSubmit={handleResend} className="verify-resend-form" noValidate>
               <TextField
                 id="guidance-resend-email"
-                label="Địa chỉ email đã đăng ký"
+                label={uiText("Địa chỉ email đã đăng ký")}
                 type="email"
                 name="email"
                 autoComplete="email"
@@ -364,18 +348,17 @@ export const VerifyEmailPage: React.FC = () => {
                 icon={<RotateCw size={16} />}
               >
                 {resendCooldown > 0
-                  ? `Gửi lại sau ${resendCooldown}s`
+                  ? uiText("Gửi lại sau {0}s",[resendCooldown])
                   : isResending
-                  ? 'Đang gửi...'
-                  : 'Gửi lại thư xác minh'}
+                  ? uiText("Đang gửi...")
+                  : uiText("Gửi lại thư xác minh")}
               </Button>
             </form>
           </div>
 
           <div className="verify-footer-links">
             <Link to="/dang-nhap" className="verify-secondary-link">
-              Đã kích hoạt? Đăng nhập ngay
-            </Link>
+              {uiText("Đã kích hoạt? Đăng nhập ngay")}</Link>
           </div>
         </div>
       )}

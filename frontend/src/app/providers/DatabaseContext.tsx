@@ -1,3 +1,4 @@
+import {uiText} from "../../shared/i18n/translate";
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { storageManager } from '../../infrastructure/persistence/storage';
 import type { DatabaseState } from '../../infrastructure/mock/mockDatabase';
@@ -116,13 +117,13 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
         at: demoClock.now(),
         actorId: session?.userId || 'system',
-        actorName: session?.fullName || 'Hệ thống',
+        actorName: session?.fullName || uiText("Hệ thống"),
         actorRole: (session?.role || 'admin') as any,
         action: auditAction.action,
         entityType: auditAction.entityType,
         entityId: auditAction.entityId,
         result: auditAction.result || 'success',
-        redactedDetails: `Thực hiện ${auditAction.action} trên ${auditAction.entityType} ${auditAction.entityId}`,
+        redactedDetails: uiText("Thực hiện {0} trên {1} {2}",[auditAction.action,auditAction.entityType,auditAction.entityId]),
       };
       clone.auditLogs.unshift(newAudit);
     }
@@ -194,7 +195,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         entityId: submissionId,
         result: 'failed'
       });
-      return { ok: false, error: { message: 'Không tìm thấy bài nộp' } };
+      return { ok: false, error: { message: uiText("Không tìm thấy bài nộp") } };
     }
 
     updateDb((draft) => {
@@ -235,7 +236,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         entityId: submissionId,
         result: 'failed'
       });
-      return { ok: false, error: { message: 'Không tìm thấy bài nộp' } };
+      return { ok: false, error: { message: uiText("Không tìm thấy bài nộp") } };
     }
 
     updateDb((draft) => {
@@ -287,7 +288,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         scanStatus: 'clean',
         extractionStatus: 'success',
         indexStatus: 'success',
-        summary: mat.summary || 'Tài liệu học tập số hóa',
+        summary: mat.summary || uiText("Tài liệu học tập số hóa"),
       });
     }, { action: 'CREATE_MATERIAL', entityType: 'Material', entityId: mat.id || 'new-material' });
   };
@@ -310,7 +311,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         scanStatus: 'clean',
         extractionStatus: 'success',
         indexStatus: 'success',
-        summary: ver.sampleContent || ver.summary || 'Phiên bản cập nhật',
+        summary: ver.sampleContent || ver.summary || uiText("Phiên bản cập nhật"),
       });
       const m = draft.materials.find((item) => item.id === ver.materialId);
       if (m) {
@@ -482,7 +483,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const lockAccount = (userId: string) => {
     const session = storageManager.getSession();
     if (session && session.userId === userId && session.role === 'admin') {
-      return { ok: false, error: { message: 'Không thể tự khóa tài khoản của chính mình' } };
+      return { ok: false, error: { message: uiText("Không thể tự khóa tài khoản của chính mình") } };
     }
     updateDb((draft) => {
       const u = draft.users.find((x) => x.id === userId);
@@ -506,7 +507,7 @@ export const DatabaseProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const changeUserRole = (userId: string, newRole: UserRole) => {
     const session = storageManager.getSession();
     if (session && session.userId === userId && session.role === 'admin') {
-      return { ok: false, error: { message: 'Không thể tự thay đổi vai trò của chính mình' } };
+      return { ok: false, error: { message: uiText("Không thể tự thay đổi vai trò của chính mình") } };
     }
     updateDb((draft) => {
       const u = draft.users.find((x) => x.id === userId);

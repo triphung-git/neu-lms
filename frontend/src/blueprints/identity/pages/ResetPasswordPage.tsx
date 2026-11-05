@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { authService } from '../../../api/authService';
@@ -51,12 +52,12 @@ export const ResetPasswordPage: React.FC = () => {
     setFormError('');
 
     if (newPassword.length < 12) {
-      setPasswordError('Mật khẩu mới phải có ít nhất 12 ký tự.');
+      setPasswordError(uiText("Mật khẩu mới phải có ít nhất 12 ký tự."));
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setConfirmError('Mật khẩu nhập lại không khớp.');
+      setConfirmError(uiText("Mật khẩu nhập lại không khớp."));
       return;
     }
 
@@ -70,7 +71,7 @@ export const ResetPasswordPage: React.FC = () => {
       });
 
       notifySuccess(
-        'Đặt lại mật khẩu thành công! Toàn bộ các phiên đăng nhập cũ đã được vô hiệu hóa. Vui lòng đăng nhập bằng mật khẩu mới.'
+        uiText("Đặt lại mật khẩu thành công! Toàn bộ các phiên đăng nhập cũ đã được vô hiệu hóa. Vui lòng đăng nhập bằng mật khẩu mới.")
       );
 
       // Clean memory state and redirect to login
@@ -91,15 +92,15 @@ export const ResetPasswordPage: React.FC = () => {
 
         if (isTokenInvalid) {
           setTokenErrorType('invalid_or_expired');
-          setFormError('Mã đặt lại mật khẩu không hợp lệ, đã hết hạn (quá 30 phút) hoặc đã được sử dụng.');
+          setFormError(uiText("Mã đặt lại mật khẩu không hợp lệ, đã hết hạn (quá 30 phút) hoặc đã được sử dụng."));
         } else if (err.status === 429) {
-          setFormError('Quá nhiều lượt thử đặt lại mật khẩu. Vui lòng chờ ít phút rồi thử lại.');
+          setFormError(uiText("Quá nhiều lượt thử đặt lại mật khẩu. Vui lòng chờ ít phút rồi thử lại."));
         } else {
-          setFormError(msg || 'Không thể đặt lại mật khẩu.');
+          setFormError(msg || uiText("Không thể đặt lại mật khẩu."));
         }
-        notifyError(msg || 'Đặt lại mật khẩu thất bại.');
+        notifyError(msg || uiText("Đặt lại mật khẩu thất bại."));
       } else {
-        const netMsg = 'Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.';
+        const netMsg = uiText("Không thể kết nối đến máy chủ. Vui lòng kiểm tra lại kết nối mạng.");
         setFormError(netMsg);
         notifyError(netMsg);
       }
@@ -111,10 +112,9 @@ export const ResetPasswordPage: React.FC = () => {
   return (
     <div className="reset-password-page">
       <div className="reset-password-header">
-        <h1 className="reset-password-title">Đặt lại mật khẩu</h1>
+        <h1 className="reset-password-title">{uiText("Đặt lại mật khẩu")}</h1>
         <p className="reset-password-subtitle">
-          Thiết lập mật khẩu mới an toàn cho tài khoản của bạn.
-        </p>
+          {uiText("Thiết lập mật khẩu mới an toàn cho tài khoản của bạn.")}</p>
       </div>
 
       {tokenErrorType ? (
@@ -122,17 +122,16 @@ export const ResetPasswordPage: React.FC = () => {
           <AlertOctagon size={40} className="reset-token-invalid-icon" aria-hidden="true" />
           <h2 className="reset-token-card-title">
             {tokenErrorType === 'missing'
-              ? 'Thiếu mã xác thực đặt lại mật khẩu'
-              : 'Mã xác thực không hợp lệ hoặc đã hết hạn'}
+              ? uiText("Thiếu mã xác thực đặt lại mật khẩu")
+              : uiText("Mã xác thực không hợp lệ hoặc đã hết hạn")}
           </h2>
           <p className="reset-token-card-text">
             {tokenErrorType === 'missing'
-              ? 'Không tìm thấy mã xác thực trong đường dẫn của bạn. Vui lòng bấm vào liên kết đầy đủ được gửi trong email hoặc yêu cầu liên kết mới.'
-              : 'Mã xác thực này đã hết hạn hiệu lực (quá 30 phút), không đúng định dạng hoặc đã được sử dụng trước đó.'}
+              ? uiText("Không tìm thấy mã xác thực trong đường dẫn của bạn. Vui lòng bấm vào liên kết đầy đủ được gửi trong email hoặc yêu cầu liên kết mới.")
+              : uiText("Mã xác thực này đã hết hạn hiệu lực (quá 30 phút), không đúng định dạng hoặc đã được sử dụng trước đó.")}
           </p>
           <Link to="/quen-mat-khau" className="btn btn-primary reset-password-submit-btn">
-            Yêu cầu liên kết đặt lại mật khẩu mới
-          </Link>
+            {uiText("Yêu cầu liên kết đặt lại mật khẩu mới")}</Link>
         </div>
       ) : (
         <>
@@ -147,7 +146,7 @@ export const ResetPasswordPage: React.FC = () => {
             <div className="password-field-wrapper">
               <TextField
                 id="reset-new-password"
-                label="Mật khẩu mới"
+                label={uiText("Mật khẩu mới")}
                 type={showPassword ? 'text' : 'password'}
                 autoComplete="new-password"
                 value={newPassword}
@@ -156,7 +155,7 @@ export const ResetPasswordPage: React.FC = () => {
                   if (passwordError) setPasswordError('');
                   if (formError) setFormError('');
                 }}
-                placeholder="Tối thiểu 12 ký tự"
+                placeholder={uiText("Tối thiểu 12 ký tự")}
                 helperText="Mật khẩu phải có độ dài tối thiểu 12 ký tự."
                 error={passwordError}
                 required
@@ -166,7 +165,7 @@ export const ResetPasswordPage: React.FC = () => {
                 type="button"
                 className="toggle-password-btn"
                 onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+                aria-label={showPassword ? uiText("Ẩn mật khẩu") : uiText("Hiện mật khẩu")}
                 tabIndex={0}
               >
                 {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
@@ -175,7 +174,7 @@ export const ResetPasswordPage: React.FC = () => {
 
             <TextField
               id="reset-confirm-password"
-              label="Xác nhận lại mật khẩu mới"
+              label={uiText("Xác nhận lại mật khẩu mới")}
               type={showPassword ? 'text' : 'password'}
               autoComplete="new-password"
               value={confirmPassword}
@@ -184,7 +183,7 @@ export const ResetPasswordPage: React.FC = () => {
                 if (confirmError) setConfirmError('');
                 if (formError) setFormError('');
               }}
-              placeholder="Nhập lại mật khẩu mới"
+              placeholder={uiText("Nhập lại mật khẩu mới")}
               error={confirmError}
               required
               disabled={isSubmitting}
@@ -200,15 +199,14 @@ export const ResetPasswordPage: React.FC = () => {
               icon={<Check size={18} />}
               className="reset-password-submit-btn"
             >
-              {isSubmitting ? 'Đang cập nhật mật khẩu...' : 'Xác nhận đặt lại mật khẩu'}
+              {isSubmitting ? uiText("Đang cập nhật mật khẩu...") : uiText("Xác nhận đặt lại mật khẩu")}
             </Button>
           </form>
 
           <div className="reset-password-footer">
-            <span>Nhớ mật khẩu của bạn?</span>{' '}
+            <span>{uiText("Nhớ mật khẩu của bạn?")}</span>{' '}
             <Link to="/dang-nhap" className="reset-password-login-link">
-              Đăng nhập ngay
-            </Link>
+              {uiText("Đăng nhập ngay")}</Link>
           </div>
         </>
       )}

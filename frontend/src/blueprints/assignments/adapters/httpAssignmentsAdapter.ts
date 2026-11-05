@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 /**
  * HTTP Adapter for Assignments Domain (B10).
  *
@@ -43,7 +44,8 @@ const mimeExtensions: Record<string, string> = {
 };
 const extensionMime = (extension: string): string =>
   Object.entries(mimeExtensions).find(([, value]) => value === extension)?.[0] || `application/${extension}`;
-const mimeExtension = (mime: string): string => mimeExtensions[mime] || mime.replace(/^.*\//, '');
+export const mimeExtension = (mime: string): string =>
+  mimeExtensions[mime] || mime.replace(/^.*\//, '');
 
 export class HttpAssignmentsAdapter implements AssignmentsPort {
   constructor(private readonly service: AssignmentsService = assignmentsService) {}
@@ -129,12 +131,12 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
         ok: false,
         error: {
           code: String(error.status),
-          message: error.message || 'Lỗi xử lý yêu cầu bài tập',
+          message: error.message || uiText("Lỗi xử lý yêu cầu bài tập"),
           details: error.details,
         },
       };
     }
-    const message = error instanceof Error ? error.message : 'Lỗi không xác định khi gọi máy chủ';
+    const message = error instanceof Error ? error.message : uiText("Lỗi không xác định khi gọi máy chủ");
     return {
       ok: false,
       error: {
@@ -394,7 +396,7 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
         assignment: {
           id: preview.id,
           courseId: preview.course_id,
-          courseTitle: 'Môn học',
+          courseTitle: uiText("Môn học"),
           chapterTitle: null,
           title: preview.title,
           instructions: preview.instructions,
@@ -444,7 +446,9 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
     eligibilityRaw: components['schemas']['StudentAssignmentEligibility']
   ): StudentAssignmentView {
     const detail = this.mapDetail(raw);
+    const latest = eligibilityRaw.latest_submission;
     const eligibility: StudentAssignmentEligibility = {
+      isGroupAssignment: eligibilityRaw.is_group_assignment,
       canSubmit: eligibilityRaw.can_submit,
       isLate: eligibilityRaw.is_late,
       isClosed: !eligibilityRaw.can_submit || Boolean(eligibilityRaw.manually_closed),
@@ -457,7 +461,7 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
       assignment: {
         id: detail.id,
         courseId: detail.courseId,
-        courseTitle: 'Môn học',
+        courseTitle: uiText("Môn học"),
         chapterTitle: null,
         title: detail.title,
         instructions: detail.instructions,
@@ -471,7 +475,22 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
         publishedAt: detail.publishedAt || '',
       },
       eligibility,
-      submission: null,
+      submission: latest
+        ? {
+            id: String(latest.id),
+            status: 'submitted',
+            submittedAt: latest.submitted_at,
+            revisionCount: latest.number,
+            latestRevision: {
+              id: String(latest.id),
+              revisionNumber: latest.number,
+              filename: latest.file_name,
+              sizeBytes: latest.file_size,
+              submittedAt: latest.submitted_at,
+              isLate: latest.is_late,
+            },
+          }
+        : null,
       publishedGrade: null,
     };
   }
@@ -622,16 +641,49 @@ export class HttpAssignmentsAdapter implements AssignmentsPort {
   }
 
   async submitAssignment(
-    _input: SubmitAssignmentInput,
-    _ctx?: RequestContext
+    input: SubmitAssignmentInput,
+    ctx?: RequestContext
   ): Promise<Result<{ revisionNumber: number; submittedAt: string }>> {
-    return {
-      ok: false,
-      error: {
-        code: 'MILESTONE_B11_PENDING',
-        message: 'Quy trình nộp bài chính thức sẽ được kích hoạt tại Milestone B11.',
-      },
-    };
+    try {
+      const fileId = input.fileId || input.file.id;
+      if (!fileId) {
+        return {
+          ok: false,
+          error: {
+            code: 'VALIDATION_ERROR',
+            message: uiText("Thiếu mã tệp đã tải lên và quét an toàn. Hãy tải tệp lại trước khi nộp."),
+          },
+        };
+      }
+
+      const assignment = input.courseId
+        ? null
+        : await this.service.getAssignmentDirect(input.assignmentId, { signal: ctx?.signal });
+      const courseId = input.courseId || assignment?.course_id;
+      if (!courseId) {
+        return {
+          ok: false,
+          error: { code: 'NOT_FOUND', message: uiText("Không xác định được môn học của bài tập.") },
+        };
+      }
+
+      const receipt = await this.service.submitAssignment(
+        courseId,
+        input.assignmentId,
+        fileId,
+        { signal: ctx?.signal, idempotencyKey: ctx?.idempotencyKey },
+      );
+
+      return {
+        ok: true,
+        data: {
+          revisionNumber: receipt.number,
+          submittedAt: receipt.submitted_at,
+        },
+      };
+    } catch (err) {
+      return this.handleError(err);
+    }
   }
 }
 

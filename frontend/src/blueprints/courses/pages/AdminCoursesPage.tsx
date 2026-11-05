@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { coursesService, type Course } from '../../../api/coursesService';
@@ -44,7 +45,7 @@ export const AdminCoursesPage: React.FC = () => {
       setTotalCourses(result.pagination.total_items);
     } catch (cause) {
       if (sequence !== loadSequence.current) return;
-      setError(cause instanceof Error ? cause.message : 'Không thể tải danh mục môn học.');
+      setError(cause instanceof Error ? cause.message : uiText("Không thể tải danh mục môn học."));
     } finally {
       if (sequence === loadSequence.current) setIsLoading(false);
     }
@@ -67,59 +68,56 @@ export const AdminCoursesPage: React.FC = () => {
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Danh mục môn học toàn trường' },
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Danh mục môn học toàn trường") },
           ]}
         />
-        <h1 className="page-heading">Quản lý môn học toàn trường</h1>
+        <h1 className="page-heading">{uiText("Quản lý môn học toàn trường")}</h1>
         <p className="page-subheading">
-          Theo dõi học phần, điều chuyển giảng viên và lưu trữ môn học.
-        </p>
+          {uiText("Theo dõi học phần, điều chuyển giảng viên và lưu trữ môn học.")}</p>
       </div>
 
       <div className="admin-notice-box" role="note">
         <AlertCircle size={18} />
         <span>
-          <strong>Lưu ý:</strong> Quản trị viên không biên soạn môn học hoặc truy cập học liệu và bài nộp.
-          Chỉ giảng viên phụ trách mới được quản lý nội dung.
-        </span>
+          <strong>{uiText("Lưu ý:")}</strong> {uiText(" Quản trị viên không biên soạn môn học hoặc truy cập học liệu và bài nộp. Chỉ giảng viên phụ trách mới được quản lý nội dung.")}</span>
       </div>
 
       <div className="filter-search-card">
         <div className="search-col">
           <TextField
-            label="Tìm kiếm"
+            label={uiText("Tìm kiếm")}
             value={search}
             onChange={(event) => {
               setSearch(event.target.value);
               setPage(1);
             }}
-            placeholder="Tên môn, mã môn hoặc giảng viên"
+            placeholder={uiText("Tên môn, mã môn hoặc giảng viên")}
           />
         </div>
         <div className="filter-col">
           <TextField
-            label="Học kỳ"
+            label={uiText("Học kỳ")}
             value={term}
             onChange={(event) => {
               setTerm(event.target.value);
               setPage(1);
             }}
-            placeholder="Ví dụ: HK1-2026"
+            placeholder={uiText("Ví dụ: HK1-2026")}
           />
         </div>
         <div className="filter-col">
           <SelectField
-            label="Trạng thái"
+            label={uiText("Trạng thái")}
             value={statusFilter}
             onChange={(event) => {
               setStatusFilter(event.target.value as CourseStatusFilter);
               setPage(1);
             }}
             options={[
-              { value: 'all', label: 'Tất cả trạng thái' },
-              { value: 'open', label: 'Đang mở' },
-              { value: 'archived', label: 'Đã lưu trữ' },
+              { value: 'all', label: uiText("Tất cả trạng thái") },
+              { value: 'open', label: uiText("Đang mở") },
+              { value: 'archived', label: uiText("Đã lưu trữ") },
             ]}
           />
         </div>
@@ -127,7 +125,7 @@ export const AdminCoursesPage: React.FC = () => {
 
       {error && (
         <ErrorBanner
-          title="Không thể tải danh mục môn học"
+          title={uiText("Không thể tải danh mục môn học")}
           message={error}
           onRetry={() => void loadCourses()}
         />
@@ -137,12 +135,11 @@ export const AdminCoursesPage: React.FC = () => {
         <LoadingSkeleton lines={6} />
       ) : error ? null : courses.length === 0 ? (
         <EmptyState
-          title="Không tìm thấy môn học phù hợp"
-          description="Không có môn học nào khớp với bộ lọc hiện tại."
+          title={uiText("Không tìm thấy môn học phù hợp")}
+          description={uiText("Không có môn học nào khớp với bộ lọc hiện tại.")}
           action={
             <Button variant="secondary" onClick={clearFilters}>
-              Xóa bộ lọc
-            </Button>
+              {uiText("Xóa bộ lọc")}</Button>
           }
         />
       ) : (
@@ -151,13 +148,13 @@ export const AdminCoursesPage: React.FC = () => {
             <table className="npc-table">
               <thead>
                 <tr>
-                  <th>Mã môn</th>
-                  <th>Tên môn học</th>
-                  <th>Học kỳ</th>
-                  <th>Giảng viên</th>
-                  <th>Sinh viên</th>
-                  <th>Trạng thái</th>
-                  <th>Hành động</th>
+                  <th>{uiText("Mã môn")}</th>
+                  <th>{uiText("Tên môn học")}</th>
+                  <th>{uiText("Học kỳ")}</th>
+                  <th>{uiText("Giảng viên")}</th>
+                  <th>{uiText("Sinh viên")}</th>
+                  <th>{uiText("Trạng thái")}</th>
+                  <th>{uiText("Hành động")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -166,12 +163,12 @@ export const AdminCoursesPage: React.FC = () => {
                     <td><span className="code-pill">{course.code}</span></td>
                     <td><strong>{course.name}</strong></td>
                     <td>{course.term}</td>
-                    <td>{course.teacher_name || 'Giảng viên'}</td>
-                    <td><span className="metric-pill">{course.active_member_count} sinh viên</span></td>
+                    <td>{course.teacher_name || uiText("Giảng viên")}</td>
+                    <td><span className="metric-pill">{course.active_member_count} {uiText(" sinh viên")}</span></td>
                     <td>
                       <Badge
                         variant={course.status === 'open' ? 'published' : 'archived'}
-                        label={course.status === 'open' ? 'Đang mở' : 'Đã lưu trữ'}
+                        label={course.status === 'open' ? uiText("Đang mở") : uiText("Đã lưu trữ")}
                       />
                     </td>
                     <td>
@@ -179,7 +176,7 @@ export const AdminCoursesPage: React.FC = () => {
                         to={`/ad/mon-hoc/${course.id}`}
                         className="npc-btn npc-btn-secondary npc-btn-sm"
                       >
-                        <span>Chi tiết & vận hành</span>
+                        <span>{uiText("Chi tiết & vận hành")}</span>
                         <ArrowRight size={14} />
                       </Link>
                     </td>
@@ -189,15 +186,14 @@ export const AdminCoursesPage: React.FC = () => {
             </table>
           </div>
           {totalPages > 1 && (
-            <div className="course-pagination" aria-label="Phân trang danh mục môn học">
+            <div className="course-pagination" aria-label={uiText("Phân trang danh mục môn học")}>
               <Button
                 variant="secondary"
                 disabled={page <= 1}
                 onClick={() => setPage((current) => current - 1)}
               >
-                Trang trước
-              </Button>
-              <span>Trang {page} / {totalPages} · {totalCourses} môn học</span>
+                {uiText("Trang trước")}</Button>
+              <span>Trang {page} / {totalPages} · {totalCourses} {uiText(" môn học")}</span>
               <Button
                 variant="secondary"
                 disabled={page >= totalPages}

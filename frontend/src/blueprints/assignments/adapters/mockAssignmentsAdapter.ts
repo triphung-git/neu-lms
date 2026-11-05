@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 /**
  * Mock Adapter for Assignments Domain (B10).
  *
@@ -50,13 +51,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<PaginatedResult<AssignmentSummaryItem>>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const course = db.courses.find((c) => c.id === courseId);
     if (!course) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Môn học không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Môn học không tồn tại.") } };
     }
 
     let items = db.assignments.filter((a) => a.courseId === courseId);
@@ -137,13 +138,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<AssignmentDetail>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === assignmentId && a.courseId === courseId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài tập.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài tập.") } };
     }
 
     const rubricCriteria: RubricCriterionDto[] = (assignment.rubricCriteria || []).map(
@@ -200,7 +201,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<AssignmentDetail>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     if (!input.title || !input.title.trim()) {
@@ -208,8 +209,8 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
         ok: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Tiêu đề bài tập không được để trống.',
-          fieldErrors: { title: ['Tiêu đề bài tập không được để trống.'] },
+          message: uiText("Tiêu đề bài tập không được để trống."),
+          fieldErrors: { title: [uiText("Tiêu đề bài tập không được để trống.")] },
         },
       };
     }
@@ -219,8 +220,8 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
         ok: false,
         error: {
           code: 'VALIDATION_ERROR',
-          message: 'Hạn nộp bài tập không được để trống.',
-          fieldErrors: { dueAt: ['Hạn nộp bài tập không được để trống.'] },
+          message: uiText("Hạn nộp bài tập không được để trống."),
+          fieldErrors: { dueAt: [uiText("Hạn nộp bài tập không được để trống.")] },
         },
       };
     }
@@ -228,12 +229,12 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     const db = storageManager.getDatabase();
     const course = db.courses.find((c) => c.id === input.courseId);
     if (!course) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Môn học không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Môn học không tồn tại.") } };
     }
     if (course.status === 'archived') {
       return {
         ok: false,
-        error: { code: 'COURSE_ARCHIVED', message: 'Môn học đã lưu trữ, không thể tạo bài tập mới.' },
+        error: { code: 'COURSE_ARCHIVED', message: uiText("Môn học đã lưu trữ, không thể tạo bài tập mới.") },
       };
     }
 
@@ -284,13 +285,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
       id: `aud-${Date.now()}`,
       at: nowIso,
       actorId: 'current-teacher',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: 'CREATE_ASSIGNMENT',
       entityType: 'Assignment',
       entityId: newId,
       result: 'success',
-      redactedDetails: `Tạo bài tập mới "${newAssignment.title}" (${initialStatus})`,
+      redactedDetails: uiText("Tạo bài tập mới \"{0}\" ({1})",[newAssignment.title,initialStatus]),
     });
 
     storageManager.saveDatabase(clone);
@@ -327,20 +328,20 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<AssignmentDetail>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === assignmentId && a.courseId === courseId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Bài tập không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Bài tập không tồn tại.") } };
     }
 
     const course = db.courses.find((c) => c.id === courseId);
     if (course?.status === 'archived') {
       return {
         ok: false,
-        error: { code: 'COURSE_ARCHIVED', message: 'Môn học đã lưu trữ, không thể chỉnh sửa bài tập.' },
+        error: { code: 'COURSE_ARCHIVED', message: uiText("Môn học đã lưu trữ, không thể chỉnh sửa bài tập.") },
       };
     }
 
@@ -353,7 +354,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
           ok: false,
           error: {
             code: 'IMMUTABLE_AFTER_PUBLISH',
-            message: 'Đề bài đã công bố không được phép sửa đổi tiêu đề hồi tố.',
+            message: uiText("Đề bài đã công bố không được phép sửa đổi tiêu đề hồi tố."),
           },
         };
       }
@@ -362,7 +363,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
           ok: false,
           error: {
             code: 'IMMUTABLE_AFTER_PUBLISH',
-            message: 'Đề bài đã công bố không được phép sửa đổi nội dung yêu cầu hồi tố.',
+            message: uiText("Đề bài đã công bố không được phép sửa đổi nội dung yêu cầu hồi tố."),
           },
         };
       }
@@ -371,7 +372,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
           ok: false,
           error: {
             code: 'IMMUTABLE_AFTER_PUBLISH',
-            message: 'Tiêu chí rubric đã công bố không được phép sửa đổi hồi tố.',
+            message: uiText("Tiêu chí rubric đã công bố không được phép sửa đổi hồi tố."),
           },
         };
       }
@@ -388,7 +389,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
         ok: false,
         error: {
           code: 'CONFLICT',
-          message: 'Bài tập đã được cập nhật bởi một phiên làm việc khác. Vui lòng tải lại dữ liệu.',
+          message: uiText("Bài tập đã được cập nhật bởi một phiên làm việc khác. Vui lòng tải lại dữ liệu."),
         },
       };
     }
@@ -421,13 +422,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
       id: `aud-${Date.now()}`,
       at: nowIso,
       actorId: 'current-teacher',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: 'UPDATE_ASSIGNMENT',
       entityType: 'Assignment',
       entityId: assignmentId,
       result: 'success',
-      redactedDetails: `Cập nhật bài tập "${target.title}" (phiên bản ${target.version})`,
+      redactedDetails: uiText("Cập nhật bài tập \"{0}\" (phiên bản {1})",[target.title,target.version]),
     });
 
     storageManager.saveDatabase(clone);
@@ -471,13 +472,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<AssignmentDetail>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === input.assignmentId && a.courseId === courseId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Bài tập không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Bài tập không tồn tại.") } };
     }
 
     if (assignment.status === 'published') {
@@ -497,13 +498,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
       id: `aud-${Date.now()}`,
       at: nowIso,
       actorId: 'current-teacher',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: 'PUBLISH_ASSIGNMENT',
       entityType: 'Assignment',
       entityId: input.assignmentId,
       result: 'success',
-      redactedDetails: `Công bố bài tập "${target.title}"`,
+      redactedDetails: uiText("Công bố bài tập \"{0}\"",[target.title]),
     });
 
     storageManager.saveDatabase(clone);
@@ -517,13 +518,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<AssignmentDetail>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === input.assignmentId && a.courseId === courseId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Bài tập không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Bài tập không tồn tại.") } };
     }
 
     const clone = JSON.parse(JSON.stringify(db));
@@ -549,13 +550,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
       id: `aud-${Date.now()}`,
       at: nowIso,
       actorId: 'current-teacher',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: input.closeType === 'manual_close' ? 'CLOSE_ASSIGNMENT' : 'REOPEN_ASSIGNMENT',
       entityType: 'Assignment',
       entityId: input.assignmentId,
       result: 'success',
-      redactedDetails: `${input.closeType === 'manual_close' ? 'Đóng nhận bài nộp' : 'Mở lại bài tập'}: ${input.reason || 'Theo quyết định giảng viên'}`,
+      redactedDetails: `${input.closeType === 'manual_close' ? uiText("Đóng nhận bài nộp") : uiText("Mở lại bài tập")}: ${input.reason || uiText("Theo quyết định giảng viên")}`,
     });
 
     storageManager.saveDatabase(clone);
@@ -580,7 +581,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
         assignment: {
           id: a.id,
           courseId: a.courseId,
-          courseTitle: 'Môn học xem trước',
+          courseTitle: uiText("Môn học xem trước"),
           chapterTitle: null,
           title: a.title,
           instructions: a.instructions,
@@ -615,7 +616,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<PaginatedResult<AssignmentSummaryItem>>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
@@ -673,7 +674,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === assignmentId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Bài tập không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Bài tập không tồn tại.") } };
     }
     return this.getStudentAssignment(assignment.courseId, assignmentId, ctx);
   }
@@ -684,7 +685,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<StudentAssignmentView>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
@@ -694,14 +695,14 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
         ok: false,
         error: {
           code: 'NOT_FOUND',
-          message: 'Bài tập không tồn tại hoặc chưa được công bố.',
+          message: uiText("Bài tập không tồn tại hoặc chưa được công bố."),
         },
       };
     }
 
     const course = db.courses.find((c) => c.id === courseId);
     if (!course) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Môn học không tồn tại.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Môn học không tồn tại.") } };
     }
 
     // Server-authoritative: resolve student session from session manager
@@ -716,7 +717,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
           isLate: false,
           isClosed: true,
           reason: 'UNKNOWN',
-          message: 'Không thể xác định điều kiện nộp bài.',
+          message: uiText("Không thể xác định điều kiện nộp bài."),
           serverTime: demoClock.now(),
         };
 
@@ -795,7 +796,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<StudentAssignmentEligibility>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
@@ -832,13 +833,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<StudentAssignmentDetailViewModel>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === assignmentId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài tập.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài tập.") } };
     }
 
     const course = db.courses.find((c) => c.id === assignment.courseId);
@@ -887,7 +888,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     ctx?: RequestContext
   ): Promise<Result<{ revisionNumber: number; submittedAt: string }>> {
     if (ctx?.signal?.aborted) {
-      return { ok: false, error: { code: 'ABORTED', message: 'Yêu cầu đã bị hủy.' } };
+      return { ok: false, error: { code: 'ABORTED', message: uiText("Yêu cầu đã bị hủy.") } };
     }
 
     const db = storageManager.getDatabase();
@@ -906,7 +907,7 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
     if (!eligibility.allowed) {
       return {
         ok: false,
-        error: { code: eligibility.reason, message: eligibility.message || 'Không thể nộp bài tập.' },
+        error: { code: eligibility.reason, message: eligibility.message || uiText("Không thể nộp bài tập.") },
       };
     }
 
@@ -965,13 +966,13 @@ export class MockAssignmentsAdapter implements AssignmentsPort {
       id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       at: nowTime,
       actorId: input.studentId,
-      actorName: 'Sinh viên',
+      actorName: uiText("Sinh viên"),
       actorRole: 'student',
       action: 'SUBMIT_ASSIGNMENT',
       entityType: 'Submission',
       entityId: existingSub.id,
       result: 'success',
-      redactedDetails: `Nộp bài tập ${input.assignmentId} (phiên bản ${nextRevNumber})`,
+      redactedDetails: uiText("Nộp bài tập {0} (phiên bản {1})",[input.assignmentId,nextRevNumber]),
     });
 
     storageManager.saveDatabase(clone);

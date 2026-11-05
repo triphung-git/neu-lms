@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React from 'react';
 import './LoadingSkeleton.css';
 
@@ -13,7 +14,7 @@ export const LoadingSkeleton: React.FC<LoadingSkeletonProps> = ({
   className = '',
 }) => {
   return (
-    <div className={`skeleton-wrapper ${className}`} aria-busy="true" aria-label="Đang tải dữ liệu...">
+    <div className={`skeleton-wrapper ${className}`} aria-busy="true" aria-label={uiText("Đang tải dữ liệu...")}>
       {Array.from({ length: lines }).map((_, i) => (
         <div
           key={i}

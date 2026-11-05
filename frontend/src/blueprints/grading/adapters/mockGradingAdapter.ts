@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import type { GradingPort, Result } from '../contracts/gradingPort';
 import type {
   SaveGradeDraftInput,
@@ -24,7 +25,7 @@ export class MockGradingAdapter implements GradingPort {
     const db = storageManager.getDatabase();
     const submission = db.submissions.find((s) => s.id === submissionId);
     if (!submission) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài nộp.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài nộp.") } };
     }
 
     const assignment = db.assignments.find((a) => a.id === submission.assignmentId);
@@ -34,7 +35,7 @@ export class MockGradingAdapter implements GradingPort {
     if (!canTeacherAccessCourse(course, teacherUser)) {
       return {
         ok: false,
-        error: { code: 'FORBIDDEN', message: 'Bạn không có quyền chấm bài môn học này.' }
+        error: { code: 'FORBIDDEN', message: uiText("Bạn không có quyền chấm bài môn học này.") }
       };
     }
 
@@ -61,7 +62,7 @@ export class MockGradingAdapter implements GradingPort {
     const db = storageManager.getDatabase();
     const sub = db.submissions.find((s) => s.id === input.submissionId);
     if (!sub) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài nộp.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài nộp.") } };
     }
 
     const clone = JSON.parse(JSON.stringify(db));
@@ -96,13 +97,13 @@ export class MockGradingAdapter implements GradingPort {
       id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       at: nowIso,
       actorId: input.authorId || 'system',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: 'SAVE_GRADE_DRAFT',
       entityType: 'Submission',
       entityId: input.submissionId,
       result: 'success',
-      redactedDetails: `Lưu điểm nháp cho bài nộp ${input.submissionId}`
+      redactedDetails: uiText("Lưu điểm nháp cho bài nộp {0}",[input.submissionId])
     });
 
     storageManager.saveDatabase(clone);
@@ -113,7 +114,7 @@ export class MockGradingAdapter implements GradingPort {
     const db = storageManager.getDatabase();
     const sub = db.submissions.find((s) => s.id === input.submissionId);
     if (!sub) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài nộp.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài nộp.") } };
     }
 
     const clone = JSON.parse(JSON.stringify(db));
@@ -149,13 +150,13 @@ export class MockGradingAdapter implements GradingPort {
       id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
       at: nowIso,
       actorId: input.authorId || 'system',
-      actorName: 'Giảng viên',
+      actorName: uiText("Giảng viên"),
       actorRole: 'teacher',
       action: 'PUBLISH_GRADE',
       entityType: 'Submission',
       entityId: input.submissionId,
       result: 'success',
-      redactedDetails: `Công bố điểm cho bài nộp ${input.submissionId}`
+      redactedDetails: uiText("Công bố điểm cho bài nộp {0}",[input.submissionId])
     });
 
     storageManager.saveDatabase(clone);
@@ -204,13 +205,13 @@ export class MockGradingAdapter implements GradingPort {
         id: `aud-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         at: nowIso,
         actorId: 'u-gv1',
-        actorName: 'Giảng viên',
+        actorName: uiText("Giảng viên"),
         actorRole: 'teacher',
         action: 'BULK_PUBLISH_GRADES',
         entityType: 'Assignment',
         entityId: input.assignmentId,
         result: 'success',
-        redactedDetails: `Công bố điểm hàng loạt cho ${count} bài nộp của bài tập ${input.assignmentId}`
+        redactedDetails: uiText("Công bố điểm hàng loạt cho {0} bài nộp của bài tập {1}",[count,input.assignmentId])
       });
 
       storageManager.saveDatabase(clone);
@@ -226,7 +227,7 @@ export class MockGradingAdapter implements GradingPort {
     const db = storageManager.getDatabase();
     const assignment = db.assignments.find((a) => a.id === assignmentId);
     if (!assignment) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy bài tập.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy bài tập.") } };
     }
 
     const course = db.courses.find((c) => c.id === assignment.courseId);
@@ -265,14 +266,14 @@ export class MockGradingAdapter implements GradingPort {
     const db = storageManager.getDatabase();
     const course = db.courses.find((c) => c.id === courseId);
     if (!course) {
-      return { ok: false, error: { code: 'NOT_FOUND', message: 'Không tìm thấy môn học.' } };
+      return { ok: false, error: { code: 'NOT_FOUND', message: uiText("Không tìm thấy môn học.") } };
     }
 
     const teacher = db.users.find((u) => u.id === teacherId);
     if (!canTeacherAccessCourse(course, teacher)) {
       return {
         ok: false,
-        error: { code: 'FORBIDDEN', message: 'Bạn không có quyền xem bảng điểm môn học này.' }
+        error: { code: 'FORBIDDEN', message: uiText("Bạn không có quyền xem bảng điểm môn học này.") }
       };
     }
 

@@ -214,3 +214,33 @@ class Lesson(models.Model):
     class Meta:
         ordering = ["position", "id"]
         indexes = [models.Index(fields=["chapter", "position"])]
+
+
+class CourseAnnouncement(models.Model):
+    request_key = models.UUIDField(default=uuid.uuid4, unique=True)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    author = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.PROTECT,
+    )
+    title = models.CharField(max_length=200)
+    body = models.TextField()
+    published_at = models.DateTimeField(auto_now_add=True)
+
+
+class CourseAnnouncementReceipt(models.Model):
+    announcement = models.ForeignKey(
+        CourseAnnouncement,
+        on_delete=models.CASCADE,
+        related_name="receipts",
+    )
+    membership = models.ForeignKey(Membership, on_delete=models.CASCADE)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["announcement", "membership"],
+                name="unique_course_notice_recipient",
+            )
+        ]

@@ -1,0 +1,68 @@
+
+{
+  "dataset_id": "web101-seed-v1",
+  "course_code": "WEB101",
+  "source": "13 Python Method with Pycharm.pdf",
+  "cases": [
+    {
+      "id": "WEB101-01",
+      "question": "Tình huống II yêu cầu người dùng nhập loại dữ liệu nào?",
+      "answerable": true,
+      "relevant_pages": [4]
+    },
+    {
+      "id": "WEB101-02",
+      "question": "Làm thế nào để xác thực địa chỉ thư điện tử do người dùng nhập?",
+      "answerable": true,
+      "relevant_pages": [4]
+    },
+    {
+      "id": "WEB101-03",
+      "question": "Hệ thống ATM hỗ trợ những giao dịch nào?",
+      "answerable": true,
+      "relevant_pages": [6]
+    },
+    {
+      "id": "WEB101-04",
+      "question": "Tình huống III sử dụng random để sinh số trong khoảng nào?",
+      "answerable": true,
+      "relevant_pages": [5]
+    },
+    {
+      "id": "WEB101-05",
+      "question": "Tình huống I yêu cầu người dùng nhập dữ liệu gì?",
+      "answerable": true,
+      "relevant_pages": [3]
+    },
+    {
+      "id": "WEB101-06",
+      "question": "Bài tập Pandas sử dụng file CSV nào và thống kê theo trường nào?",
+      "answerable": true,
+      "relevant_pages": [7]
+    },
+    {
+      "id": "WEB101-07",
+      "question": "Outline đề cập những thao tác nào với dữ liệu?",
+      "answerable": true,
+      "relevant_pages": [2]
+    },
+    {
+      "id": "WEB101-08",
+      "question": "Khi Pandas chưa được cài đặt thì tài liệu hướng dẫn sử dụng lệnh gì?",
+      "answerable": true,
+      "relevant_pages": [8]
+    },
+    {
+      "id": "WEB101-09",
+      "question": "Tên chương và chủ đề chính của tài liệu là gì?",
+      "answerable": true,
+      "relevant_pages": [1]
+    },
+    {
+      "id": "WEB101-10",
+      "question": "Theo tài liệu Python Method, quy trình hạch toán nghiệp vụ nhập khẩu hàng hóa gồm những bước nào?",
+      "answerable": false,
+      "relevant_pages": []
+    }
+  ]
+}

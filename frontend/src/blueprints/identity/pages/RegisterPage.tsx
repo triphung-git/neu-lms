@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { authService } from '../../../api/authService';
@@ -64,35 +65,35 @@ export const RegisterPage: React.FC = () => {
     setErrorMessage('');
 
     if (displayName.trim().length > 150) {
-      setDisplayNameError('Họ và tên không được vượt quá 150 ký tự.');
+      setDisplayNameError(uiText("Họ và tên không được vượt quá 150 ký tự."));
       isValid = false;
     }
 
     const trimmedEmail = email.trim().toLowerCase();
     if (!trimmedEmail) {
-      setEmailError('Vui lòng nhập địa chỉ email của bạn.');
+      setEmailError(uiText("Vui lòng nhập địa chỉ email của bạn."));
       isValid = false;
     } else if (requestedRole === 'student' && !STUDENT_EMAIL_REGEX.test(trimmedEmail)) {
-      setEmailError('Email sinh viên NEU phải có định dạng số hiệu: 1124xxxx@st.neu.edu.vn (vd: 11241234@st.neu.edu.vn).');
+      setEmailError(uiText("Email sinh viên NEU phải có định dạng số hiệu: 1124xxxx@st.neu.edu.vn (vd: 11241234@st.neu.edu.vn)."));
       isValid = false;
     } else if (requestedRole === 'teacher' && (!trimmedEmail.includes('@') || !trimmedEmail.includes('.'))) {
-      setEmailError('Địa chỉ email giảng viên không hợp lệ.');
+      setEmailError(uiText("Địa chỉ email giảng viên không hợp lệ."));
       isValid = false;
     }
 
     if (!password) {
-      setPasswordError('Vui lòng nhập mật khẩu.');
+      setPasswordError(uiText("Vui lòng nhập mật khẩu."));
       isValid = false;
     } else if (password.length < 12) {
-      setPasswordError('Mật khẩu phải có độ dài tối thiểu 12 ký tự.');
+      setPasswordError(uiText("Mật khẩu phải có độ dài tối thiểu 12 ký tự."));
       isValid = false;
     }
 
     if (!confirmPassword) {
-      setConfirmPasswordError('Vui lòng nhập lại mật khẩu.');
+      setConfirmPasswordError(uiText("Vui lòng nhập lại mật khẩu."));
       isValid = false;
     } else if (confirmPassword !== password) {
-      setConfirmPasswordError('Mật khẩu xác nhận không khớp.');
+      setConfirmPasswordError(uiText("Mật khẩu xác nhận không khớp."));
       isValid = false;
     }
 
@@ -125,12 +126,12 @@ export const RegisterPage: React.FC = () => {
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.status === 429) {
-          setErrorMessage('Bạn đã thực hiện quá nhiều yêu cầu đăng ký. Vui lòng thử lại sau.');
+          setErrorMessage(uiText("Bạn đã thực hiện quá nhiều yêu cầu đăng ký. Vui lòng thử lại sau."));
         } else {
-          setErrorMessage(err.message || 'Đăng ký tài khoản không thành công. Vui lòng kiểm tra lại thông tin.');
+          setErrorMessage(err.message || uiText("Đăng ký tài khoản không thành công. Vui lòng kiểm tra lại thông tin."));
         }
       } else {
-        setErrorMessage('Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng.');
+        setErrorMessage(uiText("Không thể kết nối đến máy chủ xác thực. Vui lòng kiểm tra lại kết nối mạng."));
       }
     } finally {
       setIsLoading(false);
@@ -151,12 +152,12 @@ export const RegisterPage: React.FC = () => {
     } catch (err: unknown) {
       if (err instanceof ApiError) {
         if (err.status === 429) {
-          setResendError('Bạn đã gửi yêu cầu quá nhanh. Vui lòng đợi trong giây lát.');
+          setResendError(uiText("Bạn đã gửi yêu cầu quá nhanh. Vui lòng đợi trong giây lát."));
         } else {
-          setResendError(err.message || 'Không thể gửi lại thư xác minh.');
+          setResendError(err.message || uiText("Không thể gửi lại thư xác minh."));
         }
       } else {
-        setResendError('Lỗi kết nối mạng khi gửi lại thư xác minh.');
+        setResendError(uiText("Lỗi kết nối mạng khi gửi lại thư xác minh."));
       }
     } finally {
       setIsResending(false);
@@ -169,11 +170,9 @@ export const RegisterPage: React.FC = () => {
         <div className="register-success-card" role="status" aria-live="polite">
           <CheckCircle2 size={44} className="register-success-icon" aria-hidden="true" />
           <h1 id="register-success-heading" className="register-success-title">
-            Đăng ký tài khoản thành công!
-          </h1>
+            {uiText("Đăng ký tài khoản thành công!")}</h1>
           <p className="register-success-subtitle">
-            Thư xác minh sẽ được gửi trong ít phút đến địa chỉ:
-          </p>
+            {uiText("Thư xác minh sẽ được gửi trong ít phút đến địa chỉ:")}</p>
           <div className="register-success-email-badge">
             <MailCheck size={18} aria-hidden="true" />
             <strong>{registeredEmail}</strong>
@@ -181,23 +180,21 @@ export const RegisterPage: React.FC = () => {
 
           <div className="register-guidance-box">
             <p className="guidance-box-item">
-              <strong>1. Kiểm tra hộp thư:</strong> Vui lòng kiểm tra hòm thư đến hoặc thư mục Spam/Rác của bạn.
+              <strong>{uiText("1. Kiểm tra hộp thư:")}</strong> {uiText(" Vui lòng kiểm tra hòm thư đến hoặc thư mục Spam/Rác của bạn.")}</p>
+            <p className="guidance-box-item">
+              <strong>{uiText("2. Thời hạn hiệu lực:")}</strong> {uiText(" Liên kết xác minh có hiệu lực trong vòng ")}<strong>{uiText("24 giờ")}</strong>.
             </p>
             <p className="guidance-box-item">
-              <strong>2. Thời hạn hiệu lực:</strong> Liên kết xác minh có hiệu lực trong vòng <strong>24 giờ</strong>.
-            </p>
-            <p className="guidance-box-item">
-              <strong>3. Phân quyền vai trò:</strong>{' '}
+              <strong>{uiText("3. Phân quyền vai trò:")}</strong>{' '}
               {registeredRole === 'student'
-                ? 'Sau khi nhấn xác minh email, tài khoản sẽ tự động được cấp quyền Sinh viên để đăng nhập và học tập.'
-                : 'Sau khi xác minh email, yêu cầu vai trò Giảng viên sẽ được chuyển đến Quản trị viên Nhà trường xét duyệt trước khi truy cập không gian Giảng viên.'}
+                ? uiText("Sau khi nhấn xác minh email, tài khoản sẽ tự động được cấp quyền Sinh viên để đăng nhập và học tập.")
+                : uiText("Sau khi xác minh email, yêu cầu vai trò Giảng viên sẽ được chuyển đến Quản trị viên Nhà trường xét duyệt trước khi truy cập không gian Giảng viên.")}
             </p>
           </div>
 
           {resendSuccess && (
             <div className="register-resend-alert success" role="status">
-              Đã tiếp nhận yêu cầu gửi lại thư xác minh. Vui lòng kiểm tra hộp thư trong ít phút.
-            </div>
+              {uiText("Đã tiếp nhận yêu cầu gửi lại thư xác minh. Vui lòng kiểm tra hộp thư trong ít phút.")}</div>
           )}
 
           {resendError && (
@@ -208,7 +205,7 @@ export const RegisterPage: React.FC = () => {
 
           <div className="register-success-actions">
             <Link to="/dang-nhap" className="btn btn-primary register-action-btn">
-              <span>Đến trang Đăng nhập</span>
+              <span>{uiText("Đến trang Đăng nhập")}</span>
               <ArrowRight size={16} aria-hidden="true" />
             </Link>
 
@@ -221,10 +218,10 @@ export const RegisterPage: React.FC = () => {
               <RotateCw size={15} className={isResending ? 'spin' : ''} aria-hidden="true" />
               <span>
                 {resendCooldown > 0
-                  ? `Gửi lại thư xác minh (${resendCooldown}s)`
+                  ? uiText("Gửi lại thư xác minh ({0}s)",[resendCooldown])
                   : isResending
-                  ? 'Đang gửi lại...'
-                  : 'Chưa nhận được? Gửi lại email xác minh'}
+                  ? uiText("Đang gửi lại...")
+                  : uiText("Chưa nhận được? Gửi lại email xác minh")}
               </span>
             </button>
           </div>
@@ -236,10 +233,9 @@ export const RegisterPage: React.FC = () => {
   return (
     <div className="register-page">
       <div className="register-header">
-        <h1 className="register-title">Đăng ký tài khoản</h1>
+        <h1 className="register-title">{uiText("Đăng ký tài khoản")}</h1>
         <p className="register-subtitle">
-          Hệ thống Quản lý Môn học & Học liệu số — Đại học Kinh tế Quốc dân
-        </p>
+          {uiText("Hệ thống Quản lý Môn học & Học liệu số — Đại học Kinh tế Quốc dân")}</p>
       </div>
 
       {errorMessage && (
@@ -253,9 +249,9 @@ export const RegisterPage: React.FC = () => {
         {/* Role Selection */}
         <fieldset className="register-role-fieldset">
           <legend className="field-label">
-            Vai trò đăng ký <span className="field-required" aria-hidden="true">*</span>
+            {uiText("Vai trò đăng ký ")}<span className="field-required" aria-hidden="true">*</span>
           </legend>
-          <div className="register-role-options" role="radiogroup" aria-label="Chọn vai trò đăng ký">
+          <div className="register-role-options" role="radiogroup" aria-label={uiText("Chọn vai trò đăng ký")}>
             <label
               className={`register-role-card ${requestedRole === 'student' ? 'selected' : ''}`}
               htmlFor="role-student"
@@ -275,9 +271,9 @@ export const RegisterPage: React.FC = () => {
               <div className="role-card-content">
                 <div className="role-card-header">
                   <School size={18} aria-hidden="true" />
-                  <span className="role-title">Sinh viên</span>
+                  <span className="role-title">{uiText("Sinh viên")}</span>
                 </div>
-                <span className="role-desc">Tự động kích hoạt sau khi xác thực email NEU</span>
+                <span className="role-desc">{uiText("Tự động kích hoạt sau khi xác thực email NEU")}</span>
               </div>
             </label>
 
@@ -300,9 +296,9 @@ export const RegisterPage: React.FC = () => {
               <div className="role-card-content">
                 <div className="role-card-header">
                   <GraduationCap size={18} aria-hidden="true" />
-                  <span className="role-title">Giảng viên</span>
+                  <span className="role-title">{uiText("Giảng viên")}</span>
                 </div>
-                <span className="role-desc">Xác minh email và chờ Quản trị viên phê duyệt</span>
+                <span className="role-desc">{uiText("Xác minh email và chờ Quản trị viên phê duyệt")}</span>
               </div>
             </label>
           </div>
@@ -311,7 +307,7 @@ export const RegisterPage: React.FC = () => {
         {/* Display Name */}
         <TextField
           id="register-display-name"
-          label="Họ và tên / Tên hiển thị"
+          label={uiText("Họ và tên / Tên hiển thị")}
           type="text"
           name="display_name"
           autoComplete="name"
@@ -321,7 +317,7 @@ export const RegisterPage: React.FC = () => {
             if (displayNameError) setDisplayNameError('');
             if (errorMessage) setErrorMessage('');
           }}
-          placeholder="vd: Nguyễn Văn A"
+          placeholder={uiText("vd: Nguyễn Văn A")}
           error={displayNameError}
           disabled={isLoading}
         />
@@ -331,8 +327,8 @@ export const RegisterPage: React.FC = () => {
           id="register-email"
           label={
             requestedRole === 'student'
-              ? 'Địa chỉ email sinh viên (@st.neu.edu.vn)'
-              : 'Địa chỉ email giảng viên'
+              ? uiText("Địa chỉ email sinh viên (@st.neu.edu.vn)")
+              : uiText("Địa chỉ email giảng viên")
           }
           type="email"
           name="email"
@@ -348,8 +344,8 @@ export const RegisterPage: React.FC = () => {
           }
           helperText={
             requestedRole === 'student'
-              ? 'Định dạng bắt buộc: 1124xxxx@st.neu.edu.vn (8 chữ số hiệu)'
-              : 'Email công tác của giảng viên (@neu.edu.vn hoặc email hợp lệ)'
+              ? uiText("Định dạng bắt buộc: 1124xxxx@st.neu.edu.vn (8 chữ số hiệu)")
+              : uiText("Email công tác của giảng viên (@neu.edu.vn hoặc email hợp lệ)")
           }
           error={emailError}
           required
@@ -360,7 +356,7 @@ export const RegisterPage: React.FC = () => {
         <div className="password-field-wrapper">
           <TextField
             id="register-password"
-            label="Mật khẩu"
+            label={uiText("Mật khẩu")}
             type={showPassword ? 'text' : 'password'}
             name="password"
             autoComplete="new-password"
@@ -370,7 +366,7 @@ export const RegisterPage: React.FC = () => {
               if (passwordError) setPasswordError('');
               if (errorMessage) setErrorMessage('');
             }}
-            placeholder="Tối thiểu 12 ký tự"
+            placeholder={uiText("Tối thiểu 12 ký tự")}
             helperText="Mật khẩu phải chứa ít nhất 12 ký tự"
             error={passwordError}
             required
@@ -380,7 +376,7 @@ export const RegisterPage: React.FC = () => {
             type="button"
             className="toggle-password-btn"
             onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Ẩn mật khẩu' : 'Hiện mật khẩu'}
+            aria-label={showPassword ? uiText("Ẩn mật khẩu") : uiText("Hiện mật khẩu")}
             tabIndex={0}
           >
             {showPassword ? <EyeOff size={18} aria-hidden="true" /> : <Eye size={18} aria-hidden="true" />}
@@ -390,7 +386,7 @@ export const RegisterPage: React.FC = () => {
         {/* Confirm Password */}
         <TextField
           id="register-confirm-password"
-          label="Xác nhận mật khẩu"
+          label={uiText("Xác nhận mật khẩu")}
           type={showPassword ? 'text' : 'password'}
           name="confirm_password"
           autoComplete="new-password"
@@ -400,7 +396,7 @@ export const RegisterPage: React.FC = () => {
             if (confirmPasswordError) setConfirmPasswordError('');
             if (errorMessage) setErrorMessage('');
           }}
-          placeholder="Nhập lại mật khẩu vừa đặt"
+          placeholder={uiText("Nhập lại mật khẩu vừa đặt")}
           error={confirmPasswordError}
           required
           disabled={isLoading}
@@ -408,9 +404,7 @@ export const RegisterPage: React.FC = () => {
 
         <div className="register-policy-note">
           <span>
-            Bằng việc nhấn Đăng ký, bạn đồng ý với Quy chế sử dụng và quản trị tài nguyên học tập số của Nhà trường.
-            Mỗi tài khoản được liên kết duy nhất với một địa chỉ email đăng ký.
-          </span>
+            {uiText("Bằng việc nhấn Đăng ký, bạn đồng ý với Quy chế sử dụng và quản trị tài nguyên học tập số của Nhà trường. Mỗi tài khoản được liên kết duy nhất với một địa chỉ email đăng ký.")}</span>
         </div>
 
         <Button
@@ -423,15 +417,14 @@ export const RegisterPage: React.FC = () => {
           icon={<UserPlus size={18} />}
           className="register-submit-btn"
         >
-          {isLoading ? 'Đang khởi tạo tài khoản...' : 'Tạo tài khoản'}
+          {isLoading ? uiText("Đang khởi tạo tài khoản...") : uiText("Tạo tài khoản")}
         </Button>
       </form>
 
       <div className="register-footer">
-        <span>Đã có tài khoản được cấp? </span>
+        <span>{uiText("Đã có tài khoản được cấp? ")}</span>
         <Link to="/dang-nhap" className="register-login-link">
-          Đăng nhập ngay
-        </Link>
+          {uiText("Đăng nhập ngay")}</Link>
       </div>
     </div>
   );

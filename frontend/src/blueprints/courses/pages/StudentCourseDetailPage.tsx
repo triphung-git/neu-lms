@@ -1,5 +1,7 @@
+import {uiText} from "../../../shared/i18n/translate";
+import {CourseAttendance} from '../../learning/LearningHub';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { useSession } from '../../../app/providers/SessionContext';
 import { useNotifications } from '../../../app/providers/NotificationContext';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
@@ -129,10 +131,10 @@ export const StudentCourseDetailPage: React.FC = () => {
       const statusCode = apiErr.status;
       const message =
         statusCode === 404
-          ? 'Môn học không tồn tại hoặc bạn chưa được ghi danh vào môn học này.'
+          ? uiText("Môn học không tồn tại hoặc bạn chưa được ghi danh vào môn học này.")
           : statusCode === 403
-          ? 'Bạn không có quyền truy cập vào nội dung môn học này.'
-          : apiErr.message || 'Không thể tải thông tin môn học. Vui lòng thử lại.';
+          ? uiText("Bạn không có quyền truy cập vào nội dung môn học này.")
+          : apiErr.message || uiText("Không thể tải thông tin môn học. Vui lòng thử lại.");
       setError({ message, statusCode });
     } finally {
       if (currentSeq === loadSequence.current) {
@@ -197,12 +199,12 @@ export const StudentCourseDetailPage: React.FC = () => {
     setIsWithdrawing(true);
     try {
       await coursesService.withdrawMember(course.id, currentUser.id);
-      showNotification('success', `Bạn đã rút khỏi môn học ${course.code} thành công.`);
+      showNotification('success', uiText("Bạn đã rút khỏi môn học {0} thành công.",[course.code]));
       setIsWithdrawModalOpen(false);
       navigate('/sv/mon-hoc');
     } catch (err: unknown) {
       const apiErr = err as { message?: string };
-      showNotification('error', apiErr.message || 'Không thể rút khỏi môn học. Vui lòng thử lại.');
+      showNotification('error', apiErr.message || uiText("Không thể rút khỏi môn học. Vui lòng thử lại."));
     } finally {
       setIsWithdrawing(false);
     }
@@ -215,14 +217,14 @@ export const StudentCourseDetailPage: React.FC = () => {
         <div className="course-detail-header-nav">
           <Breadcrumb
             items={[
-              { label: 'Trang chủ', path: '/sv' },
-              { label: 'Môn học', path: '/sv/mon-hoc' },
-              { label: 'Đang tải...' },
+              { label: uiText("Trang chủ"), path: '/sv' },
+              { label: uiText("Môn học"), path: '/sv/mon-hoc' },
+              { label: uiText("Đang tải...") },
             ]}
           />
         </div>
         <div className="course-detail-loading" style={{ padding: 'var(--space-8)', textAlign: 'center' }}>
-          <p style={{ color: 'var(--muted)', fontSize: 'var(--text-base)' }}>Đang tải nội dung môn học từ máy chủ...</p>
+          <p style={{ color: 'var(--muted)', fontSize: 'var(--text-base)' }}>{uiText("Đang tải nội dung môn học từ máy chủ...")}</p>
         </div>
       </div>
     );
@@ -233,19 +235,17 @@ export const StudentCourseDetailPage: React.FC = () => {
     return (
       <div className="course-detail-container">
         <EmptyState
-          title={error?.statusCode === 404 ? 'Chưa được ghi danh' : 'Không thể tải môn học'}
+          title={error?.statusCode === 404 ? uiText("Chưa được ghi danh") : uiText("Không thể tải môn học")}
           description={
             error?.message ||
-            'Mã môn học không tồn tại trên hệ thống hoặc bạn chưa có quyền truy cập.'
+            uiText("Mã môn học không tồn tại trên hệ thống hoặc bạn chưa có quyền truy cập.")
           }
           action={
             <div style={{ display: 'flex', gap: 'var(--space-3)' }}>
               <Button variant="secondary" onClick={fetchCourseData} icon={<RefreshCw size={16} />}>
-                Thử lại
-              </Button>
+                {uiText("Thử lại")}</Button>
               <Button variant="primary" onClick={() => navigate('/sv/mon-hoc')}>
-                Về danh sách môn học
-              </Button>
+                {uiText("Về danh sách môn học")}</Button>
             </div>
           }
         />
@@ -258,8 +258,8 @@ export const StudentCourseDetailPage: React.FC = () => {
       <div className="course-detail-header-nav">
         <Breadcrumb
           items={[
-            { label: 'Trang chủ', path: '/sv' },
-            { label: 'Môn học', path: '/sv/mon-hoc' },
+            { label: uiText("Trang chủ"), path: '/sv' },
+            { label: uiText("Môn học"), path: '/sv/mon-hoc' },
             { label: `${course.code} — ${course.name}` },
           ]}
         />
@@ -269,8 +269,8 @@ export const StudentCourseDetailPage: React.FC = () => {
         <div className="archived-banner" role="alert">
           <AlertCircle size={20} />
           <div>
-            <strong>Môn học này đã được lưu trữ</strong>
-            <p>Toàn bộ nội dung ở trạng thái chỉ đọc. Không thể chỉnh sửa hoặc thao tác ghi danh.</p>
+            <strong>{uiText("Môn học này đã được lưu trữ")}</strong>
+            <p>{uiText("Toàn bộ nội dung ở trạng thái chỉ đọc. Không thể chỉnh sửa hoặc thao tác ghi danh.")}</p>
           </div>
         </div>
       )}
@@ -280,16 +280,17 @@ export const StudentCourseDetailPage: React.FC = () => {
           <div className="course-title-block">
             <div className="course-code-badge">{course.code}</div>
             <h1 className="course-title">{course.name}</h1>
+<Link to={`/sv/hoc-tap?course=${monId}`}>{uiText("Điểm danh · Tiến độ · Thảo luận · Nhóm · Phúc khảo / Learning workspace")}</Link>
             <p className="course-meta">
-              <span>Học kỳ: <strong>{course.term}</strong></span>
+              <span>{uiText("Học kỳ: ")}<strong>{course.term}</strong></span>
               <span className="dot-divider">•</span>
-              <span>Giảng viên: <strong>{course.teacher_name || 'Chưa phân công'}</strong></span>
+              <span>{uiText("Giảng viên: ")}<strong>{course.teacher_name || uiText("Chưa phân công")}</strong></span>
               <span className="dot-divider">•</span>
               <span>
-                Trạng thái:{' '}
+                {uiText("Trạng thái:")}{' '}
                 <Badge
                   variant={course.status === 'open' ? 'published' : 'archived'}
-                  label={course.status === 'open' ? 'Đang học' : 'Đã lưu trữ'}
+                  label={course.status === 'open' ? uiText("Đang học") : uiText("Đã lưu trữ")}
                 />
               </span>
             </p>
@@ -301,10 +302,10 @@ export const StudentCourseDetailPage: React.FC = () => {
                 type="button"
                 className="withdraw-btn"
                 onClick={() => setIsWithdrawModalOpen(true)}
-                title="Rút khỏi môn học"
+                title={uiText("Rút khỏi môn học")}
               >
                 <LogOut size={16} />
-                <span>Rút khỏi môn học</span>
+                <span>{uiText("Rút khỏi môn học")}</span>
               </button>
             )}
           </div>
@@ -312,14 +313,15 @@ export const StudentCourseDetailPage: React.FC = () => {
       </header>
 
       {/* Course Subnav Tabs */}
-      <nav className="course-tabs" aria-label="Phân hệ môn học">
+      <nav className="course-tabs" aria-label={uiText("Phân hệ môn học")}>
+<button className={`course-tab-btn ${activeTab === "diem-danh" ? "active" : ""}`} onClick={()=>handleSelectTab("diem-danh")} aria-selected={activeTab === "diem-danh"}>{uiText("Điểm danh")}</button>
         <button
           className={`course-tab-btn ${activeTab === 'noi-dung' ? 'active' : ''}`}
           onClick={() => handleSelectTab('noi-dung')}
           aria-selected={activeTab === 'noi-dung'}
         >
           <BookOpen size={18} />
-          <span>Nội dung bài học</span>
+          <span>{uiText("Nội dung bài học")}</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'hoc-lieu' ? 'active' : ''}`}
@@ -327,7 +329,7 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'hoc-lieu'}
         >
           <FileText size={18} />
-          <span>Học liệu ({materialsTotal})</span>
+          <span>{uiText("Học liệu (")}{materialsTotal})</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'bai-tap' ? 'active' : ''}`}
@@ -335,7 +337,7 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'bai-tap'}
         >
           <FileText size={18} />
-          <span>Bài tập</span>
+          <span>{uiText("Bài tập")}</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'diem' ? 'active' : ''}`}
@@ -343,7 +345,7 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'diem'}
         >
           <Award size={18} />
-          <span>Bảng điểm</span>
+          <span>{uiText("Bảng điểm")}</span>
         </button>
         <button
           className={`course-tab-btn ${activeTab === 'thong-bao' ? 'active' : ''}`}
@@ -351,18 +353,19 @@ export const StudentCourseDetailPage: React.FC = () => {
           aria-selected={activeTab === 'thong-bao'}
         >
           <Bell size={18} />
-          <span>Thông báo</span>
+          <span>{uiText("Thông báo")}</span>
         </button>
       </nav>
 
-      {/* Tab: NỘI DUNG BÀI HỌC */}
+      {activeTab === 'diem-danh' && <CourseAttendance/>}
+{/* Tab: NỘI DUNG BÀI HỌC */}
       {activeTab === 'noi-dung' && (
         <div className="course-content-layout">
           {/* Sidebar Chapter Tree */}
-          <aside className="chapter-tree-sidebar" aria-label="Cây chương và bài học">
-            <h2 className="sidebar-heading">Mục lục khóa học</h2>
+          <aside className="chapter-tree-sidebar" aria-label={uiText("Cây chương và bài học")}>
+            <h2 className="sidebar-heading">{uiText("Mục lục khóa học")}</h2>
             {chapters.length === 0 ? (
-              <p className="sidebar-empty">Chưa có chương học nào được tạo.</p>
+              <p className="sidebar-empty">{uiText("Chưa có chương học nào được tạo.")}</p>
             ) : (
               <div className="chapters-list">
                 {chapters.map((ch, chIdx) => {
@@ -372,10 +375,10 @@ export const StudentCourseDetailPage: React.FC = () => {
                   return (
                     <section key={ch.id} className="chapter-node">
                       <h3 className="chapter-title">
-                        Chương {chIdx + 1}: {ch.title}
+                        {uiText("Chương ")}{chIdx + 1}: {ch.title}
                       </h3>
                       {chLessons.length === 0 ? (
-                        <p className="lesson-empty">Chưa có bài học</p>
+                        <p className="lesson-empty">{uiText("Chưa có bài học")}</p>
                       ) : (
                         <ul className="lessons-list">
                           {chLessons.map((lesson) => {
@@ -409,23 +412,22 @@ export const StudentCourseDetailPage: React.FC = () => {
               <article className="lesson-article">
                 <header className="lesson-header">
                   <div className="lesson-breadcrumb-tag">
-                    {chapters.find((ch) => ch.id === currentLesson.chapter)?.title || 'Bài học'}
+                    {chapters.find((ch) => ch.id === currentLesson.chapter)?.title || uiText("Bài học")}
                   </div>
                   <h2 className="lesson-main-title">{currentLesson.title}</h2>
                   <p className="lesson-description">
-                    {currentLesson.description || 'Chưa có mô tả chi tiết cho bài học này.'}
+                    {currentLesson.description || uiText("Chưa có mô tả chi tiết cho bài học này.")}
                   </p>
                 </header>
 
                 <section className="lesson-materials-section">
                   <h3 className="materials-heading">
                     <FileText size={18} />
-                    <span>Học liệu bài học ({lessonMaterials.length})</span>
+                    <span>{uiText("Học liệu bài học (")}{lessonMaterials.length})</span>
                   </h3>
                   {lessonMaterials.length === 0 ? (
                     <p style={{ color: 'var(--muted)', fontSize: 'var(--text-sm)', margin: 'var(--space-2) 0' }}>
-                      Chưa có học liệu nào được đính kèm cho bài học này.
-                    </p>
+                      {uiText("Chưa có học liệu nào được đính kèm cho bài học này.")}</p>
                   ) : (
                     <div className="lesson-materials-grid">
                       {lessonMaterials.map((mat) => (
@@ -440,15 +442,14 @@ export const StudentCourseDetailPage: React.FC = () => {
                               <span className="mat-version">
                                 v{mat.published_version_number || 1}
                               </span>
-                              <span className="mat-files">{mat.file_count || 1} tệp</span>
+                              <span className="mat-files">{mat.file_count || 1} {uiText(" tệp")}</span>
                             </div>
                           </div>
                           <Button
                             variant="secondary"
                             onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
                           >
-                            Xem học liệu
-                          </Button>
+                            {uiText("Xem học liệu")}</Button>
                         </div>
                       ))}
                     </div>
@@ -464,7 +465,7 @@ export const StudentCourseDetailPage: React.FC = () => {
                     >
                       <ArrowLeft size={16} />
                       <div>
-                        <span className="nav-label">Bài trước</span>
+                        <span className="nav-label">{uiText("Bài trước")}</span>
                         <strong className="nav-title">{prevLesson.title}</strong>
                       </div>
                     </button>
@@ -479,7 +480,7 @@ export const StudentCourseDetailPage: React.FC = () => {
                       onClick={() => handleSelectLesson(nextLesson.id)}
                     >
                       <div className="text-right" style={{ textAlign: 'right' }}>
-                        <span className="nav-label">Bài tiếp theo</span>
+                        <span className="nav-label">{uiText("Bài tiếp theo")}</span>
                         <strong className="nav-title">{nextLesson.title}</strong>
                       </div>
                       <ArrowRight size={16} />
@@ -490,8 +491,8 @@ export const StudentCourseDetailPage: React.FC = () => {
             ) : (
               <div className="lesson-not-selected">
                 <EmptyState
-                  title="Chưa có bài học"
-                  description="Môn học này hiện chưa có bài học nào được công bố."
+                  title={uiText("Chưa có bài học")}
+                  description={uiText("Môn học này hiện chưa có bài học nào được công bố.")}
                 />
               </div>
             )}
@@ -504,9 +505,9 @@ export const StudentCourseDetailPage: React.FC = () => {
         <section className="course-tab-panel">
           <div className="panel-header-row">
             <div>
-              <h2 className="panel-title">Tài liệu học tập môn học</h2>
+              <h2 className="panel-title">{uiText("Tài liệu học tập môn học")}</h2>
               <p className="panel-subtitle">
-                Toàn bộ tài liệu bài giảng, giáo trình và tài liệu tham khảo chính thức của môn {course.code}.
+                {uiText("Toàn bộ tài liệu bài giảng, giáo trình và tài liệu tham khảo chính thức của môn ")}{course.code}.
               </p>
             </div>
             <Button
@@ -514,17 +515,16 @@ export const StudentCourseDetailPage: React.FC = () => {
               onClick={() => navigate(`/sv/tim-kiem?mon=${course.id}`)}
               icon={<Search size={16} />}
             >
-              Tìm kiếm toàn văn môn này
-            </Button>
+              {uiText("Tìm kiếm toàn văn môn này")}</Button>
           </div>
 
-          {materialsError && <p role="alert">Không thể tải học liệu. <Button onClick={() => void fetchCourseData()}>Thử lại</Button></p>}
-          {materialsTotal > materials.length && <p>Hiển thị {materials.length}/{materialsTotal} học liệu mới nhất. Dùng Tìm kiếm để xem đầy đủ.</p>}
+          {materialsError && <p role="alert">{uiText("Không thể tải học liệu. ")}<Button onClick={() => void fetchCourseData()}>{uiText("Thử lại")}</Button></p>}
+          {materialsTotal > materials.length && <p>{uiText("Hiển thị ")}{materials.length}/{materialsTotal} {uiText(" học liệu mới nhất. Dùng Tìm kiếm để xem đầy đủ.")}</p>}
           {!materialsError && materials.length === 0 ? (
             <div style={{ marginTop: 'var(--space-6)' }}>
               <EmptyState
-                title="Chưa có học liệu"
-                description="Giảng viên chưa công bố học liệu nào cho môn học này."
+                title={uiText("Chưa có học liệu")}
+                description={uiText("Giảng viên chưa công bố học liệu nào cho môn học này.")}
               />
             </div>
           ) : (
@@ -546,7 +546,7 @@ export const StudentCourseDetailPage: React.FC = () => {
                     </div>
                     <h3 className="mat-hub-title">{mat.title}</h3>
                     <div className="mat-hub-meta">
-                      <span>{mat.file_count || 1} tệp đính kèm</span>
+                      <span>{mat.file_count || 1} {uiText(" tệp đính kèm")}</span>
                       {Array.isArray(mat.tags) && mat.tags.length > 0 && (
                         <span className="mat-hub-tags">
                           {(mat.tags as string[]).map((t: string) => `#${t}`).join(' ')}
@@ -558,8 +558,7 @@ export const StudentCourseDetailPage: React.FC = () => {
                     variant="secondary"
                     onClick={() => navigate(`/sv/mon-hoc/${monId}/hoc-lieu/${mat.id}`)}
                   >
-                    Xem chi tiết
-                  </Button>
+                    {uiText("Xem chi tiết")}</Button>
                 </article>
               ))}
             </div>
@@ -572,28 +571,27 @@ export const StudentCourseDetailPage: React.FC = () => {
         <section className="course-tab-panel" data-testid="student-assignments-tab">
           <div className="panel-header-row">
             <div>
-              <h2 className="panel-title">Danh sách bài tập môn học</h2>
-              <p className="panel-subtitle">Theo dõi các bài tập và hạn nộp được giao.</p>
+              <h2 className="panel-title">{uiText("Danh sách bài tập môn học")}</h2>
+              <p className="panel-subtitle">{uiText("Theo dõi các bài tập và hạn nộp được giao.")}</p>
             </div>
           </div>
 
           {assignmentsError ? (
             <div style={{ marginTop: 'var(--space-6)' }}>
               <EmptyState
-                title="Không thể tải danh sách bài tập"
-                description="Đã xảy ra lỗi khi tải dữ liệu bài tập từ máy chủ."
+                title={uiText("Không thể tải danh sách bài tập")}
+                description={uiText("Đã xảy ra lỗi khi tải dữ liệu bài tập từ máy chủ.")}
                 action={
                   <Button variant="secondary" onClick={fetchCourseData} icon={<RefreshCw size={16} />}>
-                    Thử lại
-                  </Button>
+                    {uiText("Thử lại")}</Button>
                 }
               />
             </div>
           ) : assignments.length === 0 ? (
             <div style={{ marginTop: 'var(--space-6)' }}>
               <EmptyState
-                title="Chưa có bài tập nào"
-                description="Giảng viên chưa công bố bài tập nào cho môn học này."
+                title={uiText("Chưa có bài tập nào")}
+                description={uiText("Giảng viên chưa công bố bài tập nào cho môn học này.")}
               />
             </div>
           ) : (
@@ -612,33 +610,31 @@ export const StudentCourseDetailPage: React.FC = () => {
                         }
                         label={
                           ass.status === 'archived'
-                            ? 'Lưu trữ'
+                            ? uiText("Lưu trữ")
                             : ass.status === 'closed'
-                            ? 'Đã đóng nộp'
-                            : 'Đang mở'
+                            ? uiText("Đã đóng nộp")
+                            : uiText("Đang mở")
                         }
                       />
                       <span className="mat-hub-format" style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Award size={14} />
-                        {ass.totalScore} điểm
-                      </span>
+                        {ass.totalScore} {uiText(" điểm")}</span>
                     </div>
                     <h3 className="mat-hub-title">{ass.title}</h3>
                     <div className="mat-hub-meta" style={{ display: 'flex', gap: 'var(--space-4)', flexWrap: 'wrap' }}>
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}>
                         <Calendar size={14} />
-                        Hạn nộp: {formatDateVN(ass.dueAt)}
+                        {uiText("Hạn nộp: ")}{formatDateVN(ass.dueAt)}
                       </span>
                       {ass.allowLate && (
                         <span style={{ color: '#d97706', fontSize: 'var(--text-xs)' }}>
-                          (Cho phép nộp muộn)
-                        </span>
+                          {uiText("(Cho phép nộp muộn)")}</span>
                       )}
                       {ass.rubricCount > 0 && (
-                        <span>{ass.rubricCount} tiêu chí rubric</span>
+                        <span>{ass.rubricCount} {uiText(" tiêu chí rubric")}</span>
                       )}
                       {ass.attachmentCount > 0 && (
-                        <span>{ass.attachmentCount} tệp đính kèm</span>
+                        <span>{ass.attachmentCount} {uiText(" tệp đính kèm")}</span>
                       )}
                     </div>
                   </div>
@@ -646,8 +642,7 @@ export const StudentCourseDetailPage: React.FC = () => {
                     variant="secondary"
                     onClick={() => navigate(`/sv/mon-hoc/${monId}/bai-tap/${ass.id}`)}
                   >
-                    Xem chi tiết
-                  </Button>
+                    {uiText("Xem chi tiết")}</Button>
                 </article>
               ))}
             </div>
@@ -660,18 +655,16 @@ export const StudentCourseDetailPage: React.FC = () => {
         <section className="course-tab-panel">
           <div className="panel-header-row">
             <div>
-              <h2 className="panel-title">Bảng điểm môn học</h2>
-              <p className="panel-subtitle">Điểm số chính thức sau khi giảng viên công bố.</p>
+              <h2 className="panel-title">{uiText("Bảng điểm môn học")}</h2>
+              <p className="panel-subtitle">{uiText("Điểm số chính thức sau khi giảng viên công bố.")}</p>
             </div>
           </div>
           <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
             <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
             <div>
-              <strong>Phân hệ Chấm điểm & Bảng điểm (B12)</strong>
+              <strong>{uiText("Phân hệ Chấm điểm & Bảng điểm (B12)")}</strong>
               <span>
-                Bảng điểm tổng hợp đang được phát triển tại phân hệ B12. Kết quả học tập và phản hồi
-                chấm điểm sẽ được hiển thị khi phân hệ B12 được tích hợp.
-              </span>
+                {uiText("Bảng điểm tổng hợp đang được phát triển tại phân hệ B12. Kết quả học tập và phản hồi chấm điểm sẽ được hiển thị khi phân hệ B12 được tích hợp.")}</span>
             </div>
           </div>
         </section>
@@ -682,17 +675,16 @@ export const StudentCourseDetailPage: React.FC = () => {
         <section className="course-tab-panel">
           <div className="panel-header-row">
             <div>
-              <h2 className="panel-title">Thông báo từ giảng viên</h2>
-              <p className="panel-subtitle">Các tin tức và cập nhật quan trọng từ giảng viên phụ trách môn học.</p>
+              <h2 className="panel-title">{uiText("Thông báo từ giảng viên")}</h2>
+              <p className="panel-subtitle">{uiText("Các tin tức và cập nhật quan trọng từ giảng viên phụ trách môn học.")}</p>
             </div>
           </div>
           <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
             <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
             <div>
-              <strong>Kênh thông báo lớp học</strong>
+              <strong>{uiText("Kênh thông báo lớp học")}</strong>
               <span>
-                Kênh thông báo đang được nâng cấp đồng bộ theo thời gian thực với máy chủ.
-              </span>
+                {uiText("Kênh thông báo đang được nâng cấp đồng bộ theo thời gian thực với máy chủ.")}</span>
             </div>
           </div>
         </section>
@@ -702,8 +694,8 @@ export const StudentCourseDetailPage: React.FC = () => {
       <Modal
         isOpen={isWithdrawModalOpen}
         onClose={() => !isWithdrawing && setIsWithdrawModalOpen(false)}
-        title="Xác nhận rút khỏi môn học"
-        description={`Bạn có chắc chắn muốn rút khỏi môn học "${course.code} — ${course.name}"?`}
+        title={uiText("Xác nhận rút khỏi môn học")}
+        description={uiText("Bạn có chắc chắn muốn rút khỏi môn học \"{0} — {1}\"?",[course.code,course.name])}
         size="sm"
         footer={
           <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 'var(--space-3)' }}>
@@ -712,26 +704,23 @@ export const StudentCourseDetailPage: React.FC = () => {
               onClick={() => setIsWithdrawModalOpen(false)}
               disabled={isWithdrawing}
             >
-              Hủy bỏ
-            </Button>
+              {uiText("Hủy bỏ")}</Button>
             <Button
               variant="danger"
               onClick={handleWithdraw}
               disabled={isWithdrawing}
               icon={<LogOut size={16} />}
             >
-              {isWithdrawing ? 'Đang xử lý...' : 'Xác nhận rút môn'}
+              {isWithdrawing ? uiText("Đang xử lý...") : uiText("Xác nhận rút môn")}
             </Button>
           </div>
         }
       >
         <div style={{ fontSize: 'var(--text-sm)', color: 'var(--ink-soft)', lineHeight: 1.6 }}>
           <p style={{ margin: '0 0 var(--space-2) 0' }}>
-            Sau khi rút khỏi môn học, bạn sẽ không còn quyền truy cập vào danh sách bài học và tài liệu của môn học này.
-          </p>
+            {uiText("Sau khi rút khỏi môn học, bạn sẽ không còn quyền truy cập vào danh sách bài học và tài liệu của môn học này.")}</p>
           <p style={{ margin: 0, color: 'var(--danger, #dc2626)' }}>
-            Lưu ý: Để tham gia lại môn học, bạn sẽ cần gửi yêu cầu ghi danh mới và chờ giảng viên phê duyệt.
-          </p>
+            {uiText("Lưu ý: Để tham gia lại môn học, bạn sẽ cần gửi yêu cầu ghi danh mới và chờ giảng viên phê duyệt.")}</p>
         </div>
       </Modal>
     </div>

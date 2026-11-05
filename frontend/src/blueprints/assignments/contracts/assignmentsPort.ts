@@ -151,8 +151,8 @@ export interface AssignmentsPort {
   ): Promise<Result<StudentAssignmentDetailViewModel>>;
 
   // =========================================================================
-  // Boundary with Milestone B11: Submissions Intake
-  // Note: Implementation in B10 mock is placeholder; real submission backend is B11.
+  // B11: Secure submission intake after the file upload/scanner flow.
+  // The HTTP adapter commits the clean StoredFile id to the server API.
   // =========================================================================
 
   submitAssignment(

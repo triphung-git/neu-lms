@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { adminService, type AdminAccountListItem } from '../../../api/adminService';
@@ -41,7 +42,7 @@ export const AdminCourseDetailPage: React.FC = () => {
 
   const loadData = useCallback(async () => {
     if (!monId) {
-      setError('Thiếu mã môn học.');
+      setError(uiText("Thiếu mã môn học."));
       setIsLoading(false);
       return;
     }
@@ -85,7 +86,7 @@ export const AdminCourseDetailPage: React.FC = () => {
       setTeachers(teacherAccounts);
     } catch (cause) {
       if (sequence !== loadSequence.current) return;
-      setError(cause instanceof Error ? cause.message : 'Không thể tải thông tin môn học.');
+      setError(cause instanceof Error ? cause.message : uiText("Không thể tải thông tin môn học."));
     } finally {
       if (sequence === loadSequence.current) setIsLoading(false);
     }
@@ -106,13 +107,13 @@ export const AdminCourseDetailPage: React.FC = () => {
       const newTeacher = teachers.find((teacher) => teacher.id === selectedTeacherId);
       showNotification(
         'success',
-        `Đã chuyển môn học cho ${newTeacher?.display_name || newTeacher?.email || 'giảng viên mới'}.`,
+        uiText("Đã chuyển môn học cho {0}.",[newTeacher?.display_name || newTeacher?.email || 'giảng viên mới']),
       );
       setShowTransferModal(false);
     } catch (cause) {
       showNotification(
         'error',
-        cause instanceof Error ? cause.message : 'Không thể chuyển giảng viên.',
+        cause instanceof Error ? cause.message : uiText("Không thể chuyển giảng viên."),
       );
     } finally {
       setIsSaving(false);
@@ -124,12 +125,12 @@ export const AdminCourseDetailPage: React.FC = () => {
     setIsSaving(true);
     try {
       setCourse(await coursesService.archive(course.id));
-      showNotification('success', `Đã lưu trữ môn học "${course.name}".`);
+      showNotification('success', uiText("Đã lưu trữ môn học \"{0}\".",[course.name]));
       setShowArchiveModal(false);
     } catch (cause) {
       showNotification(
         'error',
-        cause instanceof Error ? cause.message : 'Không thể lưu trữ môn học.',
+        cause instanceof Error ? cause.message : uiText("Không thể lưu trữ môn học."),
       );
     } finally {
       setIsSaving(false);
@@ -146,7 +147,7 @@ export const AdminCourseDetailPage: React.FC = () => {
   if (error) {
     return (
       <ErrorBanner
-        title="Không thể tải môn học"
+        title={uiText("Không thể tải môn học")}
         message={error}
         onRetry={() => void loadData()}
       />
@@ -156,9 +157,9 @@ export const AdminCourseDetailPage: React.FC = () => {
     return (
       <div className="admin-detail-container">
         <EmptyState
-          title="Không tìm thấy môn học"
-          description="Môn học không tồn tại hoặc bạn không có quyền truy cập."
-          action={<Button onClick={() => navigate('/ad/mon-hoc')}>Về danh mục môn học</Button>}
+          title={uiText("Không tìm thấy môn học")}
+          description={uiText("Môn học không tồn tại hoặc bạn không có quyền truy cập.")}
+          action={<Button onClick={() => navigate('/ad/mon-hoc')}>{uiText("Về danh mục môn học")}</Button>}
         />
       </div>
     );
@@ -173,8 +174,8 @@ export const AdminCourseDetailPage: React.FC = () => {
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Môn học toàn trường', path: '/ad/mon-hoc' },
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Môn học toàn trường"), path: '/ad/mon-hoc' },
             { label: `${course.code} — ${course.name}` },
           ]}
         />
@@ -183,13 +184,13 @@ export const AdminCourseDetailPage: React.FC = () => {
           <h1 className="course-title">{course.name}</h1>
           <Badge
             variant={isArchived ? 'archived' : 'published'}
-            label={isArchived ? 'Đã lưu trữ' : 'Đang mở'}
+            label={isArchived ? uiText("Đã lưu trữ") : uiText("Đang mở")}
           />
         </div>
         <p className="course-meta">
-          <span>Học kỳ: <strong>{course.term}</strong></span>
+          <span>{uiText("Học kỳ: ")}<strong>{course.term}</strong></span>
           <span className="dot">•</span>
-          <span>Giảng viên: <strong>{currentTeacher?.display_name || course.teacher_name}</strong></span>
+          <span>{uiText("Giảng viên: ")}<strong>{currentTeacher?.display_name || course.teacher_name}</strong></span>
         </p>
       </div>
 
@@ -198,10 +199,9 @@ export const AdminCourseDetailPage: React.FC = () => {
           <div className="ops-title-wrap">
             <UserCheck size={20} className="ops-icon" />
             <div>
-              <h2 className="ops-title">Thao tác quản trị môn học</h2>
+              <h2 className="ops-title">{uiText("Thao tác quản trị môn học")}</h2>
               <p className="ops-desc">
-                Nội dung học phần chỉ đọc. Quản trị viên không biên soạn môn hoặc truy cập học liệu.
-              </p>
+                {uiText("Nội dung học phần chỉ đọc. Quản trị viên không biên soạn môn hoặc truy cập học liệu.")}</p>
             </div>
           </div>
           <div className="ops-actions-group">
@@ -215,7 +215,7 @@ export const AdminCourseDetailPage: React.FC = () => {
               disabled={isArchived}
             >
               <UserCheck size={16} />
-              <span>Điều chuyển giảng viên</span>
+              <span>{uiText("Điều chuyển giảng viên")}</span>
             </Button>
             <Button
               type="button"
@@ -224,20 +224,20 @@ export const AdminCourseDetailPage: React.FC = () => {
               disabled={isArchived}
             >
               <Archive size={16} />
-              <span>{isArchived ? 'Đã lưu trữ' : 'Cưỡng chế lưu trữ'}</span>
+              <span>{isArchived ? uiText("Đã lưu trữ") : uiText("Cưỡng chế lưu trữ")}</span>
             </Button>
           </div>
         </div>
       </section>
 
-      <nav className="admin-tabs-nav" aria-label="Thông tin môn học">
+      <nav className="admin-tabs-nav" aria-label={uiText("Thông tin môn học")}>
         <button
           type="button"
           className={`tab-btn ${activeTab === 'tong-quan' ? 'active' : ''}`}
           onClick={() => selectTab('tong-quan')}
         >
           <BookOpen size={16} />
-          <span>Tổng quan</span>
+          <span>{uiText("Tổng quan")}</span>
         </button>
         <button
           type="button"
@@ -245,7 +245,7 @@ export const AdminCourseDetailPage: React.FC = () => {
           onClick={() => selectTab('cau-truc')}
         >
           <FolderTree size={16} />
-          <span>Cấu trúc ({chapters.length})</span>
+          <span>{uiText("Cấu trúc (")}{chapters.length})</span>
         </button>
       </nav>
 
@@ -254,47 +254,47 @@ export const AdminCourseDetailPage: React.FC = () => {
           <div className="meta-stats-grid">
             <div className="stat-card">
               <span className="stat-val">{course.active_member_count}</span>
-              <span className="stat-lbl">Sinh viên đang tham gia</span>
+              <span className="stat-lbl">{uiText("Sinh viên đang tham gia")}</span>
             </div>
             <div className="stat-card">
               <span className="stat-val">{chapters.length}</span>
-              <span className="stat-lbl">Chương</span>
+              <span className="stat-lbl">{uiText("Chương ")}</span>
             </div>
             <div className="stat-card">
               <span className="stat-val">{lessonCount}</span>
-              <span className="stat-lbl">Bài học</span>
+              <span className="stat-lbl">{uiText("Bài học")}</span>
             </div>
           </div>
           <div className="info-section-card">
-            <h3 className="section-title">Mô tả học phần</h3>
-            <p className="desc-text">{course.description || 'Chưa có mô tả môn học.'}</p>
+            <h3 className="section-title">{uiText("Mô tả học phần")}</h3>
+            <p className="desc-text">{course.description || uiText("Chưa có mô tả môn học.")}</p>
           </div>
-          {isArchived && <div className="readonly-banner"><Info size={18} />Môn học đang ở chế độ chỉ đọc.</div>}
+          {isArchived && <div className="readonly-banner"><Info size={18} />{uiText("Môn học đang ở chế độ chỉ đọc.")}</div>}
         </div>
       ) : (
         <div className="tab-pane">
           <div className="readonly-banner">
             <Info size={18} />
-            <span>Đề cương được hiển thị chỉ đọc cho Quản trị viên.</span>
+            <span>{uiText("Đề cương được hiển thị chỉ đọc cho Quản trị viên.")}</span>
           </div>
           {chapters.length === 0 ? (
             <EmptyState
-              title="Chưa có cấu trúc đề cương"
-              description="Giảng viên chưa tạo chương hoặc bài học."
+              title={uiText("Chưa có cấu trúc đề cương")}
+              description={uiText("Giảng viên chưa tạo chương hoặc bài học.")}
             />
           ) : (
             <div className="structure-readonly-tree">
               {chapters.map((chapter, index) => (
                 <div key={chapter.id} className="ch-readonly-card">
-                  <h3 className="ch-title">Chương {index + 1}: {chapter.title}</h3>
+                  <h3 className="ch-title">{uiText("Chương ")}{index + 1}: {chapter.title}</h3>
                   {chapter.lessons.length === 0 ? (
-                    <p className="empty-sub">Chưa có bài học.</p>
+                    <p className="empty-sub">{uiText("Chưa có bài học.")}</p>
                   ) : (
                     <ul className="lessons-readonly-list">
                       {chapter.lessons.map((lesson, lessonIndex) => (
                         <li key={lesson.id} className="lesson-readonly-item">
                           <BookOpen size={16} />
-                          <span>Bài {lessonIndex + 1}: {lesson.title}</span>
+                          <span>{uiText("Bài ")}{lessonIndex + 1}: {lesson.title}</span>
                         </li>
                       ))}
                     </ul>
@@ -308,16 +308,15 @@ export const AdminCourseDetailPage: React.FC = () => {
 
       {showTransferModal && (
         <Modal
-          title="Điều chuyển giảng viên phụ trách"
+          title={uiText("Điều chuyển giảng viên phụ trách")}
           isOpen={showTransferModal}
           onClose={() => setShowTransferModal(false)}
         >
           <form onSubmit={(event) => void handleTransfer(event)} className="modal-form-stack">
             <p className="modal-intro">
-              Chọn giảng viên đã xác minh email và được cấp quyền giảng dạy.
-            </p>
+              {uiText("Chọn giảng viên đã xác minh email và được cấp quyền giảng dạy.")}</p>
             <SelectField
-              label="Giảng viên tiếp nhận"
+              label={uiText("Giảng viên tiếp nhận")}
               required
               value={selectedTeacherId}
               onChange={(event) => setSelectedTeacherId(event.target.value)}
@@ -327,7 +326,7 @@ export const AdminCourseDetailPage: React.FC = () => {
               }))}
             />
             {teachers.length === 0 && (
-              <p role="status">Không có giảng viên hoạt động, đã xác minh phù hợp.</p>
+              <p role="status">{uiText("Không có giảng viên hoạt động, đã xác minh phù hợp.")}</p>
             )}
             <div className="modal-actions-bar">
               <Button
@@ -336,16 +335,14 @@ export const AdminCourseDetailPage: React.FC = () => {
                 onClick={() => setShowTransferModal(false)}
                 disabled={isSaving}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="submit"
                 variant="primary"
                 isLoading={isSaving}
                 disabled={teachers.length === 0}
               >
-                Xác nhận chuyển giao
-              </Button>
+                {uiText("Xác nhận chuyển giao")}</Button>
             </div>
           </form>
         </Modal>
@@ -353,17 +350,16 @@ export const AdminCourseDetailPage: React.FC = () => {
 
       {showArchiveModal && (
         <Modal
-          title="Xác nhận cưỡng chế lưu trữ"
+          title={uiText("Xác nhận cưỡng chế lưu trữ")}
           isOpen={showArchiveModal}
           onClose={() => setShowArchiveModal(false)}
         >
           <div className="modal-form-stack">
             <p>
-              Môn học <strong>{course.code} — {course.name}</strong> sẽ chuyển sang chế độ chỉ đọc.
-            </p>
+              {uiText("Môn học ")}<strong>{course.code} — {course.name}</strong> {uiText(" sẽ chuyển sang chế độ chỉ đọc.")}</p>
             <div className="archive-alert-box">
               <AlertTriangle size={20} />
-              <span>Thao tác này không thể hoàn tác trong phạm vi hiện tại.</span>
+              <span>{uiText("Thao tác này không thể hoàn tác trong phạm vi hiện tại.")}</span>
             </div>
             <div className="modal-actions-bar">
               <Button
@@ -372,16 +368,14 @@ export const AdminCourseDetailPage: React.FC = () => {
                 onClick={() => setShowArchiveModal(false)}
                 disabled={isSaving}
               >
-                Hủy bỏ
-              </Button>
+                {uiText("Hủy bỏ")}</Button>
               <Button
                 type="button"
                 variant="danger"
                 isLoading={isSaving}
                 onClick={() => void handleArchive()}
               >
-                Xác nhận lưu trữ
-              </Button>
+                {uiText("Xác nhận lưu trữ")}</Button>
             </div>
           </div>
         </Modal>

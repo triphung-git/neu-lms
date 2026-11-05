@@ -1,3 +1,4 @@
+import {uiText} from "../i18n/translate";
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { Button } from './Button';
@@ -80,7 +81,7 @@ export const Modal: React.FC<ModalProps> = ({
             variant="ghost"
             size="sm"
             onClick={onClose}
-            aria-label="Đóng hộp thoại"
+            aria-label={uiText("Đóng hộp thoại")}
             icon={<X size={20} />}
           />
         </div>

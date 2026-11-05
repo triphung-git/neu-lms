@@ -78,6 +78,7 @@ def readable_file(user, course_id, file_id):
             is_hidden=False,
             published_version__material_files__file=item,
         ).exists()
+
         student_material_read = is_member and item.status == FileStatus.CLEAN and material_published
     else:
         student_material_read = (
@@ -89,7 +90,6 @@ def readable_file(user, course_id, file_id):
 
     student_submission_read = (
         is_member
-        and item.status == FileStatus.CLEAN
         and item.purpose == FilePurpose.ASSIGNMENT_SUBMISSION
         and item.uploader_id == user.id
     )
@@ -237,7 +237,7 @@ class CourseFileContentView(FilesBaseView):
     )
     def put(self, request, course_id, file_id):
         item = get_object_or_404(StoredFile, pk=file_id, course_id=course_id)
-        if not manager(request.user, item.course) or item.uploader_id != request.user.id:
+        if item.uploader_id != request.user.id:
             raise exceptions.PermissionDenied()
         if request.content_type != "application/octet-stream":
             raise exceptions.UnsupportedMediaType(request.content_type)
@@ -359,6 +359,15 @@ class CourseFileDownloadView(FilesBaseView):
             or hashlib.sha256(content).hexdigest() != item.sha256_hash
         ):
             raise exceptions.PermissionDenied("File integrity check failed.")
+        from learning.models import DownloadEvent
+
+        for assignment_id in item.assignment_attachments.values_list("assignment_id", flat=True):
+            DownloadEvent.objects.create(
+                assignment_id=assignment_id,
+                file=item,
+                user=request.user,
+                kind="preview" if self.preview else "download",
+            )
         response = HttpResponse(
             content, content_type=media_types.get(ext, "application/octet-stream")
         )

@@ -1,3 +1,7 @@
+import {uiText} from "../../shared/i18n/translate";
+import { LibraryBig, ChartNoAxesCombined } from 'lucide-react';
+import { LanguageSwitch, useLanguage } from '../../blueprints/learning/i18n';
+import '../../blueprints/learning/learning.css';
 import React, { useState } from 'react';
 import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../providers/SessionContext';
@@ -17,6 +21,7 @@ import './DashboardLayout.css';
 
 export const AdminLayout: React.FC = () => {
   const { currentUser, logout } = useSession();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
@@ -28,18 +33,20 @@ export const AdminLayout: React.FC = () => {
     window.alert(
       error instanceof Error
         ? error.message
-        : 'Đăng xuất thất bại. Vui lòng thử lại.'
+        : uiText("Đăng xuất thất bại. Vui lòng thử lại.")
     );
   }
 };
 
   const navLinks = [
-    { to: '/ad', label: 'Vận hành tổng quan', icon: <ShieldCheck size={18} />, end: true },
-    { to: '/ad/tai-khoan', label: 'Tài khoản người dùng', icon: <Users size={18} /> },
-    { to: '/ad/duyet-giang-vien', label: 'Duyệt giảng viên', icon: <MailCheck size={18} /> },
-    { to: '/ad/mon-hoc', label: 'Danh mục môn học', icon: <BookMarked size={18} /> },
-    { to: '/ad/nhat-ky', label: 'Nhật ký hoạt động', icon: <FileText size={18} /> },
-    { to: '/ad/cau-hinh', label: 'Cấu hình hệ thống', icon: <Sliders size={18} /> },
+    { to: '/ad', label: t('Vận hành tổng quan', 'Operations overview'), icon: <ShieldCheck size={18} />, end: true },
+    { to: '/ad/thu-vien', label: t('Thư viện số', 'Digital library'), icon: <LibraryBig size={18} /> },
+    { to: '/ad/bao-cao', label: t('Báo cáo', 'Reports'), icon: <ChartNoAxesCombined size={18} /> },
+    { to: '/ad/tai-khoan', label: t('Tài khoản người dùng', 'User accounts'), icon: <Users size={18} /> },
+    { to: '/ad/duyet-giang-vien', label: t('Duyệt giảng viên', 'Teacher approvals'), icon: <MailCheck size={18} /> },
+    { to: '/ad/mon-hoc', label: t('Danh mục môn học', 'Course catalog'), icon: <BookMarked size={18} /> },
+    { to: '/ad/nhat-ky', label: t('Nhật ký hoạt động', 'Activity log'), icon: <FileText size={18} /> },
+    { to: '/ad/cau-hinh', label: t('Cấu hình hệ thống', 'System settings'), icon: <Sliders size={18} /> },
   ];
 
   return (
@@ -50,16 +57,16 @@ export const AdminLayout: React.FC = () => {
             <button
               className="dash-mobile-toggle"
               onClick={() => setIsMobileOpen(!isMobileOpen)}
-              aria-label="Chuyển đổi menu"
+              aria-label={uiText("Chuyển đổi menu")}
               aria-expanded={isMobileOpen}
             >
               {isMobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
-            <Link to="/ad" className="dash-brand" aria-label="Bàn làm việc Quản trị viên NEU">
+            <Link to="/ad" className="dash-brand" aria-label={uiText("Bàn làm việc Quản trị viên NEU")}>
               <div className="dash-brand-icon" aria-hidden="true">
                 <img
                   src="/neu-logo.webp"
-                  alt="Biểu trưng Đại học Kinh tế Quốc dân"
+                  alt={uiText("Biểu trưng Đại học Kinh tế Quốc dân")}
                   className="dash-brand-img"
                 />
               </div>
@@ -70,22 +77,22 @@ export const AdminLayout: React.FC = () => {
             </Link>
           </div>
 
-          <div className="dash-topbar-right">
+          <div className="dash-topbar-right"><LanguageSwitch />
             <Link to="/ho-so" className="dash-user-chip">
               <User size={16} />
               <span className="user-name">{currentUser?.fullName}</span>
               <span className="user-badge-role">Admin</span>
             </Link>
-            <button className="dash-logout-btn" onClick={handleLogout} title="Đăng xuất">
+            <button className="dash-logout-btn" onClick={handleLogout} title={uiText("Đăng xuất")}>
               <LogOut size={16} />
-              <span className="logout-text">Đăng xuất</span>
+              <span className="logout-text">{t('Đăng xuất', 'Log out')}</span>
             </button>
           </div>
         </div>
       </header>
 
       <div className="dash-body">
-        <aside className={`dash-sidebar ${isMobileOpen ? 'open' : ''}`} role="navigation" aria-label="Menu quản trị">
+        <aside className={`dash-sidebar ${isMobileOpen ? 'open' : ''}`} role="navigation" aria-label={uiText("Menu quản trị")}>
           <nav className="dash-nav">
             {navLinks.map((item) => (
               <NavLink
@@ -104,9 +111,8 @@ export const AdminLayout: React.FC = () => {
           <div className="dash-sidebar-footer">
             <Link to="/ho-so" className="sidebar-profile-link" onClick={() => setIsMobileOpen(false)}>
               <User size={16} />
-              <span>Hồ sơ cá nhân</span>
+              <span>{t('Hồ sơ cá nhân', 'Profile')}</span>
             </Link>
-            <div className="sidebar-demo-badge">Dữ liệu minh họa</div>
           </div>
         </aside>
 

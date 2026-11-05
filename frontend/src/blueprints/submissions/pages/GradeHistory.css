@@ -1,0 +1,83 @@
+.grade-history {
+  min-width: 0;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.grade-history > button {
+  width: 100%;
+}
+
+.grade-history-body {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.grade-history .grade-history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.grade-history-list > li {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.grade-history-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.grade-history-status {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.grade-history-status.draft {
+  background: #fff5d6;
+  color: #795000;
+}
+
+.grade-history-status.published {
+  background: #edf8ef;
+  color: #236c2a;
+}
+
+.grade-history time {
+  display: block;
+  margin: 8px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.grade-history .grade-history-feedback {
+  white-space: pre-wrap;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+.grade-history nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+}
+
+@media (max-width: 640px) {
+  .grade-history nav button {
+    flex: 1;
+  }
+}

@@ -1,3 +1,4 @@
+import {currentLocale} from '../i18n/translate';
 /**
  * Standard formatting utilities according to baseline/00-PROJECT-BRIEF.md §3:
  * Date: dd/MM/yyyy, 24h time
@@ -27,17 +28,17 @@ export function formatDateTimeVN(dateInput: string | Date | undefined | null): s
 export function formatScoreVN(score: number | undefined | null): string {
   if (score === undefined || score === null) return '—';
   // Vietnamese format: comma for decimal
-  return score.toFixed(1).replace('.', ',');
+  return score.toFixed(1).replace('.', currentLocale()==='vi-VN'?',':'.');
 }
 
 export function formatNumberVN(val: number | undefined | null): string {
   if (val === undefined || val === null) return '0';
-  return val.toLocaleString('vi-VN');
+  return val.toLocaleString(currentLocale());
 }
 
 export function formatFileSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1).replace('.', ',')} KB`;
-  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', ',')} MB`;
-  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1).replace('.', ',')} GB`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1).replace('.', currentLocale()==='vi-VN'?',':'.')} KB`;
+  if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1).replace('.', currentLocale()==='vi-VN'?',':'.')} MB`;
+  return `${(bytes / (1024 * 1024 * 1024)).toFixed(1).replace('.', currentLocale()==='vi-VN'?',':'.')} GB`;
 }

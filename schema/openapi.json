@@ -428,6 +428,65 @@
                 }
             }
         },
+        "/api/v1/admin/audit-log": {
+            "get": {
+                "operationId": "admin_audit_log_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "end",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 120
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "start",
+                        "schema": {
+                            "type": "string",
+                            "format": "date"
+                        }
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AuditListResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/admin/courses/{course_id}/transfer": {
             "post": {
                 "operationId": "admin_courses_transfer_create",
@@ -485,6 +544,32 @@
                 }
             }
         },
+        "/api/v1/admin/file-limits": {
+            "get": {
+                "operationId": "admin_file_limits_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminFileLimits"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/admin/grants/{grant_id}/revoke": {
             "post": {
                 "operationId": "admin_grants_revoke_create",
@@ -533,6 +618,61 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AdminAccountRoleRevokeResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/overview": {
+            "get": {
+                "operationId": "admin_overview_retrieve",
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminOverviewNumbers"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/admin/recent-activity": {
+            "get": {
+                "operationId": "admin_recent_activity_list",
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/AdminRecentEvent"
+                                    }
                                 }
                             }
                         },
@@ -675,6 +815,33 @@
                 }
             }
         },
+        "/api/v1/admin/runtime-settings": {
+            "get": {
+                "operationId": "admin_runtime_settings_retrieve",
+                "description": "Expose non-secret configuration flags so the admin UI cannot fake settings.",
+                "tags": [
+                    "admin"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AdminRuntimeSettings"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/admin/teacher-requests": {
             "get": {
                 "operationId": "admin_teacher_requests_list",
@@ -801,6 +968,292 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AdminTeacherRejectResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ai/courses/{course_id}/chat": {
+            "post": {
+                "operationId": "ai_courses_chat_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseChatRequestRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseChatRequestRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/CourseChatRequestRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CourseChatResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ai/courses/{course_id}/chat/history": {
+            "get": {
+                "operationId": "ai_courses_chat_history_list",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ChatTurn"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "ai_courses_chat_history_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/ai/courses/{course_id}/materials/{material_id}/summary-drafts": {
+            "post": {
+                "operationId": "ai_courses_materials_summary_drafts_create",
+                "description": "Generate a pending summary from clean extracted text; never publish automatically.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "material_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialSummaryDraft"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialSummaryDraft"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ai/teacher/summary-drafts": {
+            "get": {
+                "operationId": "ai_teacher_summary_drafts_list",
+                "description": "List summary drafts belonging only to courses owned by the current teacher.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/MaterialSummaryDraft"
+                                    }
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/ai/teacher/summary-drafts/{draft_id}/review": {
+            "post": {
+                "operationId": "ai_teacher_summary_drafts_review_create",
+                "description": "Confirm a teacher-edited summary or discard it; confirmation updates the version only.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "draft_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "ai"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialSummaryDraftReviewRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialSummaryDraftReviewRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/MaterialSummaryDraftReviewRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/MaterialSummaryDraft"
                                 }
                             }
                         },
@@ -973,6 +1426,51 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/StudentAssignmentEligibility"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/assignments/{id}/submissions": {
+            "get": {
+                "operationId": "teacher_submission_list",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "assignments"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TeacherSubmissionList"
                                 }
                             }
                         },
@@ -2570,6 +3068,143 @@
                 }
             }
         },
+        "/api/v1/courses/{course_id}/assignments/{id}/submission-history": {
+            "get": {
+                "operationId": "courses_assignments_submission_history_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "student_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionHistoryResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/assignments/{id}/submissions": {
+            "post": {
+                "operationId": "courses_assignments_submissions_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubmissionInputRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubmissionInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/SubmissionInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionReceipt"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SubmissionReceipt"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/courses/{course_id}/chapters": {
             "get": {
                 "operationId": "courses_chapters_list",
@@ -3843,6 +4478,81 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/UploadIntentResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/courses/{course_id}/gradebook": {
+            "get": {
+                "operationId": "courses_gradebook_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "assignment_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "download",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "csv"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "search",
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "Một phần tên hoặc email sinh viên"
+                    }
+                ],
+                "tags": [
+                    "courses"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TeacherGradebookResult"
+                                }
+                            },
+                            "text/csv": {
+                                "schema": {
+                                    "type": "string"
                                 }
                             }
                         },
@@ -5761,6 +6471,1000 @@
                 }
             }
         },
+        "/api/v1/learning/courses/{course_id}": {
+            "get": {
+                "operationId": "learning_courses_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/actions": {
+            "post": {
+                "operationId": "learning_courses_actions_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/appeals": {
+            "get": {
+                "operationId": "learning_courses_appeals_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_courses_appeals_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/attendance": {
+            "get": {
+                "operationId": "learning_courses_attendance_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_courses_attendance_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/discussion": {
+            "get": {
+                "operationId": "learning_courses_discussion_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_courses_discussion_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/downloads": {
+            "get": {
+                "operationId": "learning_courses_downloads_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/group-appeals": {
+            "get": {
+                "operationId": "learning_courses_group_appeals_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_courses_group_appeals_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/groups": {
+            "get": {
+                "operationId": "learning_courses_groups_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_courses_groups_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/courses/{course_id}/progress": {
+            "get": {
+                "operationId": "learning_courses_progress_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/drafts/{draft_id}": {
+            "delete": {
+                "operationId": "learning_drafts_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "draft_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/enrollment": {
+            "get": {
+                "operationId": "learning_enrollment_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "mode",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "approval",
+                                "password"
+                            ]
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "term",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_enrollment_create",
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/group-files/{id}": {
+            "get": {
+                "operationId": "learning_group_files_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/library": {
+            "get": {
+                "operationId": "learning_library_retrieve",
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "learning_library_create",
+                "tags": [
+                    "learning"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "type": "object",
+                                "additionalProperties": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/library/{id}": {
+            "get": {
+                "operationId": "learning_library_file",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "delete": {
+                "operationId": "learning_library_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/learning/reports": {
+            "get": {
+                "operationId": "learning_reports_retrieve",
+                "tags": [
+                    "learning"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "object",
+                                    "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/v1/materials/{id}": {
             "get": {
                 "operationId": "materials_retrieve_global",
@@ -5868,6 +7572,591 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/PaginatedMaterialSearchResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/course-announcements": {
+            "get": {
+                "operationId": "me_course_announcements_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unread",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NoticeFeed"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/course-announcements/{id}/read": {
+            "post": {
+                "operationId": "me_course_announcements_read_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/course-announcements/read-all": {
+            "post": {
+                "operationId": "me_course_announcements_read_all_create",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/course-announcements/unread": {
+            "get": {
+                "operationId": "me_course_announcements_unread_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unread",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/CountResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/grade-notices": {
+            "get": {
+                "operationId": "me_grade_notices_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeNoticeList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/grade-notices/{id}/read": {
+            "post": {
+                "operationId": "me_grade_notices_read_create",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
+            }
+        },
+        "/api/v1/me/grade-notices/read-all": {
+            "post": {
+                "operationId": "me_grade_notices_read_all_create",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeReadAllResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/grade-notices/unread": {
+            "get": {
+                "operationId": "me_grade_notices_unread_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UnreadGradeCount"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/grades": {
+            "get": {
+                "operationId": "me_grades_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StudentGradeList"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/me/upcoming-assignments": {
+            "get": {
+                "operationId": "me_upcoming_assignments_retrieve",
+                "tags": [
+                    "me"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UpcomingResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/submissions/{id}/grade": {
+            "get": {
+                "operationId": "submissions_grade_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeDetail"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "submissions_grade_create",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GradeInputRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GradeInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/GradeInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeOutput"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/submissions/{id}/grade-history": {
+            "get": {
+                "operationId": "submissions_grade_history_retrieve",
+                "description": "Lớp view cơ sở cho phân hệ Bài tập.\n\nĐảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo\nerror envelope thống nhất của hệ thống NEU LMS.",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "tags": [
+                    "submissions"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GradeHistoryResult"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/teacher/course-announcements": {
+            "get": {
+                "operationId": "teacher_course_announcements_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "course_id",
+                        "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "unread",
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
+                    }
+                ],
+                "tags": [
+                    "teacher"
+                ],
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/NoticeFeed"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/v1/teacher/course-announcements/publish": {
+            "post": {
+                "operationId": "teacher_course_announcements_publish_create",
+                "tags": [
+                    "teacher"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeInputRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeInputRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/NoticeInputRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {
+                        "SessionCookieAuth": [],
+                        "CSRFToken": []
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublishedNotice"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "201": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/PublishedNotice"
                                 }
                             }
                         },
@@ -6174,6 +8463,74 @@
                     "is_active"
                 ]
             },
+            "AdminFileLimits": {
+                "type": "object",
+                "properties": {
+                    "max_file_bytes": {
+                        "type": "integer"
+                    },
+                    "max_course_quota_bytes": {
+                        "type": "integer"
+                    },
+                    "default_file_bytes": {
+                        "type": "integer"
+                    },
+                    "default_course_quota_bytes": {
+                        "type": "integer"
+                    },
+                    "default_extensions": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "default_course_quota_bytes",
+                    "default_extensions",
+                    "default_file_bytes",
+                    "max_course_quota_bytes",
+                    "max_file_bytes"
+                ]
+            },
+            "AdminOverviewNumbers": {
+                "type": "object",
+                "properties": {
+                    "active_users": {
+                        "type": "integer"
+                    },
+                    "inactive_users": {
+                        "type": "integer"
+                    },
+                    "open_courses": {
+                        "type": "integer"
+                    },
+                    "archived_courses": {
+                        "type": "integer"
+                    },
+                    "infected_material_files": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "scanning_material_files": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "pending_teacher_requests": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "active_users",
+                    "archived_courses",
+                    "inactive_users",
+                    "infected_material_files",
+                    "open_courses",
+                    "pending_teacher_requests",
+                    "scanning_material_files"
+                ]
+            },
             "AdminPasswordResetResponse": {
                 "type": "object",
                 "properties": {
@@ -6194,6 +8551,114 @@
                         "maxLength": 1024
                     }
                 }
+            },
+            "AdminRecentEvent": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "actor_name": {
+                        "type": "string"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "resource_type": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "action",
+                    "actor_name",
+                    "id",
+                    "occurred_at",
+                    "resource_type"
+                ]
+            },
+            "AdminRuntimeSettings": {
+                "type": "object",
+                "properties": {
+                    "ai_auto_index_enabled": {
+                        "type": "boolean"
+                    },
+                    "ai_index_failed": {
+                        "type": "integer"
+                    },
+                    "ai_index_ready": {
+                        "type": "integer"
+                    },
+                    "notification_email_enabled": {
+                        "type": "boolean"
+                    },
+                    "notification_email_failed": {
+                        "type": "integer"
+                    },
+                    "notification_email_pending": {
+                        "type": "integer"
+                    },
+                    "ai_chat_configured": {
+                        "type": "boolean"
+                    },
+                    "ai_chat_model": {
+                        "type": "string"
+                    },
+                    "ai_embedding_configured": {
+                        "type": "boolean"
+                    },
+                    "ai_embedding_model": {
+                        "type": "string"
+                    },
+                    "email_backend": {
+                        "type": "string"
+                    },
+                    "email_host_configured": {
+                        "type": "boolean"
+                    },
+                    "email_auth_configured": {
+                        "type": "boolean"
+                    },
+                    "email_sender_configured": {
+                        "type": "boolean"
+                    },
+                    "file_storage_backend": {
+                        "type": "string"
+                    },
+                    "s3_storage_configured": {
+                        "type": "boolean"
+                    },
+                    "clamav_configured": {
+                        "type": "boolean"
+                    },
+                    "celery_broker_configured": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "ai_auto_index_enabled",
+                    "ai_chat_configured",
+                    "ai_chat_model",
+                    "ai_embedding_configured",
+                    "ai_embedding_model",
+                    "ai_index_failed",
+                    "ai_index_ready",
+                    "celery_broker_configured",
+                    "clamav_configured",
+                    "email_auth_configured",
+                    "email_backend",
+                    "email_host_configured",
+                    "email_sender_configured",
+                    "file_storage_backend",
+                    "notification_email_enabled",
+                    "notification_email_failed",
+                    "notification_email_pending",
+                    "s3_storage_configured"
+                ]
             },
             "AdminTeacherApprovalResponse": {
                 "type": "object",
@@ -7012,6 +9477,64 @@
                     }
                 }
             },
+            "AuditListResult": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/AuditRow"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "AuditRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "occurred_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "actor_name": {
+                        "type": "string"
+                    },
+                    "action": {
+                        "type": "string"
+                    },
+                    "resource_type": {
+                        "type": "string"
+                    },
+                    "resource_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "correlation_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "action",
+                    "actor_name",
+                    "correlation_id",
+                    "id",
+                    "occurred_at",
+                    "resource_id",
+                    "resource_type"
+                ]
+            },
             "Chapter": {
                 "type": "object",
                 "properties": {
@@ -7066,6 +9589,43 @@
                     "title"
                 ]
             },
+            "ChatTurn": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "request_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "question": {
+                        "type": "string"
+                    },
+                    "answer": {
+                        "type": "string"
+                    },
+                    "citations": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "additionalProperties": {}
+                        }
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "answer",
+                    "citations",
+                    "created_at",
+                    "id",
+                    "question",
+                    "request_id"
+                ]
+            },
             "CloseTypeEnum": {
                 "enum": [
                     "manual_close",
@@ -7110,6 +9670,17 @@
                     "file_size",
                     "sha256_hash",
                     "status"
+                ]
+            },
+            "CountResult": {
+                "type": "object",
+                "properties": {
+                    "unread_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "unread_count"
                 ]
             },
             "Course": {
@@ -7244,6 +9815,150 @@
                     "pending_request_id",
                     "teacher_name",
                     "term"
+                ]
+            },
+            "CourseChatCitation": {
+                "type": "object",
+                "properties": {
+                    "version_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "file_hash": {
+                        "type": "string"
+                    },
+                    "id": {
+                        "type": "string"
+                    },
+                    "material_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "material_title": {
+                        "type": "string"
+                    },
+                    "course_code": {
+                        "type": "string"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "page_number": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "excerpt": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "course_code",
+                    "course_name",
+                    "excerpt",
+                    "file_name",
+                    "id",
+                    "material_id",
+                    "material_title",
+                    "page_number"
+                ]
+            },
+            "CourseChatCourse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "code": {
+                        "type": "string"
+                    },
+                    "name": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "code",
+                    "id",
+                    "name"
+                ]
+            },
+            "CourseChatHistoryMessageRequest": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/CourseChatHistoryMessageRoleEnum"
+                    },
+                    "content": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 2000
+                    }
+                },
+                "required": [
+                    "content",
+                    "role"
+                ]
+            },
+            "CourseChatHistoryMessageRoleEnum": {
+                "enum": [
+                    "user",
+                    "assistant"
+                ],
+                "type": "string",
+                "description": "* `user` - user\n* `assistant` - assistant"
+            },
+            "CourseChatRequestRequest": {
+                "type": "object",
+                "properties": {
+                    "request_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "question": {
+                        "type": "string",
+                        "minLength": 3,
+                        "description": "Câu hỏi cần trợ lý AI trả lời dựa trên học liệu.",
+                        "maxLength": 2000
+                    },
+                    "history": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseChatHistoryMessageRequest"
+                        },
+                        "description": "Tối đa 8 lượt hội thoại gần nhất; chỉ dùng để hiểu ngữ cảnh, không phải nguồn dữ kiện để trả lời."
+                    }
+                },
+                "required": [
+                    "question"
+                ]
+            },
+            "CourseChatResponse": {
+                "type": "object",
+                "properties": {
+                    "answer": {
+                        "type": "string"
+                    },
+                    "citations": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseChatCitation"
+                        }
+                    },
+                    "course": {
+                        "$ref": "#/components/schemas/CourseChatCourse"
+                    }
+                },
+                "required": [
+                    "answer",
+                    "citations",
+                    "course"
                 ]
             },
             "CourseFilePolicy": {
@@ -7404,6 +10119,26 @@
                 "type": "string",
                 "description": "* `active` - Đang tham gia\n* `withdrawn` - Đã rút"
             },
+            "CourseOption": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "name",
+                    "status"
+                ]
+            },
             "CourseRequest": {
                 "type": "object",
                 "properties": {
@@ -7503,6 +10238,12 @@
             "CourseSummaryResponse": {
                 "type": "object",
                 "properties": {
+                    "pending_assignments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/PendingAssignment"
+                        }
+                    },
                     "role": {
                         "$ref": "#/components/schemas/RequestableRoleEnum"
                     },
@@ -7533,6 +10274,10 @@
                     "pending_submissions": {
                         "type": "integer",
                         "nullable": true
+                    },
+                    "scanning_materials": {
+                        "type": "integer",
+                        "minimum": 0
                     },
                     "problem_materials": {
                         "type": "integer",
@@ -7684,6 +10429,52 @@
                     "password"
                 ]
             },
+            "CriterionScoreInputRequest": {
+                "type": "object",
+                "properties": {
+                    "criterion_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "criterion_id",
+                    "score"
+                ]
+            },
+            "CriterionScoreOutput": {
+                "type": "object",
+                "properties": {
+                    "criterion_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "max_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "criterion_id",
+                    "max_score",
+                    "score",
+                    "title"
+                ]
+            },
             "EnrollmentRequestStatusEnum": {
                 "enum": [
                     "pending",
@@ -7773,6 +10564,318 @@
                         }
                     }
                 }
+            },
+            "GradeCriterion": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "max_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,3}(?:\\.\\d{0,2})?$"
+                    }
+                },
+                "required": [
+                    "id",
+                    "max_score",
+                    "title"
+                ]
+            },
+            "GradeDetail": {
+                "type": "object",
+                "properties": {
+                    "total_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                    },
+                    "rubric": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GradeCriterion"
+                        }
+                    },
+                    "grade": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GradeOutput"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "grade",
+                    "rubric",
+                    "total_score"
+                ]
+            },
+            "GradeHistoryResult": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GradeOutput"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "GradeInputRequest": {
+                "type": "object",
+                "properties": {
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                    },
+                    "rubric_scores": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CriterionScoreInputRequest"
+                        }
+                    },
+                    "feedback": {
+                        "type": "string",
+                        "maxLength": 10000
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/SubmissionGradeStatusEnum"
+                    },
+                    "expected_version": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "expected_version",
+                    "status"
+                ]
+            },
+            "GradeNotice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "read_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "revision": {
+                        "type": "integer"
+                    },
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "assignment_id",
+                    "course_id",
+                    "course_name",
+                    "id",
+                    "published_at",
+                    "read_at",
+                    "revision",
+                    "score",
+                    "title"
+                ]
+            },
+            "GradeNoticeList": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GradeNotice"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "GradeOutput": {
+                "type": "object",
+                "properties": {
+                    "version": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                    },
+                    "feedback": {
+                        "type": "string"
+                    },
+                    "status": {
+                        "$ref": "#/components/schemas/SubmissionGradeStatusEnum"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "rubric_breakdown": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CriterionScoreOutput"
+                        },
+                        "readOnly": true
+                    }
+                },
+                "required": [
+                    "created_at",
+                    "rubric_breakdown",
+                    "score",
+                    "status",
+                    "version"
+                ]
+            },
+            "GradeReadAllResult": {
+                "type": "object",
+                "properties": {
+                    "updated_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "updated_count"
+                ]
+            },
+            "GradebookAssignment": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title"
+                ]
+            },
+            "GradebookRow": {
+                "type": "object",
+                "properties": {
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "revision_number": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "latest_grade": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GradeOutput"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "published_grade": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GradeOutput"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "email",
+                    "latest_grade",
+                    "name",
+                    "published_grade",
+                    "revision_number",
+                    "student_id"
+                ]
+            },
+            "LatestSubmission": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "number": {
+                        "type": "integer"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "type": "integer"
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_late": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "file_name",
+                    "file_size",
+                    "id",
+                    "is_late",
+                    "number",
+                    "submitted_at"
+                ]
             },
             "Lesson": {
                 "type": "object",
@@ -8393,6 +11496,125 @@
                     "version_number"
                 ]
             },
+            "MaterialSummaryDraft": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "course_code": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "course_name": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "material_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "material_title": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "material_version_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "version_number": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "summary": {
+                        "type": "string",
+                        "readOnly": true
+                    },
+                    "source_file_names": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "readOnly": true
+                    },
+                    "status": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/MaterialSummaryDraftStatusEnum"
+                            }
+                        ],
+                        "readOnly": true
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true
+                    },
+                    "reviewed_at": {
+                        "type": "string",
+                        "format": "date-time",
+                        "readOnly": true,
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "course_code",
+                    "course_id",
+                    "course_name",
+                    "created_at",
+                    "id",
+                    "material_id",
+                    "material_title",
+                    "material_version_id",
+                    "reviewed_at",
+                    "source_file_names",
+                    "status",
+                    "summary",
+                    "version_number"
+                ]
+            },
+            "MaterialSummaryDraftReviewRequest": {
+                "type": "object",
+                "properties": {
+                    "status": {
+                        "$ref": "#/components/schemas/MaterialSummaryDraftReviewStatusEnum"
+                    },
+                    "summary": {
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 20000
+                    }
+                },
+                "required": [
+                    "status"
+                ]
+            },
+            "MaterialSummaryDraftReviewStatusEnum": {
+                "enum": [
+                    "confirmed",
+                    "discarded"
+                ],
+                "type": "string",
+                "description": "* `confirmed` - confirmed\n* `discarded` - discarded"
+            },
+            "MaterialSummaryDraftStatusEnum": {
+                "enum": [
+                    "pending",
+                    "confirmed",
+                    "discarded"
+                ],
+                "type": "string",
+                "description": "* `pending` - pending\n* `confirmed` - confirmed\n* `discarded` - discarded"
+            },
             "MaterialTypeEnum": {
                 "enum": [
                     "document",
@@ -8649,6 +11871,106 @@
                     "title",
                     "total_size_bytes",
                     "version_number"
+                ]
+            },
+            "NoticeFeed": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/NoticeRow"
+                        }
+                    },
+                    "courses": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CourseOption"
+                        }
+                    },
+                    "pagination": {
+                        "type": "object",
+                        "additionalProperties": {}
+                    }
+                },
+                "required": [
+                    "courses",
+                    "items",
+                    "pagination"
+                ]
+            },
+            "NoticeInputRequest": {
+                "type": "object",
+                "properties": {
+                    "request_key": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 200
+                    },
+                    "body": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 10000
+                    }
+                },
+                "required": [
+                    "body",
+                    "course_id",
+                    "request_key",
+                    "title"
+                ]
+            },
+            "NoticeRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "author_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "body": {
+                        "type": "string"
+                    },
+                    "published_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_read": {
+                        "type": "boolean"
+                    },
+                    "recipients": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "author_name",
+                    "body",
+                    "course_id",
+                    "course_name",
+                    "id",
+                    "is_read",
+                    "published_at",
+                    "recipients",
+                    "title"
                 ]
             },
             "PaginatedAdminAccountListItemList": {
@@ -9350,6 +12672,36 @@
                     }
                 }
             },
+            "PendingAssignment": {
+                "type": "object",
+                "properties": {
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "waiting": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "oldest": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "assignment_id",
+                    "course_name",
+                    "oldest",
+                    "title",
+                    "waiting"
+                ]
+            },
             "ProcessingStatusEnum": {
                 "enum": [
                     "pending",
@@ -9361,6 +12713,17 @@
                 ],
                 "type": "string",
                 "description": "* `pending` - Chờ xử lý\n* `processing` - Đang xử lý\n* `ready` - Sẵn sàng\n* `failed` - Thất bại\n* `no_text` - Không có văn bản\n* `unsupported` - Không hỗ trợ"
+            },
+            "PublishedNotice": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "id"
+                ]
             },
             "ReadinessSuccessResponse": {
                 "type": "object",
@@ -9802,8 +13165,11 @@
             },
             "StudentAssignmentEligibility": {
                 "type": "object",
-                "description": "Serializer cho kết quả thẩm định hợp lệ nộp bài theo Thẩm quyền Máy chủ.",
                 "properties": {
+                    "is_group_assignment": {
+                        "type": "boolean",
+                        "default": false
+                    },
                     "can_submit": {
                         "type": "boolean"
                     },
@@ -9853,6 +13219,14 @@
                     },
                     "has_existing_submission": {
                         "type": "boolean"
+                    },
+                    "latest_submission": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/LatestSubmission"
+                            }
+                        ],
+                        "nullable": true
                     },
                     "applicable_file_policy": {
                         "$ref": "#/components/schemas/ApplicableFilePolicy"
@@ -9958,6 +13332,181 @@
                     "updated_at"
                 ]
             },
+            "StudentGradeList": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StudentGradeRow"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "StudentGradeRow": {
+                "type": "object",
+                "properties": {
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "course_code": {
+                        "type": "string"
+                    },
+                    "revision_number": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "total_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$"
+                    },
+                    "grade": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GradeOutput"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "assignment_id",
+                    "course_code",
+                    "course_id",
+                    "course_name",
+                    "grade",
+                    "revision_number",
+                    "title",
+                    "total_score"
+                ]
+            },
+            "SubmissionGradeStatusEnum": {
+                "enum": [
+                    "draft",
+                    "published"
+                ],
+                "type": "string",
+                "description": "* `draft` - Nháp\n* `published` - Đã công bố"
+            },
+            "SubmissionHistoryResult": {
+                "type": "object",
+                "properties": {
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SubmissionHistoryRow"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "items",
+                    "pagination"
+                ]
+            },
+            "SubmissionHistoryRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "number": {
+                        "type": "integer"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "type": "integer"
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_late": {
+                        "type": "boolean"
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "file_id",
+                    "file_name",
+                    "file_size",
+                    "id",
+                    "is_late",
+                    "number",
+                    "submitted_at"
+                ]
+            },
+            "SubmissionInputRequest": {
+                "type": "object",
+                "properties": {
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "file_id"
+                ]
+            },
+            "SubmissionReceipt": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "readOnly": true
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "readOnly": true
+                    },
+                    "number": {
+                        "type": "integer",
+                        "maximum": 2147483647,
+                        "minimum": 0
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_late": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "file_id",
+                    "id",
+                    "is_late",
+                    "number",
+                    "submitted_at"
+                ]
+            },
             "TargetTypeEnum": {
                 "enum": [
                     "all",
@@ -10045,6 +13594,185 @@
                     "student_id",
                     "student_name",
                     "updated_at"
+                ]
+            },
+            "TeacherGradebookResult": {
+                "type": "object",
+                "properties": {
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "assignments": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GradebookAssignment"
+                        }
+                    },
+                    "assignment_id": {
+                        "type": "string",
+                        "format": "uuid",
+                        "nullable": true
+                    },
+                    "total_score": {
+                        "type": "string",
+                        "format": "decimal",
+                        "pattern": "^-?\\d{0,8}(?:\\.\\d{0,2})?$",
+                        "nullable": true
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/GradebookRow"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "assignment_id",
+                    "assignments",
+                    "course_name",
+                    "items",
+                    "pagination",
+                    "total_score"
+                ]
+            },
+            "TeacherSubmissionList": {
+                "type": "object",
+                "properties": {
+                    "title": {
+                        "type": "string"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TeacherSubmissionRow"
+                        }
+                    },
+                    "pagination": {
+                        "$ref": "#/components/schemas/PaginationMeta"
+                    }
+                },
+                "required": [
+                    "course_id",
+                    "items",
+                    "pagination",
+                    "title"
+                ]
+            },
+            "TeacherSubmissionRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "integer"
+                    },
+                    "number": {
+                        "type": "integer"
+                    },
+                    "file_name": {
+                        "type": "string"
+                    },
+                    "file_size": {
+                        "type": "integer"
+                    },
+                    "submitted_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "is_late": {
+                        "type": "boolean"
+                    },
+                    "student_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "student_name": {
+                        "type": "string"
+                    },
+                    "student_email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "file_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    }
+                },
+                "required": [
+                    "file_id",
+                    "file_name",
+                    "file_size",
+                    "id",
+                    "is_late",
+                    "number",
+                    "student_email",
+                    "student_id",
+                    "student_name",
+                    "submitted_at"
+                ]
+            },
+            "UnreadGradeCount": {
+                "type": "object",
+                "properties": {
+                    "unread_count": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "unread_count"
+                ]
+            },
+            "UpcomingResult": {
+                "type": "object",
+                "properties": {
+                    "total": {
+                        "type": "integer"
+                    },
+                    "items": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/UpcomingRow"
+                        }
+                    }
+                },
+                "required": [
+                    "items",
+                    "total"
+                ]
+            },
+            "UpcomingRow": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_id": {
+                        "type": "string",
+                        "format": "uuid"
+                    },
+                    "course_name": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "deadline": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "required": [
+                    "course_id",
+                    "course_name",
+                    "deadline",
+                    "id",
+                    "title"
                 ]
             },
             "UploadIntentRequest": {

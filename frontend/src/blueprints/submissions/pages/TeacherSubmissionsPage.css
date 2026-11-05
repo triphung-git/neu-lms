@@ -142,3 +142,19 @@
   border-radius: var(--radius-sm);
   font-weight: 600;
 }
+
+.teacher-submission-grade-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  min-width: 220px;
+}
+
+.teacher-submission-grade-actions > a {
+  color: var(--accent);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}

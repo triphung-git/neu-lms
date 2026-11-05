@@ -516,11 +516,12 @@ describe('T06 / B04 — Auth UI: Registration, Verification & Role State', () =>
       fireEvent.change(select, { target: { value: 'teacher' } });
 
       const submitBtn = screen.getByRole('button', { name: /Gửi yêu cầu/i });
+      await waitFor(() => expect(submitBtn).toBeEnabled());
       await act(async () => {
         fireEvent.click(submitBtn);
       });
 
-      expect(createRequestSpy).toHaveBeenCalledWith({ role: 'teacher' });
+      await waitFor(() => expect(createRequestSpy).toHaveBeenCalledWith({ role: 'teacher' }));
     });
   });
 

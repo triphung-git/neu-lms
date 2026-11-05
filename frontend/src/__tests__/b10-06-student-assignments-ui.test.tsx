@@ -295,7 +295,7 @@ describe('B10-06: Student Assignment Detail & List Integration', () => {
   });
 
   describe('Milestone B11 / B12 Boundary & Honest Deferred Action', () => {
-    it('notifies user honestly of pending Milestone B11 intake when clicking submit', async () => {
+    it('opens the secure uploader before confirming the submission', async () => {
       vi.spyOn(assignmentsService, 'getAssignmentDirect').mockResolvedValue(samplePublishedAssignment);
       vi.spyOn(assignmentsService, 'getStudentEligibilityDirect').mockResolvedValue(sampleEligibilityOpen);
 
@@ -317,11 +317,11 @@ describe('B10-06: Student Assignment Detail & List Integration', () => {
       fireEvent.click(submitBtn);
 
       await waitFor(() => {
-        expect(screen.getByText(/Milestone B11/i)).toBeInTheDocument();
+          expect(screen.getByTestId('secure-file-input')).toBeInTheDocument();
       });
     });
 
-    it('displays honest card indicating grading results and feedback start at Milestone B12', async () => {
+    it('displays grading results and feedback section', async () => {
       vi.spyOn(assignmentsService, 'getAssignmentDirect').mockResolvedValue(samplePublishedAssignment);
       vi.spyOn(assignmentsService, 'getStudentEligibilityDirect').mockResolvedValue(sampleEligibilityOpen);
 
@@ -339,7 +339,9 @@ describe('B10-06: Student Assignment Detail & List Integration', () => {
         expect(screen.getByTestId('student-assignment-detail')).toBeInTheDocument();
       });
 
-      expect(screen.getByText(/Kết quả đánh giá & Điểm số \(Phân hệ B12\)/i)).toBeInTheDocument();
+      expect(
+        screen.getByRole('heading', { name: 'Điểm và nhận xét' }),
+      ).toBeInTheDocument();
     });
   });
 

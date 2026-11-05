@@ -1,3 +1,4 @@
+import {uiText} from "../../../shared/i18n/translate";
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
@@ -81,7 +82,7 @@ export const StudentCoursesPage: React.FC = () => {
       }
     } catch (err: any) {
       if (seq === loadSequence.current) {
-        setCoursesError(err?.message || 'Không thể tải danh sách môn học.');
+        setCoursesError(err?.message || uiText("Không thể tải danh sách môn học."));
       }
     } finally {
       if (seq === loadSequence.current) {
@@ -109,7 +110,7 @@ export const StudentCoursesPage: React.FC = () => {
       }
     } catch (err: any) {
       if (seq === loadSequence.current) {
-        setCatalogError(err?.message || 'Không thể tải danh mục môn học.');
+        setCatalogError(err?.message || uiText("Không thể tải danh mục môn học."));
       }
     } finally {
       if (seq === loadSequence.current) {
@@ -139,7 +140,7 @@ export const StudentCoursesPage: React.FC = () => {
       }
     } catch (err: any) {
       if (seq === loadSequence.current) {
-        setRequestsError(err?.message || 'Không thể tải danh sách yêu cầu ghi danh.');
+        setRequestsError(err?.message || uiText("Không thể tải danh sách yêu cầu ghi danh."));
       }
     } finally {
       if (seq === loadSequence.current) {
@@ -166,13 +167,13 @@ export const StudentCoursesPage: React.FC = () => {
     setActionLoading((prev) => ({ ...prev, [courseId]: true }));
     try {
       await coursesService.enroll(courseId);
-      showNotification('success', `Đã gửi yêu cầu ghi danh vào môn học "${courseName}".`);
+      showNotification('success', uiText("Đã gửi yêu cầu ghi danh vào môn học \"{0}\".",[courseName]));
       // Refresh current views
       if (activeTab === 'catalog') {
         void fetchCatalog();
       }
     } catch (err: any) {
-      showNotification('error', err?.message || 'Gửi yêu cầu ghi danh thất bại. Vui lòng thử lại.');
+      showNotification('error', err?.message || uiText("Gửi yêu cầu ghi danh thất bại. Vui lòng thử lại."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [courseId]: false }));
     }
@@ -185,34 +186,33 @@ export const StudentCoursesPage: React.FC = () => {
     setActionLoading((prev) => ({ ...prev, [key]: true }));
     try {
       await coursesService.cancelEnrollmentRequest(requestId);
-      showNotification('success', 'Đã hủy yêu cầu ghi danh thành công.');
+      showNotification('success', uiText("Đã hủy yêu cầu ghi danh thành công."));
       if (activeTab === 'catalog') {
         void fetchCatalog();
       } else if (activeTab === 'requests') {
         void fetchMyRequests();
       }
     } catch (err: any) {
-      showNotification('error', err?.message || 'Hủy yêu cầu ghi danh thất bại. Vui lòng thử lại.');
+      showNotification('error', err?.message || uiText("Hủy yêu cầu ghi danh thất bại. Vui lòng thử lại."));
     } finally {
       setActionLoading((prev) => ({ ...prev, [key]: false }));
     }
   };
 
   const tabs = [
-    { id: 'open', label: 'Đang học' },
-    { id: 'archived', label: 'Đã lưu trữ' },
-    { id: 'catalog', label: 'Đăng ký môn học' },
-    { id: 'requests', label: 'Yêu cầu của tôi' },
+    { id: 'open', label: uiText("Đang học") },
+    { id: 'archived', label: uiText("Đã lưu trữ") },
+    { id: 'catalog', label: uiText("Đăng ký môn học") },
+    { id: 'requests', label: uiText("Yêu cầu của tôi") },
   ];
 
   return (
     <div className="courses-page-container">
       <div className="courses-page-header">
         <div>
-          <h1 className="courses-title">Môn học của tôi</h1>
+          <h1 className="courses-title">{uiText("Môn học của tôi")}</h1>
           <p className="courses-subtitle">
-            Quản lý các môn học phần đã ghi danh, tra cứu danh mục mở đăng ký và theo dõi yêu cầu xét duyệt.
-          </p>
+            {uiText("Quản lý các môn học phần đã ghi danh, tra cứu danh mục mở đăng ký và theo dõi yêu cầu xét duyệt.")}</p>
         </div>
       </div>
 
@@ -235,21 +235,20 @@ export const StudentCoursesPage: React.FC = () => {
               <BookOpen size={36} className="text-muted" />
               <h3>
                 {activeTab === 'open'
-                  ? 'Bạn chưa tham gia môn học nào'
-                  : 'Không có môn học nào đã lưu trữ'}
+                  ? uiText("Bạn chưa tham gia môn học nào")
+                  : uiText("Không có môn học nào đã lưu trữ")}
               </h3>
               <p>
                 {activeTab === 'open'
-                  ? 'Hãy chuyển sang tab "Đăng ký môn học" để tra cứu và gửi yêu cầu ghi danh vào các lớp học phần mới.'
-                  : 'Các môn học kết thúc học kỳ sẽ được lưu trữ và hiển thị tại đây.'}
+                  ? uiText("Hãy chuyển sang tab \"Đăng ký môn học\" để tra cứu và gửi yêu cầu ghi danh vào các lớp học phần mới.")
+                  : uiText("Các môn học kết thúc học kỳ sẽ được lưu trữ và hiển thị tại đây.")}
               </p>
               {activeTab === 'open' && (
                 <Button
                   variant="primary"
                   onClick={() => handleTabChange('catalog')}
                 >
-                  Tìm môn học để đăng ký
-                </Button>
+                  {uiText("Tìm môn học để đăng ký")}</Button>
               )}
             </div>
           )}
@@ -271,7 +270,7 @@ export const StudentCoursesPage: React.FC = () => {
                     <span className="card-code-badge">{crs.code}</span>
                     <Badge
                       variant={crs.status === 'open' ? 'published' : 'archived'}
-                      label={crs.status === 'open' ? 'Đang mở' : 'Đã lưu trữ'}
+                      label={crs.status === 'open' ? uiText("Đang mở") : uiText("Đã lưu trữ")}
                     />
                   </div>
 
@@ -281,27 +280,27 @@ export const StudentCoursesPage: React.FC = () => {
                   <div className="course-card-meta">
                     <div className="meta-item">
                       <User size={14} />
-                      <span>{crs.teacher_name || 'Chưa phân công'}</span>
+                      <span>{crs.teacher_name || uiText("Chưa phân công")}</span>
                     </div>
                     <div className="meta-item">
                       <Calendar size={14} />
-                      <span>Học kỳ: {crs.term}</span>
+                      <span>{uiText("Học kỳ: ")}{crs.term}</span>
                     </div>
                   </div>
 
                   <div className="course-card-footer">
                     <span className="meta-item">
-                      {crs.enrollment_open ? 'Đang mở đăng ký' : 'Đóng đăng ký'}
+                      {crs.enrollment_open ? uiText("Đang mở đăng ký") : uiText("Đóng đăng ký")}
                     </span>
-                    <span className="view-arrow">Vào học &rarr;</span>
+                    <span className="view-arrow">{uiText("Vào học &rarr;")}</span>
                   </div>
                 </div>
               ))}
             </div>
           )}
           {!coursesLoading && !coursesError && coursesTotalPages > 1 && (
-            <div className="course-pagination" aria-label="Phân trang môn đang học">
-              <Button variant="secondary" disabled={coursesPage <= 1} onClick={() => setCoursesPage(p => p - 1)}>Trang trước</Button>
+            <div className="course-pagination" aria-label={uiText("Phân trang môn đang học")}>
+              <Button variant="secondary" disabled={coursesPage <= 1} onClick={() => setCoursesPage(p => p - 1)}>{uiText("Trang trước")}</Button>
               <span>Trang {coursesPage} / {coursesTotalPages}</span>
               <Button variant="secondary" disabled={coursesPage >= coursesTotalPages} onClick={() => setCoursesPage(p => p + 1)}>Trang sau</Button>
             </div>
@@ -323,7 +322,7 @@ export const StudentCoursesPage: React.FC = () => {
             <div className="catalog-search-input">
               <input
                 type="text"
-                placeholder="Tìm theo mã môn, tên môn học hoặc giảng viên..."
+                placeholder={uiText("Tìm theo mã môn, tên môn học hoặc giảng viên...")}
                 value={catalogSearch}
                 onChange={(e) => setCatalogSearch(e.target.value)}
                 style={{
@@ -340,14 +339,13 @@ export const StudentCoursesPage: React.FC = () => {
             </div>
             <input
               type="text"
-              placeholder="Lọc theo học kỳ (VD: HK1-2026)"
+              placeholder={uiText("Lọc theo học kỳ (VD: HK1-2026)")}
               value={catalogTerm}
               onChange={(e) => setCatalogTerm(e.target.value)}
               className="catalog-term-select"
             />
             <Button variant="primary" type="submit">
-              <Search size={16} /> Tìm kiếm
-            </Button>
+              <Search size={16} /> {uiText(" Tìm kiếm")}</Button>
           </form>
 
           {catalogLoading && <LoadingSkeleton lines={4} />}
@@ -362,10 +360,9 @@ export const StudentCoursesPage: React.FC = () => {
           {!catalogLoading && !catalogError && catalogItems.length === 0 && (
             <div className="courses-empty-card" role="alert">
               <Search size={36} className="text-muted" />
-              <h3>Không tìm thấy môn học nào</h3>
+              <h3>{uiText("Không tìm thấy môn học nào")}</h3>
               <p>
-                Hiện tại không có môn học nào mở nhận ghi danh phù hợp với từ khóa tìm kiếm. Vui lòng thử lại với từ khóa khác.
-              </p>
+                {uiText("Hiện tại không có môn học nào mở nhận ghi danh phù hợp với từ khóa tìm kiếm. Vui lòng thử lại với từ khóa khác.")}</p>
             </div>
           )}
 
@@ -384,41 +381,39 @@ export const StudentCoursesPage: React.FC = () => {
                             color: 'var(--muted)',
                           }}
                         >
-                          {c.active_member_count} sinh viên
-                        </span>
+                          {c.active_member_count} {uiText(" sinh viên")}</span>
                       </div>
 
                       <h3 className="course-card-name">{c.name}</h3>
-                      <p className="course-card-desc">{c.description || 'Không có mô tả môn học.'}</p>
+                      <p className="course-card-desc">{c.description || uiText("Không có mô tả môn học.")}</p>
 
                       <div className="course-card-meta">
                         <div className="meta-item">
                           <User size={14} />
-                          <span>Giảng viên: {c.teacher_name || 'Chưa cập nhật'}</span>
+                          <span>{uiText("Giảng viên: ")}{c.teacher_name || uiText("Chưa cập nhật")}</span>
                         </div>
                         <div className="meta-item">
                           <Calendar size={14} />
-                          <span>Học kỳ: {c.term}</span>
+                          <span>{uiText("Học kỳ: ")}{c.term}</span>
                         </div>
                       </div>
 
                       <div className="catalog-card-actions">
                         {c.my_enrollment_status === 'enrolled' && (
                           <>
-                            <Badge variant="published" label="Đang học" />
+                            <Badge variant="published" label={uiText("Đang học")} />
                             <Button
                               variant="secondary"
                               size="sm"
                               onClick={() => navigate(`/sv/mon-hoc/${c.id}`)}
                             >
-                              Vào học
-                            </Button>
+                              {uiText("Vào học")}</Button>
                           </>
                         )}
 
                         {c.my_enrollment_status === 'pending' && (
                           <>
-                            <Badge variant="pending" label="Chờ duyệt" />
+                            <Badge variant="pending" label={uiText("Chờ duyệt")} />
                             {c.pending_request_id && (
                               <Button
                                 variant="danger"
@@ -426,7 +421,7 @@ export const StudentCoursesPage: React.FC = () => {
                                 disabled={isActioning}
                                 onClick={() => handleCancelRequest(c.pending_request_id!, c.id)}
                               >
-                                {isActioning ? 'Đang hủy...' : 'Hủy yêu cầu'}
+                                {isActioning ? uiText("Đang hủy...") : uiText("Hủy yêu cầu")}
                               </Button>
                             )}
                           </>
@@ -434,14 +429,14 @@ export const StudentCoursesPage: React.FC = () => {
 
                         {c.my_enrollment_status === 'withdrawn' && (
                           <>
-                            <Badge variant="archived" label="Đã rút lui" />
+                            <Badge variant="archived" label={uiText("Đã rút lui")} />
                             <Button
                               variant="primary"
                               size="sm"
                               disabled={isActioning}
                               onClick={() => handleEnroll(c.id, c.name)}
                             >
-                              {isActioning ? 'Đang gửi...' : 'Đăng ký lại'}
+                              {isActioning ? uiText("Đang gửi...") : uiText("Đăng ký lại")}
                             </Button>
                           </>
                         )}
@@ -449,15 +444,14 @@ export const StudentCoursesPage: React.FC = () => {
                         {c.my_enrollment_status === 'not_enrolled' && (
                           <>
                             <span style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)' }}>
-                              Chưa ghi danh
-                            </span>
+                              {uiText("Chưa ghi danh")}</span>
                             <Button
                               variant="primary"
                               size="sm"
                               disabled={isActioning}
                               onClick={() => handleEnroll(c.id, c.name)}
                             >
-                              {isActioning ? 'Đang gửi...' : 'Đăng ký học'}
+                              {isActioning ? uiText("Đang gửi...") : uiText("Đăng ký học")}
                             </Button>
                           </>
                         )}
@@ -471,8 +465,7 @@ export const StudentCoursesPage: React.FC = () => {
               {catalogTotalPages > 1 && (
                 <div className="catalog-pagination-bar">
                   <span className="page-info-text">
-                    Trang {catalogPage} / {catalogTotalPages} (Tổng cộng {catalogTotalItems} môn)
-                  </span>
+                    Trang {catalogPage} / {catalogTotalPages} {uiText(" (Tổng cộng ")}{catalogTotalItems} {uiText(" môn)")}</span>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <Button
                       variant="secondary"
@@ -480,8 +473,7 @@ export const StudentCoursesPage: React.FC = () => {
                       disabled={catalogPage <= 1 || catalogLoading}
                       onClick={() => setCatalogPage((p) => Math.max(1, p - 1))}
                     >
-                      &larr; Trang trước
-                    </Button>
+                      {uiText("&larr; Trang trước")}</Button>
                     <Button
                       variant="secondary"
                       size="sm"
@@ -511,11 +503,11 @@ export const StudentCoursesPage: React.FC = () => {
                   setRequestsPage(1);
                 }}
               >
-                {st === 'all' && 'Tất cả'}
-                {st === 'pending' && 'Đang chờ duyệt'}
-                {st === 'approved' && 'Đã duyệt'}
-                {st === 'rejected' && 'Đã từ chối'}
-                {st === 'cancelled' && 'Đã hủy'}
+                {st === 'all' && uiText("Tất cả")}
+                {st === 'pending' && uiText("Đang chờ duyệt")}
+                {st === 'approved' && uiText("Đã duyệt")}
+                {st === 'rejected' && uiText("Đã từ chối")}
+                {st === 'cancelled' && uiText("Đã hủy")}
               </button>
             ))}
           </div>
@@ -531,12 +523,11 @@ export const StudentCoursesPage: React.FC = () => {
 
           {!requestsLoading && !requestsError && requests.length === 0 && (
             <EmptyState
-              title="Chưa có yêu cầu ghi danh nào"
-              description="Khi bạn gửi yêu cầu ghi danh vào các lớp học phần, tiến độ phê duyệt của giảng viên sẽ xuất hiện tại đây."
+              title={uiText("Chưa có yêu cầu ghi danh nào")}
+              description={uiText("Khi bạn gửi yêu cầu ghi danh vào các lớp học phần, tiến độ phê duyệt của giảng viên sẽ xuất hiện tại đây.")}
               action={
                 <Button variant="primary" onClick={() => handleTabChange('catalog')}>
-                  Tìm môn học để đăng ký
-                </Button>
+                  {uiText("Tìm môn học để đăng ký")}</Button>
               }
             />
           )}
@@ -564,33 +555,33 @@ export const StudentCoursesPage: React.FC = () => {
                             gap: '12px',
                           }}
                         >
-                          <span>Học kỳ: {r.course_term}</span>
-                          <span>Giảng viên: {r.teacher_name}</span>
+                          <span>{uiText("Học kỳ: ")}{r.course_term}</span>
+                          <span>{uiText("Giảng viên: ")}{r.teacher_name}</span>
                         </div>
                       </div>
 
                       <div>
-                        {r.status === 'pending' && <Badge variant="pending" label="Đang chờ duyệt" />}
-                        {r.status === 'approved' && <Badge variant="published" label="Đã duyệt" />}
-                        {r.status === 'rejected' && <Badge variant="error" label="Đã từ chối" />}
-                        {r.status === 'cancelled' && <Badge variant="archived" label="Đã hủy" />}
+                        {r.status === 'pending' && <Badge variant="pending" label={uiText("Đang chờ duyệt")} />}
+                        {r.status === 'approved' && <Badge variant="published" label={uiText("Đã duyệt")} />}
+                        {r.status === 'rejected' && <Badge variant="error" label={uiText("Đã từ chối")} />}
+                        {r.status === 'cancelled' && <Badge variant="archived" label={uiText("Đã hủy")} />}
                       </div>
                     </div>
 
                     <div style={{ fontSize: 'var(--text-xs)', color: 'var(--muted)', display: 'flex', gap: '16px' }}>
                       <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Clock size={12} /> Gửi lúc: {formatDateVN(r.requested_at)}
+                        <Clock size={12} /> {uiText(" Gửi lúc: ")}{formatDateVN(r.requested_at)}
                       </span>
                       {r.reviewed_at && (
                         <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          Xử lý lúc: {formatDateVN(r.reviewed_at)}
+                          {uiText("Xử lý lúc: ")}{formatDateVN(r.reviewed_at)}
                         </span>
                       )}
                     </div>
 
                     {r.status === 'rejected' && r.rejection_reason && (
                       <div className="request-rejection-box">
-                        <strong>Lý do từ chối:</strong> {r.rejection_reason}
+                        <strong>{uiText("Lý do từ chối:")}</strong> {r.rejection_reason}
                       </div>
                     )}
 
@@ -602,7 +593,7 @@ export const StudentCoursesPage: React.FC = () => {
                           disabled={isActioning}
                           onClick={() => handleCancelRequest(r.id)}
                         >
-                          <XCircle size={14} /> {isActioning ? 'Đang hủy...' : 'Hủy yêu cầu'}
+                          <XCircle size={14} /> {isActioning ? uiText("Đang hủy...") : uiText("Hủy yêu cầu")}
                         </Button>
                       )}
 
@@ -612,8 +603,7 @@ export const StudentCoursesPage: React.FC = () => {
                           size="sm"
                           onClick={() => navigate(`/sv/mon-hoc/${r.course_id}`)}
                         >
-                          Vào học &rarr;
-                        </Button>
+                          {uiText("Vào học &rarr;")}</Button>
                       )}
                     </div>
                   </div>
@@ -623,8 +613,7 @@ export const StudentCoursesPage: React.FC = () => {
               {requestsTotalPages > 1 && (
                 <div className="catalog-pagination-bar">
                   <span className="page-info-text">
-                    Trang {requestsPage} / {requestsTotalPages} (Tổng cộng {requestsTotalItems} yêu cầu)
-                  </span>
+                    Trang {requestsPage} / {requestsTotalPages} {uiText(" (Tổng cộng ")}{requestsTotalItems} {uiText(" yêu cầu)")}</span>
                   <div style={{ display: 'flex', gap: '8px' }}>
                     <Button
                       variant="secondary"
@@ -632,8 +621,7 @@ export const StudentCoursesPage: React.FC = () => {
                       disabled={requestsPage <= 1 || requestsLoading}
                       onClick={() => setRequestsPage((p) => Math.max(1, p - 1))}
                     >
-                      &larr; Trang trước
-                    </Button>
+                      {uiText("&larr; Trang trước")}</Button>
                     <Button
                       variant="secondary"
                       size="sm"

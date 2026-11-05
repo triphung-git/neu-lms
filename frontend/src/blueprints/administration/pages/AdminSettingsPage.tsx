@@ -1,263 +1,214 @@
-import React, { useState } from 'react';
-import { useDatabase } from '../../../app/providers/DatabaseContext';
-import { useNotifications } from '../../../app/providers/NotificationContext';
+import {uiText} from "../../../shared/i18n/translate";
+import React, { useCallback, useEffect, useState } from 'react';
+import { apiClient } from '../../../api/client';
 import { Breadcrumb } from '../../../shared/ui/Breadcrumb';
-import { TextField } from '../../../shared/ui/TextField';
-import { Modal } from '../../../shared/ui/Modal';
-import { Button } from '../../../shared/ui/Button';
-import { ShieldCheck, Bot, Mail, FileCheck, Save } from 'lucide-react';
+import { AdminFileLimitsPanel } from '../../dashboards/pages/AdminFileLimitsPanel';
+import {
+  Activity,
+  Bot,
+  Database,
+  Mail,
+  RefreshCw,
+  ShieldCheck,
+  HardDrive,
+  Server,
+} from 'lucide-react';
 import './AdminSettingsPage.css';
 
+type RuntimeSettings = {
+  ai_auto_index_enabled: boolean;
+  ai_index_failed: number;
+  ai_index_ready: number;
+  notification_email_enabled: boolean;
+  notification_email_failed: number;
+  notification_email_pending: number;
+  ai_chat_configured: boolean;
+  ai_chat_model: string;
+  ai_embedding_configured: boolean;
+  ai_embedding_model: string;
+  email_backend: string;
+  email_host_configured: boolean;
+  email_auth_configured: boolean;
+  email_sender_configured: boolean;
+  file_storage_backend: string;
+  s3_storage_configured: boolean;
+  clamav_configured: boolean;
+  celery_broker_configured: boolean;
+};
+
+type StatusRowProps = {
+  label: string;
+  configured: boolean;
+  detail?: string;
+};
+
+function StatusRow({ label, configured, detail }: StatusRowProps) {
+  return (
+    <div className="runtime-status-row">
+      <div>
+        <strong>{label}</strong>
+        {detail && <p>{detail}</p>}
+      </div>
+      <span className={`runtime-status-pill ${configured ? 'is-configured' : 'is-missing'}`}>
+        <span aria-hidden="true" className="runtime-status-dot" />
+        {configured ? uiText("Đã cấu hình") : uiText("Chưa cấu hình")}
+      </span>
+    </div>
+  );
+}
+
 export const AdminSettingsPage: React.FC = () => {
-  const { systemSettings, updateSystemSettings } = useDatabase();
-  const { showNotification } = useNotifications();
+  const [runtime, setRuntime] = useState<RuntimeSettings | null>(null);
+  const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [attempt, setAttempt] = useState(0);
 
-  // Form states initialized from systemSettings
-  const [formatsStr, setFormatsStr] = useState((systemSettings.studentSubmissionFormats || ['pdf', 'docx', 'zip']).join(', '));
-  const [maxSizeMb, setMaxSizeMb] = useState((systemSettings.maxSubmissionFileMB || 50).toString());
-  const [enableAi, setEnableAi] = useState(systemSettings.aiEnabled ?? true);
-  const [teacherQuota, setTeacherQuota] = useState((systemSettings.teacherMonthlyAIQuota || 100).toString());
-  const [studentQuota, setStudentQuota] = useState((systemSettings.studentDailyAIQuota || 10).toString());
-  const [enableEmail, setEnableEmail] = useState(systemSettings.emailEnabled ?? true);
-
-  // Confirm Modal
-  const [showConfirmModal, setShowConfirmModal] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Validate formats
-    const parsedFormats = formatsStr.split(',').map((f: string) => f.trim().toLowerCase()).filter(Boolean);
-    if (parsedFormats.length === 0) {
-      showNotification('error', 'Định dạng tệp nộp bài không được để trống.');
-      return;
+  const loadRuntimeSettings = useCallback(async (signal: AbortSignal) => {
+    setIsLoading(true);
+    setError('');
+    try {
+      const result = await apiClient.untypedRequest<RuntimeSettings>(
+        '/api/v1/admin/runtime-settings',
+        { signal },
+      );
+      if (!signal.aborted) setRuntime(result);
+    } catch (caughtError) {
+      if (!signal.aborted) {
+        setError(
+          caughtError instanceof Error
+            ? caughtError.message
+            : uiText("Không tải được trạng thái cấu hình hệ thống."),
+        );
+      }
+    } finally {
+      if (!signal.aborted) setIsLoading(false);
     }
+  }, []);
 
-    // Validate size
-    const sizeNum = parseInt(maxSizeMb, 10);
-    if (isNaN(sizeNum) || sizeNum < 1) {
-      showNotification('error', 'Dung lượng tệp tối đa phải là số nguyên lớn hơn hoặc bằng 1 MB.');
-      return;
-    }
-
-    // Validate quotas
-    const tQuotaNum = parseInt(teacherQuota, 10);
-    const sQuotaNum = parseInt(studentQuota, 10);
-    if (isNaN(tQuotaNum) || tQuotaNum < 1 || isNaN(sQuotaNum) || sQuotaNum < 1) {
-      showNotification('error', 'Hạn mức AI phải là số nguyên dương lớn hơn hoặc bằng 1.');
-      return;
-    }
-
-    setShowConfirmModal(true);
-  };
-
-  const handleConfirmSave = () => {
-    setIsSaving(true);
-    const parsedFormats = formatsStr.split(',').map((f: string) => f.trim().toLowerCase()).filter(Boolean);
-
-    const res = updateSystemSettings({
-      studentSubmissionFormats: parsedFormats,
-      maxSubmissionFileMB: parseInt(maxSizeMb, 10),
-      aiEnabled: enableAi,
-      teacherMonthlyAIQuota: parseInt(teacherQuota, 10),
-      studentDailyAIQuota: parseInt(studentQuota, 10),
-      emailEnabled: enableEmail
-    });
-
-    setIsSaving(false);
-    setShowConfirmModal(false);
-
-    if (res.ok) {
-      showNotification('success', 'Đã lưu và áp dụng cấu hình hệ thống toàn trường.');
-    } else {
-      showNotification('error', res.error?.message || 'Lỗi khi lưu cấu hình');
-    }
-  };
+  useEffect(() => {
+    const controller = new AbortController();
+    void loadRuntimeSettings(controller.signal);
+    return () => controller.abort();
+  }, [attempt, loadRuntimeSettings]);
 
   return (
     <div className="admin-settings-page">
+      {runtime && <section className="runtime-jobs" aria-label={uiText("Hàng đợi nền")}>
+        <h2>{uiText("Xử lý nền")}</h2>
+        <dl><div><dt>{uiText("Tự động cập nhật embeddings")}</dt><dd>{runtime.ai_auto_index_enabled ? uiText("Đã bật") : uiText("Đã tắt")} · {runtime.ai_index_ready} {uiText(" hoàn tất · ")}{runtime.ai_index_failed} {uiText(" đang lỗi")}</dd></div>
+        <div><dt>{uiText("Email thông báo môn học và điểm")}</dt><dd>{runtime.notification_email_enabled ? uiText("Đã bật") : uiText("Đã tắt")} · {runtime.notification_email_pending} {uiText(" đang chờ · ")}{runtime.notification_email_failed} {uiText(" hết lượt thử")}</dd></div></dl>
+        <p>{uiText("Số liệu hàng đợi không thay thế kiểm tra kết nối nhà cung cấp. Tải lại để cập nhật.")}</p>
+      </section>}
+
       <div className="page-header">
         <Breadcrumb
           items={[
-            { label: 'Bàn làm việc', path: '/ad' },
-            { label: 'Cấu hình hệ thống' }
+            { label: uiText("Bàn làm việc"), path: '/ad' },
+            { label: uiText("Cấu hình hệ thống") },
           ]}
         />
-        <h1 className="page-heading">Cấu hình hệ thống toàn trường</h1>
+        <h1 className="page-heading">{uiText("Cấu hình hệ thống toàn trường")}</h1>
         <p className="page-subheading">
-          Thiết lập các tham số vận hành, hạn ngạch tài nguyên, chính sách nộp bài và an toàn thông tin.
-        </p>
+          {uiText("Theo dõi trạng thái cấu hình runtime của AI, email, lưu trữ và dịch vụ nền.")}</p>
       </div>
 
-      <form onSubmit={handleSubmit} className="settings-form-layout">
-        {/* SECTION 1: SUBMISSION CONSTRAINTS */}
-        <section className="settings-card">
-          <div className="card-top-header">
-            <FileCheck size={22} className="card-icon blue" />
-            <div>
-              <h2 className="card-title">1. Quy định nộp bài tập sinh viên</h2>
-              <p className="card-subtitle">Ràng buộc kỹ thuật khi sinh viên nộp bài làm lên hệ thống.</p>
-            </div>
+      <AdminFileLimitsPanel />
+
+      <section className="settings-card runtime-settings-card" aria-labelledby="runtime-settings-title">
+        <div className="card-top-header">
+          <Server size={22} className="card-icon blue" />
+          <div>
+            <h2 className="card-title" id="runtime-settings-title">{uiText("Trạng thái cấu hình máy chủ")}</h2>
+            <p className="card-subtitle">
+              {uiText("Dữ liệu được đọc trực tiếp từ backend. Giao diện không trả về hoặc lưu bất kỳ secret nào.")}</p>
           </div>
-
-          <div className="card-fields-grid">
-            <TextField
-              label="Các định dạng tệp cho phép (phân tách bởi dấu phẩy)"
-              required
-              value={formatsStr}
-              onChange={e => setFormatsStr(e.target.value)}
-              placeholder="pdf, docx, pptx, zip"
-              helperText="Hệ thống từ chối các định dạng không nằm trong danh mục này."
-            />
-
-            <TextField
-              label="Dung lượng tệp tối đa (MB)"
-              required
-              type="number"
-              min="1"
-              max="500"
-              value={maxSizeMb}
-              onChange={e => setMaxSizeMb(e.target.value)}
-              helperText="Giới hạn kích thước tệp tải lên (khuyến nghị 25 MB)."
-            />
-          </div>
-        </section>
-
-        {/* SECTION 2: AI ASSISTANT SETTINGS */}
-        <section className="settings-card">
-          <div className="card-top-header">
-            <Bot size={22} className="card-icon purple" />
-            <div>
-              <h2 className="card-title">2. Trợ lý học vụ AI & Hạn ngạch</h2>
-              <p className="card-subtitle">Cấu hình tính năng AI hỗ trợ học liệu và tóm tắt đề bài.</p>
-            </div>
-          </div>
-
-          <div className="card-fields-grid">
-            <div className="switch-row-box">
-              <label className="switch-toggle-label">
-                <input
-                  type="checkbox"
-                  checked={enableAi}
-                  onChange={e => setEnableAi(e.target.checked)}
-                />
-                <span className="switch-text">Kích hoạt tính năng trợ lý AI toàn hệ thống</span>
-              </label>
-              <span className="switch-help">Nếu tắt, sinh viên và giảng viên sẽ không thể sử dụng tính năng hỏi đáp và sinh bản nháp AI.</span>
-            </div>
-
-            <div className="quota-row-2col">
-              <TextField
-                label="Hạn mức AI Giảng viên (lượt / ngày)"
-                required
-                type="number"
-                min="1"
-                value={teacherQuota}
-                onChange={e => setTeacherQuota(e.target.value)}
-                disabled={!enableAi}
-              />
-
-              <TextField
-                label="Hạn mức AI Sinh viên (lượt / ngày)"
-                required
-                type="number"
-                min="1"
-                value={studentQuota}
-                onChange={e => setStudentQuota(e.target.value)}
-                disabled={!enableAi}
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 3: SIMULATED EMAIL SETTINGS */}
-        <section className="settings-card">
-          <div className="card-top-header">
-            <Mail size={22} className="card-icon orange" />
-            <div>
-              <h2 className="card-title">3. Dịch vụ gửi Email mô phỏng</h2>
-              <p className="card-subtitle">Mô phỏng gửi thông báo đến hòm thư sinh viên và cán bộ.</p>
-            </div>
-          </div>
-
-          <div className="card-fields-grid">
-            <div className="switch-row-box">
-              <label className="switch-toggle-label">
-                <input
-                  type="checkbox"
-                  checked={enableEmail}
-                  onChange={e => setEnableEmail(e.target.checked)}
-                />
-                <span className="switch-text">Bật mô phỏng gửi thông báo qua Email</span>
-              </label>
-              <span className="switch-help">Tác vụ gửi email chạy trong môi trường demo an toàn, không gửi email rác ra mạng bên ngoài.</span>
-            </div>
-          </div>
-        </section>
-
-        {/* SECTION 4: SECURITY SCAN POLICY (NON-TOGGLEABLE) */}
-        <section className="settings-card security-policy-card">
-          <div className="card-top-header">
-            <ShieldCheck size={22} className="card-icon green" />
-            <div>
-              <h2 className="card-title">4. Chính sách quét an ninh & Mã độc</h2>
-              <p className="card-subtitle">Quy định bắt buộc theo tiêu chuẩn bảo mật dữ liệu NPC LMS.</p>
-            </div>
-          </div>
-
-          <div className="security-enforced-banner">
-            <div className="enforced-left">
-              <span className="enforced-badge">CHÍNH SÁCH BẮT BUỘC BẬT (ENFORCED)</span>
-              <p className="enforced-desc">
-                Tính năng tự động quét an ninh mã độc cho 100% học liệu và bài nộp sinh viên luôn được kích hoạt ở mức cao nhất. Không thể tắt tính năng này để bảo vệ an toàn máy chủ và dữ liệu người dùng.
-              </p>
-            </div>
-          </div>
-        </section>
-
-        {/* Save Bar */}
-        <div className="settings-submit-bar">
-          <Button type="submit" variant="primary">
-            <Save size={16} />
-            <span>Lưu cấu hình hệ thống</span>
-          </Button>
+          <button
+            type="button"
+            className="runtime-refresh-button"
+            onClick={() => setAttempt(value => value + 1)}
+            disabled={isLoading}
+          >
+            <RefreshCw size={15} />
+            {uiText("Làm mới")}</button>
         </div>
-      </form>
 
-      {/* Confirmation Modal */}
-      {showConfirmModal && (
-        <Modal
-          title="Xác nhận lưu cấu hình hệ thống"
-          isOpen={showConfirmModal}
-          onClose={() => setShowConfirmModal(false)}
-        >
-          <div className="modal-content-stack">
-            <p>
-              Bạn chuẩn bị cập nhật các tham số vận hành toàn trường. Các thay đổi này sẽ có hiệu lực ngay lập tức cho toàn bộ người dùng.
-            </p>
-            <div className="confirm-summary-list">
-              <div>Định dạng cho phép: <strong>{formatsStr}</strong></div>
-              <div>Dung lượng tối đa: <strong>{maxSizeMb} MB</strong></div>
-              <div>Trợ lý AI: <strong>{enableAi ? 'BẬT' : 'TẮT'}</strong></div>
-              <div>Email mô phỏng: <strong>{enableEmail ? 'BẬT' : 'TẮT'}</strong></div>
-            </div>
-            <div className="modal-actions-bar">
-              <Button type="button" variant="secondary" onClick={() => setShowConfirmModal(false)}>
-                Hủy bỏ
-              </Button>
-              <Button
-                type="button"
-                variant="primary"
-                isLoading={isSaving}
-                onClick={handleConfirmSave}
-              >
-                Xác nhận lưu cấu hình
-              </Button>
-            </div>
+        {error && (
+          <div className="runtime-error" role="alert">
+            <span>{error}</span>
+            <button type="button" onClick={() => setAttempt(value => value + 1)}>
+              {uiText("Thử lại")}</button>
           </div>
-        </Modal>
-      )}
+        )}
+        {isLoading && !runtime && <p role="status">{uiText("Đang tải trạng thái cấu hình…")}</p>}
+
+        {runtime && (
+          <div className="runtime-sections">
+            <section className="runtime-section" aria-labelledby="runtime-ai-title">
+              <h3 id="runtime-ai-title"><Bot size={17} /> {uiText(" Dịch vụ AI/RAG")}</h3>
+              <StatusRow
+                label={uiText("Mô hình chat")}
+                configured={runtime.ai_chat_configured}
+                detail={runtime.ai_chat_model || uiText("Chưa khai báo AI_CHAT_MODEL")}
+              />
+              <StatusRow
+                label={uiText("Embedding học liệu")}
+                configured={runtime.ai_embedding_configured}
+                detail={runtime.ai_embedding_model || uiText("Chưa khai báo AI_EMBEDDING_MODEL")}
+              />
+            </section>
+
+            <section className="runtime-section" aria-labelledby="runtime-email-title">
+              <h3 id="runtime-email-title"><Mail size={17} /> Email</h3>
+              <StatusRow
+                label="SMTP host"
+                configured={runtime.email_host_configured}
+                detail={runtime.email_backend}
+              />
+              <StatusRow label={uiText("Thông tin xác thực SMTP")} configured={runtime.email_auth_configured} />
+              <StatusRow label={uiText("Địa chỉ gửi mặc định")} configured={runtime.email_sender_configured} />
+            </section>
+
+            <section className="runtime-section" aria-labelledby="runtime-storage-title">
+              <h3 id="runtime-storage-title"><HardDrive size={17} /> {uiText(" File, lưu trữ và worker")}</h3>
+              <StatusRow
+                label={uiText("Backend lưu trữ")}
+                configured={runtime.file_storage_backend === 's3' ? runtime.s3_storage_configured : runtime.file_storage_backend === 'local'}
+                detail={uiText("Chế độ hiện tại: {0}",[runtime.file_storage_backend])}
+              />
+              <StatusRow label="Object storage S3" configured={runtime.s3_storage_configured} />
+              <StatusRow label="ClamAV scanner" configured={runtime.clamav_configured} />
+              <StatusRow label="Celery broker" configured={runtime.celery_broker_configured} />
+            </section>
+
+            <section className="runtime-section runtime-security-note" aria-labelledby="runtime-security-title">
+              <h3 id="runtime-security-title"><ShieldCheck size={17} /> {uiText(" Chính sách và giới hạn")}</h3>
+              <p>
+                {uiText("Khóa API, mật khẩu SMTP, S3 credentials và kết nối cơ sở dữ liệu phải được cấu hình qua secret manager hoặc biến môi trường trên máy chủ; không chỉnh sửa qua trình duyệt.")}</p>
+              <p>
+                {uiText("Các trạng thái trên chỉ xác nhận sự hiện diện của cấu hình, không thay thế health check kết nối, kiểm tra worker hoặc smoke test trên staging.")}</p>
+            </section>
+          </div>
+        )}
+
+        {!isLoading && !error && !runtime && (
+          <div className="runtime-error" role="alert">{uiText("Backend không trả về dữ liệu cấu hình.")}</div>
+        )}
+      </section>
+
+      <section className="settings-card security-policy-card">
+        <div className="card-top-header">
+          <Activity size={22} className="card-icon green" />
+          <div>
+            <h2 className="card-title">{uiText("Chính sách bảo mật tệp")}</h2>
+            <p className="card-subtitle">{uiText("Các giới hạn và bộ quét được backend áp dụng; không thể tắt từ giao diện.")}</p>
+          </div>
+        </div>
+        <div className="security-enforced-banner">
+          <Database size={21} />
+          <p className="enforced-desc">
+            {uiText("Tệp tải lên chỉ được phân phối sau khi quy trình kiểm tra an toàn hoàn tất. Trong staging, cần bảo đảm file worker, scheduler, object storage và ClamAV hoạt động trước khi nghiệm thu.")}</p>
+        </div>
+      </section>
     </div>
   );
 };

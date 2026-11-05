@@ -1,0 +1,39 @@
+.recent-course-notices ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-course-notices li {
+  display: grid;
+  gap: 4px;
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.recent-course-notices li + li {
+  border-top: 1px solid var(--border);
+}
+
+.recent-course-notices li a {
+  color: var(--focus);
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.recent-course-notices li span,
+.recent-course-notices time {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.recent-course-notices [role="alert"] {
+  color: var(--danger);
+}
+
+.recent-course-notices button {
+  min-height: 44px;
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}

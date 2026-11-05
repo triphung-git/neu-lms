@@ -132,6 +132,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/audit-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_audit_log_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/courses/{course_id}/transfer": {
         parameters: {
             query?: never;
@@ -148,6 +164,22 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/file-limits": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_file_limits_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/grants/{grant_id}/revoke": {
         parameters: {
             query?: never;
@@ -158,6 +190,38 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["admin_grants_revoke_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/overview": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_overview_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/admin/recent-activity": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["admin_recent_activity_list"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -212,6 +276,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/admin/runtime-settings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description Expose non-secret configuration flags so the admin UI cannot fake settings. */
+        get: operations["admin_runtime_settings_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/admin/teacher-requests": {
         parameters: {
             query?: never;
@@ -254,6 +335,89 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["admin_teacher_requests_reject_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/chat": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["ai_courses_chat_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/chat/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["ai_courses_chat_history_list"];
+        put?: never;
+        post?: never;
+        delete: operations["ai_courses_chat_history_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/courses/{course_id}/materials/{material_id}/summary-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Generate a pending summary from clean extracted text; never publish automatically. */
+        post: operations["ai_courses_materials_summary_drafts_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/teacher/summary-drafts": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** @description List summary drafts belonging only to courses owned by the current teacher. */
+        get: operations["ai_teacher_summary_drafts_list"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/ai/teacher/summary-drafts/{draft_id}/review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** @description Confirm a teacher-edited summary or discard it; confirmation updates the version only. */
+        post: operations["ai_teacher_summary_drafts_review_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -320,6 +484,28 @@ export interface paths {
         };
         /** @description Thẩm định tính hợp lệ nộp bài trực tiếp qua assignment ID. */
         get: operations["assignments_direct_eligibility_check"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assignments/{id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["teacher_submission_list"];
         put?: never;
         post?: never;
         delete?: never;
@@ -796,6 +982,44 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/courses/{course_id}/assignments/{id}/submission-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["courses_assignments_submission_history_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/assignments/{id}/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["courses_assignments_submissions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/courses/{course_id}/chapters": {
         parameters: {
             query?: never;
@@ -1054,6 +1278,28 @@ export interface paths {
         get?: never;
         put?: never;
         post: operations["courses_files_upload_intent_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/courses/{course_id}/gradebook": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["courses_gradebook_retrieve"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1575,6 +1821,246 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/learning/courses/{course_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/actions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["learning_courses_actions_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_appeals_retrieve"];
+        put?: never;
+        post: operations["learning_courses_appeals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/attendance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_attendance_retrieve"];
+        put?: never;
+        post: operations["learning_courses_attendance_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/discussion": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_discussion_retrieve"];
+        put?: never;
+        post: operations["learning_courses_discussion_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/downloads": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_downloads_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/group-appeals": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_group_appeals_retrieve"];
+        put?: never;
+        post: operations["learning_courses_group_appeals_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/groups": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_groups_retrieve"];
+        put?: never;
+        post: operations["learning_courses_groups_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/courses/{course_id}/progress": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_courses_progress_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/drafts/{draft_id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete: operations["learning_drafts_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/enrollment": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_enrollment_retrieve"];
+        put?: never;
+        post: operations["learning_enrollment_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/group-files/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_group_files_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/library": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_library_retrieve"];
+        put?: never;
+        post: operations["learning_library_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/library/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_library_file"];
+        put?: never;
+        post?: never;
+        delete: operations["learning_library_destroy"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/learning/reports": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["learning_reports_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/materials/{id}": {
         parameters: {
             query?: never;
@@ -1603,6 +2089,278 @@ export interface paths {
         get: operations["materials_search_global"];
         put?: never;
         post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_course_announcements_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["me_course_announcements_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["me_course_announcements_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/course-announcements/unread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_course_announcements_unread_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grade_notices_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/{id}/read": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["me_grade_notices_read_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/read-all": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["me_grade_notices_read_all_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grade-notices/unread": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grade_notices_unread_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/grades": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["me_grades_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/me/upcoming-assignments": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["me_upcoming_assignments_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}/grade": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["submissions_grade_retrieve"];
+        put?: never;
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        post: operations["submissions_grade_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/submissions/{id}/grade-history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * @description Lớp view cơ sở cho phân hệ Bài tập.
+         *
+         *     Đảm bảo giao dịch atomic cho mọi mutation và chuyển đổi exception chuẩn hóa theo
+         *     error envelope thống nhất của hệ thống NEU LMS.
+         */
+        get: operations["submissions_grade_history_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teacher/course-announcements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get: operations["teacher_course_announcements_retrieve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/teacher/course-announcements/publish": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: operations["teacher_course_announcements_publish_create"];
         delete?: never;
         options?: never;
         head?: never;
@@ -1705,11 +2463,56 @@ export interface components {
             is_active: boolean;
             current_password?: string;
         };
+        AdminFileLimits: {
+            max_file_bytes: number;
+            max_course_quota_bytes: number;
+            default_file_bytes: number;
+            default_course_quota_bytes: number;
+            default_extensions: string[];
+        };
+        AdminOverviewNumbers: {
+            active_users: number;
+            inactive_users: number;
+            open_courses: number;
+            archived_courses: number;
+            infected_material_files: number;
+            scanning_material_files: number;
+            pending_teacher_requests: number;
+        };
         AdminPasswordResetResponse: {
             message: string;
         };
         AdminReauthRequest: {
             current_password?: string;
+        };
+        AdminRecentEvent: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurred_at: string;
+            actor_name: string;
+            action: string;
+            resource_type: string;
+        };
+        AdminRuntimeSettings: {
+            ai_auto_index_enabled: boolean;
+            ai_index_failed: number;
+            ai_index_ready: number;
+            notification_email_enabled: boolean;
+            notification_email_failed: number;
+            notification_email_pending: number;
+            ai_chat_configured: boolean;
+            ai_chat_model: string;
+            ai_embedding_configured: boolean;
+            ai_embedding_model: string;
+            email_backend: string;
+            email_host_configured: boolean;
+            email_auth_configured: boolean;
+            email_sender_configured: boolean;
+            file_storage_backend: string;
+            s3_storage_configured: boolean;
+            clamav_configured: boolean;
+            celery_broker_configured: boolean;
         };
         AdminTeacherApprovalResponse: {
             /** Format: uuid */
@@ -2041,6 +2844,25 @@ export interface components {
             attachment_file_ids?: string[];
             expected_version?: number;
         };
+        AuditListResult: {
+            items: components["schemas"]["AuditRow"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        AuditRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: date-time */
+            occurred_at: string;
+            actor_name: string;
+            action: string;
+            resource_type: string;
+            /** Format: uuid */
+            resource_id: string;
+            /** Format: uuid */
+            correlation_id: string;
+        };
         Chapter: {
             /** Format: uuid */
             readonly id: string;
@@ -2055,6 +2877,18 @@ export interface components {
         };
         ChapterRequest: {
             title: string;
+        };
+        ChatTurn: {
+            id: number;
+            /** Format: uuid */
+            request_id: string;
+            question: string;
+            answer: string;
+            citations: {
+                [key: string]: unknown;
+            }[];
+            /** Format: date-time */
+            created_at: string;
         };
         /**
          * @description * `manual_close` - manual_close
@@ -2073,6 +2907,9 @@ export interface components {
             file_size: number;
             status: string;
             sha256_hash: string;
+        };
+        CountResult: {
+            unread_count: number;
         };
         Course: {
             /** Format: uuid */
@@ -2110,6 +2947,51 @@ export interface components {
             pending_request_id: string | null;
             /** Format: date-time */
             created_at: string;
+        };
+        CourseChatCitation: {
+            /** Format: uuid */
+            version_id?: string;
+            /** Format: uuid */
+            file_id?: string;
+            file_hash?: string;
+            id: string;
+            /** Format: uuid */
+            material_id: string;
+            material_title: string;
+            course_code: string;
+            course_name: string;
+            file_name: string;
+            page_number: number | null;
+            excerpt: string;
+        };
+        CourseChatCourse: {
+            /** Format: uuid */
+            id: string;
+            code: string;
+            name: string;
+        };
+        CourseChatHistoryMessageRequest: {
+            role: components["schemas"]["CourseChatHistoryMessageRoleEnum"];
+            content: string;
+        };
+        /**
+         * @description * `user` - user
+         *     * `assistant` - assistant
+         * @enum {string}
+         */
+        CourseChatHistoryMessageRoleEnum: "user" | "assistant";
+        CourseChatRequestRequest: {
+            /** Format: uuid */
+            request_id?: string;
+            /** @description Câu hỏi cần trợ lý AI trả lời dựa trên học liệu. */
+            question: string;
+            /** @description Tối đa 8 lượt hội thoại gần nhất; chỉ dùng để hiểu ngữ cảnh, không phải nguồn dữ kiện để trả lời. */
+            history?: components["schemas"]["CourseChatHistoryMessageRequest"][];
+        };
+        CourseChatResponse: {
+            answer: string;
+            citations: components["schemas"]["CourseChatCitation"][];
+            course: components["schemas"]["CourseChatCourse"];
         };
         CourseFilePolicy: {
             /** Format: uuid */
@@ -2162,6 +3044,12 @@ export interface components {
          * @enum {string}
          */
         CourseMemberStatusEnum: "active" | "withdrawn";
+        CourseOption: {
+            /** Format: uuid */
+            id: string;
+            name: string;
+            status: string;
+        };
         CourseRequest: {
             code: string;
             name: string;
@@ -2193,6 +3081,7 @@ export interface components {
             updated_at: string;
         };
         CourseSummaryResponse: {
+            pending_assignments?: components["schemas"]["PendingAssignment"][];
             role: components["schemas"]["RequestableRoleEnum"];
             total_courses?: number | null;
             open_courses?: number | null;
@@ -2201,6 +3090,7 @@ export interface components {
             total_memberships?: number | null;
             distinct_students?: number | null;
             pending_submissions?: number | null;
+            scanning_materials?: number;
             problem_materials?: number | null;
             pending_ai_drafts?: number | null;
             total_enrolled_courses?: number | null;
@@ -2241,6 +3131,21 @@ export interface components {
             /** Format: email */
             email: string;
             password: string;
+        };
+        CriterionScoreInputRequest: {
+            /** Format: uuid */
+            criterion_id: string;
+            /** Format: decimal */
+            score: string;
+        };
+        CriterionScoreOutput: {
+            /** Format: uuid */
+            criterion_id: string;
+            /** Format: decimal */
+            score: string;
+            title: string;
+            /** Format: decimal */
+            max_score: string;
         };
         /**
          * @description * `pending` - Đang chờ duyệt
@@ -2284,6 +3189,88 @@ export interface components {
             max_files_per_submission?: number;
             max_file_size_bytes?: number;
             allowed_extensions?: string[];
+        };
+        GradeCriterion: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+            /** Format: decimal */
+            max_score: string;
+        };
+        GradeDetail: {
+            /** Format: decimal */
+            total_score: string;
+            rubric: components["schemas"]["GradeCriterion"][];
+            grade: components["schemas"]["GradeOutput"] | null;
+        };
+        GradeHistoryResult: {
+            items: components["schemas"]["GradeOutput"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        GradeInputRequest: {
+            /** Format: decimal */
+            score?: string;
+            rubric_scores?: components["schemas"]["CriterionScoreInputRequest"][];
+            feedback?: string;
+            status: components["schemas"]["SubmissionGradeStatusEnum"];
+            expected_version: number;
+        };
+        GradeNotice: {
+            id: number;
+            /** Format: date-time */
+            readonly read_at: string | null;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            revision: number;
+            /** Format: decimal */
+            score: string;
+            /** Format: date-time */
+            published_at: string;
+        };
+        GradeNoticeList: {
+            items: components["schemas"]["GradeNotice"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        GradeOutput: {
+            version: number;
+            /** Format: decimal */
+            score: string;
+            feedback?: string;
+            status: components["schemas"]["SubmissionGradeStatusEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+            readonly rubric_breakdown: components["schemas"]["CriterionScoreOutput"][];
+        };
+        GradeReadAllResult: {
+            updated_count: number;
+        };
+        GradebookAssignment: {
+            /** Format: uuid */
+            id: string;
+            title: string;
+        };
+        GradebookRow: {
+            /** Format: uuid */
+            student_id: string;
+            name: string;
+            /** Format: email */
+            email: string;
+            revision_number: number | null;
+            latest_grade: components["schemas"]["GradeOutput"] | null;
+            published_grade: components["schemas"]["GradeOutput"] | null;
+        };
+        LatestSubmission: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
         };
         Lesson: {
             /** Format: uuid */
@@ -2462,6 +3449,44 @@ export interface components {
             rank: number;
             matches: components["schemas"]["MaterialSearchMatch"][];
         };
+        MaterialSummaryDraft: {
+            /** Format: uuid */
+            readonly id: string;
+            /** Format: uuid */
+            readonly course_id: string;
+            readonly course_code: string;
+            readonly course_name: string;
+            /** Format: uuid */
+            readonly material_id: string;
+            readonly material_title: string;
+            /** Format: uuid */
+            readonly material_version_id: string;
+            readonly version_number: number;
+            readonly summary: string;
+            readonly source_file_names: string[];
+            readonly status: components["schemas"]["MaterialSummaryDraftStatusEnum"];
+            /** Format: date-time */
+            readonly created_at: string;
+            /** Format: date-time */
+            readonly reviewed_at: string | null;
+        };
+        MaterialSummaryDraftReviewRequest: {
+            status: components["schemas"]["MaterialSummaryDraftReviewStatusEnum"];
+            summary?: string;
+        };
+        /**
+         * @description * `confirmed` - confirmed
+         *     * `discarded` - discarded
+         * @enum {string}
+         */
+        MaterialSummaryDraftReviewStatusEnum: "confirmed" | "discarded";
+        /**
+         * @description * `pending` - pending
+         *     * `confirmed` - confirmed
+         *     * `discarded` - discarded
+         * @enum {string}
+         */
+        MaterialSummaryDraftStatusEnum: "pending" | "confirmed" | "discarded";
         /**
          * @description * `document` - Tài liệu
          *     * `slide` - Bài giảng/Slide
@@ -2540,6 +3565,34 @@ export interface components {
             readonly finalized_at: string | null;
             /** Format: date-time */
             readonly created_at: string;
+        };
+        NoticeFeed: {
+            items: components["schemas"]["NoticeRow"][];
+            courses: components["schemas"]["CourseOption"][];
+            pagination: {
+                [key: string]: unknown;
+            };
+        };
+        NoticeInputRequest: {
+            /** Format: uuid */
+            request_key: string;
+            /** Format: uuid */
+            course_id: string;
+            title: string;
+            body: string;
+        };
+        NoticeRow: {
+            id: number;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            author_name: string;
+            title: string;
+            body: string;
+            /** Format: date-time */
+            published_at: string;
+            is_read: boolean;
+            recipients: number;
         };
         PaginatedAdminAccountListItemList: {
             items: components["schemas"]["AdminAccountListItem"][];
@@ -2757,6 +3810,15 @@ export interface components {
         PatchedUpdateFilePublishRequest: {
             is_published?: boolean;
         };
+        PendingAssignment: {
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            course_name: string;
+            waiting: number;
+            /** Format: date-time */
+            oldest: string;
+        };
         /**
          * @description * `pending` - Chờ xử lý
          *     * `processing` - Đang xử lý
@@ -2767,6 +3829,9 @@ export interface components {
          * @enum {string}
          */
         ProcessingStatusEnum: "pending" | "processing" | "ready" | "failed" | "no_text" | "unsupported";
+        PublishedNotice: {
+            id: number;
+        };
         ReadinessSuccessResponse: {
             /** @default ok */
             status: string;
@@ -2923,8 +3988,9 @@ export interface components {
          * @enum {string}
          */
         StoredFileStatusEnum: "quarantine_pending" | "scanning" | "clean" | "infected" | "deleted";
-        /** @description Serializer cho kết quả thẩm định hợp lệ nộp bài theo Thẩm quyền Máy chủ. */
         StudentAssignmentEligibility: {
+            /** @default false */
+            is_group_assignment: boolean;
             can_submit: boolean;
             can_replace: boolean;
             is_late: boolean;
@@ -2943,6 +4009,7 @@ export interface components {
             /** Format: date-time */
             reopen_window_end: string | null;
             has_existing_submission: boolean;
+            latest_submission?: components["schemas"]["LatestSubmission"] | null;
             applicable_file_policy: components["schemas"]["ApplicableFilePolicy"];
             contract_version: string;
         };
@@ -2965,6 +4032,57 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        StudentGradeList: {
+            items: components["schemas"]["StudentGradeRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        StudentGradeRow: {
+            /** Format: uuid */
+            assignment_id: string;
+            title: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            course_code: string;
+            revision_number: number | null;
+            /** Format: decimal */
+            total_score: string;
+            grade: components["schemas"]["GradeOutput"] | null;
+        };
+        /**
+         * @description * `draft` - Nháp
+         *     * `published` - Đã công bố
+         * @enum {string}
+         */
+        SubmissionGradeStatusEnum: "draft" | "published";
+        SubmissionHistoryResult: {
+            items: components["schemas"]["SubmissionHistoryRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        SubmissionHistoryRow: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+            /** Format: uuid */
+            file_id: string;
+        };
+        SubmissionInputRequest: {
+            /** Format: uuid */
+            file_id: string;
+        };
+        SubmissionReceipt: {
+            readonly id: number;
+            /** Format: uuid */
+            readonly file_id: string;
+            number: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
         };
         /**
          * @description * `all` - Toàn bộ lớp
@@ -2993,6 +4111,56 @@ export interface components {
             readonly created_at: string;
             /** Format: date-time */
             readonly updated_at: string;
+        };
+        TeacherGradebookResult: {
+            course_name: string;
+            assignments: components["schemas"]["GradebookAssignment"][];
+            /** Format: uuid */
+            assignment_id: string | null;
+            /** Format: decimal */
+            total_score: string | null;
+            items: components["schemas"]["GradebookRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        TeacherSubmissionList: {
+            title: string;
+            /** Format: uuid */
+            course_id: string;
+            items: components["schemas"]["TeacherSubmissionRow"][];
+            pagination: components["schemas"]["PaginationMeta"];
+        };
+        TeacherSubmissionRow: {
+            id: number;
+            number: number;
+            file_name: string;
+            file_size: number;
+            /** Format: date-time */
+            submitted_at: string;
+            is_late: boolean;
+            /** Format: uuid */
+            student_id: string;
+            student_name: string;
+            /** Format: email */
+            student_email: string;
+            /** Format: uuid */
+            file_id: string;
+        };
+        UnreadGradeCount: {
+            unread_count: number;
+        };
+        UpcomingResult: {
+            total: number;
+            items: components["schemas"]["UpcomingRow"][];
+        };
+        UpcomingRow: {
+            /** Format: uuid */
+            id: string;
+            /** Format: uuid */
+            course_id: string;
+            course_name: string;
+            title: string;
+            /** Format: date-time */
+            deadline: string;
         };
         UploadIntentRequest: {
             file_name: string;
@@ -3251,6 +4419,30 @@ export interface operations {
             };
         };
     };
+    admin_audit_log_retrieve: {
+        parameters: {
+            query?: {
+                end?: string;
+                page?: number;
+                search?: string;
+                start?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditListResult"];
+                };
+            };
+        };
+    };
     admin_courses_transfer_create: {
         parameters: {
             query?: never;
@@ -3278,6 +4470,25 @@ export interface operations {
             };
         };
     };
+    admin_file_limits_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminFileLimits"];
+                };
+            };
+        };
+    };
     admin_grants_revoke_create: {
         parameters: {
             query?: never;
@@ -3301,6 +4512,44 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminAccountRoleRevokeResponse"];
+                };
+            };
+        };
+    };
+    admin_overview_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminOverviewNumbers"];
+                };
+            };
+        };
+    };
+    admin_recent_activity_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRecentEvent"][];
                 };
             };
         };
@@ -3375,6 +4624,25 @@ export interface operations {
             };
         };
     };
+    admin_runtime_settings_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AdminRuntimeSettings"];
+                };
+            };
+        };
+    };
     admin_teacher_requests_list: {
         parameters: {
             query?: {
@@ -3441,6 +4709,153 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["AdminTeacherRejectResponse"];
+                };
+            };
+        };
+    };
+    ai_courses_chat_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CourseChatRequestRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["CourseChatRequestRequest"];
+                "multipart/form-data": components["schemas"]["CourseChatRequestRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CourseChatResponse"];
+                };
+            };
+        };
+    };
+    ai_courses_chat_history_list: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ChatTurn"][];
+                };
+            };
+        };
+    };
+    ai_courses_chat_history_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    ai_courses_materials_summary_drafts_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                material_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
+                };
+            };
+        };
+    };
+    ai_teacher_summary_drafts_list: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"][];
+                };
+            };
+        };
+    };
+    ai_teacher_summary_drafts_review_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+                "multipart/form-data": components["schemas"]["MaterialSummaryDraftReviewRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MaterialSummaryDraft"];
                 };
             };
         };
@@ -3527,6 +4942,29 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["StudentAssignmentEligibility"];
+                };
+            };
+        };
+    };
+    teacher_submission_list: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherSubmissionList"];
                 };
             };
         };
@@ -4343,6 +5781,67 @@ export interface operations {
             };
         };
     };
+    courses_assignments_submission_history_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+                student_id?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionHistoryResult"];
+                };
+            };
+        };
+    };
+    courses_assignments_submissions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SubmissionInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["SubmissionInputRequest"];
+                "multipart/form-data": components["schemas"]["SubmissionInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionReceipt"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionReceipt"];
+                };
+            };
+        };
+    };
     courses_chapters_list: {
         parameters: {
             query?: never;
@@ -4936,6 +6435,34 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["UploadIntentResponse"];
+                };
+            };
+        };
+    };
+    courses_gradebook_retrieve: {
+        parameters: {
+            query?: {
+                assignment_id?: string;
+                download?: "csv";
+                page?: number;
+                /** @description Một phần tên hoặc email sinh viên */
+                search?: string;
+            };
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TeacherGradebookResult"];
+                    "text/csv": string;
                 };
             };
         };
@@ -5828,6 +7355,616 @@ export interface operations {
             };
         };
     };
+    learning_courses_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_actions_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_appeals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_appeals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_attendance_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_attendance_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_discussion_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_discussion_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_downloads_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_group_appeals_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_group_appeals_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_groups_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_groups_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_courses_progress_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                course_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_drafts_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                draft_id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    learning_enrollment_retrieve: {
+        parameters: {
+            query?: {
+                mode?: "approval" | "password";
+                page?: number;
+                q?: string;
+                term?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_enrollment_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_group_files_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    learning_library_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_library_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: {
+            content: {
+                "application/json": {
+                    [key: string]: unknown;
+                };
+                "application/x-www-form-urlencoded": {
+                    [key: string]: unknown;
+                };
+                "multipart/form-data": {
+                    [key: string]: unknown;
+                };
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
+    learning_library_file: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": string;
+                };
+            };
+        };
+    };
+    learning_library_destroy: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    learning_reports_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": {
+                        [key: string]: unknown;
+                    };
+                };
+            };
+        };
+    };
     materials_retrieve_global: {
         parameters: {
             query?: never;
@@ -5877,6 +8014,338 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["PaginatedMaterialSearchResult"];
+                };
+            };
+        };
+    };
+    me_course_announcements_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoticeFeed"];
+                };
+            };
+        };
+    };
+    me_course_announcements_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_course_announcements_read_all_create: {
+        parameters: {
+            query?: {
+                course_id?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_course_announcements_unread_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CountResult"];
+                };
+            };
+        };
+    };
+    me_grade_notices_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeNoticeList"];
+                };
+            };
+        };
+    };
+    me_grade_notices_read_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description No response body */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
+    me_grade_notices_read_all_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeReadAllResult"];
+                };
+            };
+        };
+    };
+    me_grade_notices_unread_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UnreadGradeCount"];
+                };
+            };
+        };
+    };
+    me_grades_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["StudentGradeList"];
+                };
+            };
+        };
+    };
+    me_upcoming_assignments_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["UpcomingResult"];
+                };
+            };
+        };
+    };
+    submissions_grade_retrieve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeDetail"];
+                };
+            };
+        };
+    };
+    submissions_grade_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["GradeInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["GradeInputRequest"];
+                "multipart/form-data": components["schemas"]["GradeInputRequest"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeOutput"];
+                };
+            };
+        };
+    };
+    submissions_grade_history_retrieve: {
+        parameters: {
+            query?: {
+                page?: number;
+            };
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GradeHistoryResult"];
+                };
+            };
+        };
+    };
+    teacher_course_announcements_retrieve: {
+        parameters: {
+            query?: {
+                course_id?: string;
+                page?: number;
+                unread?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NoticeFeed"];
+                };
+            };
+        };
+    };
+    teacher_course_announcements_publish_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["NoticeInputRequest"];
+                "application/x-www-form-urlencoded": components["schemas"]["NoticeInputRequest"];
+                "multipart/form-data": components["schemas"]["NoticeInputRequest"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedNotice"];
+                };
+            };
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PublishedNotice"];
                 };
             };
         };

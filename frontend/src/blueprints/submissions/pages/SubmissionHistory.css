@@ -1,0 +1,121 @@
+.submission-history,
+.submission-history-list {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+
+.submission-history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.submission-history-list > li {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow-wrap: anywhere;
+}
+
+.submission-history-heading,
+.submission-history nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.submission-history-heading span {
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+
+.submission-history .submission-late {
+  background: #fff5d6;
+  color: #795000;
+}
+
+.submission-history .submission-on-time {
+  background: #edf8ef;
+  color: #236c2a;
+}
+
+.submission-history :is(time, small) {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.submission-history a {
+  color: var(--focus);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+button.submission-history-trigger,
+.submission-history button {
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+}
+
+button.submission-history-trigger {
+  margin-top: 12px;
+}
+
+.submission-history > button {
+  justify-self: start;
+}
+
+.submission-history button:hover:not(:disabled) {
+  background: var(--surface-soft);
+}
+
+.submission-history button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.submission-history [role="alert"] {
+  padding: 12px;
+  border: 1px solid #f0b9b5;
+  border-radius: 10px;
+  background: #fff4f3;
+  color: var(--danger);
+}
+
+.submission-history .grade-panel {
+  width: 100%;
+}
+
+.submission-history .grade-panel button.workflow-primary {
+  background: var(--ink);
+  color: var(--on-dark);
+}
+
+.submission-history :is(a, button):focus-visible,
+button.submission-history-trigger:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+@media (max-width: 640px) {
+  .submission-history-list > li {
+    padding: 12px;
+  }
+
+  .submission-history nav button {
+    flex: 1;
+  }
+}
