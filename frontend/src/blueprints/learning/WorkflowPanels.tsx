@@ -1,3 +1,4 @@
+import "./AssignmentDownloadLog.css";
 import { useState } from "react";
 import { useSession } from "../../app/providers/SessionContext";
 import { get, post, root, upload } from "./api";
@@ -148,6 +149,9 @@ export function Appeals({ path, hub }: Props) {
 export function Downloads({ path, hub }: Props) {
   const { t, date } = useLanguage();
   const [query, setQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [formError, setFormError] = useState("");
+  const pageSize = 25;
   const state = useData<{
     items: {
       user__display_name: string;
@@ -174,6 +178,14 @@ export function Downloads({ path, hub }: Props) {
         onSubmit={(e) => {
           e.preventDefault();
           const f = new FormData(e.currentTarget);
+          const start = String(f.get('start') || '');
+          const end = String(f.get('end') || '');
+          if (start && end && new Date(start) > new Date(end)) {
+            setFormError(t('Thời gian bắt đầu phải trước thời gian kết thúc.', 'Start time must precede end time.'));
+            return;
+          }
+          setFormError('');
+          setPage(1);
           const q = new URLSearchParams();
           for (const [k, v] of f)
             if (v)
@@ -186,7 +198,10 @@ export function Downloads({ path, hub }: Props) {
           setQuery("?" + q);
         }}
       >
-        <AssignmentSelect hub={hub} />
+        <label>{t('Bài tập', 'Assignment')}<select name="assignment_id">
+          <option value="">{t('Tất cả bài tập', 'All assignments')}</option>
+          {hub.assignments.map(a => <option key={a.id} value={a.id}>{a.title}</option>)}
+        </select></label>
         <label>
           {t("Sinh viên", "Student")}
           <select name="user_id">
@@ -217,6 +232,9 @@ export function Downloads({ path, hub }: Props) {
         />
         <button>{t("Lọc", "Filter")}</button>
       </form>
+      {formError && <p role="alert">{formError}</p>}
+      <div className="download-log-toolbar">
+      <button type="button" onClick={() => { setPage(1); state.reload(); }}>{t('Làm mới', 'Refresh')}</button>
       <a
         href={
           root +
@@ -228,13 +246,16 @@ export function Downloads({ path, hub }: Props) {
       >
         {t("Xuất CSV", "Export CSV")}
       </a>
+      </div>
       {!state.data ? (
         <Load {...state} />
       ) : (
         <>
-          <p>
-            {t("Tổng sự kiện", "Total events")}: {state.data.total_events}
-          </p>
+          <div className="download-log-stats">
+            <span>{t('Tổng lượt tải', 'Total downloads')}: <strong>{state.data.totals.reduce((sum, item) => sum + item.count, 0)}</strong></span>
+            <span>{t('Tổng sự kiện (gồm xem trước)', 'Total events (including previews)')}: <strong>{state.data.total_events}</strong></span>
+          </div>
+          <h3 className="download-log-section">{t('Tổng lượt tải theo sinh viên và tệp', 'Downloads by student and file')}</h3>
           <Table
             headers={["Email", t("Tệp", "File"), t("Số lượt tải", "Downloads")]}
             rows={state.data.totals.map((x) => [
@@ -243,22 +264,32 @@ export function Downloads({ path, hub }: Props) {
               x.count,
             ])}
           />
+          <h3 className="download-log-section">{t('Chi tiết từng lần truy cập', 'Individual access history')}</h3>
+          <p className="download-log-note">{t('Thời gian hiển thị theo múi giờ trình duyệt. Mặc định lấy dữ liệu 30 ngày gần nhất.', 'Times use your browser timezone. Defaults to the last 30 days.')}</p>
+          {state.data.total_events > state.data.items.length && <p role="status">{t('Đang hiển thị tối đa 5.000 sự kiện mới nhất. Thu hẹp bộ lọc thời gian để xem các sự kiện cũ hơn.', 'Showing at most 5,000 recent events. Narrow the date filter to see older events.')}</p>}
           <Table
             headers={[
               t("Sinh viên", "Student"),
+              "Email",
               t("Bài tập", "Assignment"),
               t("Tệp", "File"),
               t("Loại", "Type"),
               t("Ngày giờ", "Timestamp"),
             ]}
-            rows={state.data.items.map((x) => [
+            rows={state.data.items.slice((page - 1) * pageSize, page * pageSize).map((x) => [
               x.user__display_name,
+              x.user__email,
               x.assignment__title,
               x.file__file_name,
-              x.kind,
+              x.kind === 'download' ? t('Tải xuống', 'Download') : x.kind === 'preview' ? t('Xem trước', 'Preview') : x.kind,
               date(x.occurred_at),
             ])}
           />
+          <nav className="download-log-toolbar" aria-label={t('Phân trang lịch sử tải', 'Download history pagination')}>
+            <button type="button" disabled={page <= 1} onClick={() => setPage(value => value - 1)}>{t('Trước', 'Previous')}</button>
+            <span>{t('Trang', 'Page')} {page} / {Math.max(1, Math.ceil(state.data.items.length / pageSize))}</span>
+            <button type="button" disabled={page * pageSize >= state.data.items.length} onClick={() => setPage(value => value + 1)}>{t('Sau', 'Next')}</button>
+          </nav>
         </>
       )}
     </>

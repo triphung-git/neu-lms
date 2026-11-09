@@ -1,0 +1,19 @@
+.assignment-download-log { margin: 0 0 24px; }
+.assignment-download-log h2 { font-size: 1.25rem; margin: 0 0 12px; }
+.download-log-toolbar { display:flex; gap:12px; align-items:center; flex-wrap:wrap; margin:16px 0; }
+.download-log-toolbar button, .download-log-toolbar a { border:1px solid #cbd5e1; border-radius:9px; padding:9px 14px; background:#fff; color:#075985; font:inherit; cursor:pointer; text-decoration:none; }
+.download-log-toolbar button:hover, .download-log-toolbar a:hover { background:#f0f9ff; }
+.download-log-toolbar button:disabled { opacity:.45; cursor:not-allowed; }
+.download-log-toolbar :focus-visible { outline:3px solid #38bdf8; outline-offset:2px; }
+.download-log-stats { display:flex; flex-wrap:wrap; gap:12px; padding:14px 18px; border-radius:12px; background:#f0f9ff; color:#075985; margin:16px 0; }
+.download-log-stats strong { font-size:1.15rem; }
+.download-log-section { margin:22px 0 12px; font-size:1.05rem; }
+.download-log-note { color:#64748b; font-size:.9rem; }
+.assignment-download-log .learning-table { max-height:520px; overflow:auto; }
+.assignment-download-log .learning-table th { position:sticky; top:0; background:#f1f5f9; z-index:1; }
+@media(max-width:640px) { .assignment-download-log { padding:16px; } .download-log-toolbar { gap:8px; } }
+.assignment-download-log .learning-form { grid-template-columns:repeat(auto-fit,minmax(min(100%,210px),1fr)); align-items:end; }
+.assignment-download-log label { display:grid; gap:6px; font-weight:500; min-width:0; }
+.assignment-download-log input, .assignment-download-log select { width:100%; min-width:0; box-sizing:border-box; font:inherit; border:1px solid #bdcada; border-radius:8px; padding:10px 12px; color:#172033; background:white; }
+.assignment-download-log .learning-form button { font:inherit; color:white; background:#0369a1; border:0; border-radius:8px; padding:10px 20px; cursor:pointer; }
+.assignment-download-log .learning-form button:focus-visible { outline:3px solid #38bdf8; outline-offset:2px; }
