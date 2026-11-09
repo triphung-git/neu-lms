@@ -1,3 +1,5 @@
+import { Grades } from '../../grading/pages/StudentGradesPage';
+import { CourseFeed } from '../../announcements/pages/CourseAnnouncements';
 import {uiText} from "../../../shared/i18n/translate";
 import {CourseAttendance} from '../../learning/LearningHub';
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
@@ -25,7 +27,6 @@ import {
   LogOut,
   RefreshCw,
   Search,
-  Info,
   Calendar,
   Clock,
 } from 'lucide-react';
@@ -650,43 +651,15 @@ export const StudentCourseDetailPage: React.FC = () => {
         </section>
       )}
 
-      {/* Tab: BẢNG ĐIỂM */}
+      {/* Course-scoped panels remount when the course/account changes. */}
       {activeTab === 'diem' && (
-        <section className="course-tab-panel">
-          <div className="panel-header-row">
-            <div>
-              <h2 className="panel-title">{uiText("Bảng điểm môn học")}</h2>
-              <p className="panel-subtitle">{uiText("Điểm số chính thức sau khi giảng viên công bố.")}</p>
-            </div>
-          </div>
-          <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
-            <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-            <div>
-              <strong>{uiText("Phân hệ Chấm điểm & Bảng điểm (B12)")}</strong>
-              <span>
-                {uiText("Bảng điểm tổng hợp đang được phát triển tại phân hệ B12. Kết quả học tập và phản hồi chấm điểm sẽ được hiển thị khi phân hệ B12 được tích hợp.")}</span>
-            </div>
-          </div>
+        <section className="course-tab-panel course-live-panel">
+          <Grades key={`${currentUser?.id}:${course.id}`} courseId={course.id} />
         </section>
       )}
-
-      {/* Tab: THÔNG BÁO */}
       {activeTab === 'thong-bao' && (
-        <section className="course-tab-panel">
-          <div className="panel-header-row">
-            <div>
-              <h2 className="panel-title">{uiText("Thông báo từ giảng viên")}</h2>
-              <p className="panel-subtitle">{uiText("Các tin tức và cập nhật quan trọng từ giảng viên phụ trách môn học.")}</p>
-            </div>
-          </div>
-          <div className="feature-notice-box" role="status" style={{ marginTop: 'var(--space-4)' }}>
-            <Info size={20} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-            <div>
-              <strong>{uiText("Kênh thông báo lớp học")}</strong>
-              <span>
-                {uiText("Kênh thông báo đang được nâng cấp đồng bộ theo thời gian thực với máy chủ.")}</span>
-            </div>
-          </div>
+        <section className="course-tab-panel course-live-panel">
+          <CourseFeed key={`${currentUser?.id}:${course.id}`} teacher={false} fixedCourseId={course.id} />
         </section>
       )}
 

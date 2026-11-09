@@ -1,3 +1,5 @@
+import { AssignmentDownloadLog } from '../../learning/AssignmentDownloadLog';
+import { useLanguage } from '../../learning/i18n';
 import {uiText} from "../../../shared/i18n/translate";
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useOutletContext, Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -36,6 +38,9 @@ export const TeacherAssignmentListPage: React.FC = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { notifySuccess, notifyError } = useNotification();
   const navigate = useNavigate();
+
+  const [showDownloadLog, setShowDownloadLog] = useState(false);
+  const { t } = useLanguage();
 
   // Route state
   const activeTab = searchParams.get('tab') || 'all';
@@ -381,7 +386,9 @@ export const TeacherAssignmentListPage: React.FC = () => {
             ]}
           />
           <h1 className="page-main-heading">{uiText("Bài tập & Đề thi học phần")}</h1>
-<Link to={`/gv/hoc-tap?course=${monId}&tab=downloads`}>{uiText("Log tải tài liệu / Download log")}</Link>
+<Button type="button" variant="secondary" aria-expanded={showDownloadLog} aria-controls="assignment-download-log" onClick={() => setShowDownloadLog(value => !value)}>
+            <History size={16} />{t('Xem log tải tài liệu', 'View download log')}
+          </Button>
           <p className="page-subtitle">
             {uiText("Thiết lập đề bài, tiêu chí rubric chấm điểm và quản lý tiến độ nộp bài của sinh viên.")}</p>
         </div>
@@ -405,6 +412,8 @@ export const TeacherAssignmentListPage: React.FC = () => {
             {uiText("Môn học đã lưu trữ: Toàn bộ bài tập ở trạng thái chỉ đọc. Không thể soạn bài mới hoặc điều chỉnh tiêu chí.")}</span>
         </div>
       )}
+
+      {showDownloadLog && <AssignmentDownloadLog key={course.id} courseId={course.id} />}
 
       {/* Filter and Search Bar */}
       <div className="ass-filter-bar">

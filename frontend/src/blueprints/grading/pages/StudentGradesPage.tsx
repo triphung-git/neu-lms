@@ -48,12 +48,12 @@ export function StudentGradesPage() {
   );
 }
 
-function Grades({
+export function Grades({
   courseId,
   clearFilter,
 }: {
   courseId: string;
-  clearFilter: () => void;
+  clearFilter?: () => void;
 }) {
   const [page, setPage] = useState(1);
   const [data, setData] = useState<Listing | null>(null);
@@ -94,7 +94,7 @@ function Grades({
 
   return (
     <div className="student-grades-page">
-      <h1>{uiText("Điểm của tôi")}</h1>
+      <h2>{uiText(courseId && !clearFilter ? "Bảng điểm môn học" : "Điểm của tôi")}</h2>
 
       <p>
         {uiText("Hiển thị kết quả đã công bố của lần nộp mới nhất ở mỗi bài tập.")}</p>
@@ -106,7 +106,7 @@ function Grades({
         >
           {uiText("Cập nhật bảng điểm")}</button>
 
-        {courseId && (
+        {courseId && clearFilter && (
           <button type="button" onClick={clearFilter}>
             {uiText("Xem tất cả môn")}</button>
         )}

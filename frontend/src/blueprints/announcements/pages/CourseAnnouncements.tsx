@@ -50,9 +50,9 @@ export function StudentAnnouncementsPage() {
   );
 }
 
-function CourseFeed({ teacher }: { teacher: boolean }) {
+export function CourseFeed({ teacher, fixedCourseId }: { teacher: boolean; fixedCourseId?: string }) {
   const [params, setParams] = useSearchParams();
-  const filter = params.get('mon') || '';
+  const filter = fixedCourseId ?? (params.get('mon') || '');
 
   const [page, setPage] = useState(1);
   const [unread, setUnread] = useState(false);
@@ -164,7 +164,7 @@ function CourseFeed({ teacher }: { teacher: boolean }) {
 
   return (
     <section className="course-feed">
-      <h1>{uiText("Thông báo môn học")}</h1>
+      <h2>{uiText("Thông báo môn học")}</h2>
 
       {error && <p role="alert">{error}</p>}
       {message && <p role="status">{message}</p>}
@@ -228,7 +228,7 @@ function CourseFeed({ teacher }: { teacher: boolean }) {
           )}
 
           <div className="course-feed-tools">
-            <label>
+            {!fixedCourseId && <label>
               {uiText("Lọc theo môn")}<select value={filter} onChange={event => {
                 setPage(1);
                 setExpanded(0);
@@ -239,7 +239,7 @@ function CourseFeed({ teacher }: { teacher: boolean }) {
                   <option key={course.id} value={course.id}>{course.name}</option>
                 ))}
               </select>
-            </label>
+            </label>}
 
             {!teacher && (
               <>
@@ -250,8 +250,8 @@ function CourseFeed({ teacher }: { teacher: boolean }) {
                   }} />
                   {uiText("Chỉ hiện chưa đọc")}</label>
 
-                <button type="button" disabled={busy} onClick={() => void markRead()}>
-                  {uiText("Đánh dấu đã đọc ở tất cả môn")}</button>
+                {!fixedCourseId && <button type="button" disabled={busy} onClick={() => void markRead()}>
+                  {uiText("Đánh dấu đã đọc ở tất cả môn")}</button>}
               </>
             )}
           </div>
