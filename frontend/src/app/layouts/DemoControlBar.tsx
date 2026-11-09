@@ -106,7 +106,7 @@ export const DemoControlBar: React.FC = () => {
         }
       >
         <p style={{ color: 'var(--ink-soft)', lineHeight: '1.6' }}>
-          {uiText("Hành động này sẽ xóa dữ liệu trong bộ nhớ namespace ")}<code>npc-lms-demo:v1</code> {uiText(" và hủy phiên đăng nhập hiện tại.")}</p>
+          {uiText("Hành động này sẽ đặt lại dữ liệu minh họa của NEU LMS trong trình duyệt và hủy phiên đăng nhập hiện tại.")}</p>
       </Modal>
     </div>
   );
