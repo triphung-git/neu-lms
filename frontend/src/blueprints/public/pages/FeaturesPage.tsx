@@ -7,9 +7,9 @@ export const FeaturesPage: React.FC = () => {
   return (
     <div className="features-container">
       <header className="features-header">
-        <h1 className="features-title">{uiText("Tính năng hệ thống NPC LMS / LCMS")}</h1>
+        <h1 className="features-title">{uiText("Tính năng hệ thống NEU LMS")}</h1>
         <p className="features-subtitle">
-          {uiText("Khám phá năng lực quản lý học phần, biên soạn học liệu, quy trình nộp bài tập và bảo mật giao diện được thiết kế theo tiêu chuẩn đại học.")}</p>
+          {uiText("Khám phá NEU LMS — hệ thống quản lý học phần, biên soạn học liệu và hỗ trợ học tập của Đại học Kinh tế Quốc dân.")}</p>
         <div className="features-quick-nav">
           <a href="#vai-tro" className="quick-link">{uiText("Phân hệ theo vai trò")}</a>
           <a href="#ai" className="quick-link">{uiText("Trợ lý AI có kiểm soát")}</a>

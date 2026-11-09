@@ -144,7 +144,7 @@ export const PublicLayout: React.FC = () => {
       <footer className="public-footer" role="contentinfo">
         <div className="public-footer-inner">
           <div className="footer-left">
-            <p className="footer-brand">{uiText("NEU LMS / LCMS Đại học")}</p>
+            <p className="footer-brand">{uiText("NEU LMS")}</p>
             <p className="footer-desc">
               {uiText("Không gian quản lý môn học, phân phối học liệu số và tương tác học tập rõ việc.")}</p>
           </div>

@@ -1,6 +1,6 @@
 import {uiText} from "../i18n/translate";
 /**
- * RFC 4180 compliant CSV parser for NPC LMS admin import
+ * RFC 4180 compliant CSV parser for NEU LMS admin import
  * Supports: quotes, commas within quoted cells, CRLF/LF, UTF-8 BOM
  */
 

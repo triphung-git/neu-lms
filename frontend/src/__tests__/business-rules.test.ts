@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import type { RubricCriterion } from '../shared/kernel/types';
 
-describe('NPC LMS Business Rules Validation', () => {
+describe('NEU LMS Business Rules Validation', () => {
   describe('Rubric total score check', () => {
     it('correctly sums criteria maximum scores to 10.0', () => {
       const criteria: RubricCriterion[] = [

@@ -111,7 +111,7 @@ export const GuidePage: React.FC = () => {
   return (
     <div className="guide-container">
       <header className="guide-header">
-        <h1 className="guide-title">{uiText("Hướng dẫn sử dụng NPC LMS / LCMS")}</h1>
+        <h1 className="guide-title">{uiText("Hướng dẫn sử dụng NEU LMS")}</h1>
         <p className="guide-subtitle">
           {uiText("Quy trình 5 bước thao tác chuẩn cho từng vai trò trên nền tảng quản lý học tập.")}</p>
       </header>
