@@ -711,3 +711,26 @@
 .mat-hub-tags {
   color: var(--accent);
 }
+
+/* Live course grades and announcements */
+.course-live-panel { min-width: 0; }
+.course-live-panel .course-feed { margin-block: 0; }
+.course-live-panel .grades-toolbar,
+.course-live-panel .student-grades-page nav {
+  display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+}
+.course-live-panel button {
+  min-height: 44px; padding: 10px 16px; border: 1px solid var(--border);
+  border-radius: 10px; background: var(--surface-card, white); color: var(--ink);
+  font: inherit; cursor: pointer;
+}
+.course-live-panel button:disabled { opacity: .5; cursor: not-allowed; }
+.course-live-panel :is(button, a):focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.course-live-panel .grades-table-card table { min-width: 680px; }
+.course-live-panel .grades-table-card :is(th, td) {
+  padding: 14px; text-align: left; border-bottom: 1px solid var(--border);
+}
+.course-live-panel .grades-table-card th { background: var(--surface-hover); }
+.course-live-panel [role=alert] {
+  padding: 14px; border-radius: 10px; background: #fff1f2; color: #b91c1c;
+}
