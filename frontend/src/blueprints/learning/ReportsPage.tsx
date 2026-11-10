@@ -5,9 +5,11 @@ import { useLanguage } from "./i18n";
 import { Input, Load, useData } from "./ui";
 import "./learning.css";
 export function ReportsPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [query, setQuery] = useState("");
   const state = useData<{
+    start: string;
+    end: string;
     metrics: Record<string, number>;
     download_trend: { day: string; count: number }[];
   }>("/reports" + query);
@@ -54,9 +56,14 @@ export function ReportsPage() {
         <Input name="end" type="datetime-local" label={t("Đến", "To")} />
         <button>{t("Xem báo cáo", "View report")}</button>
       </form>
-      <a href={root + "/reports" + (query ? query + "&" : "?") + "export=csv"}>
-        {t("Xuất CSV", "Export CSV")}
-      </a>
+      {state.data && <div className="report-export-actions">
+        <a href={root + "/reports?" + new URLSearchParams({start: state.data.start, end: state.data.end, export: "csv"})}>
+          {t("Xuất CSV", "Export CSV")}
+        </a>
+        <a href={root + "/reports?" + new URLSearchParams({start: state.data.start, end: state.data.end, export: "xlsx", lang: language})}>
+          {t("Xuất Excel có biểu đồ", "Export Excel with charts")}
+        </a>
+      </div>}
       {!state.data ? (
         <Load {...state} />
       ) : (

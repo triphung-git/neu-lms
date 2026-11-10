@@ -217,3 +217,7 @@
 .attendance-email{display:block;color:#64748b;margin-top:4px;font-size:.8rem}.attendance-summary strong{font-variant-numeric:tabular-nums}
 
 .chart-legend{display:flex;flex-wrap:wrap;gap:20px;justify-content:center}.chart-legend span{display:inline-flex;align-items:center;gap:8px}.chart-legend i{width:12px;height:12px;border-radius:50%;display:inline-block}
+
+.report-export-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-block: 16px; }
+.report-export-actions a { padding: 12px 18px; border-radius: 10px; border: 1px solid #155e75; color: #155e75; text-decoration: none; }
+.report-export-actions a:last-child { background: #155e75; color: white; }

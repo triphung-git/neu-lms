@@ -1,5 +1,6 @@
 from datetime import timedelta
 
+from django.http import HttpResponse
 from django.db.models import Count, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
@@ -15,6 +16,7 @@ from identity.models import Role, User
 from identity.services.common import has_role
 
 from .common import LearningBase, csv_response, date_range
+from .report_excel import build_report_excel
 from .models import (
     AttendanceRecord,
     DownloadEvent,
@@ -74,6 +76,14 @@ class ReportsView(LearningBase):
             {"day": first + timedelta(days=n), "count": counts.get(first + timedelta(days=n), 0)}
             for n in range((last - first).days + 1)
         ]
+        if request.query_params.get("export") == "xlsx":
+            response = HttpResponse(
+                build_report_excel(metrics, trend, start, end, request.query_params.get("lang", "vi")),
+                content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            )
+            response["Content-Disposition"] = 'attachment; filename="neu-lms-report.xlsx"'
+            response["Cache-Control"] = "private, no-store"
+            return response
         if request.query_params.get("export") == "csv":
             return csv_response(
                 [["metric", "value"]]
